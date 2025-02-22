@@ -30,7 +30,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@cloudflare/workers-types", "npm:4.20250214.0"],\
             ["typescript", "patch:typescript@npm%3A5.7.3#~builtin<compat/typescript>::version=5.7.3&hash=5da071"],\
-            ["wrangler", "virtual:3c65a970e8f41c87a3a1c264fa4ff58181523a03ef6a14f38f4fd8da31c466ecf4d3220e5249d59a6dd5693c5f4fc9565e8de19ac93714998975e427f508f14d#npm:3.109.2"]\
+            ["wrangler", "virtual:3c65a970e8f41c87a3a1c264fa4ff58181523a03ef6a14f38f4fd8da31c466ecf4d3220e5249d59a6dd5693c5f4fc9565e8de19ac93714998975e427f508f14d#npm:3.109.2"],\
+            ["yaml", "npm:2.7.0"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -1431,7 +1432,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["node-fetch", "workspace:."],\
             ["@cloudflare/workers-types", "npm:4.20250214.0"],\
             ["typescript", "patch:typescript@npm%3A5.7.3#~builtin<compat/typescript>::version=5.7.3&hash=5da071"],\
-            ["wrangler", "virtual:3c65a970e8f41c87a3a1c264fa4ff58181523a03ef6a14f38f4fd8da31c466ecf4d3220e5249d59a6dd5693c5f4fc9565e8de19ac93714998975e427f508f14d#npm:3.109.2"]\
+            ["wrangler", "virtual:3c65a970e8f41c87a3a1c264fa4ff58181523a03ef6a14f38f4fd8da31c466ecf4d3220e5249d59a6dd5693c5f4fc9565e8de19ac93714998975e427f508f14d#npm:3.109.2"],\
+            ["yaml", "npm:2.7.0"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -2056,6 +2058,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/yallist-npm-5.0.0-8732dd9f1c-eba5118240.zip/node_modules/yallist/",\
           "packageDependencies": [\
             ["yallist", "npm:5.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["yaml", [\
+        ["npm:2.7.0", {\
+          "packageLocation": "./.yarn/cache/yaml-npm-2.7.0-bb348b356b-6e8b2f9b9d.zip/node_modules/yaml/",\
+          "packageDependencies": [\
+            ["yaml", "npm:2.7.0"]\
           ],\
           "linkType": "HARD"\
         }]\

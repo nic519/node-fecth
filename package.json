@@ -12,5 +12,8 @@
 		"@cloudflare/workers-types": "^4.20250214.0",
 		"typescript": "^5.5.2",
 		"wrangler": "latest"
+	},
+	"dependencies": {
+		"yaml": "^2.7.0"
 	}
 }

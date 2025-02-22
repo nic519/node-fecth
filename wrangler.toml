@@ -1,0 +1,6 @@
+name = "node-fetch"
+main = "src/index.ts"
+compatibility_date = "2024-02-22"
+
+[triggers]
+crons = ["* * * * *"]  # 每分钟执行一次，您可以根据需要修改
