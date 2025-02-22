@@ -24,19 +24,13 @@ class SubscriptionService {
 	private validateToken(request: Request): { userId: string, config: UserConfig } | Response {
 		const url = new URL(request.url);
 		const userId = url.pathname.split('/')[1];
-		const token = url.searchParams.get('token');
-		
-		console.log('userId:', userId);
-		console.log('USER_CONFIGS:', JSON.stringify(this.env.USER_CONFIGS, null, 2));  // 完整打印配置
+		const token = url.searchParams.get('token'); 
 		
 		if (userId === 'favicon.ico') {
 			return new Response('Not Found', { status: 404 });
 		}
 		
-		const userConfig = getUserConfig(this.env, userId);
-		console.log('userConfig:', userConfig);
-		console.log('Received token:', token);
-		console.log('Expected token:', userConfig?.ACCESS_TOKEN);
+		const userConfig = getUserConfig(this.env, userId); 
 		
 		if (!userConfig || token !== userConfig.ACCESS_TOKEN) {
 			return new Response('Unauthorized', { status: 401 });
@@ -56,7 +50,7 @@ class SubscriptionService {
 			...Object.fromEntries(
 				Object.entries(SUB_PARAMS.options).map(([k, v]) => [k, String(v)])
 			), 
-			filename: SUB_PARAMS.filename
+			filename: userConfig?.FILE_NAME || '123'
 		});
 		
 		return `${engineUrl}?${params.toString()}`;
@@ -66,14 +60,12 @@ class SubscriptionService {
 	private validateYaml(yaml: any): Response | null {
 		if (!yaml) {
 			return new Response("解析出的结果不是yaml格式", { 
-				status: 500,
-				headers: RESPONSE_HEADERS 
+				status: 500
 			});
 		}
 		if (!yaml.proxies || !Array.isArray(yaml.proxies) || yaml.proxies.length < 2) {
 			return new Response("解析出的结果不符合clash的格式", { 
-				status: 500,
-				headers: RESPONSE_HEADERS 
+				status: 500
 			});
 		}
 		return null;
@@ -81,37 +73,38 @@ class SubscriptionService {
 
 	// 处理订阅请求
 	async handleRequest(request: Request): Promise<Response> {
-		// 验证令牌和获取用户ID
 		const auth = this.validateToken(request);
 		if (auth instanceof Response) return auth;
 
 		try {
-			// 获取并转换订阅内容
+			// 直接获取转换后的订阅
 			const finalURL = this.buildSubscriptionUrl(auth.userId);
-			console.log( auth.userId, finalURL);
-			const response = await fetch(finalURL);
-			const text = await response.text();
+			const response = await fetch(finalURL, {
+				headers: {
+					'User-Agent': 'Clash/1.0',
+					'Accept': '*/*'
+				}
+			});
 			
-			// 验证YAML
+			// 打印响应头，看看转换后的信息
+			// console.log('Converted response headers:', Object.fromEntries(response.headers.entries()));
+			
+			const text = await response.text();
 			const yaml = yamlParse(text);
 			const yamlError = this.validateYaml(yaml);
 			if (yamlError) return yamlError;
 
-			// 返回成功响应
 			return new Response(text, {
 				status: 200,
 				headers: {
 					...RESPONSE_HEADERS,
-					'Subscription-Userinfo': response.headers.get('Subscription-Userinfo') || '',
-					'Content-Disposition': `attachment; filename=${SUB_PARAMS.filename}.yaml`
+					'Subscription-Userinfo': response.headers.get('subscription-userinfo') || '',
+					'Content-Disposition': `attachment; filename=${auth.config.FILE_NAME}`
 				}
 			});
 		} catch (error) {
 			console.error('Error:', error);
-			return new Response("处理订阅时发生错误", { 
-				status: 500,
-				headers: RESPONSE_HEADERS 
-			});
+			return new Response("处理订阅时发生错误", { status: 500 });
 		}
 	}
 }

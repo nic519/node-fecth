@@ -1,9 +1,10 @@
 // 单个用户配置接口
 export interface UserConfig {
-	ENGINE?: string;           // 可选的订阅转换引擎
 	SUB_URL: string;          // 必需的订阅链接
-	RULE_URL?: string;        // 可选的规则链接
 	ACCESS_TOKEN: string;     // 必需的访问令牌
+	ENGINE?: string;          // 可选的订阅转换引擎
+	RULE_URL?: string;        // 可选的规则链接
+	FILE_NAME?: string;       // 可选的文件名
 }
 
 // 默认配置
@@ -14,12 +15,7 @@ export const DEFAULT_CONFIG = {
 
 // 用户配置映射类型
 interface UserConfigsMap {
-	[key: string]: {
-		SUB_URL: string;
-		ACCESS_TOKEN: string;
-		ENGINE?: string;
-		RULE_URL?: string;
-	}
+	[key: string]: UserConfig
 }
 
 // 环境变量接口
@@ -39,10 +35,9 @@ export const getUserConfig = (env: Env, userId: string): UserConfig | null => {
 		if (!userConfig) return null;
 		
 		return {
-			ENGINE: userConfig.ENGINE || DEFAULT_CONFIG.ENGINE,
-			RULE_URL: userConfig.RULE_URL || DEFAULT_CONFIG.RULE_URL,
-			SUB_URL: userConfig.SUB_URL,
-			ACCESS_TOKEN: userConfig.ACCESS_TOKEN
+			...DEFAULT_CONFIG,  // 先展开默认配置
+			...userConfig,      // 再展开用户配置，会覆盖默认值
+			FILE_NAME: userConfig.FILE_NAME || 'clash'
 		};
 	} catch (error) {
 		console.error('Failed to process USER_CONFIGS:', error);
@@ -70,8 +65,7 @@ export const RESPONSE_HEADERS = {
 
 // 订阅参数配置
 export const SUB_PARAMS = {
-	target: 'clash',
-	filename: 'BigMeGroup',
+	target: 'clash', 
 	options: {
 		emoji: true,
 		list: false,
