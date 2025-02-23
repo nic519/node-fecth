@@ -65,7 +65,6 @@ export const RESPONSE_HEADERS = {
 
 // 订阅参数配置
 export const SUB_PARAMS = {
-	target: 'clash', 
 	options: {
 		emoji: true,
 		list: false,
