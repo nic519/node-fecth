@@ -44,12 +44,7 @@ export class NodeConverter {
     const yaml = yamlParse(text);
 
     const proxiesObj = yaml.proxies;
-
-    // 把clash的yaml的proxies转换为常规的节点
-    // 把 {name: 🇭🇰 香港00, server: 420mco4.icfjlk.xyz, port: 40269, client-fingerprint: chrome, type: trojan, password: a7a35cc7-4137-4b2f-a3e7-4bdb42876b2a, sni: i0.hdslb.com, skip-cert-verify: false} 
-    // 转换为 trojan://1911e7c8-e50c-48c0-9708-4492a59706fa@420mco4.icfjlk.xyz:40269?allowInsecure=1&peer=i0.hdslb.com&sni=i0.hdslb.com#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF00
-    // 把  {name: 🇭🇰 香港01, server: o5gemqnew.bigmeyear.org, port: 51001, client-fingerprint: chrome, type: ss, cipher: aes-128-gcm, password: 1911e7c8-e50c-48c0-9708-4492a59706fa, tfo: false}
-    // ss://YWVzLTEyOC1nY206MTkxMWU3YzgtZTUwYy00OGMwLTk3MDgtNDQ5MmE1OTcwNmZh@iq6dsbz.icfjlk.xyz:40662#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF01
+    
     const proxies = proxiesObj.map((proxy: any) => {
       if (proxy.type === 'trojan') {
         return `${proxy.type}://${proxy.password}@${proxy.server}:${proxy.port}?allowInsecure=1&peer=${proxy.sni}&sni=${proxy.sni}#${encodeURIComponent(proxy.name)}`;
