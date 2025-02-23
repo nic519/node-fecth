@@ -14,11 +14,15 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-import { parse as yamlParse } from 'yaml';
 import { ExecutionContext } from '@cloudflare/workers-types';
-import { Env, getUserConfig, SUB_PARAMS, RESPONSE_HEADERS, DEFAULT_CONFIG, UserConfig } from './types';
+import { Env, getUserConfig, SUB_PARAMS, RESPONSE_HEADERS, DEFAULT_CONFIG, UserConfig } from './types/types';
+import { NodeConverter } from './module/nodeConverter';
+import { ConfigValidator } from './module/configValidator';
 
 class SubscriptionService {
+	private nodeConverter = new NodeConverter();
+	private configValidator = new ConfigValidator();
+	
 	constructor(private env: Env) {}
 
 	private validateToken(request: Request): { userId: string, config: UserConfig } | Response {
@@ -54,87 +58,51 @@ class SubscriptionService {
 		
 		return `${engineUrl}?${params.toString()}`;
 	}
-
-	// 验证 YAML 格式（Clash）
-	private validateYaml(yaml: any): Response | null {
-		if (!yaml) {
-			return new Response("解析出的结果不是yaml格式", { status: 500 });
-		}
-		if (!yaml.proxies || !Array.isArray(yaml.proxies) || yaml.proxies.length < 2) {
-			return new Response("解析出的结果不符合clash的格式", { status: 500 });
-		}
-		return null;
-	}
-
-	// 验证 JSON 格式（sing-box）
-	private validateJson(json: any): Response | null {
-		if (!json) {
-			return new Response("解析出的结果不是json格式", { status: 500 });
-		}
-		if (!json.outbounds || !Array.isArray(json.outbounds)) {
-			return new Response("解析出的结果不符合sing-box的格式", { status: 500 });
-		}
-		return null;
-	}
-
+ 
 	// 处理订阅请求
 	async handleRequest(request: Request): Promise<Response> {
+		const url = new URL(request.url);
+		
+		// 处理代理内容的路由
+		if (url.pathname === '/proxy-content') {
+			const content = url.searchParams.get('content');
+			if (!content) {
+				return new Response('No content provided', { status: 400 });
+			}
+			
+			return new Response(content, {
+				headers: {
+					'Content-Type': 'text/plain; charset=utf-8',
+					'Access-Control-Allow-Origin': '*'
+				}
+			});
+		}
+		
 		const auth = this.validateToken(request);
 		if (auth instanceof Response) return auth;
 
 		try {
-			const url = new URL(request.url);
 			const target = url.searchParams.get('target') || 'clash';
 			
-			const originUA = request.headers.get('User-Agent') || request.headers.get('user-agent') || 'clash 1.10.0';
-			// console.log('originUA', originUA);
-
 			const finalURL = this.buildSubscriptionUrl(auth.userId, target);
-			const response = await fetch(finalURL, {
-				headers: {
-					'User-Agent': originUA,
-					'Accept': 'text/yaml, application/json',
-					'Accept-Encoding': 'gzip, deflate, br',
-					'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-					'Cache-Control': 'no-cache',
-				}
-			});
+			const { text, headers } = await this.nodeConverter.convert(
+				request,
+				auth.config.SUB_URL,
+				finalURL,
+				'clash 1.10.0'
+			);
 			
-			// 打印响应头，看看转换后的信息
-			// console.log('Converted response headers:', Object.fromEntries(response.headers.entries()));
-			
-			const text = await response.text();
-			
-			// 根据 target 进行不同的格式验证
-			let formatError = null;
-			if (target === 'clash') {
-				const yaml = yamlParse(text);
-				formatError = this.validateYaml(yaml);
-			} else if (target === 'singbox') {
-				try {
-					const json = JSON.parse(text);
-					formatError = this.validateJson(json);
-				} catch {
-					formatError = new Response("无效的JSON格式", { status: 500 });
-				}
-			}
-			
+			// 使用配置验证器验证格式
+			const formatError = this.configValidator.validate(text, target);
 			if (formatError) return formatError;
-
-			// 获取订阅信息
-			const subInfo = response.headers.get('subscription-userinfo') || 
-			response.headers.get('Subscription-Userinfo') ||
-			response.headers.get('SUBSCRIPTION-USERINFO');
-
-			// console.log('Sub info:', subInfo);  // 调试日志
 
 			return new Response(text, {
 				status: 200,
 				headers: {
 					...RESPONSE_HEADERS,
 					'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
-					'Subscription-Userinfo': subInfo || '',  // 确保订阅信息被传递
-					'Content-Disposition': `attachment; filename=${auth.config.FILE_NAME}`
+					'Subscription-Userinfo': headers['subscription-userinfo'] || '',
+					'Content-Disposition': `attachment; filename=${auth.config.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
 				}
 			});
 		} catch (error) {
