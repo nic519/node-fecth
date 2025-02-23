@@ -33,28 +33,47 @@ export class NodeConverter {
   }
 
   // 获取真实节点
-  private async getRealNodes(subUrl: string): Promise<string[]> {
-    const response = await fetch(subUrl);
+  private async getRealNodes(subUrl: string): Promise<{nodes: string[], subInfo: string }> {
+    const response = await fetch(subUrl, {
+      headers: {
+        'User-Agent': 'clash 1.10.0'
+      }
+    });
     let text = await response.text();
     // 如果结果是base64编码，则先解码
-    if (text.endsWith('=')) {
-      text = atob(text);
-    }
-    const proxies = text.split('\n').map(line => line.trim()).filter(line => line);
-    return proxies;
+    const yaml = yamlParse(text);
+
+    const proxiesObj = yaml.proxies;
+
+    // 把clash的yaml的proxies转换为常规的节点
+    // 把 {name: 🇭🇰 香港00, server: 420mco4.icfjlk.xyz, port: 40269, client-fingerprint: chrome, type: trojan, password: a7a35cc7-4137-4b2f-a3e7-4bdb42876b2a, sni: i0.hdslb.com, skip-cert-verify: false} 
+    // 转换为 trojan://1911e7c8-e50c-48c0-9708-4492a59706fa@420mco4.icfjlk.xyz:40269?allowInsecure=1&peer=i0.hdslb.com&sni=i0.hdslb.com#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF00
+    // 把  {name: 🇭🇰 香港01, server: o5gemqnew.bigmeyear.org, port: 51001, client-fingerprint: chrome, type: ss, cipher: aes-128-gcm, password: 1911e7c8-e50c-48c0-9708-4492a59706fa, tfo: false}
+    // ss://YWVzLTEyOC1nY206MTkxMWU3YzgtZTUwYy00OGMwLTk3MDgtNDQ5MmE1OTcwNmZh@iq6dsbz.icfjlk.xyz:40662#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF01
+    const proxies = proxiesObj.map((proxy: any) => {
+      if (proxy.type === 'trojan') {
+        return `${proxy.type}://${proxy.password}@${proxy.server}:${proxy.port}?allowInsecure=1&peer=${proxy.sni}&sni=${proxy.sni}#${encodeURIComponent(proxy.name)}`;
+      } else if (proxy.type === 'ss') {
+        // 将 cipher:password 组合并进行 base64 编码
+        const userinfo = this.utf8ToBase64(`${proxy.cipher}:${proxy.password}`);
+        return `ss://${userinfo}@${proxy.server}:${proxy.port}#${encodeURIComponent(proxy.name)}`;
+      }
+    });
+    console.log(`proxies: ${JSON.stringify(proxies)}`);
+    return { 
+      nodes: proxies, 
+      subInfo: response.headers.get('subscription-userinfo') || ''
+    };
   }
 
   // 替换回真实节点
   private replaceWithRealNodes(convertedConfig: string, fakeNodes: string[], realNodes: string[]): string {
     let result = convertedConfig;
-    console.log(`result: ${result.substring(200, 800)}`);
     fakeNodes.forEach((fakeNode, index) => {
       if (realNodes[index]) {
         const realDomain = this.extractDomain(realNodes[index]);
         const fakeDomain = this.extractDomain(fakeNode);
-        console.log(`fakeNode: ${fakeDomain}->${realDomain}`);
         if (result.includes(fakeDomain)) {
-          console.log(`replace ${fakeDomain} with ${realDomain}`);
           result = result.replace(fakeDomain, realDomain);
         }
       }
@@ -68,15 +87,19 @@ export class NodeConverter {
     headers: { [key: string]: string };
   }> {
     try {
-      const realNodes = await this.getRealNodes(subUrl);
+      const { nodes: realNodes, subInfo: realSubInfo } = await this.getRealNodes(subUrl);
       const fakeNodes = this.generateFakeNodes(realNodes);
       const fakeSubContent = fakeNodes.join('\n');
       
       // 使用当前 Worker 的 URL，添加一个专门的路径
       const currentUrl = new URL(request.url);
-      const fakeSubUrl = `${currentUrl.protocol}//${currentUrl.host}/proxy-content?content=${this.utf8ToBase64(fakeSubContent)}`;
-      // console.log(`fakeSubUrl: ${fakeSubUrl}`);
-      // const fakeSubUrl = "https://node.1024.hair/proxy-content?content=dHJvamFuOi8vYTdhMzVjYzctNDEzNy00YjJmLWEzZTctNGJkYjQyODc2YjJhQGM5enc3Lm43enRyOXUuY29tOjIxNzk4OjQwMjY5P2FsbG93SW5zZWN1cmU9MSZwZWVyPWkwLmhkc2xiLmNvbSZzbmk9aTAuaGRzbGIuY29tIyVGMCU5RiU4NyVBRCVGMCU5RiU4NyVCMCUyMCVFOSVBNiU5OSVFNiVCOCVBRjAwCnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEAxcmVtYS5uN3p0cjl1LmNvbToyMzg3Mjo0MDY2MiMlRjAlOUYlODclQUQlRjAlOUYlODclQjAlMjAlRTklQTYlOTklRTYlQjglQUYwMQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAc3NibHkubjd6dHI5dS5jb206MjkzMzM6NDAwOTcjJUYwJTlGJTg3JUFEJUYwJTlGJTg3JUIwJTIwJUU5JUE2JTk5JUU2JUI4JUFGMDIKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGM5dTl1Lm43enRyOXUuY29tOjYxMjY6NDE5ODkjJUYwJTlGJTg3JUFEJUYwJTlGJTg3JUIwJTIwJUU5JUE2JTk5JUU2JUI4JUFGMDMKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGM4NXBlLm43enRyOXUuY29tOjM1Nzg0OjQyMDg4IyVGMCU5RiU4NyVBRCVGMCU5RiU4NyVCMCUyMCVFOSVBNiU5OSVFNiVCOCVBRjA0CnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEB0Y3dhdy5uN3p0cjl1LmNvbTo0MTU3MTo0NjY1MyMlRjAlOUYlODclQTglRjAlOUYlODclQjMlMjAlRTUlOEYlQjAlRTYlQjklQkUwMQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAd29oNTcubjd6dHI5dS5jb206NDI2NDE6NDU2NTgjJUYwJTlGJTg3JUE4JUYwJTlGJTg3JUIzJTIwJUU1JThGJUIwJUU2JUI5JUJFMDIKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGIwaDE0Lm43enRyOXUuY29tOjM5NTQ5OjQzMzgzIyVGMCU5RiU4NyVBOCVGMCU5RiU4NyVCMyUyMCVFNSU4RiVCMCVFNiVCOSVCRTAzCnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEAzMGR5ei5uN3p0cjl1LmNvbTozNzQxNDo0NjE1MSMlRjAlOUYlODclQjglRjAlOUYlODclQUMlMjAlRTYlOTYlQjAlRTUlOEElQTAlRTUlOUQlQTEwMQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAMjdyczQubjd6dHI5dS5jb206NTA1Njg6NDQ2NzAjJUYwJTlGJTg3JUI4JUYwJTlGJTg3JUFDJTIwJUU2JTk2JUIwJUU1JThBJUEwJUU1JTlEJUExMDIKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGUyNDA0Lm43enRyOXUuY29tOjE2OTQ0OjQxNTMwIyVGMCU5RiU4NyVCOCVGMCU5RiU4NyVBQyUyMCVFNiU5NiVCMCVFNSU4QSVBMCVFNSU5RCVBMTAzCnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEBsMmdwbC5uN3p0cjl1LmNvbTo1NTAyMDo0MjQ5MiMlRjAlOUYlODclQUYlRjAlOUYlODclQjUlMjAlRTYlOTclQTUlRTYlOUMlQUMwMQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAc3pnMHgubjd6dHI5dS5jb206NTU4NTE6NDQ5NTEjJUYwJTlGJTg3JUFGJUYwJTlGJTg3JUI1JTIwJUU2JTk3JUE1JUU2JTlDJUFDMDIKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGtpaTB6Lm43enRyOXUuY29tOjkxNTU6NDQzMDEjJUYwJTlGJTg3JUFGJUYwJTlGJTg3JUI1JTIwJUU2JTk3JUE1JUU2JTlDJUFDMDMKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQHRueHd4Lm43enRyOXUuY29tOjQyOTU0OjQzODkyIyVGMCU5RiU4NyVCMiVGMCU5RiU4NyVCNCUyMCVFNiVCRSVCMyVFOSU5NyVBODAxCnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEBqb3czNy5uN3p0cjl1LmNvbTo2NTE5Njo0MTA5NiMlRjAlOUYlODclQUUlRjAlOUYlODclQTklMjAlRTUlOEQlQjAlRTUlQjAlQkMwMQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAM3ViaGcubjd6dHI5dS5jb206MTgyOTM6NDM3MzcjJUYwJTlGJTlBJUE5JTIwJUU0JUI4JTkzJUU3JTk0JUE4JTIwJTdDJTIwRW1ieQpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhAZHoxMHgubjd6dHI5dS5jb206MTgyOTk6NDI4MTQjJUYwJTlGJTg3JUIwJUYwJTlGJTg3JUI3JTIwJUU5JTlGJUE5JUU1JTlCJUJEMDEKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQDQ2OXBhLm43enRyOXUuY29tOjI0MDQzOjQzNTUyIyVGMCU5RiU4NyVCQSVGMCU5RiU4NyVCOCUyMCVFNyVCRSU4RSVFNSU5QiVCRDAxCnNzOi8vWVdWekxURXlPQzFuWTIwNllUZGhNelZqWXpjdE5ERXpOeTAwWWpKbUxXRXpaVGN0TkdKa1lqUXlPRGMyWWpKaEA1NG9lMC5uN3p0cjl1LmNvbToyMTMxNzo0NjA4OSMlRjAlOUYlODclQkElRjAlOUYlODclQjglMjAlRTclQkUlOEUlRTUlOUIlQkQwMgpzczovL1lXVnpMVEV5T0MxblkyMDZZVGRoTXpWall6Y3ROREV6TnkwMFlqSm1MV0V6WlRjdE5HSmtZalF5T0RjMllqSmhANWp2aTAubjd6dHI5dS5jb206NDQ1MjA6NDAwODMjJUYwJTlGJTg3JUJBJUYwJTlGJTg3JUI4JTIwJUU3JUJFJThFJUU1JTlCJUJEMDMKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQHo0cnR1Lm43enRyOXUuY29tOjc1NTU6NDE3MjcjJUYwJTlGJTg3JUE5JUYwJTlGJTg3JUFBJTIwJUU1JUJFJUI3JUU1JTlCJUJEMDEKc3M6Ly9ZV1Z6TFRFeU9DMW5ZMjA2WVRkaE16VmpZemN0TkRFek55MDBZakptTFdFelpUY3ROR0prWWpReU9EYzJZakpoQGh6cWdqLm43enRyOXUuY29tOjM5NDYzOjQ1NjMxIyVGMCU5RiU4NyVCOSVGMCU5RiU4NyVCNyUyMCVFNSU5QyU5RiVFOCU4MCVCMyVFNSU4NSVCNjAx"
+      // 如果currentUrl.host是本地，则强制使用线上的地址
+      let storageUri = `${currentUrl.protocol}//${currentUrl.host}`;
+      if (storageUri.includes('127.0.0.1')) {
+        storageUri = 'https://node.1024.hair';
+      } 
+      const fakeSubUrl = `${storageUri}/proxy-content?content=${this.utf8ToBase64(fakeSubContent)}`;
+      
       const convertUrlObj = new URL(convertUrl);
       const params = new URLSearchParams(convertUrlObj.search);
       params.set('url', fakeSubUrl);
@@ -93,8 +116,8 @@ export class NodeConverter {
       let text = await response.text();
       const headers = Object.fromEntries(response.headers.entries());
       text = this.replaceWithRealNodes(text, fakeNodes, realNodes);
-      
-      return { text, headers };
+      //console.log(`realHeaders: ${JSON.stringify(realHeaders)}`);
+      return { text, headers: { 'subscription-userinfo': realSubInfo } };
     } catch (error) {
       console.error('Node conversion error:', error);
       throw error;
