@@ -1,7 +1,7 @@
 // 节点转换器类
 import { parse as yamlParse } from 'yaml';
 import { Base64Utils } from '../utils/base64Utils';
-
+import { Routes } from '../routes/routesConfig';
 
 export class NodeConverter {
    
@@ -47,7 +47,8 @@ export class NodeConverter {
 
   private getProxiesByRaw(base64Text: string): string[] {
     const text = Base64Utils.base64ToUtf8(base64Text);
-    const proxies = text.split('\n').filter(line => line.trim() !== '');
+    // 处理不同操作系统的换行符，并过滤空行
+    const proxies = text.split(/\r?\n/).filter(line => line.trim() !== '');
     return proxies;
   }
 
@@ -88,24 +89,33 @@ export class NodeConverter {
     return result;
   }
 
-  // 转换节点
-  public async convert(request: Request, subUrl: string, convertUrl: string, userAgent: string): Promise<{
+  private buildFakeSubUrl(fakeNodes: string[], request: Request): string {
+    // 使用当前 Worker 的 URL，添加一个专门的路径
+    const fakeContent = Base64Utils.utf8ToBase64(fakeNodes.join('\n'));
+    const currentUrl = new URL(request.url);
+    let storageUri = `${currentUrl.protocol}//${currentUrl.host}`;
+    if (storageUri.includes('127.0.0.1')) {
+      storageUri = 'https://node.1024.hair';
+    }
+    const fakeSubUrl = `${storageUri}${Routes.storage}?v=${fakeContent}`;
+    // console.log(`fakeSubUrl: ${fakeSubUrl}`);
+    return fakeSubUrl;
+  }
+
+  // 获取订阅信息
+  public async convert(
+    request: Request, 
+    subUrl: string, 
+    convertUrl: string, 
+    userAgent: string
+  ): Promise<{
     text: string;
     headers: { [key: string]: string };
   }> {
     try {
       const { nodes: realNodes, subInfo: realSubInfo } = await this.getRealNodes(subUrl);
       const fakeNodes = this.generateFakeNodes(realNodes);
-      const fakeSubContent = fakeNodes.join('\n');
-      
-      // 使用当前 Worker 的 URL，添加一个专门的路径
-      const currentUrl = new URL(request.url);
-      // 如果currentUrl.host是本地，则强制使用线上的地址
-      let storageUri = `${currentUrl.protocol}//${currentUrl.host}`;
-      if (storageUri.includes('127.0.0.1')) {
-        storageUri = 'https://node.1024.hair';
-      } 
-      const fakeSubUrl = `${storageUri}/proxy-content?content=${Base64Utils.utf8ToBase64(fakeSubContent)}`;
+      const fakeSubUrl = this.buildFakeSubUrl(fakeNodes, request);
       
       const convertUrlObj = new URL(convertUrl);
       const params = new URLSearchParams(convertUrlObj.search);
@@ -121,7 +131,6 @@ export class NodeConverter {
       });
       
       let text = await response.text();
-      const headers = Object.fromEntries(response.headers.entries());
       text = this.replaceWithRealNodes(text, fakeNodes, realNodes);
       //console.log(`realHeaders: ${JSON.stringify(realHeaders)}`);
       return { text, headers: { 'subscription-userinfo': realSubInfo } };

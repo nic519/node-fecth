@@ -21,7 +21,7 @@ npx wrangler deploy --keep-vars
 
 在worker里面需要设置json环境变量：
 
-key为USER_CONFIGS，value为json，格式如下：
+key为`USER_CONFIGS`，value为json，格式如下：
 ```json
 {
 	"519": {

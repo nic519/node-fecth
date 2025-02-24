@@ -1,4 +1,7 @@
 name = "node-fetch"
 main = "src/index.ts"
 compatibility_date = "2024-02-22"
- 
+
+# TODO: 不知为什么定时任务关不掉，所以设置了一个最长周期
+[triggers]
+crons = ["0 0 * * *"]  # 每天午夜执行一次

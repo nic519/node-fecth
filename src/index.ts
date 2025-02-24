@@ -1,23 +1,9 @@
-/**
- * Welcome to Cloudflare Workers!
- *
- * This is a template for a Scheduled Worker: a Worker that can run on a
- * configurable interval:
- * https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Run `curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"` to see your Worker in action
- * - Run `npm run deploy` to publish your Worker
- *
- * Bind resources to your Worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
 import { ExecutionContext } from '@cloudflare/workers-types';
 import { Env, getUserConfig, SUB_PARAMS, RESPONSE_HEADERS, DEFAULT_CONFIG, UserConfig } from './types/types';
 import { NodeConverter } from './module/nodeConverter';
 import { ConfigValidator } from './module/configValidator';
+import { StorageHandler } from './routes/storageHandler';
+import { Routes } from './routes/routesConfig';
 
 class SubscriptionService {
 	private nodeConverter = new NodeConverter();
@@ -61,27 +47,20 @@ class SubscriptionService {
  
 	// 处理订阅请求
 	async handleRequest(request: Request): Promise<Response> {
-		const url = new URL(request.url);
-		
-		// 处理代理内容的路由
-		if (url.pathname === '/proxy-content') {
-			const content = url.searchParams.get('content');
-			if (!content) {
-				return new Response('No content provided', { status: 400 });
+		try {
+			const url = new URL(request.url);
+
+			// 先尝试处理存储路由
+			if (url.pathname === Routes.storage) {
+				const storageResponse = await StorageHandler.handle(request);
+				if (storageResponse) return storageResponse;
 			}
 			
-			return new Response(content, {
-				headers: {
-					'Content-Type': 'text/plain; charset=utf-8',
-					'Access-Control-Allow-Origin': '*'
-				}
-			});
-		}
-		
-		const auth = this.validateToken(request);
-		if (auth instanceof Response) return auth;
+			// 验证token
+			const auth = this.validateToken(request);
+			if (auth instanceof Response) return auth;
 
-		try {
+			// 开始处理订阅获取
 			const target = url.searchParams.get('target') || 'clash';
 			
 			const finalURL = this.buildSubscriptionUrl(auth.userId, target);
