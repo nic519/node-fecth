@@ -11,27 +11,19 @@ class SubscriptionService {
 	
 	constructor(private env: Env) {}
 
-	private validateToken(request: Request): { userId: string, config: UserConfig } | Response {
-		const url = new URL(request.url);
-		const userId = url.pathname.split('/')[1];
-		const token = url.searchParams.get('token'); 
-		
-		if (userId === 'favicon.ico') {
-			return new Response('Not Found', { status: 404 });
+	private validateToken(uid: string, token: string | null): UserConfig | Response {
+		if (!uid || !token) {
+			return new Response('Unauthorized', { status: 401 });
 		}
-		
-		const userConfig = getUserConfig(this.env, userId); 
-		
+		const userConfig = getUserConfig(this.env, uid); 
 		if (!userConfig || token !== userConfig.ACCESS_TOKEN) {
 			return new Response('Unauthorized', { status: 401 });
 		}
-
-		return { userId, config: userConfig };
+		return userConfig
 	}
 
 	// 构建订阅URL
-	private buildSubscriptionUrl(userId: string, target: string = 'clash'): string {
-		const userConfig = getUserConfig(this.env, userId);
+	private buildSubscriptionUrl(userConfig: UserConfig, target: string = 'clash'): string {
 		const engineUrl = new URL(userConfig?.ENGINE || DEFAULT_CONFIG.ENGINE);
 		const params = new URLSearchParams({
 			target,
@@ -57,16 +49,18 @@ class SubscriptionService {
 			}
 			
 			// 验证token
-			const auth = this.validateToken(request);
-			if (auth instanceof Response) return auth;
+			const uid = url.pathname.slice(1);
+			const token = url.searchParams.get('token');
+			const authConfig = this.validateToken(uid, token);
+			if (authConfig instanceof Response) return authConfig;
 
 			// 开始处理订阅获取
 			const target = url.searchParams.get('target') || 'clash';
 			
-			const finalURL = this.buildSubscriptionUrl(auth.userId, target);
+			const finalURL = this.buildSubscriptionUrl(authConfig, target);
 			const { text, headers } = await this.nodeConverter.convert(
 				request,
-				auth.config.SUB_URL,
+				authConfig.SUB_URL,
 				finalURL,
 				'clash 1.10.0'
 			);
@@ -81,7 +75,7 @@ class SubscriptionService {
 					...RESPONSE_HEADERS,
 					'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
 					'Subscription-Userinfo': headers['subscription-userinfo'] || '',
-					'Content-Disposition': `attachment; filename=${auth.config.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
+					'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
 				}
 			});
 		} catch (error) {
