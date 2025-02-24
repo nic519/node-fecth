@@ -19,9 +19,23 @@ clash/sing-box等工具，优势就是他们的分组策略，可以做得很灵
 npx wrangler deploy --keep-vars  
 ```
 
-在worker里面需要设置环境变量：
+在worker里面需要设置json环境变量：
+
+
+```json
+{
+	"519": {
+		"ACCESS_TOKEN": "d2fs1s12f3",
+		"FILE_NAME": "配置名称",
+		"SUB_URL": "https://xxx.xxx/xxx"
+	} 
+}
+```
+在前端的访问地址是：https://worker域名/519?token=d2fs1s12f3
+
+每个key，代表一个配置，其中配置可以填这些值：
 - ACCESS_TOKEN: 访问token，用于验证请求，自己随机生成就好
+- FILE_NAME（可选）: 配置名称，用于在客户端显示
 - SUB_URL: 机场订阅链接
 - RULE_URL（可选）: 分流规则
 - ENGINE（可选）: 转换订阅的网址
-
