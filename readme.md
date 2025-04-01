@@ -28,7 +28,7 @@ key为`USER_CONFIGS`，value为json，格式如下：
 		"ACCESS_TOKEN": "d2fs1s12f3",
 		"FILE_NAME": "配置名称",
 		"SUB_URL": "https://xxx.xxx/xxx"
-	} 
+	}
 }
 ```
 在前端的访问地址是：https://worker域名/519?token=d2fs1s12f3

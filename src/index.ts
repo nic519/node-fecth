@@ -11,6 +11,12 @@ class SubscriptionService {
 	
 	constructor(private env: Env) {}
 
+	/**
+	 * 验证token
+	 * @param uid 用户id
+	 * @param token 访问token
+	 * @returns 用户配置或401响应
+	 */
 	private validateToken(uid: string, token: string | null): UserConfig | Response {
 		if (!uid || !token) {
 			return new Response('Unauthorized', { status: 401 });
@@ -22,7 +28,7 @@ class SubscriptionService {
 		return userConfig
 	}
 
-	// 构建订阅URL
+	// 构建订阅URL（去第三方的转换引擎的网址）
 	private buildSubscriptionUrl(userConfig: UserConfig, target: string = 'clash'): string {
 		const engineUrl = new URL(userConfig?.ENGINE || DEFAULT_CONFIG.ENGINE);
 		const params = new URLSearchParams({
@@ -55,6 +61,9 @@ class SubscriptionService {
 			if (authConfig instanceof Response) return authConfig;
 
 			// 开始处理订阅获取
+			if (authConfig.RULE_URL?.endsWith('yaml')) {
+				
+			}
 			const target = url.searchParams.get('target') || 'clash';
 			
 			const finalURL = this.buildSubscriptionUrl(authConfig, target);
