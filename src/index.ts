@@ -4,6 +4,7 @@ import { NodeConverter } from './module/nodeConverter';
 import { ConfigValidator } from './module/configValidator';
 import { StorageHandler } from './routes/storageHandler';
 import { Routes } from './routes/routesConfig';
+import { YamlMerge } from './module/yamlMerge';
 
 class SubscriptionService {
 	private nodeConverter = new NodeConverter();
@@ -59,31 +60,21 @@ class SubscriptionService {
 			const token = url.searchParams.get('token');
 			const authConfig = this.validateToken(uid, token);
 			if (authConfig instanceof Response) return authConfig;
-
-			// 开始处理订阅获取
-			if (authConfig.RULE_URL?.endsWith('yaml')) {
-				
-			}
-			const target = url.searchParams.get('target') || 'clash';
-			
-			const finalURL = this.buildSubscriptionUrl(authConfig, target);
-			const { text, headers } = await this.nodeConverter.convert(
-				request,
-				authConfig.SUB_URL,
-				finalURL,
-				'clash 1.10.0'
-			);
+ 
+			const target = url.searchParams.get('target') || 'clash'; 
+			const yamlMerge = new YamlMerge(authConfig.RULE_URL);
+			const {yamlContent, subInfo} = await yamlMerge.merge(authConfig.RULE_URL!, authConfig.SUB_URL);
 			
 			// 使用配置验证器验证格式
-			const formatError = this.configValidator.validate(text, target);
+			const formatError = this.configValidator.validate(yamlContent, target);
 			if (formatError) return formatError;
 
-			return new Response(text, {
+			return new Response(yamlContent, {
 				status: 200,
 				headers: {
 					...RESPONSE_HEADERS,
 					'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
-					'Subscription-Userinfo': headers['subscription-userinfo'] || '',
+					'Subscription-Userinfo': subInfo,
 					'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
 				}
 			});

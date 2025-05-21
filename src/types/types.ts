@@ -10,7 +10,8 @@ export interface UserConfig {
 // 默认配置
 export const DEFAULT_CONFIG = {
 	ENGINE: 'https://url.v1.mk/sub',
-	RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/config.ini'
+	// RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/config.ini'
+	RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml'
 } as const;
 
 // 用户配置映射类型

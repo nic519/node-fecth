@@ -8,7 +8,7 @@ export class ConfigValidator {
       return new Response("解析出的结果不是yaml格式", { status: 500 });
     }
     // console.log(yaml.proxies);
-    if (!yaml.proxies || !Array.isArray(yaml.proxies) || yaml.proxies.length < 2) {
+    if (!yaml.proxies || !Array.isArray(yaml.proxies)) {
       return new Response("解析出的结果不符合clash的格式", { status: 500 });
     }
     return null;
