@@ -1,10 +1,10 @@
 import { ExecutionContext } from '@cloudflare/workers-types';
-import { Env, getUserConfig, SUB_PARAMS, RESPONSE_HEADERS, DEFAULT_CONFIG, UserConfig } from './types/types';
-import { NodeConverter } from './module/nodeConverter';
-import { ConfigValidator } from './module/configValidator';
-import { StorageHandler } from './routes/storageHandler';
-import { Routes } from './routes/routesConfig';
-import { YamlMerge } from './module/yamlMerge';
+import { Env, getUserConfig, SUB_PARAMS, RESPONSE_HEADERS, DEFAULT_CONFIG, UserConfig } from '@/types/types';
+import { NodeConverter } from '@/module/nodeConverter';
+import { ConfigValidator } from '@/module/configValidator';
+import { StorageHandler } from '@/routes/storageHandler';
+import { Routes } from '@/routes/routesConfig';
+import { YamlMerge } from '@/module/yamlMerge';
 
 class SubscriptionService {
 	private nodeConverter = new NodeConverter();

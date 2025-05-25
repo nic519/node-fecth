@@ -1,4 +1,4 @@
-import { ExtractClashNode, OutputFormat } from '../module/extractClashNode';
+import { ExtractClashNode, OutputFormat } from '@/module/extractClashNode';
 
 // 示例Clash配置内容
 const sampleClashConfig = `

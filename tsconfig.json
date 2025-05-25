@@ -13,6 +13,12 @@
 		"module": "es2022",
     /* Specify how TypeScript looks up a file from a given module specifier. */
 		"moduleResolution": "node",
+		/* Base directory to resolve non-relative module names. */
+		"baseUrl": ".",
+		/* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
+		"paths": {
+			"@/*": ["src/*"]
+		},
     /* Specify type package names to be included without being referenced in a source file. */
 		"types": ["@cloudflare/workers-types"],
     /* Enable importing .json files */
