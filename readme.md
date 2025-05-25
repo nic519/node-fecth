@@ -33,7 +33,7 @@
 
 ### 3. 原始代理链接格式 (`OutputFormat.ORIGINAL_LINKS`)
 ```
-ss://YWVzLTEyOC1nY206cGFzc3dvcmQxMjM=@example.com:443#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF01
+ss://YWVzLTEyOC1nY206cGFzc3dv8cmQxMjM=@example.com:443#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF01
 trojan://password123@example2.com:443?allowInsecure=1#%F0%9F%87%B8%F0%9F%87%AC%20%E6%96%B0%E5%8A%A0%E5%9D%A101
 ```
 

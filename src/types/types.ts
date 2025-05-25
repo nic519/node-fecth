@@ -18,11 +18,7 @@ export const DEFAULT_CONFIG = {
 interface UserConfigsMap {
 	[key: string]: UserConfig
 }
-
-// 环境变量接口
-export interface Env {
-	USER_CONFIGS: UserConfigsMap;  // Cloudflare 平台上是 JSON 类型
-}
+ 
 
 // 获取特定用户的配置
 export const getUserConfig = (env: Env, userId: string): UserConfig | null => {
