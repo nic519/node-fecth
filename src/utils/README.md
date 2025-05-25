@@ -66,31 +66,40 @@ const DEFAULT_DEV_CONFIG: DevConfig = {
 代理服务通过检查 `env.KV_BINDING` 是否可用来判断是否为本地开发环境。
 
 ### 转发机制
-- **GET操作**: 转发到 `/kv` 端点
-- **PUT操作**: 转发到 `/kv-put` 端点
+- **GET操作**: 转发到 `/kv` 端点（GET方法）
+- **PUT操作**: 转发到 `/kv` 端点（POST方法）
 
 ### 生产环境路由
-确保你的生产Worker包含以下路由：
+确保你的生产Worker包含统一的KV路由：
 - `GET /kv` - 处理KV读取请求
-- `POST /kv-put` - 处理KV写入请求
+- `POST /kv` - 处理KV写入请求
 
 ## 日志输出
 
-代理服务会输出详细的日志信息：
+代理服务会输出详细的日志信息，帮助调试：
 
 ```
+🔍 环境检测: { hasKvBinding: false, kvGetAvailable: false, isLocalDev: true }
+🔄 本地开发环境 - 转发KV GET操作: mykey
+🌐 转发GET请求到: https://your-worker.workers.dev/kv?key=mykey
+📥 KV GET成功: mykey - value content...
+
 🔄 本地开发环境 - 转发KV PUT操作: mykey
-🌐 转发PUT请求到: https://your-worker.com/kv-put
+🌐 转发PUT请求到: https://your-worker.workers.dev/kv
 📤 KV PUT成功: mykey
 ```
 
 ## 错误处理
 
-如果转发失败，代理服务会抛出详细的错误信息，帮助你调试问题。
+代理服务包含完整的错误处理机制：
+- 配置检查
+- 网络错误处理
+- 响应状态验证
+- 详细的错误日志
 
 ## 注意事项
 
 1. 确保生产环境的Worker已部署并可访问
-2. 确保生产环境包含对应的KV处理路由
-3. 本地开发时需要网络连接到生产环境
-4. 建议在开发配置中正确设置生产Worker URL 
+2. 正确配置 `productionWorkerUrl` 和 `enableForwarding`
+3. 生产环境需要支持统一的 `/kv` 路由（GET和POST方法）
+4. 本地开发时确保网络连接正常 

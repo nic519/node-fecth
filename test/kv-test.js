@@ -158,7 +158,7 @@ async function testKvPut() {
         
         console.log('📤 发送PUT请求:', testData);
         
-        const response = await fetch('http://localhost:8787/kv-put', {
+        const response = await fetch('http://localhost:8787/kv', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

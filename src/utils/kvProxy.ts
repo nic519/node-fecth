@@ -107,8 +107,8 @@ export class KvProxy {
         }
         
         try {
-            // 构建转发URL
-            const forwardUrl = new URL('/kv-put', productionWorkerUrl);
+            // 构建转发URL - 现在使用统一的/kv路由
+            const forwardUrl = new URL('/kv', productionWorkerUrl);
             
             console.log(`🌐 转发PUT请求到: ${forwardUrl.toString()}`);
             

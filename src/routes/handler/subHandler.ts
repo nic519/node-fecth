@@ -1,8 +1,8 @@
 import { RouteHandler } from '@/routes/types';
-import { getUserConfig, RESPONSE_HEADERS, UserConfig } from '@/types/types';
+import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlMerge } from '@/module/yamlMerge';
-import { ClashYamlMerge } from '@/module/clashYamlMerge';
+import { AuthUtils } from '@/utils/authUtils';
 
 export class SubscriptionHandler implements RouteHandler {
     private configValidator = new ConfigValidator();
@@ -13,7 +13,7 @@ export class SubscriptionHandler implements RouteHandler {
         const token = url.searchParams.get('token');
         
         // 验证token
-        const authConfig = this.validateToken(uid, token, env);
+        const authConfig = AuthUtils.validateToken(uid, token, env);
         if (authConfig instanceof Response) return authConfig;
         
         try {
@@ -38,23 +38,5 @@ export class SubscriptionHandler implements RouteHandler {
             console.error('Error:', error);
             return new Response("处理订阅时发生错误", { status: 500 });
         }
-    }
-    
-    /**
-     * 验证token
-     * @param uid 用户id
-     * @param token 访问token
-     * @param env 环境变量
-     * @returns 用户配置或401响应
-     */
-    private validateToken(uid: string, token: string | null, env: Env): UserConfig | Response {
-        if (!uid || !token) {
-            return new Response('Unauthorized', { status: 401 });
-        }
-        const userConfig = getUserConfig(env, uid);
-        if (!userConfig || token !== userConfig.ACCESS_TOKEN) {
-            return new Response('Unauthorized', { status: 401 });
-        }
-        return userConfig;
-    }
+    } 
 } 

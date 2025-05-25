@@ -2,8 +2,7 @@ import { RouteHandler } from '@/routes/types';
 import { Routes } from '@/routes/routesConfig';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/routes/handler/kvHandler';
-import { KvPutHandler } from '@/routes/handler/kvPutHandler';
-import { SubscriptionHandler } from '@/routes/handler/subscriptionHandler';
+import { SubscriptionHandler } from '@/routes/handler/subHandler';
 import { SubHandlerFast } from './handler/subHandlerFast';
 
 export class Router {
@@ -16,9 +15,8 @@ export class Router {
     private registerHandlers() {
         this.handlers.set(Routes.storage, new StorageHandler());
         this.handlers.set(Routes.kv, new KvHandler());
-        this.handlers.set(Routes.kvPut, new KvPutHandler());
         this.handlers.set(Routes.subscription, new SubscriptionHandler());
-        this.handlers.set(Routes.subscription1URL, new SubHandlerFast());
+        this.handlers.set(Routes.subscriptionFast, new SubHandlerFast());
     }
     
     async route(request: Request, env: Env): Promise<Response> {
@@ -52,7 +50,7 @@ export class Router {
         }
         
         // 动态路由匹配 - 普通订阅路由 (/:uid 格式)
-        if (pathname !== '/' && pathname !== Routes.storage && pathname !== Routes.kv && pathname !== Routes.kvPut && pathname !== Routes.subscription1URL) {
+        if (pathname !== '/' && pathname !== Routes.storage && pathname !== Routes.kv && pathname !== Routes.subscriptionFast) {
             console.log('📡 匹配普通订阅路由');
             const subscriptionHandler = this.handlers.get(Routes.subscription);
             if (subscriptionHandler) {

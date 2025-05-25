@@ -49,13 +49,12 @@ export class ClashYamlMerge {
         
         // 生成简单的键：使用URL的hostname和pathname的组合
         const url = new URL(this.clashSubUrl);
-        const storageKey = `sub-${url.hostname}${url.pathname.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const storageKey = `sub-${url.hostname}${url.pathname.replace(/[^a-z]/g, '-')}`;
         
         // 使用KV代理服务进行存储
         // value要用base64编码
         const value = btoa(clashNodes);
         await this.kvProxy.put(storageKey, value); 
-        // console.log(`🔑 提取原始订阅内容: ${clashNodes}`);
         
         return storageKey;
     }
