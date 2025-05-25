@@ -1,7 +1,7 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { ExtractClashNode, OutputFormat } from './extractClashNode';
+import { ExtractClashNode } from './extractClashNode';
 
-export class YamlMerge {
+export class ClashYamlMerge {
 
     constructor(
         private env: Env, 
@@ -34,35 +34,40 @@ export class YamlMerge {
         const extractor = new ExtractClashNode();
         const clashNodes = extractor.getOriginalLinks(clashRawCfg);
         // 把原始订阅地址，存入worker的kv，并可以通过一个url获取出来
-        const storageKey = `sub-${this.clashSubUrl}`;
+        const storageKey = `sub`;
         this.env.KV_BINDING.put(storageKey, clashNodes);
         return storageKey;
     }
 
     /// 把订阅地址合并进去
-    async getFianlRawCfg(airplaneRawUrl: string): Promise<string> {
+    async getFianlRawCfg(): Promise<{yamlContent: string, subInfo: string}> {
         // 得到clash配置+剩余流量信息
         const clashContent = await this.fetchClashContent();
         // 得到clash模板
         const clashCfgTemplate = await fetch(this.clashTemplateUrl).then(res => res.text());
         // 把clash配置里面的节点信息提取出来
         const kvKey = this.extractOriginalSubUrl(clashContent.rawContent);
+
+        const routeUrl = `${this.env.CF_WORKER_URL}/${kvKey}`;
+
         // 合并yaml
         const yamlObj = yamlParse(clashCfgTemplate);
         // 修改proxy-providers中的url
         if (yamlObj['proxy-providers'] && yamlObj['proxy-providers']['Airport1']) {
-            yamlObj['proxy-providers']['Airport1'].url = airplaneRawUrl;
+            yamlObj['proxy-providers']['Airport1'].url = routeUrl;
         }
         // 把yamlObj转成yaml字符串
-        return yamlStringify(yamlObj);
+        return {
+            yamlContent: yamlStringify(yamlObj),
+            subInfo: clashContent.subInfo
+        };
     }  
 
     async merge(): Promise<{yamlContent: string, subInfo: string}> {
-        const [responseYaml, responseSubInfo] = await Promise.all([
-            this.getFianlRawCfg(this.clashTemplateUrl, this.clashSubUrl)
-        ]);
+        const {yamlContent, subInfo} = await this.getFianlRawCfg();
         return {
-            yamlContent: responseYaml, 
+            yamlContent, 
+            subInfo
         }
     }
 } 

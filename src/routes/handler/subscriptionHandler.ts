@@ -1,7 +1,8 @@
-import { RouteHandler } from './types';
+import { RouteHandler } from '@/routes/types';
 import { getUserConfig, RESPONSE_HEADERS, UserConfig } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlMerge } from '@/module/yamlMerge';
+import { ClashYamlMerge } from '@/module/clashYamlMerge';
 
 export class SubscriptionHandler implements RouteHandler {
     private configValidator = new ConfigValidator();
@@ -17,9 +18,11 @@ export class SubscriptionHandler implements RouteHandler {
         
         try {
             const target = url.searchParams.get('target') || 'clash';
-            const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
-            const { yamlContent, subInfo } = await yamlMerge.merge();
+            // const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
+            // const { yamlContent, subInfo } = await yamlMerge.merge();
             
+            const clashYamlMerge = new ClashYamlMerge(env, authConfig.SUB_URL!, authConfig.RULE_URL!);
+            const { yamlContent, subInfo } = await clashYamlMerge.merge();
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
             if (formatError) return formatError;

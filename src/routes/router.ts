@@ -1,8 +1,8 @@
-import { RouteHandler } from './types';
-import { Routes } from './routesConfig';
-import { StorageHandler } from './storageHandler';
-import { KvHandler } from './kvHandler';
-import { SubscriptionHandler } from './subscriptionHandler';
+import { RouteHandler } from '@/routes/types';
+import { Routes } from '@/routes/routesConfig';
+import { StorageHandler } from '@/routes/handler/storageHandler';
+import { KvHandler } from '@/routes/handler/kvHandler';
+import { SubscriptionHandler } from '@/routes/handler/subscriptionHandler';
 
 export class Router {
     private handlers: Map<string, RouteHandler> = new Map();
