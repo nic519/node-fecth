@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "node-fetch-dev",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-14",
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
+  }
+} 

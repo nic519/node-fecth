@@ -18,11 +18,9 @@ export class SubscriptionHandler implements RouteHandler {
         
         try {
             const target = url.searchParams.get('target') || 'clash';
-            // const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
-            // const { yamlContent, subInfo } = await yamlMerge.merge();
-            
-            const clashYamlMerge = new ClashYamlMerge(env, authConfig.SUB_URL!, authConfig.RULE_URL!);
-            const { yamlContent, subInfo } = await clashYamlMerge.merge();
+            const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
+            const { yamlContent, subInfo } = await yamlMerge.merge();
+             
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
             if (formatError) return formatError;

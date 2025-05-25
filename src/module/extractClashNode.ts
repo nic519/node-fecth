@@ -78,7 +78,27 @@ export class ExtractClashNode {
     const method = node.cipher || 'aes-128-gcm';
     const password = node.password || '';
     const auth = btoa(`${method}:${password}`);
-    return `ss://${auth}@${node.server}:${node.port}#${encodedName}`;
+    let link = `ss://${auth}@${node.server}:${node.port}`;
+
+    // 添加插件参数
+    if (node.plugin) {
+      const pluginParams = [];
+      if (node['plugin-opts']) {
+        const opts = node['plugin-opts'];
+        if (opts.mode) pluginParams.push(`obfs=${opts.mode}`);
+        if (opts.host) pluginParams.push(`obfs-host=${opts.host}`);
+      }
+      if (pluginParams.length > 0) {
+        link += `/?plugin=${encodeURIComponent(`obfs-local;${pluginParams.join(';')}`)}`;
+      }
+    }
+
+    // 添加UDP参数
+    if (node.udp) {
+      link += (link.includes('?') ? '&' : '?') + 'udp=1';
+    }
+
+    return `${link}#${encodedName}`;
   }
 
   /// 生成Trojan链接
