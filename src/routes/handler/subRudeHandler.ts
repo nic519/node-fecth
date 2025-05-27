@@ -1,16 +1,20 @@
 import { RouteHandler } from '@/routes/types';
 import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
-import { ConfigValidator } from '@/module/configValidator';
-import { YamlMerge } from '@/module/yamlCommonMerge';
+import { ConfigValidator } from '@/module/configValidator'; 
 import { AuthUtils } from '@/utils/authUtils';
+import { YamlRudeMerge } from '@/module/yamlRudeMerge';
 
-export class SubscriptionHandler implements RouteHandler {
+export class SubRudeHandler implements RouteHandler {
     private configValidator = new ConfigValidator();
     
     async handle(request: Request, env: Env, params?: Record<string, string>): Promise<Response | null> {
         const url = new URL(request.url);
-        const uid = params?.uid || url.pathname.slice(1);
+        const uid = url.searchParams.get('uid');
         const token = url.searchParams.get('token');
+
+        if (!uid || !token) {
+            return new Response('缺少必要参数: uid, token', { status: 400 });
+        }
         
         // 验证token
         const authConfig = AuthUtils.validateToken(uid, token, env);
@@ -18,8 +22,8 @@ export class SubscriptionHandler implements RouteHandler {
         
         try {
             const target = url.searchParams.get('target') || 'clash';
-            const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
-            const { yamlContent, subInfo } = await yamlMerge.merge();
+            const yamlMerge = new YamlRudeMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
+            const { yamlContent } = await yamlMerge.merge();
              
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
@@ -30,7 +34,6 @@ export class SubscriptionHandler implements RouteHandler {
                 headers: {
                     ...RESPONSE_HEADERS,
                     'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
-                    'Subscription-Userinfo': subInfo,
                     'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
                 }
             });

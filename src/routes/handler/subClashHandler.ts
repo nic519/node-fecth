@@ -1,11 +1,11 @@
 import { RouteHandler } from '@/routes/types';
 import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator'; 
-import { ClashYamlMerge } from '@/module/clashYamlMerge';
+import { ClashYamlMerge } from '@/module/yamlClashFastMerge';
 import { AuthUtils } from '@/utils/authUtils';
 import { CustomError, ErrorHandler, ErrorCode } from '@/utils/customError';
 
-export class SubHandlerFast implements RouteHandler {
+export class SubFastHandler implements RouteHandler {
     private configValidator = new ConfigValidator();
     
     async handle(request: Request, env: Env, params?: Record<string, string>): Promise<Response | null> {

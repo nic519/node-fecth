@@ -3,7 +3,8 @@ import { Routes } from '@/routes/routesConfig';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/routes/handler/kvHandler';
 import { SubscriptionHandler } from '@/routes/handler/subHandler';
-import { SubHandlerFast } from './handler/subHandlerFast';
+import { SubFastHandler } from './handler/subClashHandler';
+import { SubRudeHandler } from './handler/subRudeHandler';
 
 export class Router {
     private handlers: Map<string, RouteHandler> = new Map();
@@ -16,7 +17,8 @@ export class Router {
         this.handlers.set(Routes.storage, new StorageHandler());
         this.handlers.set(Routes.kv, new KvHandler());
         this.handlers.set(Routes.subscription, new SubscriptionHandler());
-        this.handlers.set(Routes.subscriptionFast, new SubHandlerFast());
+        this.handlers.set(Routes.subscriptionFast, new SubFastHandler());
+        this.handlers.set(Routes.subscriptionRude, new SubRudeHandler());
     }
     
     async route(request: Request, env: Env): Promise<Response> {
@@ -36,7 +38,7 @@ export class Router {
             pathname.endsWith('.css') ||
             pathname.endsWith('.js')) {
             console.log(`🚫 忽略静态资源请求: ${pathname}`);
-            return new Response('', { status: 204 }); // 返回 204 No Content
+            return new Response(null, { status: 204 }); // 返回 204 No Content
         }
         
         // 精确匹配路由
