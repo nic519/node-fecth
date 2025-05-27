@@ -90,8 +90,8 @@ console.log('=== 使用示例 ===\n');
 // 从远程获取yaml文件
 async function main() {
   // const remoteUrl = 'http://192.168.7.116/Bigme.yaml';
-  const remoteUrl = 'http://192.168.7.116/Renzhe.yaml';
-
+  // const remoteUrl = 'http://192.168.7.116/Renzhe.yaml';
+  const remoteUrl = 'http://192.168.7.116/Hitun.yaml';
 
   const yamlContent1 = await fetch(remoteUrl).then(res => res.text());
   

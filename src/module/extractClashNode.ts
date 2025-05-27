@@ -1,5 +1,6 @@
 import { parse as yamlParse } from 'yaml';
 import { CustomError, ErrorCode } from '@/utils/customError';
+import { Base64Utils } from '@/utils/base64Utils';
 
 // 定义节点接口
 interface ClashNode {
@@ -25,6 +26,11 @@ interface ClashNode {
     path?: string;
     headers?: { [key: string]: string };
   };
+  // SSR特有字段
+  protocol?: string;
+  obfs?: string;
+  'protocol-param'?: string;
+  'obfs-param'?: string;
 }
 
 // 简化的节点信息接口
@@ -95,6 +101,10 @@ export class ExtractClashNode {
       case 'shadowsocks':
         return this.generateShadowsocksLink(node, encodedName);
       
+      case 'ssr':
+      case 'shadowsocksr':
+        return this.generateSsrLink(node, encodedName);
+      
       case 'trojan':
         return this.generateTrojanLink(node, encodedName);
       
@@ -135,6 +145,60 @@ export class ExtractClashNode {
     }
 
     return `${link}#${encodedName}`;
+  }
+
+  /// 生成ShadowsocksR链接
+  private generateSsrLink(node: ClashNode, encodedName: string): string {
+    const server = node.server;
+    const port = node.port.toString();
+    const protocol = node.protocol || 'origin';
+    const method = node.cipher || 'aes-128-ctr';
+    const obfs = node.obfs || 'plain';
+    
+    // 使用Base64Utils进行base64编码，并转换为URL安全格式
+    const toBase64UrlSafe = (str: string): string => {
+      return Base64Utils.utf8ToBase64(str)
+        .replace(/[+/]/g, (match) => match === '+' ? '-' : '_')
+        .replace(/=+$/, '');
+    };
+    
+    const password = toBase64UrlSafe(node.password || '');
+    
+    // SSR链接格式: ssr://server:port:protocol:method:obfs:password_base64/?obfsparam=obfs_param_base64&protoparam=protocol_param_base64&remarks=remarks_base64&group=group_base64
+    const baseUrl = `${server}:${port}:${protocol}:${method}:${obfs}:${password}`;
+    const params = [];
+    
+    // 处理obfs参数
+    const obfsParam = node['obfs-param'];
+    if (obfsParam && obfsParam.trim() !== '') {
+      const encodedObfsParam = toBase64UrlSafe(obfsParam);
+      params.push(`obfsparam=${encodedObfsParam}`);
+    }
+    
+    // 处理protocol参数
+    const protocolParam = node['protocol-param'];
+    if (protocolParam && protocolParam.trim() !== '') {
+      const encodedProtocolParam = toBase64UrlSafe(protocolParam);
+      params.push(`protoparam=${encodedProtocolParam}`);
+    }
+    
+    // 处理备注
+    const remarks = toBase64UrlSafe(node.name);
+    params.push(`remarks=${remarks}`);
+    
+    // 处理分组（通常为空）
+    const group = toBase64UrlSafe('');
+    if (group) {
+      params.push(`group=${group}`);
+    }
+
+    const paramString = params.length > 0 ? `/?${params.join('&')}` : '';
+    const fullUrl = `${baseUrl}${paramString}`;
+    
+    // 对整个URL进行base64编码，使用URL安全的base64编码
+    const encodedUrl = toBase64UrlSafe(fullUrl);
+    
+    return `ssr://${encodedUrl}`;
   }
 
   /// 生成Trojan链接
