@@ -67,7 +67,7 @@ export class KvHandler implements RouteHandler {
                 uid?: string;
                 token?: string;
             };
-            
+        
             const { key, value } = body;
             
             if (!key || !value) {

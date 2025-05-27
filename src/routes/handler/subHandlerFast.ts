@@ -3,6 +3,7 @@ import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator'; 
 import { ClashYamlMerge } from '@/module/clashYamlMerge';
 import { AuthUtils } from '@/utils/authUtils';
+import { CustomError, ErrorHandler, ErrorCode } from '@/utils/customError';
 
 export class SubHandlerFast implements RouteHandler {
     private configValidator = new ConfigValidator();
@@ -65,7 +66,19 @@ export class SubHandlerFast implements RouteHandler {
             
         } catch (error) {
             console.error('❌ 处理订阅时出错:', error);
-            return new Response('Internal Server Error', { status: 500 });
+            
+            // 使用自定义错误处理器
+            if (error instanceof CustomError) {
+                return ErrorHandler.createResponse(error);
+            }
+            
+            // 对于未知错误，创建通用错误响应
+            return ErrorHandler.createResponse(new CustomError(
+                ErrorCode.SUBSCRIPTION_FETCH_FAILED,
+                '订阅处理失败',
+                500,
+                { originalError: error instanceof Error ? error.message : String(error) }
+            ));
         }
     }
     

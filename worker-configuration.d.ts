@@ -2,6 +2,5 @@
 // After adding bindings to `wrangler.jsonc`, regenerate this interface via `npm run cf-typegen`
 interface Env {
     USER_CONFIGS: UserConfigsMap;  // Cloudflare 平台上是 JSON 类型
-	KV_BINDING: KVNamespace;      // Cloudflare KV 命名空间
-    CF_WORKER_URL: string;       // Cloudflare Worker URL
+	KV_BINDING: KVNamespace;      // Cloudflare KV 命名空间 
 }

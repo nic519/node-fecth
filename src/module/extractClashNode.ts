@@ -1,4 +1,5 @@
 import { parse as yamlParse } from 'yaml';
+import { CustomError, ErrorCode } from '@/utils/customError';
 
 // 定义节点接口
 interface ClashNode {
@@ -45,9 +46,44 @@ export enum OutputFormat {
 export class ExtractClashNode {
   /// 根据clash的yaml文件提取出节点信息
   private extractNodes(yamlContent: string): ClashNode[] {
-    const yamlObj = yamlParse(yamlContent);
-    const nodes = yamlObj.proxies || [];
-    return nodes;
+    try {
+      const yamlObj = yamlParse(yamlContent);
+      const proxies = yamlObj.proxies;
+      
+      // 确保 proxies 是数组类型
+      if (!Array.isArray(proxies)) {
+        throw new CustomError(
+          ErrorCode.NO_PROXIES_FOUND,
+          '订阅内容中没有找到有效的代理节点',
+          422, // Unprocessable Entity
+          { 
+            yamlStructure: Object.keys(yamlObj || {}),
+            proxiesType: typeof proxies 
+          }
+        );
+      }
+      
+      if (proxies.length === 0) {
+        throw new CustomError(
+          ErrorCode.NO_PROXIES_FOUND,
+          '订阅内容中的代理节点列表为空',
+          422
+        );
+      }
+      
+      return proxies;
+    } catch (error) {
+      if (error instanceof CustomError) {
+        throw error;
+      }
+      
+      throw new CustomError(
+        ErrorCode.INVALID_YAML,
+        'YAML格式解析失败',
+        400,
+        { originalError: error instanceof Error ? error.message : String(error) }
+      );
+    }
   }
 
   /// 将节点转换为原始代理链接格式
