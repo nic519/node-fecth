@@ -5,6 +5,7 @@ import { KvHandler } from '@/routes/handler/kvHandler';
 import { SubscriptionHandler } from '@/routes/handler/subHandler';
 import { SubFastHandler } from './handler/subClashHandler';
 import { SubRudeHandler } from './handler/subRudeHandler';
+import { AuthUtils } from '@/utils/authUtils';
 
 export class Router {
     private handlers: Map<string, RouteHandler> = new Map();
@@ -17,8 +18,7 @@ export class Router {
         this.handlers.set(Routes.storage, new StorageHandler());
         this.handlers.set(Routes.kv, new KvHandler());
         this.handlers.set(Routes.subscription, new SubscriptionHandler());
-        this.handlers.set(Routes.subscriptionFast, new SubFastHandler());
-        this.handlers.set(Routes.subscriptionRude, new SubRudeHandler());
+        this.handlers.set(Routes.subscriptionFast, new SubFastHandler()); 
     }
     
     async route(request: Request, env: Env): Promise<Response> {
@@ -52,14 +52,28 @@ export class Router {
         }
         
         // 动态路由匹配 - 普通订阅路由 (/:uid 格式)
-        if (pathname !== '/' && pathname !== Routes.storage && pathname !== Routes.kv && pathname !== Routes.subscriptionFast) {
+        const token = url.searchParams.get('token');
+        if (pathname !== '/' && token !== null) {
+            // 验证token
+            const uid = pathname.slice(1);
+            const authConfig = AuthUtils.validateToken(uid, token, env);
+            if (authConfig instanceof Response) return authConfig;
+
             console.log('📡 匹配普通订阅路由');
-            const subscriptionHandler = this.handlers.get(Routes.subscription);
-            if (subscriptionHandler) {
-                const uid = pathname.slice(1);
-                console.log(`👤 提取用户ID: ${uid}`);
-                const response = await (subscriptionHandler as any).handle(request, env, { uid });
-                if (response) return response;
+            if (authConfig.MODE === 0) {
+                const subscriptionHandler = this.handlers.get(Routes.subscription);
+                if (subscriptionHandler) { 
+                    console.log(`👤 提取用户ID: ${uid}`);
+                    const response = await (subscriptionHandler as any).handle(request, env, { uid });
+                    if (response) return response;
+                }
+            } else if (authConfig.MODE === 1) {
+                const subscriptionHandler = new SubRudeHandler();
+                if (subscriptionHandler) { 
+                    console.log(`👤 提取用户ID: ${uid}`);
+                    const response = await (subscriptionHandler as any).handle(request, env, { uid });
+                    if (response) return response;
+                }
             }
         }
         

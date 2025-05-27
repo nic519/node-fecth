@@ -1,3 +1,4 @@
+import { TrafficUtils } from '@/utils/trafficUtils';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 
 export class YamlMerge {
@@ -16,19 +17,7 @@ export class YamlMerge {
     private async fetchRemoteContent(url: string): Promise<any> {
         const response = await fetch(url);
         return response.text();
-    } 
-
-    // 从原始地址获取clash的剩余流量信息
-    private async fetchSubInfo(commonAirplaneUrl: string): Promise<string> {
-        // 并发执行两个fetch请求
-        const responseClash = await fetch(commonAirplaneUrl, {
-            headers: {
-            'User-Agent': 'clash 1.10.0'
-            }
-        });
-        const subInfo = responseClash.headers.get('subscription-userinfo') || ''; 
-        return subInfo;
-    }
+    }  
 
     /// 把订阅地址合并进去
     async getFianlRawCfg(yamlUrl: string, airplaneRawUrl: string): Promise<string> {
@@ -47,7 +36,7 @@ export class YamlMerge {
     async merge(): Promise<{yamlContent: string, subInfo: string}> {
         const [responseYaml, responseSubInfo] = await Promise.all([
             this.getFianlRawCfg(this.yamlCfgUrl, this.originalAirplaneUrl),
-            this.fetchSubInfo(this.originalAirplaneUrl)
+            TrafficUtils.fetchRemote(this.originalAirplaneUrl)
         ]);
         return {
             yamlContent: responseYaml,

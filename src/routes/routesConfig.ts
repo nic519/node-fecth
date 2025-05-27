@@ -6,9 +6,7 @@ export const Routes = {
     // 订阅路由，动态参数
     subscription: '/:uid', 
     // 订阅路由，1URL
-    subscriptionFast: '/quick',
-    // 订阅路由，原始订阅地址
-    subscriptionRude: '/rude',
+    subscriptionFast: '/quick'
 } as const;
 
 export type RouteKey = keyof typeof Routes;

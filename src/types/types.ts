@@ -1,23 +1,18 @@
 // 单个用户配置接口
 export interface UserConfig {
 	SUB_URL: string;          // 必需的订阅链接
-	ACCESS_TOKEN: string;     // 必需的访问令牌
-	ENGINE?: string;          // 可选的订阅转换引擎
+	ACCESS_TOKEN: string;     // 必需的访问令牌 
 	RULE_URL?: string;        // 可选的规则链接
 	FILE_NAME?: string;       // 可选的文件名
+	MODE?: number;            // 可选的模式
 }
 
 // 默认配置
-export const DEFAULT_CONFIG = {
-	ENGINE: 'https://url.v1.mk/sub',
+export const DEFAULT_CONFIG = { 
 	// RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/config.ini'
 	RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml'
 } as const;
-
-// 用户配置映射类型
-interface UserConfigsMap {
-	[key: string]: UserConfig
-}
+ 
  
 
 // 获取特定用户的配置
@@ -34,7 +29,8 @@ export const getUserConfig = (env: Env, userId: string): UserConfig | null => {
 		return {
 			...DEFAULT_CONFIG,  // 先展开默认配置
 			...userConfig,      // 再展开用户配置，会覆盖默认值
-			FILE_NAME: userConfig.FILE_NAME || 'clash'
+			FILE_NAME: userConfig.FILE_NAME || 'clash',
+			MODE: userConfig.MODE || 0
 		};
 	} catch (error) {
 		console.error('Failed to process USER_CONFIGS:', error);

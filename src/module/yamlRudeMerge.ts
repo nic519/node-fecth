@@ -1,3 +1,4 @@
+import { TrafficUtils } from '@/utils/trafficUtils';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 
 export class YamlRudeMerge {
@@ -29,10 +30,12 @@ export class YamlRudeMerge {
         return yamlStringify(yamlObj);
     }  
 
-    async merge(): Promise<{yamlContent: string}> {
+    async merge(): Promise<{yamlContent: string, subInfo: string}> {
         const responseYaml = await this.getFianlRawCfg();
+        const subInfo = await TrafficUtils.fetchRemote(this.clashSubUrl);
         return {
             yamlContent: responseYaml, 
+            subInfo: subInfo
         }
     }
 }

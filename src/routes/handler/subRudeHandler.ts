@@ -9,7 +9,7 @@ export class SubRudeHandler implements RouteHandler {
     
     async handle(request: Request, env: Env, params?: Record<string, string>): Promise<Response | null> {
         const url = new URL(request.url);
-        const uid = url.searchParams.get('uid');
+        const uid = params?.uid;
         const token = url.searchParams.get('token');
 
         if (!uid || !token) {
@@ -23,7 +23,7 @@ export class SubRudeHandler implements RouteHandler {
         try {
             const target = url.searchParams.get('target') || 'clash';
             const yamlMerge = new YamlRudeMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
-            const { yamlContent } = await yamlMerge.merge();
+            const { yamlContent, subInfo } = await yamlMerge.merge();
              
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
@@ -33,6 +33,7 @@ export class SubRudeHandler implements RouteHandler {
                 status: 200,
                 headers: {
                     ...RESPONSE_HEADERS,
+                    'Subscription-Userinfo': subInfo,
                     'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
                     'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
                 }
