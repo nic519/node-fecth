@@ -1,4 +1,4 @@
-import { getUserConfig, UserConfig } from '@/types/types';
+import { DBUser, getUserConfig, ProcessedDBUser } from '@/types/types';
 
 export class AuthUtils {
     /**
@@ -8,12 +8,12 @@ export class AuthUtils {
      * @param env 环境变量
      * @returns 用户配置或401响应
      */
-    static validateToken(uid: string, token: string | null, env: Env): UserConfig | Response {
+    static validateToken(uid: string, token: string | null, env: Env): ProcessedDBUser | Response {
         if (!uid || !token) {
             return new Response('Unauthorized', { status: 401 });
         }
         const userConfig = getUserConfig(env, uid);
-        if (!userConfig || token !== userConfig.ACCESS_TOKEN) {
+        if (!userConfig || token !== userConfig.accessToken) {
             return new Response('Unauthorized', { status: 401 });
         }
         return userConfig;

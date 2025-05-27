@@ -60,17 +60,17 @@ export class Router {
             if (authConfig instanceof Response) return authConfig;
 
             console.log('📡 匹配普通订阅路由');
-            if (authConfig.MODE === 0) {
+            console.log(`👤 提取用户ID: ${uid} ${authConfig.mode}`);
+
+            if (authConfig.mode === 0) {
                 const subscriptionHandler = this.handlers.get(Routes.subscription);
                 if (subscriptionHandler) { 
-                    console.log(`👤 提取用户ID: ${uid}`);
                     const response = await (subscriptionHandler as any).handle(request, env, { uid });
                     if (response) return response;
                 }
-            } else if (authConfig.MODE === 1) {
+            } else if (authConfig.mode === 1) {
                 const subscriptionHandler = new SubRudeHandler();
-                if (subscriptionHandler) { 
-                    console.log(`👤 提取用户ID: ${uid}`);
+                if (subscriptionHandler) {  
                     const response = await (subscriptionHandler as any).handle(request, env, { uid });
                     if (response) return response;
                 }

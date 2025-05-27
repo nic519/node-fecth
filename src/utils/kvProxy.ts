@@ -1,4 +1,5 @@
 import { getDevConfig } from '../config/dev-config';
+import { CommonUtils } from './commonUtils';
 
 /**
  * KV代理服务 - 在本地开发环境中转发KV操作到生产环境
@@ -9,20 +10,7 @@ export class KvProxy {
     constructor(env: Env) {
         this.env = env;
     }
-    
-    /**
-     * 检测是否为本地开发环境
-     */
-    private isLocalDevelopment(): boolean {
-        // 检查KV是否可用
-        const kvAvailable = this.env.KV_BINDING && typeof this.env.KV_BINDING.get === 'function';
-        console.log('🔍 环境检测:', {
-            hasKvBinding: !!this.env.KV_BINDING,
-            kvGetAvailable: !!(this.env.KV_BINDING && typeof this.env.KV_BINDING.get === 'function'),
-            isLocalDev: !kvAvailable
-        });
-        return !kvAvailable;
-    }
+     
     
     /**
      * 获取生产worker URL
@@ -43,7 +31,7 @@ export class KvProxy {
      */
     async get(key: string, uid?: string, token?: string): Promise<string | null> {
         // 如果不是本地开发环境，直接使用KV
-        if (!this.isLocalDevelopment()) {
+        if (!CommonUtils.isLocalDevelopment(this.env)) {
             return await this.env.KV_BINDING?.get(key) || null;
         }
         

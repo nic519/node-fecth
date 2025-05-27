@@ -1,8 +1,9 @@
 import { RouteHandler } from '@/routes/types';
-import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
+import { RESPONSE_HEADERS, ProcessedDBUser } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlMerge } from '@/module/yamlCommonMerge';
 import { AuthUtils } from '@/utils/authUtils';
+import { CommonUtils } from '@/utils/commonUtils';
 
 export class SubscriptionHandler implements RouteHandler {
     private configValidator = new ConfigValidator();
@@ -18,21 +19,28 @@ export class SubscriptionHandler implements RouteHandler {
         
         try {
             const target = url.searchParams.get('target') || 'clash';
-            const yamlMerge = new YamlMerge(authConfig.SUB_URL!, authConfig.RULE_URL!);
+            const yamlMerge = new YamlMerge(authConfig.subscribe, authConfig.ruleUrl);
             const { yamlContent, subInfo } = await yamlMerge.merge();
              
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
             if (formatError) return formatError;
+            
+            var headers = {
+                ...RESPONSE_HEADERS,
+                'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
+                'Subscription-Userinfo': subInfo,
+            }
 
+            // 通过URL参数控制是否下载文件
+            const shouldDownload = url.searchParams.get('download') == null;
+            if (CommonUtils.isLocalDevelopment(env) && shouldDownload) {
+                (headers as any)['Content-Disposition'] = `attachment; filename=${authConfig.fileName}.${target === 'clash' ? 'yaml' : 'json'}`;
+            }
+            
             return new Response(yamlContent, {
                 status: 200,
-                headers: {
-                    ...RESPONSE_HEADERS,
-                    'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
-                    'Subscription-Userinfo': subInfo,
-                    'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
-                }
+                headers: headers
             });
         } catch (error) {
             console.error('Error:', error);

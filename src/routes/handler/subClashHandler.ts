@@ -1,5 +1,5 @@
 import { RouteHandler } from '@/routes/types';
-import { RESPONSE_HEADERS, UserConfig } from '@/types/types';
+import { RESPONSE_HEADERS, ProcessedDBUser } from '@/types/types';
 import { ConfigValidator } from '@/module/configValidator'; 
 import { ClashYamlMerge } from '@/module/yamlClashFastMerge';
 import { AuthUtils } from '@/utils/authUtils';
@@ -35,8 +35,7 @@ export class SubFastHandler implements RouteHandler {
             return authConfig;
         }
         
-        console.log('✅ Token验证通过');
-        console.log('📋 用户配置:', JSON.stringify(authConfig, null, 2));
+        console.log('✅ Token验证通过'); 
         
         try {
             // 处理订阅逻辑
@@ -45,7 +44,7 @@ export class SubFastHandler implements RouteHandler {
             const target = url.searchParams.get('target') || 'clash';
             console.log(`🎯 目标格式: ${target}`);
         
-            const clashYamlMerge = new ClashYamlMerge(env, request, authConfig.SUB_URL!, authConfig.RULE_URL!, token, uid);
+            const clashYamlMerge = new ClashYamlMerge(env, request, authConfig.subscribe, authConfig.ruleUrl, token, uid);
             const { yamlContent, subInfo } = await clashYamlMerge.merge();
             // 使用配置验证器验证格式
             const formatError = this.configValidator.validate(yamlContent, target);
@@ -60,7 +59,7 @@ export class SubFastHandler implements RouteHandler {
                     ...RESPONSE_HEADERS,
                     'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8', 
                     'Subscription-Userinfo': subInfo,
-                    'Content-Disposition': `attachment; filename=${authConfig.FILE_NAME}.${target === 'clash' ? 'yaml' : 'json'}`
+                    'Content-Disposition': `attachment; filename=${authConfig.fileName}.${target === 'clash' ? 'yaml' : 'json'}`
                 }
             });
             
