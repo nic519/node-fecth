@@ -1,43 +1,53 @@
-// 单个用户配置接口
-export interface UserConfig {
-	SUB_URL: string;          // 必需的订阅链接
-	ACCESS_TOKEN: string;     // 必需的访问令牌
-	ENGINE?: string;          // 可选的订阅转换引擎
-	RULE_URL?: string;        // 可选的规则链接
-	FILE_NAME?: string;       // 可选的文件名
+import { parse as yamlParse } from 'yaml';
+
+
+// 单个用户配置接口（原始配置，字段可选）
+export interface DBUser {
+	subscribe: string;          // 必需的订阅链接
+	accessToken: string;     // 必需的访问令牌 
+	ruleUrl?: string;        // 可选的规则链接
+	fileName?: string;       // 可选的文件名
+	mode?: number;            // 可选的模式
+}
+
+// 处理后的用户配置接口（所有字段都有默认值）
+export interface ProcessedDBUser {
+	subscribe: string;          // 必需的订阅链接
+	accessToken: string;     // 必需的访问令牌 
+	ruleUrl: string;         // 处理后必有值
+	fileName: string;        // 处理后必有值
+	mode: number;            // 处理后必有值
 }
 
 // 默认配置
-export const DEFAULT_CONFIG = {
-	ENGINE: 'https://url.v1.mk/sub',
-	// RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/config.ini'
-	RULE_URL: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml'
-} as const;
-
-// 用户配置映射类型
-interface UserConfigsMap {
-	[key: string]: UserConfig
-}
+const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml'
+ 
  
 
-// 获取特定用户的配置
-export const getUserConfig = (env: Env, userId: string): UserConfig | null => {
+// 获取特定用户的配置，返回所有字段都有值的完整配置
+export const getUserConfig = (env: Env, userId: string): ProcessedDBUser | null => {
 	try {
-		// 处理本地开发环境中的字符串类型
-		const configs = typeof env.USER_CONFIGS === 'string' 
-			? JSON.parse(env.USER_CONFIGS) 
-			: env.USER_CONFIGS;
+		// 检查环境变量是否存在
+		if (!env.DB_USER) {
+			console.error('DB_USER environment variable is not set');
+			return null;
+		}
+		
+		// 处理本地开发环境中的字符串类型 
+		const configs = yamlParse(env.DB_USER)  
 		
 		const userConfig = configs[userId];
 		if (!userConfig) return null;
 		
 		return {
-			...DEFAULT_CONFIG,  // 先展开默认配置
-			...userConfig,      // 再展开用户配置，会覆盖默认值
-			FILE_NAME: userConfig.FILE_NAME || 'clash'
+			subscribe: userConfig.subscribe,
+			accessToken: userConfig.accessToken,
+			ruleUrl: userConfig.ruleUrl || DEFAULT_RULE_URL,
+			fileName: userConfig.fileName || userId,
+			mode: userConfig.mode || 0
 		};
 	} catch (error) {
-		console.error('Failed to process USER_CONFIGS:', error);
+		console.error('Failed to process DB_USER:', error);
 		return null;
 	}
 };

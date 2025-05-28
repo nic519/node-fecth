@@ -12,13 +12,13 @@
 	},
 	"triggers": {
 		"crons": [
-			"* * * * *"
+			"0 0 1 1 *"
 		]
 	},
   "kv_namespaces": [
     {
       "binding": "KV_BINDING",
-      "id": "111852c104cd4df9a5c0d4ba286565a7"
+      "id": "52fa82d5a9c3438195385f592be41ef9"
     }
   ]
   /**

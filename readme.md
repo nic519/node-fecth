@@ -19,6 +19,16 @@ npx wrangler dev
 
 ```
 
+### KV转发功能
+
+在本地开发时，由于没有真实的KV存储，系统提供了转发机制：
+
+1. **自动检测**: 检测本地环境且KV不可用时自动启用
+2. **配置转发**: 编辑 `src/config/dev-config.ts` 设置生产worker URL
+3. **测试转发**: 运行 `npm run test:kv-forward` 测试功能
+
+详细使用说明请参考：[KV转发功能指南](docs/kv-forwarding.md)
+
 ## 部署
 ```bash
 npx wrangler deploy --keep-vars  

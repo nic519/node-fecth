@@ -142,4 +142,91 @@ function testKvRoute() {
 }
 
 // 运行测试
-testKvRoute(); 
+testKvRoute();
+
+async function testKvPut() {
+    try {
+        const fetch = (await import('node-fetch')).default;
+        console.log('🧪 测试KV PUT功能');
+        
+        const testData = {
+            key: 'test-key',
+            value: 'test-value',
+            uid: '519',
+            token: 'd2f1441a2f96'
+        };
+        
+        console.log('📤 发送PUT请求:', testData);
+        
+        const response = await fetch('http://localhost:8787/kv', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        console.log('📥 响应状态:', response.status);
+        const text = await response.text();
+        console.log('📥 响应内容:', text);
+        
+        if (response.ok) {
+            console.log('✅ 测试成功');
+        } else {
+            console.log('❌ 测试失败');
+        }
+        
+    } catch (error) {
+        console.error('❌ 测试出错:', error);
+    }
+}
+
+async function testKvGet() {
+    try {
+        const fetch = (await import('node-fetch')).default;
+        console.log('\n🧪 测试KV GET功能');
+        
+        const testParams = {
+            key: 'test-key',
+            uid: '519',
+            token: 'd2f1441a2f96'
+        };
+        
+        const url = new URL('http://localhost:8787/kv');
+        url.searchParams.set('key', testParams.key);
+        url.searchParams.set('uid', testParams.uid);
+        url.searchParams.set('token', testParams.token);
+        
+        console.log('📤 发送GET请求:', url.toString());
+        
+        const response = await fetch(url.toString());
+        
+        console.log('📥 响应状态:', response.status);
+        const text = await response.text();
+        console.log('📥 响应内容:', text);
+        
+        if (response.ok) {
+            console.log('✅ 测试成功');
+            if (text === 'test-value') {
+                console.log('✅ 数据验证成功：写入和读取的值匹配');
+            } else {
+                console.log('❌ 数据验证失败：读取的值与写入的不匹配');
+                console.log('期望值: test-value');
+                console.log('实际值:', text);
+            }
+        } else {
+            console.log('❌ 测试失败');
+        }
+        
+    } catch (error) {
+        console.error('❌ 测试出错:', error);
+    }
+}
+
+// 先运行PUT测试，然后运行GET测试
+async function runTests() {
+    await testKvPut();
+    await testKvGet();
+}
+
+runTests(); 

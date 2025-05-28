@@ -26,13 +26,24 @@ src/routes/
 - **响应**: 返回参数`v`的值
 
 ### 2. KV路由 `/kv`
-- **用途**: 获取KV存储中的值
-- **使用方式**: `GET /kv?key=mykey&token=your_token&uid=user123`
-- **参数**:
-  - `key`: KV存储的键名
-  - `token`: 用户访问令牌
-  - `uid`: 用户ID
-- **响应**: 返回KV存储中对应键的值
+- **用途**: KV存储操作（读取和写入）
+- **GET方式**: `GET /kv?key=mykey&token=your_token&uid=user123`
+  - **参数**:
+    - `key`: KV存储的键名（必需）
+    - `token`: 用户访问令牌（可选）
+    - `uid`: 用户ID（可选）
+  - **响应**: 返回KV存储中对应键的值
+- **POST方式**: `POST /kv`
+  - **请求体**:
+    ```json
+    {
+      "key": "mykey",
+      "value": "myvalue",
+      "token": "your_token",
+      "uid": "user123"
+    }
+    ```
+  - **响应**: 存储成功返回 "OK"
 
 ### 3. 订阅路由 `/:uid`
 - **用途**: 处理订阅配置请求
