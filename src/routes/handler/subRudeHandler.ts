@@ -36,9 +36,8 @@ export class SubRudeHandler implements RouteHandler {
                 'Content-Type': target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
             }
             
-            // 通过URL参数控制是否下载文件
-            const shouldDownload = url.searchParams.get('download') == null;
-            if (CommonUtils.isLocalDevelopment(env) && shouldDownload) {
+            // 通过URL参数控制是否下载文件 
+            if (!CommonUtils.isLocalDevelopment(env)) {
                 (headers as any)['Content-Disposition'] = `attachment; filename=${authConfig.fileName}.${target === 'clash' ? 'yaml' : 'json'}`;
             }
             
