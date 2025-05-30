@@ -1,7 +1,7 @@
 import { RouteHandler } from '@/routes/routesType';
 import { RoutesPath } from '@/routes/routesPath';
 import { StorageHandler } from '@/routes/handler/storageHandler';
-import { KvHandler } from '@/routes/handler/kvHandler';
+import { KvHandler } from '@/module/kv/kvHandler';
 import { SubscriptionHandler } from '@/routes/handler/subHandler';
 import { SubFastHandler } from './handler/subClashHandler';
 import { SubRudeHandler } from './handler/subRudeHandler';
