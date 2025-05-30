@@ -1,16 +1,23 @@
-export class CommonUtils {
+import { getDevConfig } from '@/config/dev-config';
 
-    /**
-     * 检测是否为本地开发环境
-     */
-    static isLocalDevelopment(env: Env): boolean {
-        // 检查KV是否可用
-        const kvAvailable = env.KV_BINDING && typeof env.KV_BINDING.get === 'function';
-        console.log('🔍 环境检测:', {
-            hasKvBinding: !!env.KV_BINDING,
-            kvGetAvailable: !!(env.KV_BINDING && typeof env.KV_BINDING.get === 'function'),
-            isLocalDev: !kvAvailable
-        });
-        return !kvAvailable;
-    }
+export class CommonUtils {
+	/**
+	 * 检测是否本地开发模式
+	 */
+	static isLocalEnv(request: Request): boolean {
+		const currentUrl = new URL(request.url);
+		return currentUrl.host in ['127.0.0.1', 'localhost'];
+	}
+
+	/**
+	 * 获取生产worker URI
+	 */
+	static getProdURI(): string {
+		const uri = getDevConfig().productionWorkerUrl;
+		if (uri != null) {
+			return uri;
+		}
+		console.warn('⚠️  生产worker URL未配置或转发功能未启用');
+		throw new Error('生产worker URL未配置，无法转发KV操作');
+	}
 }

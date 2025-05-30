@@ -1,9 +1,9 @@
 import { ExecutionContext } from '@cloudflare/workers-types';
-import { Router } from '@/routes/router';
+import { Router } from '@/routes/routesHandler';
 
 class SubscriptionService {
 	private router = new Router();
-	
+
 	constructor(private env: Env) {}
 
 	async handleRequest(request: Request): Promise<Response> {
@@ -17,5 +17,5 @@ export default {
 		console.log('🔑 开始处理请求');
 		const service = new SubscriptionService(env);
 		return service.handleRequest(request);
-	}
+	},
 };

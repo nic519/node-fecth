@@ -19,7 +19,7 @@ export class ClashYamlMerge {
         private token: string,
         private uid: string
     ) {
-        this.kvProxy = new KvProxy(env);
+        this.kvProxy = new KvProxy(request, env);
     }
     
     private getWorkerUrl(): string | null {

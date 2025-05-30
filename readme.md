@@ -15,42 +15,28 @@ clash/sing-box等工具，优势就是他们的分组策略，可以做得很灵
 
 ## 本地调试
 ```bash
-npx wrangler dev
+yarn start
 
 ```
 
-### KV转发功能
-
-在本地开发时，由于没有真实的KV存储，系统提供了转发机制：
-
-1. **自动检测**: 检测本地环境且KV不可用时自动启用
-2. **配置转发**: 编辑 `src/config/dev-config.ts` 设置生产worker URL
-3. **测试转发**: 运行 `npm run test:kv-forward` 测试功能
-
-详细使用说明请参考：[KV转发功能指南](docs/kv-forwarding.md)
-
 ## 部署
 ```bash
-npx wrangler deploy --keep-vars  
+yarn run deploy
 ```
 
 在worker里面需要设置json环境变量：
 
-key为`USER_CONFIGS`，value为json，格式如下：
-```json
-{
-	"519": {
-		"ACCESS_TOKEN": "d2fs1s12f3",
-		"FILE_NAME": "配置名称",
-		"SUB_URL": "https://xxx.xxx/xxx"
-	}
-}
+key为`DB_USER`，value为json，格式如下：
+```yaml
+519
+	accessToken: "d2fs1s12f3"
+	fileName: "配置名称"
+	subscribe: "https://xxx.xxx/xxx"
 ```
 在前端的访问地址是：https://worker域名/519?token=d2fs1s12f3
 
 每个key，代表一个配置，其中配置可以填这些值：
-- ACCESS_TOKEN: 访问token，用于验证请求，自己随机生成就好
-- FILE_NAME（可选）: 配置名称，用于在客户端显示
-- SUB_URL: 机场订阅链接
-- RULE_URL（可选）: 分流规则
-- ENGINE（可选）: 转换订阅的网址
+- accessToken: 访问token，用于验证请求，自己随机生成就好
+- fileName: 配置名称，用于在客户端显示
+- subscribe: 机场订阅链接
+- ruleUrl（可选）: 分流规则 

@@ -1,6 +1,6 @@
-export { Router } from '@/routes/router';
+export { Router } from '@/routes/routesHandler';
 export { StorageHandler } from '@/routes/handler/storageHandler';
 export { KvHandler } from '@/routes/handler/kvHandler';
 export { SubscriptionHandler } from '@/routes/handler/subHandler';
-export { Routes } from '@/routes/routesConfig';
-export type { RouteHandler, RouteMatch } from '@/routes/types'; 
+export { RoutesPath as Routes } from '@/routes/routesPath';
+export type { RouteHandler, RouteMatch } from '@/routes/routesType';

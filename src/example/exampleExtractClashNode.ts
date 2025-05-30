@@ -8,20 +8,20 @@ proxies:
     server: iq6dsbz.icfjlk.xyz
     port: 40662
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec-20995588d723
+    password: 311f049f-3f4f-48af-a0ec
 
   - name: "🇭🇰 香港02"
     type: ss
     server: 986yn1v.icfjlk.xyz
     port: 40097
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec-20995588d723
+    password: 311f049f-3f4f-48af-a0ec
 
   - name: "🇭🇰 香港Trojan"
     type: trojan
     server: 420mco4.icfjlk.xyz
     port: 40269
-    password: 311f049f-3f4f-48af-a0ec-20995588d723
+    password: 311f049f-3f4f-48af-a0ec
     skip-cert-verify: true
     sni: i0.hdslb.com
 
@@ -30,26 +30,9 @@ proxies:
     server: goh8x3new.bigmeyear.org
     port: 46151
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec-20995588d723
+    password: 311f049f-3f4f-48af-a0ec
 `;
 
-// 另一个示例配置（模拟从文件读取的内容）
-const yamlContent = `
-proxies:
-  - name: "🇺🇸 美国01"
-    type: ss
-    server: us1.example.com
-    port: 8080
-    cipher: aes-256-gcm
-    password: test-password-123
-
-  - name: "🇯🇵 日本01"
-    type: trojan
-    server: jp1.example.com
-    port: 443
-    password: test-password-456
-    skip-cert-verify: true
-`;
 
 // 创建ExtractClashNode实例
 const extractor = new ExtractClashNode();

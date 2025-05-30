@@ -21,8 +21,8 @@ export interface ProcessedDBUser {
 
 // 默认配置
 const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml'
- 
- 
+
+
 
 // 获取特定用户的配置，返回所有字段都有值的完整配置
 export const getUserConfig = (env: Env, userId: string): ProcessedDBUser | null => {
