@@ -8,16 +8,13 @@ export class ForwardingService {
 	/**
 	 * 转发完整的HTTP请求到生产环境
 	 */
-	static async forwardRequest(request: Request, targetPath: string): Promise<Response> {
+	static async forwardRequest(request: Request): Promise<Response> {
 		try {
-			// 构建转发URL
-			const forwardUrl = new URL(targetPath, CommonUtils.getProdURI());
+			// 构建转发URL - 直接替换base URL，保持原始路径和参数
 			const originalUrl = new URL(request.url);
-
-			// 复制所有查询参数
-			originalUrl.searchParams.forEach((value, key) => {
-				forwardUrl.searchParams.set(key, value);
-			});
+			const forwardUrl = new URL(CommonUtils.getProdURI());
+			forwardUrl.pathname = originalUrl.pathname;
+			forwardUrl.search = originalUrl.search;
 
 			console.log(`🌐 转发请求到: ${forwardUrl.toString()}`);
 
@@ -30,11 +27,7 @@ export class ForwardingService {
 			// 转发请求
 			const response = await fetch(forwardUrl.toString(), {
 				method: request.method,
-				headers: {
-					'User-Agent': 'Local-Dev-Proxy/1.0',
-					'X-Forwarded-For': 'local-development',
-					'Content-Type': request.headers.get('Content-Type') || 'application/json',
-				},
+				headers: request.headers,
 				body,
 			});
 
@@ -56,75 +49,6 @@ export class ForwardingService {
 			console.error('转发到生产worker失败:', error);
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			return new Response(`转发请求失败: ${errorMessage}`, { status: 500 });
-		}
-	}
-
-	/**
-	 * 发送GET请求到生产环境
-	 */
-	static async forwardGet(targetPath: string, params: Record<string, string> = {}): Promise<string | null> {
-		try {
-			const forwardUrl = new URL(targetPath, CommonUtils.getProdURI());
-
-			// 添加查询参数
-			Object.entries(params).forEach(([key, value]) => {
-				if (value) forwardUrl.searchParams.set(key, value);
-			});
-
-			console.log(`🌐 转发GET请求到: ${forwardUrl.toString()}`);
-
-			const response = await fetch(forwardUrl.toString(), {
-				method: 'GET',
-				headers: {
-					'User-Agent': 'Local-Dev-KV-Proxy/1.0',
-					'X-Forwarded-For': 'local-development',
-				},
-			});
-
-			if (response.status === 404) {
-				return null;
-			}
-
-			if (!response.ok) {
-				throw new Error(`GET转发失败: ${response.status} - ${await response.text()}`);
-			}
-
-			const result = await response.text();
-			console.log(`📥 GET成功: ${result.substring(0, 100)}...`);
-			return result;
-		} catch (error) {
-			console.error('GET转发失败:', error);
-			throw error;
-		}
-	}
-
-	/**
-	 * 发送POST请求到生产环境
-	 */
-	static async forwardPost(targetPath: string, data: Record<string, any>): Promise<void> {
-		try {
-			const forwardUrl = new URL(targetPath, CommonUtils.getProdURI());
-
-			console.log(`🌐 转发POST请求到: ${forwardUrl.toString()}`);
-
-			const response = await fetch(forwardUrl.toString(), {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': 'Local-Dev-KV-Proxy/1.0',
-					'X-Forwarded-For': 'local-development',
-				},
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				throw new Error(`POST转发失败: ${response.status} - ${await response.text()}`);
-			}
-
-			console.log(`📤 POST成功`);
-		} catch (error) {
-			console.error('POST转发失败:', error);
-			throw error;
 		}
 	}
 }
