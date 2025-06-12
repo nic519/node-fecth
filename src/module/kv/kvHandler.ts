@@ -17,20 +17,8 @@ export class KvHandler implements RouteHandler {
 		}
 
 		// 统一验证token
-		let uid: string | undefined;
-		let token: string | null = null;
-
-		if (request.method === 'GET') {
-			uid = url.searchParams.get('uid') || undefined;
-			token = url.searchParams.get('token');
-		} else if (request.method === 'POST') {
-			const body = (await request.json()) as { uid?: string; token?: string };
-			uid = body.uid;
-			token = body.token || null;
-		}
-
-		if (!uid) return new Response('缺少参数: uid', { status: 400 });
-
+		let uid = url.searchParams.get('uid');
+		let token = url.searchParams.get('token');
 		const authResult = AuthUtils.validateToken(uid, token, env);
 		if (authResult instanceof Response) return authResult;
 
@@ -38,14 +26,15 @@ export class KvHandler implements RouteHandler {
 		const kvService = new KvService(request, env);
 
 		if (request.method === 'POST') {
-			return this.handlePost(request, kvService);
+			const body = await request.text();
+			const bodyParams = JSON.parse(body);
+			return this.handlePost(bodyParams, kvService);
 		}
-		return this.handleGet(request, kvService);
+		return this.handleGet(url.searchParams, kvService);
 	}
 
-	private async handleGet(request: Request, kvService: KvService): Promise<Response> {
-		const url = new URL(request.url);
-		const key = url.searchParams.get('key');
+	private async handleGet(searchParams: URLSearchParams, kvService: KvService): Promise<Response> {
+		const key = searchParams.get('key');
 
 		if (!key) return new Response('缺少参数: key', { status: 400 });
 
@@ -55,15 +44,8 @@ export class KvHandler implements RouteHandler {
 		return new Response(value, this.getHeaders());
 	}
 
-	private async handlePost(request: Request, kvService: KvService): Promise<Response> {
-		// 重新解析body，因为在handle方法中已经解析过一次
-		const body = await request.text();
-		const { key, value, action } = JSON.parse(body) as {
-			key: string;
-			value?: string;
-			action?: string;
-		};
-
+	private async handlePost(bodyParams: { key: string; value?: string; action?: string }, kvService: KvService): Promise<Response> {
+		const { key, value, action } = bodyParams;
 		if (!key) return new Response('缺少参数: key', { status: 400 });
 
 		if (action === 'delete') {
