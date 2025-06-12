@@ -1,4 +1,4 @@
-import { RouteHandler } from '@/routes/routesType';
+import { RouteHandler } from '@/types/routesType';
 
 export class StorageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response | null> {

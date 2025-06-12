@@ -1,6 +1,6 @@
-import { RouteHandler } from '@/routes/routesType';
+import { RouteHandler } from '@/types/routesType';
 import { CommonUtils } from '@/utils/commonUtils';
-import { RoutesPath } from '@/routes/routesPath';
+import { RoutesPathConfig } from '@/config/routesPathConfig';
 import { KvService } from '@/module/kv/services/kvService';
 import { ForwardingService } from '@/module/kv/services/forwardingService';
 import { AuthUtils } from '@/utils/authUtils';

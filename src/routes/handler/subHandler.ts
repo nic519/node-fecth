@@ -1,5 +1,5 @@
-import { RouteHandler } from '@/routes/routesType';
-import { RESPONSE_HEADERS, ProcessedDBUser } from '@/types/types';
+import { RouteHandler } from '@/types/routesType';
+import { RESPONSE_HEADERS, ProcessedDBUser } from '@/types/userTypes';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlMerge } from '@/module/yamlCommonMerge';
 import { AuthUtils } from '@/utils/authUtils';

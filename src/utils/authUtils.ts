@@ -1,4 +1,4 @@
-import { DBUser, getUserConfig, ProcessedDBUser } from '@/types/types';
+import { getUserConfig, ProcessedDBUser } from '@/types/userTypes';
 
 export class AuthUtils {
 	/**

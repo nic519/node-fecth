@@ -1,7 +1,7 @@
 // 节点转换器类
 import { parse as yamlParse } from 'yaml';
 import { Base64Utils } from '@/utils/base64Utils';
-import { RoutesPath } from '@/routes/routesPath';
+import { RoutesPathConfig } from '@/config/routesPathConfig';
 import { getDevConfig } from '@/config/dev-config';
 import { CommonUtils } from '@/utils/commonUtils';
 
@@ -80,7 +80,7 @@ export class NodeConverter {
 	/// 把假节点，“塞”入一个可供其他网站访问的链接
 	private buildFakeSubUrl(fakeNodes: string[]): string {
 		const fakeContent = Base64Utils.utf8ToBase64(fakeNodes.join('\n'));
-		var fakeURL = new URL(RoutesPath.storage, CommonUtils.getProdURI());
+		var fakeURL = new URL(RoutesPathConfig.storage, CommonUtils.getProdURI());
 		fakeURL.searchParams.set('v', fakeContent);
 		// console.log(`fakeSubUrl: ${fakeSubUrl}`);
 		return fakeURL.toString();
