@@ -1,25 +1,18 @@
 import { RouteHandler } from '@/types/routesType';
-import { RESPONSE_HEADERS } from '@/types/userTypes';
+import { ProcessedDBUser, RESPONSE_HEADERS } from '@/types/userTypes';
 import { ConfigValidator } from '@/module/configValidator';
-import { AuthUtils } from '@/utils/authUtils';
 import { YamlRudeMerge } from '@/module/yamlRudeMerge';
 import { CommonUtils } from '@/utils/commonUtils';
 
 export class SubRudeHandler implements RouteHandler {
 	private configValidator = new ConfigValidator();
 
-	async handle(request: Request, env: Env, params?: Record<string, string>): Promise<Response | null> {
+	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const uid = params?.uid;
-		const token = url.searchParams.get('token');
-
-		if (!uid || !token) {
-			return new Response('缺少必要参数: uid, token', { status: 400 });
+		const authConfig = params?.authConfig as ProcessedDBUser;
+		if (!authConfig) {
+			return new Response('缺少必要参数: authConfig', { status: 400 });
 		}
-
-		// 验证token
-		const authConfig = AuthUtils.validateToken(uid, token, env);
-		if (authConfig instanceof Response) return authConfig;
 
 		try {
 			const target = url.searchParams.get('target') || 'clash';

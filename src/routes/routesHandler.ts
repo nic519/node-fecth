@@ -2,8 +2,6 @@ import { RouteHandler } from '@/types/routesType';
 import { RoutesPathConfig } from '@/config/routesPathConfig';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
-import { SubscriptionHandler } from '@/routes/handler/subHandler';
-import { SubFastHandler } from './handler/subClashHandler';
 import { SubRudeHandler } from './handler/subRudeHandler';
 import { AuthUtils } from '@/utils/authUtils';
 import { IgnoreHandler } from './handler/ignoreHandler';
@@ -18,7 +16,6 @@ export class Router {
 	private registerHandlers() {
 		this.handlers.set(RoutesPathConfig.storage, new StorageHandler());
 		this.handlers.set(RoutesPathConfig.kv, new KvHandler());
-		this.handlers.set(RoutesPathConfig.subscription, new SubscriptionHandler());
 	}
 
 	async route(request: Request, env: Env): Promise<Response> {
@@ -51,20 +48,9 @@ export class Router {
 
 			console.log('📡 匹配普通订阅路由');
 			console.log(`👤 提取用户ID: ${uid} ${authConfig.mode}`);
-
-			if (authConfig.mode === 0) {
-				const subscriptionHandler = this.handlers.get(RoutesPathConfig.subscription);
-				if (subscriptionHandler) {
-					const response = await (subscriptionHandler as any).handle(request, env, { uid });
-					if (response) return response;
-				}
-			} else if (authConfig.mode === 1) {
-				const subscriptionHandler = new SubRudeHandler();
-				if (subscriptionHandler) {
-					const response = await (subscriptionHandler as any).handle(request, env, { uid });
-					if (response) return response;
-				}
-			}
+			const subscriptionHandler = new SubRudeHandler();
+			const response = await (subscriptionHandler as any).handle(request, env, { authConfig });
+			if (response) return response;
 		}
 
 		console.log('❌ 没有匹配的路由');
