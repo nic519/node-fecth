@@ -3,7 +3,7 @@
  * 纯粹的KV操作，不包含转发逻辑
  */
 export class KvService {
-	constructor(private request: Request, private env: Env) {}
+	constructor(private env: Env) {}
 
 	/**
 	 * KV GET操作

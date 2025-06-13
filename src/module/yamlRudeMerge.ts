@@ -1,5 +1,6 @@
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { YamlMergeStrategy } from './yamlMergeStrategy';
 
 export class YamlRudeMerge {
 	constructor(
@@ -9,28 +10,15 @@ export class YamlRudeMerge {
 		private ruleUrl: string
 	) {}
 
-	/// 读取远程内容
-	private async fetchRemoteContent(url: string): Promise<any> {
-		const response = await fetch(url);
-		return response.text();
-	}
-
 	/// 把订阅地址合并进去
-	async getFinalRawCfg(): Promise<string> {
-		const yamlContent = await this.fetchRemoteContent(this.ruleUrl);
-
-		// 合并yaml
-		const yamlObj = yamlParse(yamlContent);
-		// 修改proxy-providers中的url
-		if (yamlObj['proxy-providers'] && yamlObj['proxy-providers']['Airport1']) {
-			yamlObj['proxy-providers']['Airport1'].url = this.clashSubUrl;
-		}
-		// 把yamlObj转成yaml字符串
-		return yamlStringify(yamlObj);
+	async mergeProvider(): Promise<string> {
+		const yamlContent = await TrafficUtils.fetchRawContent(this.ruleUrl);
+		const yamlStrategy = new YamlMergeStrategy(yamlContent);
+		return yamlStrategy.generate(this.clashSubUrl);
 	}
 
 	async merge(): Promise<{ yamlContent: string; subInfo: string }> {
-		const responseYaml = await this.getFinalRawCfg();
+		const responseYaml = await this.mergeProvider();
 		const { subInfo, content } = await TrafficUtils.fetchClashContent(this.clashSubUrl);
 		return {
 			yamlContent: responseYaml,

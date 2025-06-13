@@ -23,19 +23,17 @@ export class KvHandler implements RouteHandler {
 		if (authResult instanceof Response) return authResult;
 
 		// 生产环境或有KV binding的环境，直接处理
-		const kvService = new KvService(request, env);
+		const kvService = new KvService(env);
 
 		if (request.method === 'POST') {
 			const body = await request.text();
 			const bodyParams = JSON.parse(body);
 			return this.handlePost(bodyParams, kvService);
 		}
-		return this.handleGet(url.searchParams, kvService);
+		return this.handleGet(url.searchParams.get('key') || '', kvService);
 	}
 
-	private async handleGet(searchParams: URLSearchParams, kvService: KvService): Promise<Response> {
-		const key = searchParams.get('key');
-
+	private async handleGet(key: string, kvService: KvService): Promise<Response> {
 		if (!key) return new Response('缺少参数: key', { status: 400 });
 
 		const value = await kvService.get(key);
@@ -44,16 +42,9 @@ export class KvHandler implements RouteHandler {
 		return new Response(value, this.getHeaders());
 	}
 
-	private async handlePost(bodyParams: { key: string; value?: string; action?: string }, kvService: KvService): Promise<Response> {
-		const { key, value, action } = bodyParams;
-		if (!key) return new Response('缺少参数: key', { status: 400 });
-
-		if (action === 'delete') {
-			await kvService.delete(key);
-			return new Response('删除成功', this.getHeaders());
-		}
-
-		if (!value) return new Response('缺少参数: value', { status: 400 });
+	private async handlePost(bodyParams: { key: string; value: string }, kvService: KvService): Promise<Response> {
+		const { key, value } = bodyParams;
+		if (!key || !value) return new Response('缺少参数: key/value', { status: 400 });
 
 		await kvService.put(key, value);
 		return new Response('OK', this.getHeaders());

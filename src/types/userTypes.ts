@@ -66,18 +66,3 @@ export const RESPONSE_HEADERS = {
 	// 启用浏览器XSS过滤器，并在检测到攻击时阻止页面加载
 	'X-XSS-Protection': '1; mode=block',
 };
-
-// 订阅参数配置
-export const SUB_PARAMS = {
-	options: {
-		emoji: true,
-		list: false,
-		xudp: false,
-		udp: false,
-		tfo: false,
-		expand: true,
-		scv: false,
-		fdn: false,
-		new_name: true,
-	},
-};
