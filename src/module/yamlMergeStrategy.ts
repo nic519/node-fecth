@@ -1,6 +1,5 @@
-import { ClashListener, ClashProxy } from '@/types/clashTypes';
+import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import fs from 'fs';
 
 export class YamlMergeStrategy {
 	constructor(private ruleContent: string) {}
@@ -23,30 +22,39 @@ export class YamlMultiPortStrategy {
 		return yamlObj['proxies'].map((proxy: any) => proxy as ClashProxy);
 	}
 
+	private getProxyArea(proxyName: string): ProxyAreaInfo {
+		const proxyMatchKey = Object.values(ProxyArea).find((area) => new RegExp(area.regex, 'i').test(proxyName)) ?? ProxyArea.Unknown;
+		return proxyMatchKey as ProxyAreaInfo;
+	}
+
 	/// 创建listeners
 	private createListeners(proxyList: ClashProxy[]): ClashListener[] {
 		var startPort = 42000;
 		const listeners: ClashListener[] = [];
-		// 1. 先收集所有的proxy name, 如果都是同一个国家地区的，就分一个组
-		// 2. 需要根据分组，去决定port的分配，如新加坡的就从startPort+0开始，另一个地方，就从startPort+100开始
-		const areaMap = new Map<string, ClashProxy[]>();
+
+		// 根据国家地区来分组，且需要固定顺序
+		const areaMap = new Map<ProxyAreaInfo, ClashProxy[]>();
 		for (const proxy of proxyList) {
-			const proxyMatchKey = proxy.name.substring(0, 3);
-			if (areaMap.has(proxyMatchKey)) {
-				areaMap.get(proxyMatchKey)?.push(proxy);
+			const matchArea = this.getProxyArea(proxy.name);
+			if (areaMap.has(matchArea)) {
+				areaMap.get(matchArea)?.push(proxy);
 			} else {
-				areaMap.set(proxyMatchKey, [proxy]);
+				areaMap.set(matchArea, [proxy]);
 			}
 		}
-		// 3. 根据分组，去决定port的分配
-		for (const [proxyName, proxyList] of areaMap) {
-			listeners.push({
-				name: 'mixed-' + startPort,
-				type: 'mixed',
-				port: startPort++,
-				proxy: proxyList.map((proxy) => proxy.name).join(','),
+		console.log(areaMap);
+		Array.from(areaMap.entries()).forEach(([proxyArea, proxyList]) => {
+			// 不同的国家地区，安排一个新的端口起点
+			var tPort = startPort + proxyArea.startPort;
+			proxyList.map((proxy) => {
+				listeners.push({
+					name: 'mixed-' + tPort,
+					type: 'mixed',
+					port: tPort++,
+					proxy: proxy.name,
+				});
 			});
-		}
+		});
 		return listeners;
 	}
 
@@ -67,11 +75,3 @@ export class YamlMultiPortStrategy {
 		return yamlStringify(yamlObj);
 	}
 }
-
-// 测试
-// 读取本地文件
-const ruleContent = fs.readFileSync('/Users/nicholas/Desktop/program_private/passwall_rule/miho-cfg.yaml', 'utf8');
-const clashContent = fs.readFileSync('/Users/nicholas/Desktop/RenzheCloud_Clash.yaml', 'utf8');
-const yamlMultiPortStrategy = new YamlMultiPortStrategy(ruleContent, clashContent);
-const result = yamlMultiPortStrategy.generate();
-console.log(result);
