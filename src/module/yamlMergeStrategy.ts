@@ -44,16 +44,20 @@ export class YamlMultiPortStrategy {
 		}
 		console.log(areaMap);
 		Array.from(areaMap.entries()).forEach(([proxyArea, proxyList]) => {
+			if (proxyArea === ProxyArea.Unknown) {
+				return;
+			}
 			// 不同的国家地区，安排一个新的端口起点
-			var tPort = startPort + proxyArea.startPort;
-			proxyList.map((proxy) => {
+			let tPort = startPort + proxyArea.startPort;
+			proxyList.forEach((proxy) => {
 				listeners.push({
 					name: 'mixed-' + tPort,
 					type: 'mixed',
-					port: tPort++,
+					port: tPort,
 					proxy: proxy.name,
 				});
-			});
+				tPort++;
+			}); 
 		});
 		return listeners;
 	}
@@ -66,7 +70,11 @@ export class YamlMultiPortStrategy {
 
 		// 2.添加proxy
 		const proxyList = this.getProxyList();
-		yamlObj['proxies'] = proxyList;
+		if (yamlObj['proxies']) {
+			yamlObj['proxies'].push(...proxyList);
+		} else {
+			yamlObj['proxies'] = proxyList;
+		}
 
 		// 3.添加listeners
 		const listeners = this.createListeners(proxyList);

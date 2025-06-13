@@ -16,10 +16,4 @@ export class StorageHandler implements RouteHandler {
 			},
 		});
 	}
-
-	// 保持静态方法以兼容现有代码
-	static async handle(request: Request): Promise<Response | null> {
-		const handler = new StorageHandler();
-		return handler.handle(request, {} as Env);
-	}
 }

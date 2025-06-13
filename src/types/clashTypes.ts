@@ -17,9 +17,12 @@ export interface ClashListener {
 }
 
 export interface ProxyAreaInfo {
+	// 显示名称
 	name: string;
-	regex: string; // 正则匹配条件
-	startPort: number; // 端口相对起点
+	// 正则匹配条件
+	regex: string; 
+	// 端口相对起点，作用：把地区的端口范围固定
+	startPort: number;
 }
 
 export const ProxyArea: Record<string, ProxyAreaInfo> = {
@@ -42,11 +45,6 @@ export const ProxyArea: Record<string, ProxyAreaInfo> = {
 		name: 'HK',
 		regex: 'HK|香港',
 		startPort: 300,
-	},
-	KR: {
-		name: 'KR',
-		regex: 'KR|韩国',
-		startPort: 400,
 	},
 	Unknown: {
 		name: 'Unknown',

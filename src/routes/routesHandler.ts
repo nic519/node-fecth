@@ -5,6 +5,7 @@ import { KvHandler } from '@/module/kv/kvHandler';
 import { SubRudeHandler } from './handler/subRudeHandler';
 import { AuthUtils } from '@/utils/authUtils';
 import { IgnoreHandler } from './handler/ignoreHandler';
+import { SubscribeParamsValidator } from '@/types/subscribeTypes';
 
 export class Router {
 	private handlers: Map<string, RouteHandler> = new Map();
@@ -39,17 +40,17 @@ export class Router {
 		}
 
 		// 3. 动态路由匹配 - 普通订阅路由 (/:uid 格式)
-		const token = url.searchParams.get('token');
-		if (pathname !== '/' && token !== null) {
+		const queryParams = SubscribeParamsValidator.parseParams(url);
+		if (pathname !== '/' && queryParams.token !== null) {
 			// 验证token
 			const uid = pathname.slice(1);
-			const authConfig = AuthUtils.validateToken(uid, token, env);
+			const authConfig = AuthUtils.validateToken(uid, queryParams.token, env);
 			if (authConfig instanceof Response) return authConfig;
 
 			console.log('📡 匹配普通订阅路由');
 			console.log(`👤 提取用户ID: ${uid} ${authConfig.mode}`);
 			const subscriptionHandler = new SubRudeHandler();
-			const response = await (subscriptionHandler as any).handle(request, env, { authConfig });
+			const response = await subscriptionHandler.handle(request, env, { authConfig });
 			if (response) return response;
 		}
 

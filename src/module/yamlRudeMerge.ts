@@ -1,6 +1,6 @@
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { YamlMergeStrategy } from './yamlMergeStrategy';
+import { YamlMergeStrategy, YamlMultiPortStrategy } from './yamlMergeStrategy';
 
 export class YamlRudeMerge {
 	constructor(
@@ -9,19 +9,24 @@ export class YamlRudeMerge {
 		// clash使用的yaml配置地址（仅包含规则）
 		private ruleUrl: string
 	) {}
+ 
 
-	/// 把订阅地址合并进去
-	async mergeProvider(): Promise<string> {
-		const yamlContent = await TrafficUtils.fetchRawContent(this.ruleUrl);
-		const yamlStrategy = new YamlMergeStrategy(yamlContent);
-		return yamlStrategy.generate(this.clashSubUrl);
-	}
-
-	async merge(): Promise<{ yamlContent: string; subInfo: string }> {
-		const responseYaml = await this.mergeProvider();
+	async fastStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
+		const ruleContent = await TrafficUtils.fetchRawContent(this.ruleUrl);
+		const yamlStrategy = new YamlMergeStrategy(ruleContent);  
 		const { subInfo, content } = await TrafficUtils.fetchClashContent(this.clashSubUrl);
 		return {
-			yamlContent: responseYaml,
+			yamlContent: yamlStrategy.generate(this.clashSubUrl),
+			subInfo: subInfo,
+		};
+	}
+
+	async multiPortStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
+		const ruleContent = await TrafficUtils.fetchRawContent(this.ruleUrl);
+		const { subInfo, content: clashContent } = await TrafficUtils.fetchClashContent(this.clashSubUrl);
+		const yamlStrategy = new YamlMultiPortStrategy(ruleContent, clashContent);
+		return {
+			yamlContent: yamlStrategy.generate(),
 			subInfo: subInfo,
 		};
 	}
