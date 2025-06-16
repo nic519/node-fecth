@@ -25,6 +25,9 @@ const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_r
 export const getUserConfig = (env: Env, userId: string): ProcessedDBUser | null => {
 	try {
 		// 检查环境变量是否存在
+		console.log('env.DB_USER type:', typeof env.DB_USER);
+		console.log('env.DB_USER raw value:', env.DB_USER);
+
 		if (!env.DB_USER) {
 			console.error('DB_USER environment variable is not set');
 			return null;

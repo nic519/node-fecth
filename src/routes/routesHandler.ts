@@ -41,13 +41,14 @@ export class Router {
 
 		// 3. 动态路由匹配 - 普通订阅路由 (/:uid 格式)
 		const queryParams = SubscribeParamsValidator.parseParams(url);
+		console.log('📡 匹配普通订阅路由', queryParams);
+
 		if (pathname !== '/' && queryParams.token !== null) {
 			// 验证token
 			const uid = pathname.slice(1);
 			const authConfig = AuthUtils.validateToken(uid, queryParams.token, env);
 			if (authConfig instanceof Response) return authConfig;
 
-			console.log('📡 匹配普通订阅路由');
 			console.log(`👤 提取用户ID: ${uid} ${authConfig.mode}`);
 			const subscriptionHandler = new SubRudeHandler();
 			const response = await subscriptionHandler.handle(request, env, { authConfig });
