@@ -1,8 +1,9 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
+import { AreaCode } from '@/types/userTypes';
 
 export class StrategyMultiPort {
-	constructor(private ruleContent: string, private clashContent: string) {}
+	constructor(private ruleContent: string, private clashContent: string, private areaCodeList: AreaCode[]) {}
 
 	/// 取出所有proxy
 	private getProxyList(): ClashProxy[] {
@@ -30,11 +31,14 @@ export class StrategyMultiPort {
 				areaMap.set(matchArea, [proxy]);
 			}
 		}
-		console.log(areaMap);
 		Array.from(areaMap.entries()).forEach(([proxyArea, proxyList]) => {
-			if (proxyArea === ProxyArea.Unknown) {
-				return;
+			// 类型保护，确保 areaCodeList 存在且为数组，proxyArea.code 存在
+			if (this.areaCodeList[0] !== 'ALL') {
+				if (proxyArea === ProxyArea.Unknown || !this.areaCodeList.includes(proxyArea.code)) {
+					return;
+				}
 			}
+
 			// 不同的国家地区，安排一个新的端口起点
 			let tPort = startPort + proxyArea.startPort;
 			proxyList.forEach((proxy) => {

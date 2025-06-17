@@ -1,4 +1,4 @@
-import { getDevConfig } from '@/config/dev-config';
+import { GlobalConfig } from '@/config/global-config';
 
 export class CommonUtils {
 	/**
@@ -13,7 +13,7 @@ export class CommonUtils {
 	 * 获取生产worker URI
 	 */
 	static getProdURI(): string {
-		const uri = getDevConfig().productionWorkerUrl;
+		const uri = GlobalConfig.workerUrl;
 		if (uri != null) {
 			return uri;
 		}

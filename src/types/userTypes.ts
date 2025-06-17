@@ -1,4 +1,6 @@
 import { parse as yamlParse } from 'yaml';
+import { CommonUtils } from '@/utils/commonUtils';
+import { GlobalConfig } from '@/config/global-config';
 
 // 地区代码
 export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'ALL' | 'Unknown';
@@ -38,8 +40,8 @@ export class DBUser {
 				console.error('DB_USER environment variable is not set');
 				return null;
 			}
-
 			const configs = yamlParse(env.DB_USER) as Record<string, any>;
+
 			const users: Record<string, DBUser> = {};
 
 			for (const [userId, config] of Object.entries(configs)) {

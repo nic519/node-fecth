@@ -19,10 +19,17 @@ export class YamlMergeFactory {
 	async multiPortStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
 		const ruleContent = await TrafficUtils.fetchRawContent(this.userConfig.ruleUrl);
 		const { subInfo, content: clashContent } = await TrafficUtils.fetchClashContent(this.userConfig.subscribe);
-		const yamlStrategy = new StrategyMultiPort(ruleContent, clashContent);
+		const yamlStrategy = new StrategyMultiPort(ruleContent, clashContent, this.userConfig.multiPortMode || []);
 		return {
 			yamlContent: yamlStrategy.generate(),
 			subInfo: subInfo,
 		};
+	}
+
+	async generate(): Promise<{ yamlContent: string; subInfo: string }> {
+		if (this.userConfig.multiPortMode) {
+			return await this.multiPortStrategy();
+		}
+		return await this.fastStrategy();
 	}
 }

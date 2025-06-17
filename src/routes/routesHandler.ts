@@ -2,10 +2,11 @@ import { RouteHandler } from '@/types/routesType';
 import { RoutesPathConfig } from '@/config/routesPathConfig';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
-import { SubRudeHandler } from './handler/subRudeHandler';
+import { SubRudeHandler } from '@/routes/handler/subRudeHandler';
+import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { AuthUtils } from '@/utils/authUtils';
-import { IgnoreHandler } from './handler/ignoreHandler';
 import { SubscribeParamsValidator } from '@/types/subscribeTypes';
+import { DBUser } from '@/types/userTypes';
 
 export class Router {
 	private handlers: Map<string, RouteHandler> = new Map();
@@ -49,7 +50,7 @@ export class Router {
 			const authConfig = AuthUtils.validateToken(uid, queryParams.token, env);
 			if (authConfig instanceof Response) return authConfig;
 
-			console.log(`👤 提取用户ID: ${uid} ${authConfig.mode}`);
+			console.log(`👤 提取用户ID: ${uid}`);
 			const subscriptionHandler = new SubRudeHandler();
 			const response = await subscriptionHandler.handle(request, env, { authConfig });
 			if (response) return response;

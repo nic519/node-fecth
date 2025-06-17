@@ -9,7 +9,7 @@ export class SubRudeHandler implements RouteHandler {
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const authConfig = getUserConfig(env, params?.uid);
+		const authConfig = params?.authConfig;
 		if (!authConfig) {
 			return new Response('缺少必要参数: authConfig', { status: 400 });
 		}
@@ -17,7 +17,7 @@ export class SubRudeHandler implements RouteHandler {
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 			const yamlMerge = new YamlMergeFactory(authConfig);
-			const { yamlContent, subInfo } = queryParams.mode === 'fast' ? await yamlMerge.fastStrategy() : await yamlMerge.multiPortStrategy();
+			const { yamlContent, subInfo } = await yamlMerge.generate();
 
 			// 使用配置验证器验证格式
 			const formatError = this.configValidator.validate(yamlContent);

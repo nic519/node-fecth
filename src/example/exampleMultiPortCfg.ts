@@ -1,4 +1,4 @@
-import { YamlMultiPortStrategy } from '@/module/yamlMerge/strategyDirectly';
+import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
 
 // 测试代码
 const ruleContent = `
@@ -127,6 +127,6 @@ proxies:
 `;
 
 // 测试 YamlMultiPortStrategy
-const yamlMultiPortStrategy = new YamlMultiPortStrategy(ruleContent, clashContent);
+const yamlMultiPortStrategy = new StrategyMultiPort(ruleContent, clashContent);
 console.log('\nYamlMultiPortStrategy 测试结果:');
 console.log(yamlMultiPortStrategy.generate());

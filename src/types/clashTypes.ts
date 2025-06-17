@@ -20,7 +20,7 @@ export interface ClashListener {
 
 export interface ProxyAreaInfo {
 	// 显示名称
-	name: string;
+	code: AreaCode;
 	// 正则匹配条件
 	regex: string;
 	// 端口相对起点，作用：把地区的端口范围固定
@@ -29,37 +29,37 @@ export interface ProxyAreaInfo {
 
 export const ProxyArea: Partial<Record<AreaCode, ProxyAreaInfo>> = {
 	TW: {
-		name: 'TW',
+		code: 'TW',
 		regex: 'TW|台湾',
 		startPort: 0,
 	},
 	SG: {
-		name: 'SG',
+		code: 'SG',
 		regex: 'SG|新加坡',
 		startPort: 100,
 	},
 	JP: {
-		name: 'JP',
+		code: 'JP',
 		regex: 'JP|日本',
 		startPort: 200,
 	},
 	VN: {
-		name: 'VN',
+		code: 'VN',
 		regex: 'VN|越南',
 		startPort: 400,
 	},
 	HK: {
-		name: 'HK',
+		code: 'HK',
 		regex: 'HK|香港',
 		startPort: 300,
 	},
 	US: {
-		name: 'US',
+		code: 'US',
 		regex: 'US|美国',
 		startPort: 800,
 	},
 	Unknown: {
-		name: 'Unknown',
+		code: 'Unknown',
 		regex: 'Unknown',
 		startPort: 900,
 	},
