@@ -1,4 +1,4 @@
-import { getUserConfig, ProcessedDBUser } from '@/types/userTypes';
+import { getUserConfig, DBUser } from '@/types/userTypes';
 
 export class AuthUtils {
 	/**
@@ -8,7 +8,7 @@ export class AuthUtils {
 	 * @param env 环境变量
 	 * @returns 用户配置或401响应
 	 */
-	static validateToken(uid: string | null, token: string | null, env: Env): ProcessedDBUser | Response {
+	static validateToken(uid: string | null, token: string | null, env: Env): DBUser | Response {
 		if (!uid || !token) {
 			return new Response('Unauthorized 缺少参数: uid 或 token', { status: 401 });
 		}

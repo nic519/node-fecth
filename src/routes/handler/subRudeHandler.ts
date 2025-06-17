@@ -1,5 +1,5 @@
 import { RouteHandler } from '@/types/routesType';
-import { ProcessedDBUser, RESPONSE_HEADERS } from '@/types/userTypes';
+import { getUserConfig, RESPONSE_HEADERS } from '@/types/userTypes';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlRudeMerge } from '@/module/yamlRudeMerge';
 import { CommonUtils } from '@/utils/commonUtils';
@@ -10,7 +10,7 @@ export class SubRudeHandler implements RouteHandler {
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const authConfig = params?.authConfig as ProcessedDBUser;
+		const authConfig = getUserConfig(env, params?.uid);
 		if (!authConfig) {
 			return new Response('缺少必要参数: authConfig', { status: 400 });
 		}
@@ -21,18 +21,18 @@ export class SubRudeHandler implements RouteHandler {
 			const { yamlContent, subInfo } = queryParams.mode === 'fast' ? await yamlMerge.fastStrategy() : await yamlMerge.multiPortStrategy();
 
 			// 使用配置验证器验证格式
-			const formatError = this.configValidator.validate(yamlContent, queryParams.target);
+			const formatError = this.configValidator.validate(yamlContent);
 			if (formatError) return formatError;
 
 			var headers = {
 				...RESPONSE_HEADERS,
 				'Subscription-Userinfo': subInfo,
-				'Content-Type': queryParams.target === 'clash' ? 'text/yaml; charset=utf-8' : 'application/json; charset=utf-8',
+				'Content-Type': 'text/yaml; charset=utf-8',
 			};
 
 			// 通过URL参数控制是否下载文件
 			if (queryParams.download) {
-				(headers as any)['Content-Disposition'] = `attachment; filename=${authConfig.fileName}.${queryParams.target === 'clash' ? 'yaml' : 'json'}`;
+				(headers as any)['Content-Disposition'] = `attachment; filename=${authConfig.fileName}.yaml`;
 			}
 
 			return new Response(yamlContent, {

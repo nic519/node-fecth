@@ -1,3 +1,5 @@
+import { AreaCode } from './userTypes';
+
 export interface ClashProxy {
 	name: string;
 	type: string;
@@ -20,12 +22,12 @@ export interface ProxyAreaInfo {
 	// 显示名称
 	name: string;
 	// 正则匹配条件
-	regex: string; 
+	regex: string;
 	// 端口相对起点，作用：把地区的端口范围固定
 	startPort: number;
 }
 
-export const ProxyArea: Record<string, ProxyAreaInfo> = {
+export const ProxyArea: Partial<Record<AreaCode, ProxyAreaInfo>> = {
 	TW: {
 		name: 'TW',
 		regex: 'TW|台湾',
@@ -41,10 +43,20 @@ export const ProxyArea: Record<string, ProxyAreaInfo> = {
 		regex: 'JP|日本',
 		startPort: 200,
 	},
+	VN: {
+		name: 'VN',
+		regex: 'VN|越南',
+		startPort: 400,
+	},
 	HK: {
 		name: 'HK',
 		regex: 'HK|香港',
 		startPort: 300,
+	},
+	US: {
+		name: 'US',
+		regex: 'US|美国',
+		startPort: 800,
 	},
 	Unknown: {
 		name: 'Unknown',

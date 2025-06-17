@@ -9,11 +9,10 @@ export class YamlRudeMerge {
 		// clash使用的yaml配置地址（仅包含规则）
 		private ruleUrl: string
 	) {}
- 
 
 	async fastStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
 		const ruleContent = await TrafficUtils.fetchRawContent(this.ruleUrl);
-		const yamlStrategy = new YamlMergeStrategy(ruleContent);  
+		const yamlStrategy = new YamlMergeStrategy(ruleContent);
 		const { subInfo, content } = await TrafficUtils.fetchClashContent(this.clashSubUrl);
 		return {
 			yamlContent: yamlStrategy.generate(this.clashSubUrl),

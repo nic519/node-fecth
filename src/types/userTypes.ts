@@ -1,56 +1,68 @@
 import { parse as yamlParse } from 'yaml';
 
-// 单个用户配置接口（原始配置，字段可选）
-export interface DBUser {
-	subscribe: string; // 必需的订阅链接
-	accessToken: string; // 必需的访问令牌
-	ruleUrl?: string; // 可选的规则链接
-	fileName?: string; // 可选的文件名
-	mode?: number; // 可选的模式
-}
+// 地区代码
+export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'ALL' | 'Unknown';
 
-// 处理后的用户配置接口（所有字段都有默认值）
-export interface ProcessedDBUser {
+// 订阅的配置
+export interface SubConfig {
 	subscribe: string; // 必需的订阅链接
-	accessToken: string; // 必需的访问令牌
-	ruleUrl: string; // 处理后必有值
-	fileName: string; // 处理后必有值
-	mode: number; // 处理后必有值
+	include?: AreaCode[]; // 可选的包含区域, 不填的话就是所有
 }
 
 // 默认配置
 const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml';
 
-// 获取特定用户的配置，返回所有字段都有值的完整配置
-export const getUserConfig = (env: Env, userId: string): ProcessedDBUser | null => {
-	try {
-		// 检查环境变量是否存在
-		console.log('env.DB_USER type:', typeof env.DB_USER);
-		console.log('env.DB_USER raw value:', env.DB_USER);
+// 用户配置类
+export class DBUser {
+	readonly subscribe: string;
+	readonly accessToken: string;
+	readonly ruleUrl: string;
+	readonly fileName: string;
+	readonly multiPortMode?: AreaCode[];
+	readonly appendSubList?: SubConfig[];
 
-		if (!env.DB_USER) {
-			console.error('DB_USER environment variable is not set');
+	// 从环境变量解析所有用户配置
+	static fromEnv(env: Env): Record<string, DBUser> | null {
+		try {
+			if (!env.DB_USER) {
+				console.error('DB_USER environment variable is not set');
+				return null;
+			}
+
+			const configs = yamlParse(env.DB_USER) as Record<string, any>;
+			const users: Record<string, DBUser> = {};
+
+			for (const [userId, config] of Object.entries(configs)) {
+				users[userId] = new DBUser({
+					...config,
+					ruleUrl: config.ruleUrl || DEFAULT_RULE_URL,
+					fileName: config.fileName || userId,
+				});
+			}
+
+			return users;
+		} catch (error) {
+			console.error('Failed to parse DB_USER:', error);
 			return null;
 		}
-
-		// 处理本地开发环境中的字符串类型
-		const configs = yamlParse(env.DB_USER);
-
-		const userConfig = configs[userId];
-		if (!userConfig) return null;
-
-		return {
-			subscribe: userConfig.subscribe,
-			accessToken: userConfig.accessToken,
-			ruleUrl: userConfig.ruleUrl || DEFAULT_RULE_URL,
-			fileName: userConfig.fileName || userId,
-			mode: userConfig.mode || 0,
-		};
-	} catch (error) {
-		console.error('Failed to process DB_USER:', error);
-		return null;
 	}
-};
+
+	private constructor(config: {
+		subscribe: string;
+		accessToken: string;
+		ruleUrl: string;
+		fileName: string;
+		multiPortMode?: AreaCode[];
+		appendSubList?: SubConfig[];
+	}) {
+		this.subscribe = config.subscribe;
+		this.accessToken = config.accessToken;
+		this.ruleUrl = config.ruleUrl;
+		this.fileName = config.fileName;
+		this.multiPortMode = config.multiPortMode;
+		this.appendSubList = config.appendSubList;
+	}
+}
 
 // 响应头配置
 export const RESPONSE_HEADERS = {
@@ -68,4 +80,10 @@ export const RESPONSE_HEADERS = {
 
 	// 启用浏览器XSS过滤器，并在检测到攻击时阻止页面加载
 	'X-XSS-Protection': '1; mode=block',
+};
+
+// 获取特定用户的配置
+export const getUserConfig = (env: Env, userId: string): DBUser | null => {
+	const users = DBUser.fromEnv(env);
+	return users?.[userId] || null;
 };
