@@ -1,4 +1,4 @@
-import { YamlMultiPortStrategy } from '@/module/yamlMergeStrategy';
+import { YamlMultiPortStrategy } from '@/module/yamlMerge/strategyDirectly';
 
 // 测试代码
 const ruleContent = `

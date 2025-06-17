@@ -1,19 +1,7 @@
-import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
 
-export class YamlMergeStrategy {
-	constructor(private ruleContent: string) {}
-
-	generate(subUrl: string): string {
-		const yamlObj = yamlParse(this.ruleContent);
-		if (yamlObj['proxy-providers'] && yamlObj['proxy-providers']['Airport1']) {
-			yamlObj['proxy-providers']['Airport1'].url = subUrl;
-		}
-		return yamlStringify(yamlObj);
-	}
-}
-
-export class YamlMultiPortStrategy {
+export class StrategyMultiPort {
 	constructor(private ruleContent: string, private clashContent: string) {}
 
 	/// 取出所有proxy
@@ -57,7 +45,7 @@ export class YamlMultiPortStrategy {
 					proxy: proxy.name,
 				});
 				tPort++;
-			}); 
+			});
 		});
 		return listeners;
 	}

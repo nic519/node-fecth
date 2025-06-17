@@ -1,7 +1,7 @@
 import { RouteHandler } from '@/types/routesType';
 import { getUserConfig, RESPONSE_HEADERS } from '@/types/userTypes';
 import { ConfigValidator } from '@/module/configValidator';
-import { YamlRudeMerge } from '@/module/yamlRudeMerge';
+import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/subscribeTypes';
 
 export class SubRudeHandler implements RouteHandler {
@@ -16,7 +16,7 @@ export class SubRudeHandler implements RouteHandler {
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
-			const yamlMerge = new YamlRudeMerge(authConfig.subscribe, authConfig.ruleUrl);
+			const yamlMerge = new YamlMergeFactory(authConfig);
 			const { yamlContent, subInfo } = queryParams.mode === 'fast' ? await yamlMerge.fastStrategy() : await yamlMerge.multiPortStrategy();
 
 			// 使用配置验证器验证格式
