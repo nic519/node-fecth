@@ -46,7 +46,7 @@ export const ProxyArea: Partial<Record<AreaCode, ProxyAreaInfo>> = {
 	VN: {
 		code: 'VN',
 		regex: 'VN|越南',
-		startPort: 400,
+		startPort: 700,
 	},
 	HK: {
 		code: 'HK',

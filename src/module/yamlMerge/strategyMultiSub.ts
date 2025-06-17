@@ -3,6 +3,7 @@ import { ClashProxy } from '@/types/clashTypes';
 import { AreaCode, DBUser } from '@/types/userTypes';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
+import { StrategyMultiPort } from './strategyMultiPort';
 
 export class StrategyMultiSub {
 	constructor(private userConfig: DBUser, private mainClashContent: string) {}
@@ -60,6 +61,12 @@ export class StrategyMultiSub {
 			yamlObj['proxies'].push(...proxyList);
 		} else {
 			yamlObj['proxies'] = proxyList;
+		}
+
+		// 3. 检查是否支持多出口模式
+		if (this.userConfig.multiPortMode) {
+			const strategyMultiPort = new StrategyMultiPort(ruleContent, yamlStringify(yamlObj), this.userConfig.multiPortMode);
+			yamlObj['listeners'] = strategyMultiPort.createListeners(yamlObj['proxies']);
 		}
 
 		return yamlStringify(yamlObj);

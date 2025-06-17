@@ -13,7 +13,7 @@ export class StrategyMultiPort {
 	}
 
 	/// 创建listeners
-	private createListeners(proxyList: ClashProxy[]): ClashListener[] {
+	createListeners(proxyList: ClashProxy[]): ClashListener[] {
 		var startPort = 42000;
 		const listeners: ClashListener[] = [];
 
