@@ -6,7 +6,12 @@ export interface ClashProxy {
 	server: string;
 	port: number;
 	password: string;
+	cipher: string;
 	udp: boolean;
+	obfs: string;
+	'obfs-param': string;
+	protocol: string;
+	'protocol-param': string;
 	sni?: string;
 	'skip-cert-verify'?: boolean;
 }
@@ -64,3 +69,10 @@ export const ProxyArea: Partial<Record<AreaCode, ProxyAreaInfo>> = {
 		startPort: 900,
 	},
 } as const;
+
+export interface SubInfo {
+	upload: number;
+	download: number;
+	total: number;
+	expire: number;
+}

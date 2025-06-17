@@ -30,7 +30,7 @@ export class StrategyMultiSub {
 	/// 取出所有proxy
 	private async getProxyList(): Promise<ClashProxy[]> {
 		// 获取主订阅的clash内容
-		const mainProxyList = this.getProxyListFromClashContent(this.mainClashContent);
+		const mainProxyList: ClashProxy[] = this.getProxyListFromClashContent(this.mainClashContent);
 
 		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
@@ -38,9 +38,19 @@ export class StrategyMultiSub {
 			for (const sub of appendSubList) {
 				const { subInfo, content: clashContent } = await TrafficUtils.fetchClashContent(sub.subscribe);
 				// 要加一条无用的但是说明订阅剩余流量信息的proxy
-				// mainProxyList.push({
-				// 	name: `${subInfo}-${sub.flag}`
-				// });
+				mainProxyList.push({
+					name: `${StrategyUtils.formatSubInfo(subInfo)}-${sub.flag}`,
+					server: 'www.baidu.com',
+					port: 443,
+					password: '123456',
+					udp: true,
+					cipher: 'aes-256-cfb',
+					obfs: 'http_simple',
+					'obfs-param': '',
+					protocol: 'origin',
+					'protocol-param': '',
+					type: 'ssr',
+				});
 				const appendProxyList = this.getProxyListFromClashContent(clashContent, sub.flag, sub.include);
 				mainProxyList.push(...appendProxyList);
 			}
