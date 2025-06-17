@@ -1,6 +1,7 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
 import { AreaCode } from '@/types/userTypes';
+import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 
 export class StrategyMultiPort {
 	constructor(private ruleContent: string, private clashContent: string, private areaCodeList: AreaCode[]) {}
@@ -11,11 +12,6 @@ export class StrategyMultiPort {
 		return yamlObj['proxies'].map((proxy: any) => proxy as ClashProxy);
 	}
 
-	private getProxyArea(proxyName: string): ProxyAreaInfo {
-		const proxyMatchKey = Object.values(ProxyArea).find((area) => new RegExp(area.regex, 'i').test(proxyName)) ?? ProxyArea.Unknown;
-		return proxyMatchKey as ProxyAreaInfo;
-	}
-
 	/// 创建listeners
 	private createListeners(proxyList: ClashProxy[]): ClashListener[] {
 		var startPort = 42000;
@@ -24,7 +20,7 @@ export class StrategyMultiPort {
 		// 根据国家地区来分组，且需要固定顺序
 		const areaMap = new Map<ProxyAreaInfo, ClashProxy[]>();
 		for (const proxy of proxyList) {
-			const matchArea = this.getProxyArea(proxy.name);
+			const matchArea = StrategyUtils.getProxyArea(proxy.name);
 			if (areaMap.has(matchArea)) {
 				areaMap.get(matchArea)?.push(proxy);
 			} else {

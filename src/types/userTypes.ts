@@ -1,6 +1,4 @@
 import { parse as yamlParse } from 'yaml';
-import { CommonUtils } from '@/utils/commonUtils';
-import { GlobalConfig } from '@/config/global-config';
 
 // 地区代码
 export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'ALL' | 'Unknown';
