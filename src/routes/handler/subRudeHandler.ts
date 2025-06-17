@@ -2,7 +2,6 @@ import { RouteHandler } from '@/types/routesType';
 import { getUserConfig, RESPONSE_HEADERS } from '@/types/userTypes';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlRudeMerge } from '@/module/yamlRudeMerge';
-import { CommonUtils } from '@/utils/commonUtils';
 import { SubscribeParamsValidator } from '@/types/subscribeTypes';
 
 export class SubRudeHandler implements RouteHandler {

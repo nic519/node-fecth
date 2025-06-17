@@ -1,4 +1,3 @@
-export type SubscribeTarget = 'clash' | 'json';
 export type SubscribeMode = 'fast' | 'multiPort';
 
 export interface SubscribeQueryParams {

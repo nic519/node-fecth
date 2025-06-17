@@ -6,7 +6,17 @@ export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'ALL' | 'Unknow
 // 订阅的配置
 export interface SubConfig {
 	subscribe: string; // 必需的订阅链接
+	flag: string; // 标识，用于区分不同的订阅
 	include?: AreaCode[]; // 可选的包含区域, 不填的话就是所有
+}
+
+export interface UserConfig {
+	subscribe: string; // 订阅地址
+	accessToken: string; // 访问令牌
+	ruleUrl?: string; // 规则模板链接
+	fileName?: string; // 文件名
+	multiPortMode?: AreaCode[]; // 多出口模式
+	appendSubList?: SubConfig[]; // 追加订阅列表
 }
 
 // 默认配置
@@ -35,7 +45,6 @@ export class DBUser {
 			for (const [userId, config] of Object.entries(configs)) {
 				users[userId] = new DBUser({
 					...config,
-					ruleUrl: config.ruleUrl || DEFAULT_RULE_URL,
 					fileName: config.fileName || userId,
 				});
 			}
@@ -47,18 +56,11 @@ export class DBUser {
 		}
 	}
 
-	private constructor(config: {
-		subscribe: string;
-		accessToken: string;
-		ruleUrl: string;
-		fileName: string;
-		multiPortMode?: AreaCode[];
-		appendSubList?: SubConfig[];
-	}) {
+	private constructor(config: UserConfig) {
 		this.subscribe = config.subscribe;
 		this.accessToken = config.accessToken;
-		this.ruleUrl = config.ruleUrl;
-		this.fileName = config.fileName;
+		this.ruleUrl = config.ruleUrl || DEFAULT_RULE_URL;
+		this.fileName = config.fileName || '';
 		this.multiPortMode = config.multiPortMode;
 		this.appendSubList = config.appendSubList;
 	}
