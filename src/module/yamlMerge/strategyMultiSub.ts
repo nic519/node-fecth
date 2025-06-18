@@ -11,7 +11,10 @@ export class StrategyMultiSub {
 	/// 取出所有proxy
 	private async getProxyList(): Promise<ClashProxy[]> {
 		// 获取主订阅的clash内容
-		const mainProxyList: ClashProxy[] = StrategyUtils.getProxyList(this.mainClashContent);
+		const mainProxyList: ClashProxy[] = StrategyUtils.getProxyList({
+			clashContent: this.mainClashContent,
+			excludeRegex: this.userConfig.excludeRegex,
+		});
 
 		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
@@ -32,7 +35,12 @@ export class StrategyMultiSub {
 					'protocol-param': '',
 					type: 'ssr',
 				});
-				const appendProxyList = StrategyUtils.getProxyList(clashContent, sub.flag, sub.include, sub.excludeKeywords);
+				const appendProxyList = StrategyUtils.getProxyList({
+					clashContent,
+					flag: sub.flag,
+					includeArea: sub.includeArea,
+					excludeRegex: this.userConfig.excludeRegex,
+				});
 				mainProxyList.push(...appendProxyList);
 			}
 		}
@@ -56,7 +64,7 @@ export class StrategyMultiSub {
 
 		// 3. 检查是否支持多出口模式
 		if (this.userConfig.multiPortMode) {
-			const strategyMultiPort = new StrategyMultiPort(ruleContent, yamlStringify(yamlObj), this.userConfig.multiPortMode);
+			const strategyMultiPort = new StrategyMultiPort(ruleContent, yamlStringify(yamlObj), this.userConfig);
 			yamlObj['listeners'] = strategyMultiPort.createListeners(yamlObj['proxies']);
 		}
 

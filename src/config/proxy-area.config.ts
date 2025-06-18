@@ -31,9 +31,4 @@ export const ProxyAreaObjects: ProxyAreaInfo[] = [
 		regex: 'US|美国',
 		startPort: 800,
 	},
-	{
-		code: 'Unknown',
-		regex: 'Unknown',
-		startPort: 900,
-	},
 ];

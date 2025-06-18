@@ -1,7 +1,6 @@
 import { ExecutionContext } from '@cloudflare/workers-types';
 import { Router } from '@/routes/routesHandler';
 import { initGlobalConfig } from '@/config/global-config';
-import { DBUser } from './types/user.types';
 
 class SubscriptionService {
 	private router = new Router();
@@ -18,7 +17,7 @@ export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		console.log('🔑 开始处理请求');
 		initGlobalConfig(request);
-		DBUser.fromEnv(env);
+
 		const service = new SubscriptionService(env);
 		return service.handleRequest(request);
 	},

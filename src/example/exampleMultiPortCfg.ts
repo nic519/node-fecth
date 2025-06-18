@@ -126,7 +126,7 @@ proxies:
       host: eef5630245860.microsoft.com
 `;
 
-// 测试 YamlMultiPortStrategy
-const yamlMultiPortStrategy = new StrategyMultiPort(ruleContent, clashContent);
-console.log('\nYamlMultiPortStrategy 测试结果:');
-console.log(yamlMultiPortStrategy.generate());
+// // 测试 YamlMultiPortStrategy
+// const yamlMultiPortStrategy = new StrategyMultiPort(ruleContent, clashContent);
+// console.log('\nYamlMultiPortStrategy 测试结果:');
+// console.log(yamlMultiPortStrategy.generate());

@@ -1,10 +1,10 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashListener, ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
-import { AreaCode } from '@/types/user.types';
+import { AreaCode, DBUser } from '@/types/user.types';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 
 export class StrategyMultiPort {
-	constructor(private ruleContent: string, private clashContent: string, private areaCodeList: AreaCode[]) {}
+	constructor(private ruleContent: string, private clashContent: string, private userConfig: DBUser) {}
 
 	/// 创建listeners
 	createListeners(proxyList: ClashProxy[]): ClashListener[] {
@@ -25,7 +25,7 @@ export class StrategyMultiPort {
 			}
 		}
 		Array.from(areaMap.entries()).forEach(([proxyArea, proxyList]) => {
-			if (this.areaCodeList.length > 0 && !this.areaCodeList.includes(proxyArea.code)) {
+			if (this.userConfig.multiPortMode && !this.userConfig.multiPortMode.includes(proxyArea.code)) {
 				return;
 			}
 
@@ -51,7 +51,10 @@ export class StrategyMultiPort {
 		delete yamlObj['proxy-providers'];
 
 		// 2.添加proxy
-		const proxyList = StrategyUtils.getProxyList(this.clashContent);
+		const proxyList = StrategyUtils.getProxyList({
+			clashContent: this.clashContent,
+			excludeRegex: this.userConfig.excludeRegex,
+		});
 		if (yamlObj['proxies']) {
 			yamlObj['proxies'].push(...proxyList);
 		} else {

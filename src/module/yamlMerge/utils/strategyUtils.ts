@@ -32,18 +32,24 @@ export class StrategyUtils {
 	}
 
 	/// 根据clashContent提取proxyList
-	static getProxyList(clashContent: string, flag?: string, include?: AreaCode[], excludeKeyWords?: string[]): ClashProxy[] {
+	static getProxyList(options: {
+		clashContent: string;
+		flag?: string;
+		includeArea?: AreaCode[];
+		excludeRegex?: string; // 排除匹配的
+	}): ClashProxy[] {
+		const { clashContent, flag, includeArea, excludeRegex } = options;
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']
 			.filter((proxy: ClashProxy) => {
-				// 检查排除关键词
-				if (excludeKeyWords && excludeKeyWords.some((keyword) => proxy.name.includes(keyword))) {
+				// 排除匹配 excludeRegex 的
+				if (excludeRegex && new RegExp(excludeRegex, 'i').test(proxy.name)) {
 					return false;
 				}
 				// 检查地区包含
-				if (include) {
+				if (includeArea) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
-					return proxyArea && include.includes(proxyArea.code);
+					return proxyArea && includeArea.includes(proxyArea.code);
 				}
 				return true;
 			})

@@ -2,14 +2,13 @@ import { GlobalConfig } from '@/config/global-config';
 import { parse as yamlParse } from 'yaml';
 
 // 地区代码
-export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'Unknown';
+export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US';
 
 // 订阅的配置
 export interface SubConfig {
 	subscribe: string; // 必需的订阅链接
 	flag: string; // 标识，用于区分不同的订阅
-	include?: AreaCode[]; // 可选的包含区域, 不填的话就是所有
-	excludeKeywords?: string[]; // 可选的排除关键字, 不填的话就是所有
+	includeArea?: AreaCode[]; // 可选的包含区域, 不填的话就是所有
 }
 
 export interface UserConfig {
@@ -19,6 +18,7 @@ export interface UserConfig {
 	fileName?: string; // 文件名
 	multiPortMode?: AreaCode[]; // 多出口模式
 	appendSubList?: SubConfig[]; // 追加订阅列表
+	excludeRegex?: string; // 需要排除的节点，格式正则表达式. 只有在多端口和多订阅模式下有效
 }
 
 // 用户配置类
@@ -29,6 +29,7 @@ export class DBUser {
 	readonly fileName: string;
 	readonly multiPortMode?: AreaCode[];
 	readonly appendSubList?: SubConfig[];
+	readonly excludeRegex?: string;
 
 	// 从环境变量解析所有用户配置
 	static fromEnv(env: Env): Record<string, DBUser> | null {
@@ -62,6 +63,7 @@ export class DBUser {
 		this.fileName = config.fileName || '';
 		this.multiPortMode = config.multiPortMode;
 		this.appendSubList = config.appendSubList;
+		this.excludeRegex = config.excludeRegex;
 	}
 }
 
