@@ -1,13 +1,23 @@
+import { UserConfig } from '@/types/user.types';
 import * as fs from 'fs';
 import * as path from 'path';
+import { parse as yamlParse } from 'yaml';
 
 // 读取 .dev.user.vars 文件
-const userVarsPath: string = path.join(__dirname, '..', '.dev.user.vars');
+const userVarsPath: string = path.join(__dirname, '..', '.dev.users.yaml');
 const devVarsPath: string = path.join(__dirname, '..', '.dev.vars');
+
+function printLink(yamlContent: string) {
+	const yamlObj = yamlParse(yamlContent) as Record<string, UserConfig>;
+	for (const userId in yamlObj) {
+		console.log(`http://localhost:8787/${userId}?token=${yamlObj[userId].accessToken}&download=false`);
+	}
+}
 
 try {
 	// 读取 .dev.user.vars 文件内容
 	const userVarsContent: string = fs.readFileSync(userVarsPath, 'utf8');
+	printLink(userVarsContent);
 
 	// 将 YAML 内容转换为字符串格式，只处理换行符
 	const stringifiedContent: string = userVarsContent

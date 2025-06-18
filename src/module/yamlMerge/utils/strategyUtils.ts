@@ -34,9 +34,11 @@ export class StrategyUtils {
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']
 			.filter((proxy: ClashProxy) => {
-				if (excludeKeyWords) {
-					return !excludeKeyWords.some((keyword) => proxy.name.includes(keyword));
+				// 检查排除关键词
+				if (excludeKeyWords && excludeKeyWords.some((keyword) => proxy.name.includes(keyword))) {
+					return false;
 				}
+				// 检查地区包含
 				if (include) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
 					return proxyArea && include.includes(proxyArea.code);
