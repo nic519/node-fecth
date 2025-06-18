@@ -9,7 +9,7 @@ export class TrafficUtils {
 			},
 		});
 		if (!responseClash.ok) {
-			throw new CustomError(ErrorCode.SUBSCRIPTION_FETCH_FAILED, 'Failed to fetch subscription content');
+			throw new CustomError(ErrorCode.SUBSCRIPTION_FETCH_FAILED, `Failed to fetch subscription content ${clashSubUrl}`);
 		}
 		const subInfo = responseClash.headers.get('subscription-userinfo') || '';
 		const content = await responseClash.text();

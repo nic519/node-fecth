@@ -8,20 +8,20 @@ proxies:
     server: iq6dsbz.icfjlk.xyz
     port: 40662
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec
+    password: 311f049f-3f4f-48af
 
   - name: "🇭🇰 香港02"
     type: ss
     server: 986yn1v.icfjlk.xyz
     port: 40097
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec
+    password: 311f049f-3f4f-48af
 
   - name: "🇭🇰 香港Trojan"
     type: trojan
     server: 420mco4.icfjlk.xyz
     port: 40269
-    password: 311f049f-3f4f-48af-a0ec
+    password: 311f049f-3f4f-48af
     skip-cert-verify: true
     sni: i0.hdslb.com
 
@@ -30,9 +30,8 @@ proxies:
     server: goh8x3new.bigmeyear.org
     port: 46151
     cipher: aes-128-gcm
-    password: 311f049f-3f4f-48af-a0ec
+    password: 311f049f-3f4f-48af
 `;
-
 
 // 创建ExtractClashNode实例
 const extractor = new ExtractClashNode();
@@ -69,19 +68,17 @@ console.log('=== 使用示例 ===\n');
 // console.log(extractor.getNodesByKeyword(sampleClashConfig, '香港', OutputFormat.ORIGINAL_LINKS));
 // console.log('\n');
 
-
 // 从远程获取yaml文件
 async function main() {
-  // const remoteUrl = 'http://192.168.7.116/Bigme.yaml';
-  // const remoteUrl = 'http://192.168.7.116/Renzhe.yaml';
-  const remoteUrl = 'http://192.168.7.116/Hitun.yaml';
+	// const remoteUrl = 'http://192.168.7.116/Bigme.yaml';
+	// const remoteUrl = 'http://192.168.7.116/Renzhe.yaml';
+	const remoteUrl = 'http://192.168.7.116/Hitun.yaml';
 
-  const yamlContent1 = await fetch(remoteUrl).then(res => res.text());
-  
-  // console.log(`\ncontent:\n${yamlContent1}\n\n`);
+	const yamlContent1 = await fetch(remoteUrl).then((res) => res.text());
 
-  console.log(extractor.getNodes(yamlContent1, OutputFormat.ORIGINAL_LINKS));
+	// console.log(`\ncontent:\n${yamlContent1}\n\n`);
+
+	console.log(extractor.getNodes(yamlContent1, OutputFormat.ORIGINAL_LINKS));
 }
 
 main().catch(console.error);
-

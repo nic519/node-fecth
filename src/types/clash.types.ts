@@ -10,13 +10,13 @@ export interface ClashProxy {
 	type: string;
 	server: string;
 	port: number;
-	password: string;
-	cipher: string;
-	udp: boolean;
-	obfs: string;
-	'obfs-param': string;
-	protocol: string;
-	'protocol-param': string;
+	password?: string;
+	cipher?: string;
+	udp?: boolean;
+	obfs?: string;
+	'obfs-param'?: string;
+	protocol?: string;
+	'protocol-param'?: string;
 	sni?: string;
 	'skip-cert-verify'?: boolean;
 }

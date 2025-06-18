@@ -26,14 +26,7 @@ export class StrategyMultiSub {
 					name: `${StrategyUtils.formatSubInfo(subInfo)}-${sub.flag}`,
 					server: 'www.baidu.com',
 					port: 1443,
-					password: '123456',
-					udp: false,
-					cipher: 'aes-256-cfb',
-					obfs: 'http_simple',
-					'obfs-param': '',
-					protocol: 'origin',
-					'protocol-param': '',
-					type: 'ssr',
+					type: 'http',
 				});
 				const appendProxyList = StrategyUtils.getProxyList({
 					clashContent,
