@@ -2,7 +2,7 @@ import { RouteHandler } from '@/types/routes.types';
 import { RoutesPathConfig } from '@/config/routes.config';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
-import { SubRudeHandler } from '@/routes/handler/subRudeHandler';
+import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { AuthUtils } from '@/utils/authUtils';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
@@ -47,12 +47,12 @@ export class Router {
 		if (pathname !== '/' && queryParams.token !== null) {
 			// 验证token
 			const uid = pathname.slice(1);
-			const authConfig = AuthUtils.validateToken(uid, queryParams.token, env);
+			const authConfig = AuthUtils.validateToken(env, uid, queryParams.token);
 			if (authConfig instanceof Response) return authConfig;
 
 			console.log(`👤 提取用户ID: ${uid}`);
-			const subscriptionHandler = new SubRudeHandler();
-			const response = await subscriptionHandler.handle(request, env, { authConfig });
+			const clashHandler = new ClashHandler();
+			const response = await clashHandler.handle(request, env, { authConfig });
 			if (response) return response;
 		}
 

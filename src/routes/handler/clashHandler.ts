@@ -1,11 +1,11 @@
 import { RouteHandler } from '@/types/routes.types';
 import { getUserConfig, RESPONSE_HEADERS } from '@/types/user.types';
-import { ConfigValidator } from '@/module/configValidator';
+import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
 
-export class SubRudeHandler implements RouteHandler {
-	private configValidator = new ConfigValidator();
+export class ClashHandler implements RouteHandler {
+	private yamlValidator = new YamlValidator();
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
@@ -20,8 +20,7 @@ export class SubRudeHandler implements RouteHandler {
 			const { yamlContent, subInfo } = await yamlMerge.generate();
 
 			// 使用配置验证器验证格式
-			const formatError = this.configValidator.validate(yamlContent);
-			if (formatError) return formatError;
+			this.yamlValidator.validate(yamlContent);
 
 			var headers = {
 				...RESPONSE_HEADERS,

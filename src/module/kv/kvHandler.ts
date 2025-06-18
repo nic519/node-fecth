@@ -17,9 +17,9 @@ export class KvHandler implements RouteHandler {
 		}
 
 		// 统一验证token
-		let uid = url.searchParams.get('uid');
-		let token = url.searchParams.get('token');
-		const authResult = AuthUtils.validateToken(uid, token, env);
+		const uid = url.searchParams.get('uid') || undefined;
+		const token = url.searchParams.get('token') || undefined;
+		const authResult = AuthUtils.validateToken(env, uid, token);
 		if (authResult instanceof Response) return authResult;
 
 		// 生产环境或有KV binding的环境，直接处理
