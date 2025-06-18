@@ -8,29 +8,10 @@ import { StrategyMultiPort } from './strategyMultiPort';
 export class StrategyMultiSub {
 	constructor(private userConfig: DBUser, private mainClashContent: string) {}
 
-	/// 根据clashContent提取proxyList
-	private getProxyListFromClashContent(clashContent: string, flag?: string, include?: AreaCode[]): ClashProxy[] {
-		const yamlObj = yamlParse(clashContent);
-		return yamlObj['proxies']
-			.filter((proxy: ClashProxy) => {
-				if (include) {
-					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
-					return include.includes(proxyArea.code);
-				}
-				return true;
-			})
-			.map((proxy: ClashProxy) => {
-				if (flag) {
-					proxy.name = `${proxy.name}-${flag}`;
-				}
-				return proxy;
-			});
-	}
-
 	/// 取出所有proxy
 	private async getProxyList(): Promise<ClashProxy[]> {
 		// 获取主订阅的clash内容
-		const mainProxyList: ClashProxy[] = this.getProxyListFromClashContent(this.mainClashContent);
+		const mainProxyList: ClashProxy[] = StrategyUtils.getProxyList(this.mainClashContent);
 
 		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
@@ -51,7 +32,7 @@ export class StrategyMultiSub {
 					'protocol-param': '',
 					type: 'ssr',
 				});
-				const appendProxyList = this.getProxyListFromClashContent(clashContent, sub.flag, sub.include);
+				const appendProxyList = StrategyUtils.getProxyList(clashContent, sub.flag, sub.include, sub.excludeKeywords);
 				mainProxyList.push(...appendProxyList);
 			}
 		}

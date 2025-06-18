@@ -1,13 +1,14 @@
 import { parse as yamlParse } from 'yaml';
 
 // 地区代码
-export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'ALL' | 'Unknown';
+export type AreaCode = 'TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US' | 'Unknown';
 
 // 订阅的配置
 export interface SubConfig {
 	subscribe: string; // 必需的订阅链接
 	flag: string; // 标识，用于区分不同的订阅
 	include?: AreaCode[]; // 可选的包含区域, 不填的话就是所有
+	excludeKeywords?: string[]; // 可选的排除关键字, 不填的话就是所有
 }
 
 export interface UserConfig {
