@@ -1,8 +1,6 @@
 // 节点转换器类
-import { parse as yamlParse } from 'yaml';
 import { Base64Utils } from '@/utils/base64Utils';
-import { RoutesPathConfig } from '@/config/routesPathConfig';
-import { getDevConfig } from '@/config/dev-config';
+import { RoutesPathConfig } from '@/config/routes.config';
 import { CommonUtils } from '@/utils/commonUtils';
 
 /// 把真实的节点列表，替换成假的节点列表，并且生成URL

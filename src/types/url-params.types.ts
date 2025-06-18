@@ -1,13 +1,9 @@
-export type SubscribeMode = 'fast' | 'multiPort';
-
 export interface SubscribeQueryParams {
-	mode?: SubscribeMode;
 	token: string;
 	download: boolean;
 }
 
 const DEFAULT_SUBSCRIBE_PARAMS: Omit<Required<SubscribeQueryParams>, 'token'> = {
-	mode: 'fast',
 	download: true,
 };
 
@@ -24,7 +20,6 @@ export class SubscribeParamsValidator {
 		}
 		return {
 			token,
-			mode: (url.searchParams.get('mode') as SubscribeMode) || DEFAULT_SUBSCRIBE_PARAMS.mode,
 			download: shouldDownload,
 		};
 	}

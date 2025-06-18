@@ -1,6 +1,6 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { ClashListener, ClashProxy, ProxyArea, ProxyAreaInfo } from '@/types/clashTypes';
-import { AreaCode } from '@/types/userTypes';
+import { ClashListener, ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
+import { AreaCode } from '@/types/user.types';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 
 export class StrategyMultiPort {
@@ -15,6 +15,9 @@ export class StrategyMultiPort {
 		const areaMap = new Map<ProxyAreaInfo, ClashProxy[]>();
 		for (const proxy of proxyList) {
 			const matchArea = StrategyUtils.getProxyArea(proxy.name);
+			if (!matchArea) {
+				continue;
+			}
 			if (areaMap.has(matchArea)) {
 				areaMap.get(matchArea)?.push(proxy);
 			} else {
@@ -22,9 +25,6 @@ export class StrategyMultiPort {
 			}
 		}
 		Array.from(areaMap.entries()).forEach(([proxyArea, proxyList]) => {
-			if (proxyArea === ProxyArea.Unknown) {
-				return;
-			}
 			if (this.areaCodeList.length > 0 && !this.areaCodeList.includes(proxyArea.code)) {
 				return;
 			}

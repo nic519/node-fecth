@@ -1,3 +1,4 @@
+import { GlobalConfig } from '@/config/global-config';
 import { parse as yamlParse } from 'yaml';
 
 // 地区代码
@@ -19,9 +20,6 @@ export interface UserConfig {
 	multiPortMode?: AreaCode[]; // 多出口模式
 	appendSubList?: SubConfig[]; // 追加订阅列表
 }
-
-// 默认配置
-const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml';
 
 // 用户配置类
 export class DBUser {
@@ -60,7 +58,7 @@ export class DBUser {
 	private constructor(config: UserConfig) {
 		this.subscribe = config.subscribe;
 		this.accessToken = config.accessToken;
-		this.ruleUrl = config.ruleUrl || DEFAULT_RULE_URL;
+		this.ruleUrl = config.ruleUrl || GlobalConfig.ruleUrl;
 		this.fileName = config.fileName || '';
 		this.multiPortMode = config.multiPortMode;
 		this.appendSubList = config.appendSubList;

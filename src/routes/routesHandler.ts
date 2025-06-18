@@ -1,12 +1,12 @@
-import { RouteHandler } from '@/types/routesType';
-import { RoutesPathConfig } from '@/config/routesPathConfig';
+import { RouteHandler } from '@/types/routes.types';
+import { RoutesPathConfig } from '@/config/routes.config';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
 import { SubRudeHandler } from '@/routes/handler/subRudeHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { AuthUtils } from '@/utils/authUtils';
-import { SubscribeParamsValidator } from '@/types/subscribeTypes';
-import { DBUser } from '@/types/userTypes';
+import { SubscribeParamsValidator } from '@/types/url-params.types';
+import { DBUser } from '@/types/user.types';
 
 export class Router {
 	private handlers: Map<string, RouteHandler> = new Map();

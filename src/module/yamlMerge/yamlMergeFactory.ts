@@ -1,7 +1,7 @@
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyDirectly } from '@/module/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
-import { DBUser } from '@/types/userTypes';
+import { DBUser } from '@/types/user.types';
 import { StrategyMultiSub } from './strategyMultiSub';
 
 export class YamlMergeFactory {

@@ -1,12 +1,13 @@
-import { ClashProxy, ProxyArea, ProxyAreaInfo, SubInfo } from '@/types/clashTypes';
-import { AreaCode } from '@/types/userTypes';
+import { ClashProxy, ProxyAreaInfo, SubInfo } from '@/types/clash.types';
+import { AreaCode } from '@/types/user.types';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { ProxyAreaObjects } from '@/config/proxy-area.config';
 
 export class StrategyUtils {
 	/// 根据代理名称，获取代理所属的地区信息
-	static getProxyArea(proxyName: string): ProxyAreaInfo {
-		const proxyMatchKey = Object.values(ProxyArea).find((area) => new RegExp(area.regex, 'i').test(proxyName)) ?? ProxyArea.Unknown;
-		return proxyMatchKey as ProxyAreaInfo;
+	static getProxyArea(proxyName: string): ProxyAreaInfo | null {
+		const proxyMatchKey = ProxyAreaObjects.find((area) => new RegExp(area.regex, 'i').test(proxyName));
+		return proxyMatchKey ?? null;
 	}
 
 	/// 根据clash的订阅情况信息格式，调整成可视的信息
@@ -38,7 +39,7 @@ export class StrategyUtils {
 				}
 				if (include) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
-					return include.includes(proxyArea.code);
+					return proxyArea && include.includes(proxyArea.code);
 				}
 				return true;
 			})

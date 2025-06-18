@@ -1,4 +1,4 @@
-import { AreaCode } from './userTypes';
+import { AreaCode } from './user.types';
 
 export interface ClashProxy {
 	name: string;
@@ -31,44 +31,6 @@ export interface ProxyAreaInfo {
 	// 端口相对起点，作用：把地区的端口范围固定
 	startPort: number;
 }
-
-export const ProxyArea: Partial<Record<AreaCode, ProxyAreaInfo>> = {
-	TW: {
-		code: 'TW',
-		regex: 'TW|台湾',
-		startPort: 0,
-	},
-	SG: {
-		code: 'SG',
-		regex: 'SG|新加坡',
-		startPort: 100,
-	},
-	JP: {
-		code: 'JP',
-		regex: 'JP|日本',
-		startPort: 200,
-	},
-	VN: {
-		code: 'VN',
-		regex: 'VN|越南',
-		startPort: 700,
-	},
-	HK: {
-		code: 'HK',
-		regex: 'HK|香港',
-		startPort: 300,
-	},
-	US: {
-		code: 'US',
-		regex: 'US|美国',
-		startPort: 800,
-	},
-	Unknown: {
-		code: 'Unknown',
-		regex: 'Unknown',
-		startPort: 900,
-	},
-} as const;
 
 export interface SubInfo {
 	upload: number;

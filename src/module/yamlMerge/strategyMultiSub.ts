@@ -1,6 +1,6 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { ClashProxy } from '@/types/clashTypes';
-import { AreaCode, DBUser } from '@/types/userTypes';
+import { ClashProxy } from '@/types/clash.types';
+import { AreaCode, DBUser } from '@/types/user.types';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 import { StrategyMultiPort } from './strategyMultiPort';

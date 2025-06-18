@@ -1,8 +1,8 @@
-import { RouteHandler } from '@/types/routesType';
-import { getUserConfig, RESPONSE_HEADERS } from '@/types/userTypes';
+import { RouteHandler } from '@/types/routes.types';
+import { getUserConfig, RESPONSE_HEADERS } from '@/types/user.types';
 import { ConfigValidator } from '@/module/configValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
-import { SubscribeParamsValidator } from '@/types/subscribeTypes';
+import { SubscribeParamsValidator } from '@/types/url-params.types';
 
 export class SubRudeHandler implements RouteHandler {
 	private configValidator = new ConfigValidator();
