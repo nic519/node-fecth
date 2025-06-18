@@ -1,4 +1,9 @@
-import { AreaCode } from './user.types';
+import { AreaCode } from '@/types/user.types';
+
+export interface ClashYaml {
+	proxies: ClashProxy[];
+	listeners?: ClashListener[];
+}
 
 export interface ClashProxy {
 	name: string;

@@ -6,7 +6,7 @@
 		"convert-vars": "ts-node scripts/convert-vars.ts",
 		"deploy": "wrangler deploy --keep-vars",
 		"start": "yarn convert-vars && wrangler dev",
-		"cf-typegen": "wrangler types", 
+		"cf-typegen": "wrangler types",
 		"predev": "npm run convert-vars"
 	},
 	"devDependencies": {
@@ -19,7 +19,6 @@
 		"wrangler": "^4.16.0"
 	},
 	"dependencies": {
-		"node-fetch": "^3.3.2",
 		"yaml": "^2.7.0"
 	},
 	"packageManager": "yarn@4.9.2"
