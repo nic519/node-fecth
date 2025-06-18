@@ -168,7 +168,7 @@ dist
 
 # wrangler project
 
-.dev.vars
+.dev.*
 .wrangler/
 
 .prettierrc

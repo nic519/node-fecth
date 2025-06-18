@@ -4,23 +4,17 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy --keep-vars",
-		"dev": "wrangler dev --test-scheduled",
 		"start": "wrangler dev --config wrangler.dev.jsonc",
 		"cf-typegen": "wrangler types",
-		"test": "node test/quick-test.js",
-		"test:ts": "ts-node test/simple-test.ts",
-		"test:jest": "jest",
-		"test:all": "npm run test && npm run test:ts",
-		"test:url": "node test/url-test.js",
-		"test:520": "node test/debug-520.js",
-		"test:curl": "node test/curl-test.js",
-		"test:kv": "node test/kv-test.js",
-		"diagnose": "node test/diagnose.js"
+		"diagnose": "node test/diagnose.js",
+		"convert-vars": "ts-node scripts/convert-vars.ts",
+		"predev": "npm run convert-vars",
+		"predeploy": "npm run convert-vars"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
 		"@types/jest": "^29.5.5",
-		"@types/node": "^24.0.1",
+		"@types/node": "^24.0.3",
 		"jest": "^29.7.0",
 		"ts-node": "^10.9.1",
 		"typescript": "^5.5.2",
