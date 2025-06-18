@@ -22,9 +22,9 @@ export class StrategyMultiSub {
 				mainProxyList.push({
 					name: `${StrategyUtils.formatSubInfo(subInfo)}-${sub.flag}`,
 					server: 'www.baidu.com',
-					port: 443,
+					port: 1443,
 					password: '123456',
-					udp: true,
+					udp: false,
 					cipher: 'aes-256-cfb',
 					obfs: 'http_simple',
 					'obfs-param': '',

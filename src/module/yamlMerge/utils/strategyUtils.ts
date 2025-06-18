@@ -18,7 +18,8 @@ export class StrategyUtils {
 				return [key, Number(value)];
 			})
 		);
-		const percent = (((subInfoObj.upload + subInfoObj.download) / subInfoObj.total) * 100).toFixed(1);
+		const percent = ((subInfoObj.upload + subInfoObj.download) / subInfoObj.total) * 100;
+		const percentStr = percent.toFixed(1) + '%';
 		let expireStr = '';
 		if (subInfoObj.expire && !isNaN(subInfoObj.expire)) {
 			const date = new Date(subInfoObj.expire * 1000);
@@ -26,7 +27,8 @@ export class StrategyUtils {
 		} else {
 			expireStr = '未知';
 		}
-		return `[消耗]${percent}% [过期]${expireStr}`;
+		var powerEmoji = percent < 70 ? '🔋' : '🪫';
+		return `A${powerEmoji}消耗${percentStr}, 到期${expireStr}`;
 	}
 
 	/// 根据clashContent提取proxyList
