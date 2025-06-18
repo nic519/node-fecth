@@ -3,13 +3,11 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy --keep-vars",
-		"start": "wrangler dev --config wrangler.dev.jsonc",
-		"cf-typegen": "wrangler types",
-		"diagnose": "node test/diagnose.js",
 		"convert-vars": "ts-node scripts/convert-vars.ts",
-		"predev": "npm run convert-vars",
-		"predeploy": "npm run convert-vars"
+		"deploy": "wrangler deploy --keep-vars",
+		"start": "yarn convert-vars && wrangler dev",
+		"cf-typegen": "wrangler types", 
+		"predev": "npm run convert-vars"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
