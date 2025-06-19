@@ -61,7 +61,7 @@ function configManager() {
 				const token = new URLSearchParams(window.location.search).get('token');
 				console.log('Token:', token ? '存在' : '不存在');
 
-				const response = await fetch(`/api/config/users/${this.userId}?token=${token}&format=yaml`);
+				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`);
 				console.log('API响应状态:', response.status);
 
 				if (response.ok) {
@@ -74,7 +74,8 @@ function configManager() {
 
 					if (this.editor) {
 						console.log('直接设置YAML内容...');
-						this.editor.setValue(data.yaml);
+						const yaml = this.configToYaml(data.config)
+						this.editor.setValue(yaml);
 						this.updatePreview();
 					}
 				} else {

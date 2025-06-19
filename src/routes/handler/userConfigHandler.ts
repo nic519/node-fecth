@@ -1,6 +1,6 @@
 import { RouteHandler } from '@/types/routes.types';
-import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
-import { UserConfig } from '@/types/user-config.schema';
+import { UserManager, UserUtils } from '@/module/userManager/userManager';
+import { UserConfig } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
 
 /**
@@ -59,10 +59,7 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-			return AuthUtils.createSuccessResponse({
-				yaml: UserManager.convertToYaml(authResult.config),
-				meta: authResult.meta,
-			});
+			return AuthUtils.createSuccessResponse(authResult);
 			 
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);

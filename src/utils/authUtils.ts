@@ -1,11 +1,12 @@
-import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
+import { UserManager } from '@/module/userManager/userManager';
+import { ConfigResponse } from '@/types/user-config.types';
 
 /**
  * 身份验证结果接口
  */
 export interface AuthResult {
 	success: boolean;
-	user?: UserConfigResponse;
+	user?: ConfigResponse;
 	response?: Response;
 }
 
@@ -63,7 +64,7 @@ export class AuthUtils {
 	 * @param userId 可选的用户ID，如果不提供则只验证令牌存在
 	 * @returns 验证结果
 	 */
-	static async authenticate(request: Request, env: Env, userId?: string): Promise<UserConfigResponse> {
+	static async authenticate(request: Request, env: Env, userId?: string): Promise<ConfigResponse> {
 		// 验证访问令牌
 		const accessToken = this.getAccessToken(request);
 		if (!accessToken) {

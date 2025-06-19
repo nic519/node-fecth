@@ -1,5 +1,5 @@
 import { RouteHandler } from '@/types/routes.types';
-import { UserManager } from '@/module/userManager/userManager'; 
+import { UserManager, UserUtils } from '@/module/userManager/userManager'; 
 import { AuthUtils } from '@/utils/authUtils';
 
 export class ConfigPageHandler implements RouteHandler {
@@ -21,7 +21,7 @@ export class ConfigPageHandler implements RouteHandler {
 				const authResult = await AuthUtils.authenticate(request, env, userId);
 
 				// 获取用户配置 
-				const configYaml = UserManager.convertToYaml(authResult.config) || this.getDefaultConfigYaml();
+				const configYaml = UserUtils.convertToYaml(authResult.config) || this.getDefaultConfigYaml();
 
 				// 生成HTML页面
 				const html = await this.generateConfigPage(userId, configYaml, request);
