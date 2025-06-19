@@ -59,36 +59,11 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-			if (!authResult.success) {
-				return authResult.response!;
-			}
-
-			const userManager = authResult.userManager!;
-
-			// 检查请求格式参数
-			const url = new URL(request.url);
-			const format = url.searchParams.get('format');
-
-			if (format === 'yaml') {
-				// 返回YAML格式
-				const yamlResponse = await userManager.getUserConfigYaml(userId);
-				if (!yamlResponse) {
-					return AuthUtils.createErrorResponse('User config not found', 404);
-				}
-
-				return AuthUtils.createSuccessResponse({
-					yaml: yamlResponse.yaml,
-					meta: yamlResponse.meta,
-				});
-			} else {
-				// 返回JSON格式（默认）
-				const configResponse = await userManager.getUserConfig(userId);
-				if (!configResponse) {
-					return AuthUtils.createErrorResponse('User config not found', 404);
-				}
-
-				return AuthUtils.createSuccessResponse(configResponse);
-			}
+			return AuthUtils.createSuccessResponse({
+				yaml: UserManager.convertToYaml(authResult.config),
+				meta: authResult.meta,
+			});
+			 
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
@@ -102,13 +77,9 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证（超级管理员权限）
 			const authResult = await AuthUtils.authenticate(request, env);
-			if (!authResult.success) {
-				return authResult.response!;
-			}
-
-			const userManager = authResult.userManager!;
-
+			 
 			// 获取所有用户列表
+			const userManager = new UserManager(env);
 			const users = await userManager.getAllUsers();
 
 			// 为每个用户获取基本信息
@@ -138,14 +109,9 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-			if (!authResult.success) {
-				return authResult.response!;
-			}
-
-			const userManager = authResult.userManager!;
-
+	 
 			// 解析请求体
-			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
+			const body = (await request.json()) as { yaml?: string };
 			let config: UserConfig;
 
 			if (body.yaml) {
@@ -156,9 +122,6 @@ export class UserConfigHandler implements RouteHandler {
 				} catch (error) {
 					return AuthUtils.createErrorResponse('Bad Request: Invalid YAML format', 400);
 				}
-			} else if (body.config) {
-				// 处理JSON格式的请求（向后兼容）
-				config = body.config;
 			} else {
 				return AuthUtils.createErrorResponse('Bad Request: Missing config or yaml data', 400);
 			}
@@ -176,6 +139,7 @@ export class UserConfigHandler implements RouteHandler {
 			}
 
 			// 保存用户配置
+			const userManager = new UserManager(env);
 			const success = await userManager.saveUserConfig(userId, config);
 			if (!success) {
 				return AuthUtils.createErrorResponse('Failed to save user config', 500);
@@ -199,11 +163,9 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-			if (!authResult.success) {
-				return authResult.response!;
-			}
-
-			const userManager = authResult.userManager!;
+		 
+			
+			const userManager = new UserManager(env);
 
 			// 删除用户配置
 			const success = await userManager.deleteUserConfig(userId);

@@ -1,12 +1,11 @@
-import { UserManager, DBUser } from '@/module/userManager/userManager';
+import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
 
 /**
  * 身份验证结果接口
  */
 export interface AuthResult {
 	success: boolean;
-	user?: DBUser;
-	userManager?: UserManager;
+	user?: UserConfigResponse;
 	response?: Response;
 }
 
@@ -64,14 +63,11 @@ export class AuthUtils {
 	 * @param userId 可选的用户ID，如果不提供则只验证令牌存在
 	 * @returns 验证结果
 	 */
-	static async authenticate(request: Request, env: Env, userId?: string): Promise<AuthResult> {
+	static async authenticate(request: Request, env: Env, userId?: string): Promise<UserConfigResponse> {
 		// 验证访问令牌
 		const accessToken = this.getAccessToken(request);
 		if (!accessToken) {
-			return {
-				success: false,
-				response: new Response('Unauthorized: Missing access token', { status: 401 }),
-			};
+			throw Error('no access token')
 		}
 
 		const userManager = new UserManager(env);
@@ -80,23 +76,11 @@ export class AuthUtils {
 		if (userId) {
 			const user = await userManager.validateAndGetUser(userId, accessToken);
 			if (!user) {
-				return {
-					success: false,
-					response: new Response('Forbidden: Invalid access token', { status: 403 }),
-				};
-			}
-
-			return {
-				success: true,
-				user,
-				userManager,
-			};
+				throw Error(' Invalid access token') 
+			} 
+			return user;
 		}
-
-		return {
-			success: true,
-			userManager,
-		};
+		throw Error(' No user id') ;
 	}
 
 	/**

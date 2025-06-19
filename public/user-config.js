@@ -206,14 +206,6 @@ function configManager() {
 			}
 		},
 
-		// 重置配置
-		resetConfig() {
-			if (confirm('确定要重置配置吗？这将丢失所有未保存的更改。')) {
-				this.editor?.setValue(this.getDefaultConfigYaml());
-				this.updatePreview();
-			}
-		},
-
 		// YAML 转换工具
 		configToYaml(config) {
 			if (!config) return this.getDefaultConfigYaml();
