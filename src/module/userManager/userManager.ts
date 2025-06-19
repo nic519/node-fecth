@@ -1,7 +1,6 @@
 import { GlobalConfig } from '@/config/global-config';
 import { AreaCode, SubConfig, UserConfig } from '@/types/user-config.schema';
 import { parse as yamlParse } from 'yaml';
-import { AuthUtils } from '@/utils/authUtils';
 import { stringify } from 'yaml';
 import { validateUserConfig } from '@/types/user-config.schema';
 
@@ -322,34 +321,36 @@ export class UserManager {
 	}
 
 	/**
-	 * 验证用户权限
+	 * 验证用户token并获取用户配置（支持KV存储）
+	 * @param userId 用户ID
+	 * @param accessToken 访问token
+	 * @returns 验证通过返回DBUser，验证失败返回null
 	 */
-	validateUserPermission(userId: string, accessToken: string): boolean {
-		try {
-			// 使用现有的AuthUtils验证token
-			const authResult = AuthUtils.validateToken(this.env, userId, accessToken);
-			return !(authResult instanceof Response);
-		} catch (error) {
-			console.error(`验证用户权限失败: ${userId}`, error);
-			return false;
+	async validateAndGetUser(userId: string, accessToken: string): Promise<DBUser | null> {
+		if (!userId || !accessToken) {
+			console.log('验证失败: 缺少参数 userId 或 accessToken');
+			return null;
 		}
-	}
 
-	/**
-	 * 静态方法：获取用户配置（向后兼容）
-	 */
-	static get(env: Env, userId: string): DBUser | null {
 		try {
-			const dbUser = env.DB_USER;
-			if (!dbUser) return null;
+			const userConfigResponse = await this.getUserConfig(userId);
 
-			const users = yamlParse(dbUser) as Record<string, any>;
-			const config = users[userId];
-			if (!config) return null;
+			if (!userConfigResponse) {
+				console.log(`验证失败: 用户配置不存在 - ${userId}`);
+				return null;
+			}
 
+			const { config } = userConfigResponse;
+
+			if (accessToken !== config.accessToken) {
+				console.log(`验证失败: token 无效 - ${userId}`);
+				return null;
+			}
+
+			// 返回 DBUser 实例
 			return new DBUser(config);
 		} catch (error) {
-			console.error(`获取用户配置失败: ${userId}`, error);
+			console.error(`验证用户token失败: ${userId}`, error);
 			return null;
 		}
 	}

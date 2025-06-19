@@ -1,6 +1,5 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashProxy } from '@/types/clash.types';
-import { AreaCode } from '@/types/user-config.schema';
 import { DBUser } from '@/module/userManager/userManager';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';

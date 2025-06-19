@@ -6,7 +6,7 @@ import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { ConfigPageHandler } from '@/routes/handler/configPageHandler';
-import { AuthUtils } from '@/utils/authUtils';
+import { UserManager } from '@/module/userManager/userManager';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
 
 export class Router {
@@ -70,8 +70,9 @@ export class Router {
 		if (pathname !== '/' && queryParams.token !== null) {
 			// 验证token
 			const uid = pathname.slice(1);
-			const authConfig = AuthUtils.validateToken(env, uid, queryParams.token);
-			if (authConfig instanceof Response) return authConfig;
+			const userManager = new UserManager(env);
+			const authConfig = await userManager.validateAndGetUser(uid, queryParams.token);
+			if (!authConfig) return new Response('Unauthorized', { status: 401 });
 
 			console.log(`👤 提取用户ID: ${uid}`);
 			const clashHandler = new ClashHandler();

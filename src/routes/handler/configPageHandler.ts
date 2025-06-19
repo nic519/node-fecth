@@ -24,7 +24,7 @@ export class ConfigPageHandler implements RouteHandler {
 
 				// 验证用户权限
 				const userManager = new UserManager(env);
-				if (!userManager.validateUserPermission(userId, token)) {
+				if (!userManager.validateAndGetUser(userId, token)) {
 					return new Response('Invalid access token', { status: 403 });
 				}
 

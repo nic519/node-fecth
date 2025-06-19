@@ -1,6 +1,6 @@
 import { RouteHandler } from '@/types/routes.types';
 import { KvService } from '@/module/kv/services/kvService';
-import { AuthUtils } from '@/utils/authUtils';
+import { UserManager } from '@/module/userManager/userManager';
 
 export class KvHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response | null> {
@@ -10,8 +10,11 @@ export class KvHandler implements RouteHandler {
 		// 统一验证token
 		const uid = url.searchParams.get('uid') || undefined;
 		const token = url.searchParams.get('token') || undefined;
-		const authResult = AuthUtils.validateToken(env, uid, token);
-		if (authResult instanceof Response) return authResult;
+		if (!uid || !token) return new Response('Unauthorized', { status: 401 });
+
+		const userManager = new UserManager(env);
+		const authResult = await userManager.validateAndGetUser(uid, token);
+		if (!authResult) return new Response('Unauthorized', { status: 401 });
 
 		// 生产环境或有KV binding的环境，直接处理
 		const kvService = new KvService(env);

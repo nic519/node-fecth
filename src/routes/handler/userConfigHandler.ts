@@ -2,6 +2,15 @@ import { RouteHandler } from '@/types/routes.types';
 import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
 import { UserConfig } from '@/types/user-config.schema';
 
+/**
+ * 身份验证结果接口
+ */
+interface AuthResult {
+	success: boolean;
+	userManager?: UserManager;
+	response?: Response;
+}
+
 export class UserConfigHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
@@ -43,22 +52,60 @@ export class UserConfigHandler implements RouteHandler {
 	}
 
 	/**
+	 * 统一的身份验证和权限验证方法
+	 */
+	private async authenticate(request: Request, env: Env, userId?: string): Promise<AuthResult> {
+		// 验证访问令牌
+		const accessToken = this.getAccessToken(request);
+		if (!accessToken) {
+			return {
+				success: false,
+				response: new Response('Unauthorized: Missing access token', { status: 401 }),
+			};
+		}
+
+		const userManager = new UserManager(env);
+
+		// 如果提供了userId，验证用户权限
+		if (userId) {
+			if (!userManager.validateAndGetUser(userId, accessToken)) {
+				return {
+					success: false,
+					response: new Response('Forbidden: Invalid access token', { status: 403 }),
+				};
+			}
+		}
+
+		return {
+			success: true,
+			userManager,
+		};
+	}
+
+	/**
+	 * 生成标准的CORS响应头
+	 */
+	private getCorsHeaders(): HeadersInit {
+		return {
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+			'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+		};
+	}
+
+	/**
 	 * 获取指定用户配置
 	 */
 	private async getUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
-			// 验证访问令牌
-			const accessToken = this.getAccessToken(request);
-			if (!accessToken) {
-				return new Response('Unauthorized: Missing access token', { status: 401 });
+			// 身份验证
+			const authResult = await this.authenticate(request, env, userId);
+			if (!authResult.success) {
+				return authResult.response!;
 			}
 
-			const userManager = new UserManager(env);
-
-			// 验证用户权限
-			if (!userManager.validateUserPermission(userId, accessToken)) {
-				return new Response('Forbidden: Invalid access token', { status: 403 });
-			}
+			const userManager = authResult.userManager!;
 
 			// 检查请求格式参数
 			const url = new URL(request.url);
@@ -78,12 +125,7 @@ export class UserConfigHandler implements RouteHandler {
 					}),
 					{
 						status: 200,
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-							'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-							'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-						},
+						headers: this.getCorsHeaders(),
 					}
 				);
 			} else {
@@ -95,12 +137,7 @@ export class UserConfigHandler implements RouteHandler {
 
 				return new Response(JSON.stringify(configResponse), {
 					status: 200,
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-					},
+					headers: this.getCorsHeaders(),
 				});
 			}
 		} catch (error) {
@@ -114,13 +151,13 @@ export class UserConfigHandler implements RouteHandler {
 	 */
 	private async getAllUsers(request: Request, env: Env): Promise<Response> {
 		try {
-			// 验证访问令牌（超级管理员权限）
-			const accessToken = this.getAccessToken(request);
-			if (!accessToken) {
-				return new Response('Unauthorized: Missing access token', { status: 401 });
+			// 身份验证（超级管理员权限）
+			const authResult = await this.authenticate(request, env);
+			if (!authResult.success) {
+				return authResult.response!;
 			}
 
-			const userManager = new UserManager(env);
+			const userManager = authResult.userManager!;
 
 			// 获取所有用户列表
 			const users = await userManager.getAllUsers();
@@ -140,12 +177,7 @@ export class UserConfigHandler implements RouteHandler {
 
 			return new Response(JSON.stringify({ users: userList }), {
 				status: 200,
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-				},
+				headers: this.getCorsHeaders(),
 			});
 		} catch (error) {
 			console.error('获取用户列表失败', error);
@@ -158,18 +190,13 @@ export class UserConfigHandler implements RouteHandler {
 	 */
 	private async updateUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
-			// 验证访问令牌
-			const accessToken = this.getAccessToken(request);
-			if (!accessToken) {
-				return new Response('Unauthorized: Missing access token', { status: 401 });
+			// 身份验证
+			const authResult = await this.authenticate(request, env, userId);
+			if (!authResult.success) {
+				return authResult.response!;
 			}
 
-			const userManager = new UserManager(env);
-
-			// 验证用户权限
-			if (!userManager.validateUserPermission(userId, accessToken)) {
-				return new Response('Forbidden: Invalid access token', { status: 403 });
-			}
+			const userManager = authResult.userManager!;
 
 			// 解析请求体
 			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
@@ -206,12 +233,7 @@ export class UserConfigHandler implements RouteHandler {
 					}),
 					{
 						status: 400,
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin': '*',
-							'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-							'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-						},
+						headers: this.getCorsHeaders(),
 					}
 				);
 			}
@@ -230,12 +252,7 @@ export class UserConfigHandler implements RouteHandler {
 				}),
 				{
 					status: 200,
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-					},
+					headers: this.getCorsHeaders(),
 				}
 			);
 		} catch (error) {
@@ -249,18 +266,13 @@ export class UserConfigHandler implements RouteHandler {
 	 */
 	private async deleteUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
-			// 验证访问令牌
-			const accessToken = this.getAccessToken(request);
-			if (!accessToken) {
-				return new Response('Unauthorized: Missing access token', { status: 401 });
+			// 身份验证
+			const authResult = await this.authenticate(request, env, userId);
+			if (!authResult.success) {
+				return authResult.response!;
 			}
 
-			const userManager = new UserManager(env);
-
-			// 验证用户权限
-			if (!userManager.validateUserPermission(userId, accessToken)) {
-				return new Response('Forbidden: Invalid access token', { status: 403 });
-			}
+			const userManager = authResult.userManager!;
 
 			// 删除用户配置
 			const success = await userManager.deleteUserConfig(userId);
@@ -277,12 +289,7 @@ export class UserConfigHandler implements RouteHandler {
 				}),
 				{
 					status: 200,
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-					},
+					headers: this.getCorsHeaders(),
 				}
 			);
 		} catch (error) {
