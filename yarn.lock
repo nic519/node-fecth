@@ -2324,6 +2324,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hono@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "hono@npm:4.8.0"
+  checksum: 10/dc94bb11b8f324fbacb5543bb31e011e3c9d9da503135d94f8d89390fdc45118c1391b1c9ebf45ef3c4b1590c1104b9382a7888ce1ce9c75588f5e84b0faea54
+  languageName: node
+  linkType: hard
+
 "html-escaper@npm:^2.0.0":
   version: 2.0.2
   resolution: "html-escaper@npm:2.0.2"
@@ -3338,6 +3345,7 @@ __metadata:
     "@cloudflare/workers-types": "npm:^4.20250214.0"
     "@types/jest": "npm:^29.5.5"
     "@types/node": "npm:^24.0.3"
+    hono: "npm:^4.8.0"
     jest: "npm:^29.7.0"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.5.2"
