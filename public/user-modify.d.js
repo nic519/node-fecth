@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const user_config_types_1 = require("../src/types/user-config.types");
+const user_config_schema_1 = require("../types/user-config.schema");
 function configManager() {
     return {
         editor: null,
@@ -105,9 +105,9 @@ function configManager() {
                         this.validationErrors.push(`第${i + 1}行: 缩进错误`);
                     }
                 }
-                // 尝试解析YAML并使用Zod验证函数
+                // 尝试解析YAML并使用后端验证函数
                 const config = this.yamlToConfig(yaml);
-                const validation = (0, user_config_types_1.validateUserConfig)(config);
+                const validation = (0, user_config_schema_1.validateUserConfig)(config);
                 if (!validation.isValid) {
                     this.validationErrors.push(...validation.errors);
                 }
@@ -128,7 +128,7 @@ function configManager() {
                 // 验证YAML格式和字段
                 try {
                     const config = this.yamlToConfig(yaml);
-                    const validation = (0, user_config_types_1.validateUserConfig)(config);
+                    const validation = (0, user_config_schema_1.validateUserConfig)(config);
                     if (!validation.isValid) {
                         alert(`配置验证失败:\n${validation.errors.join('\n')}`);
                         return;
@@ -153,8 +153,15 @@ function configManager() {
                     alert('配置保存成功！');
                 }
                 else {
-                    const error = await response.text();
-                    alert(`保存失败: ${error}`);
+                    // 处理后端返回的详细错误信息
+                    const errorData = (await response.json().catch(() => null));
+                    if (errorData && errorData.details) {
+                        alert(`配置验证失败:\n${errorData.details.join('\n')}`);
+                    }
+                    else {
+                        const error = await response.text();
+                        alert(`保存失败: ${error}`);
+                    }
                 }
             }
             catch (error) {

@@ -194,6 +194,28 @@ export class UserConfigHandler implements RouteHandler {
 				return new Response('Bad Request: Invalid config data', { status: 400 });
 			}
 
+			// 使用Zod验证配置
+			const { validateUserConfig } = await import('@/types/user-config.schema');
+			const validation = validateUserConfig(config);
+
+			if (!validation.isValid) {
+				return new Response(
+					JSON.stringify({
+						error: 'Validation failed',
+						details: validation.errors,
+					}),
+					{
+						status: 400,
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+							'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+						},
+					}
+				);
+			}
+
 			// 保存用户配置
 			const success = await userManager.saveUserConfig(userId, config);
 			if (!success) {
@@ -202,8 +224,7 @@ export class UserConfigHandler implements RouteHandler {
 
 			return new Response(
 				JSON.stringify({
-					success: true,
-					message: 'User config updated successfully',
+					message: 'User config saved successfully',
 					userId,
 					timestamp: new Date().toISOString(),
 				}),

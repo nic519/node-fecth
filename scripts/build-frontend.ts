@@ -8,12 +8,12 @@ function buildFrontend() {
 		console.log('开始编译前端 TypeScript 文件...');
 		const output_name = 'user-modify.d.js';
 
-		// 使用 tsc 编译 public/user-modify.ts
-		const tscCommand = `npx tsc public/user-modify.ts --outDir . --target es2021 --module commonjs --lib es2021,dom --strict --skipLibCheck`;
+		// 使用 tsc 编译 src/frontend/user-modify.ts
+		const tscCommand = `npx tsc src/frontend/user-modify.ts --outDir . --target es2021 --module commonjs --lib es2021,dom --strict --skipLibCheck`;
 		execSync(tscCommand, { stdio: 'inherit' });
 
 		// 重命名生成的文件
-		const originalFile = path.join('public', 'user-modify.js');
+		const originalFile = path.join('frontend', 'user-modify.js');
 		const targetFile = path.join('public', output_name);
 
 		if (fs.existsSync(originalFile)) {

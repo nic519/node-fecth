@@ -1,7 +1,5 @@
-// 从Zod schema导入类型和验证函数
+// 从Zod schema导入类型
 export type { UserConfig, SubConfig, AreaCode } from './user-config.schema';
-
-export { validateUserConfig, validateUserConfigStrict } from './user-config.schema';
 
 // 前端特定的类型定义
 export interface ConfigResponse {

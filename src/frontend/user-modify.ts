@@ -5,8 +5,8 @@ import {
 	EditorInterface,
 	ConnectionStatus,
 	ConfigManager,
-	validateUserConfig,
-} from '../src/types/user-config.types';
+} from '../types/user-config.types';
+import { validateUserConfig } from '../types/user-config.schema';
 
 function configManager(): ConfigManager {
 	return {
@@ -124,7 +124,7 @@ function configManager(): ConfigManager {
 					}
 				}
 
-				// 尝试解析YAML并使用Zod验证函数
+				// 尝试解析YAML并使用后端验证函数
 				const config = this.yamlToConfig(yaml);
 				const validation = validateUserConfig(config);
 
@@ -177,8 +177,14 @@ function configManager(): ConfigManager {
 					this.connectionStatus = 'connected';
 					alert('配置保存成功！');
 				} else {
-					const error = await response.text();
-					alert(`保存失败: ${error}`);
+					// 处理后端返回的详细错误信息
+					const errorData = (await response.json().catch(() => null)) as { error?: string; details?: string[] } | null;
+					if (errorData && errorData.details) {
+						alert(`配置验证失败:\n${errorData.details.join('\n')}`);
+					} else {
+						const error = await response.text();
+						alert(`保存失败: ${error}`);
+					}
 				}
 			} catch (error) {
 				console.error('保存配置失败:', error);
