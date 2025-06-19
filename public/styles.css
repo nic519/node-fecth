@@ -1,0 +1,204 @@
+/* 高级背景样式 */
+body {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 网格背景 - 更微妙 */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    z-index: -2;
+}
+
+/* 动态背景粒子效果 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 动态滚动球体 - 更模糊自然 */
+.floating-sphere {
+    position: fixed;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+    filter: blur(8px);
+    box-shadow: 
+        0 0 40px rgba(255, 255, 255, 0.1),
+        inset 0 0 30px rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.sphere-1 {
+    width: 120px;
+    height: 120px;
+    top: 15%;
+    left: 8%;
+    animation: float1 30s ease-in-out infinite;
+}
+
+.sphere-2 {
+    width: 180px;
+    height: 180px;
+    top: 65%;
+    right: 10%;
+    animation: float2 35s ease-in-out infinite reverse;
+}
+
+.sphere-3 {
+    width: 90px;
+    height: 90px;
+    bottom: 25%;
+    left: 15%;
+    animation: float3 28s ease-in-out infinite;
+}
+
+.sphere-4 {
+    width: 150px;
+    height: 150px;
+    top: 35%;
+    right: 25%;
+    animation: float4 32s ease-in-out infinite reverse;
+}
+
+@keyframes float1 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(80px, -40px) rotate(90deg); }
+    50% { transform: translate(160px, 0px) rotate(180deg); }
+    75% { transform: translate(80px, 40px) rotate(270deg); }
+}
+
+@keyframes float2 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(-60px, -60px) rotate(120deg); }
+    66% { transform: translate(-120px, 0px) rotate(240deg); }
+}
+
+@keyframes float3 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(50px, -50px) rotate(180deg); }
+}
+
+@keyframes float4 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-40px, 40px) rotate(90deg); }
+    50% { transform: translate(-80px, 0px) rotate(180deg); }
+    75% { transform: translate(-40px, -40px) rotate(270deg); }
+}
+
+/* 毛玻璃卡片效果 - 更流畅 */
+.glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* 无边框卡片 */
+.glass-card-no-border {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* 编辑器样式 */
+#editor { 
+    width: 100%; 
+    height: 500px; 
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 16px;
+    background: rgba(15, 15, 35, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    resize: vertical;
+    color: #e2e8f0;
+    backdrop-filter: blur(15px);
+}
+
+#editor:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.4s ease;
+    border-radius: 12px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* 状态指示器动画 */
+.status-dot {
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+} 

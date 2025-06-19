@@ -17,11 +17,6 @@ function buildFrontend() {
 		const targetFile = path.join('public', output_name);
 
 		if (fs.existsSync(originalFile)) {
-			// 确保 public 目录存在
-			if (!fs.existsSync('public')) {
-				fs.mkdirSync('public', { recursive: true });
-			}
-
 			// 移动并重命名文件
 			fs.renameSync(originalFile, targetFile);
 			console.log('前端文件编译完成！');
