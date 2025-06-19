@@ -1,20 +1,11 @@
 import { RouteHandler } from '@/types/routes.types';
-import { CommonUtils } from '@/utils/commonUtils';
-import { RoutesPathConfig } from '@/config/routes.config';
 import { KvService } from '@/module/kv/services/kvService';
-import { ForwardingService } from '@/module/kv/services/forwardingService';
 import { AuthUtils } from '@/utils/authUtils';
 
 export class KvHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response | null> {
 		const url = new URL(request.url);
 		console.log('kvHandler', url, request.method);
-
-		// 如果是本地开发环境，直接转发整个请求
-		if (CommonUtils.isLocalEnv(request)) {
-			console.log('🔄 本地开发环境检测到，转发到生产worker');
-			return ForwardingService.forwardRequest(request);
-		}
 
 		// 统一验证token
 		const uid = url.searchParams.get('uid') || undefined;
