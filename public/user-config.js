@@ -1,15 +1,8 @@
-import {
-	UserConfig,
-	ConfigResponse,
-	YamlConfigResponse,
-	EditorInterface,
-	ConnectionStatus,
-	ConfigManager,
-} from '../types/user-config.types';
-import { validateUserConfig } from '../types/user-config.schema';
-
-function configManager(): ConfigManager {
+// 用户配置管理器 - 使用 Alpine.js
+function configManager() {
 	return {
+		// 响应式数据
+		userId: '',
 		editor: null,
 		configPreview: '',
 		validationErrors: [],
@@ -18,20 +11,16 @@ function configManager(): ConfigManager {
 		lastModified: null,
 		configSource: '',
 		connectionStatus: 'connecting',
-		userId: '',
 
+		// 初始化
 		init() {
 			this.userId = window.location.pathname.split('/')[2] || '';
 			console.log('userId', this.userId);
 
 			// 检查YAML库是否正确加载
 			console.log('检查YAML库...');
-			if ((window as any).jsyaml) {
+			if (window.jsyaml) {
 				console.log('✓ js-yaml库已加载');
-			} else if ((window as any).YAML) {
-				console.log('✓ YAML库已加载');
-			} else if ((window as any).yaml) {
-				console.log('✓ yaml库已加载');
 			} else {
 				console.error('✗ 未找到YAML库');
 			}
@@ -40,23 +29,21 @@ function configManager(): ConfigManager {
 			this.loadConfig();
 		},
 
+		// 初始化编辑器
 		initSimpleEditor() {
-			const editorElement = document.getElementById('editor') as HTMLTextAreaElement;
+			const editorElement = document.getElementById('editor');
 			if (!editorElement) {
 				throw new Error('Editor element not found');
 			}
 
 			this.editor = {
-				getValue: (): string => editorElement.value,
-				setValue: (value: string): void => {
+				getValue: () => editorElement.value,
+				setValue: (value) => {
 					editorElement.value = value;
 				},
-				onDidChangeModelContent: (callback: () => void): void => {
+				onDidChangeModelContent: (callback) => {
 					editorElement.addEventListener('input', callback);
 				},
-				getModel: () => ({
-					getLineCount: (): number => editorElement.value.split('\n').length,
-				}),
 			};
 
 			editorElement.value = this.getDefaultConfigYaml();
@@ -67,7 +54,8 @@ function configManager(): ConfigManager {
 			this.updatePreview();
 		},
 
-		async loadConfig(): Promise<void> {
+		// 加载配置
+		async loadConfig() {
 			try {
 				console.log('开始加载配置...');
 				const token = new URLSearchParams(window.location.search).get('token');
@@ -77,7 +65,7 @@ function configManager(): ConfigManager {
 				console.log('API响应状态:', response.status);
 
 				if (response.ok) {
-					const data: YamlConfigResponse = await response.json();
+					const data = await response.json();
 					console.log('配置数据:', data);
 
 					this.lastModified = data.meta.lastModified;
@@ -87,6 +75,7 @@ function configManager(): ConfigManager {
 					if (this.editor) {
 						console.log('直接设置YAML内容...');
 						this.editor.setValue(data.yaml);
+						this.updatePreview();
 					}
 				} else {
 					console.error('API响应错误:', response.status, response.statusText);
@@ -98,6 +87,7 @@ function configManager(): ConfigManager {
 			}
 		},
 
+		// 更新预览
 		updatePreview() {
 			if (!this.editor) return;
 
@@ -106,7 +96,8 @@ function configManager(): ConfigManager {
 			this.validateConfig(yaml);
 		},
 
-		validateConfig(yaml: string) {
+		// 验证配置
+		validateConfig(yaml) {
 			this.validationErrors = [];
 
 			try {
@@ -124,12 +115,37 @@ function configManager(): ConfigManager {
 					}
 				}
 
-				// 尝试解析YAML并使用后端验证函数
+				// 尝试解析YAML并验证字段
 				const config = this.yamlToConfig(yaml);
-				const validation = validateUserConfig(config);
 
-				if (!validation.isValid) {
-					this.validationErrors.push(...validation.errors);
+				// 验证必需字段
+				if (!config.subscribe) this.validationErrors.push('subscribe 字段是必需的');
+				if (!config.accessToken) this.validationErrors.push('accessToken 字段是必需的');
+
+				// 验证URL格式
+				if (config.subscribe) {
+					try {
+						new URL(config.subscribe);
+					} catch {
+						this.validationErrors.push('subscribe 必须是有效的 URL');
+					}
+				}
+
+				if (config.ruleUrl) {
+					try {
+						new URL(config.ruleUrl);
+					} catch {
+						this.validationErrors.push('ruleUrl 必须是有效的 URL');
+					}
+				}
+
+				// 验证数组字段
+				if (config.multiPortMode && !Array.isArray(config.multiPortMode)) {
+					this.validationErrors.push('multiPortMode 必须是数组');
+				}
+
+				if (config.appendSubList && !Array.isArray(config.appendSubList)) {
+					this.validationErrors.push('appendSubList 必须是数组');
 				}
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -137,7 +153,8 @@ function configManager(): ConfigManager {
 			}
 		},
 
-		async saveConfig(): Promise<void> {
+		// 保存配置
+		async saveConfig() {
 			if (this.validationErrors.length > 0) {
 				alert('配置有错误，请先修复后再保存');
 				return;
@@ -151,12 +168,7 @@ function configManager(): ConfigManager {
 				// 验证YAML格式和字段
 				try {
 					const config = this.yamlToConfig(yaml);
-					const validation = validateUserConfig(config);
-
-					if (!validation.isValid) {
-						alert(`配置验证失败:\n${validation.errors.join('\n')}`);
-						return;
-					}
+					// 这里可以添加更多验证逻辑
 				} catch (error) {
 					alert('YAML格式错误，请检查配置');
 					return;
@@ -178,7 +190,7 @@ function configManager(): ConfigManager {
 					alert('配置保存成功！');
 				} else {
 					// 处理后端返回的详细错误信息
-					const errorData = (await response.json().catch(() => null)) as { error?: string; details?: string[] } | null;
+					const errorData = await response.json().catch(() => null);
 					if (errorData && errorData.details) {
 						alert(`配置验证失败:\n${errorData.details.join('\n')}`);
 					} else {
@@ -194,39 +206,25 @@ function configManager(): ConfigManager {
 			}
 		},
 
+		// 重置配置
 		resetConfig() {
 			if (confirm('确定要重置配置吗？这将丢失所有未保存的更改。')) {
 				this.editor?.setValue(this.getDefaultConfigYaml());
+				this.updatePreview();
 			}
 		},
 
-		configToYaml(config: UserConfig | null): string {
+		// YAML 转换工具
+		configToYaml(config) {
 			if (!config) return this.getDefaultConfigYaml();
 
 			try {
-				// 尝试多种方式访问YAML库
-				let yamlLib: any = null;
-
-				// 方式1: js-yaml库
-				if ((window as any).jsyaml) {
-					yamlLib = (window as any).jsyaml;
-				}
-				// 方式2: 全局YAML对象
-				else if ((window as any).YAML) {
-					yamlLib = (window as any).YAML;
-				}
-				// 方式3: 全局yaml对象
-				else if ((window as any).yaml) {
-					yamlLib = (window as any).yaml;
-				}
-
-				if (!yamlLib || !yamlLib.dump) {
+				if (!window.jsyaml || !window.jsyaml.dump) {
 					console.error('YAML库未找到或未正确加载');
 					return this.getDefaultConfigYaml();
 				}
 
-				// js-yaml使用dump方法而不是stringify
-				return yamlLib.dump(config, {
+				return window.jsyaml.dump(config, {
 					indent: 2,
 				});
 			} catch (error) {
@@ -235,31 +233,14 @@ function configManager(): ConfigManager {
 			}
 		},
 
-		yamlToConfig(yaml: string): UserConfig {
+		yamlToConfig(yaml) {
 			try {
-				// 尝试多种方式访问YAML库
-				let yamlLib: any = null;
-
-				// 方式1: js-yaml库
-				if ((window as any).jsyaml) {
-					yamlLib = (window as any).jsyaml;
-				}
-				// 方式2: 全局YAML对象
-				else if ((window as any).YAML) {
-					yamlLib = (window as any).YAML;
-				}
-				// 方式3: 全局yaml对象
-				else if ((window as any).yaml) {
-					yamlLib = (window as any).yaml;
-				}
-
-				if (!yamlLib || !yamlLib.load) {
+				if (!window.jsyaml || !window.jsyaml.load) {
 					console.error('YAML库未找到或未正确加载');
 					throw new Error('YAML库未正确加载');
 				}
 
-				// js-yaml使用load方法而不是parse
-				const config = yamlLib.load(yaml) as UserConfig;
+				const config = window.jsyaml.load(yaml);
 				return config || { subscribe: '', accessToken: '' };
 			} catch (error) {
 				console.error('YAML解析错误:', error);
@@ -267,7 +248,8 @@ function configManager(): ConfigManager {
 			}
 		},
 
-		getDefaultConfigYaml(): string {
+		// 获取默认配置
+		getDefaultConfigYaml() {
 			return `subscribe: "https://example.com/subscription"
 accessToken: "your-access-token"
 fileName: "config.yaml"
@@ -286,13 +268,11 @@ appendSubList:
     flag: "sub2"`;
 		},
 
-		formatTime(isoString: string | null): string {
+		// 时间格式化
+		formatTime(isoString) {
 			if (!isoString) return '未知';
 			const date = new Date(isoString);
 			return date.toLocaleString('zh-CN');
 		},
 	};
 }
-
-// 导出函数供全局使用
-(window as any).configManager = configManager;
