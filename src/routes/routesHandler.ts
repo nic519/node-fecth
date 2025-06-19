@@ -8,6 +8,7 @@ import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { ConfigPageHandler } from '@/routes/handler/configPageHandler';
 import { UserManager } from '@/module/userManager/userManager';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
+import { AuthUtils } from '@/utils/authUtils';
 
 export class Router {
 	private handlers: Map<string, RouteHandler> = new Map();
@@ -64,20 +65,27 @@ export class Router {
 		}
 
 		// 5. 动态路由匹配 - 普通订阅路由 (/:uid 格式)
-		const queryParams = SubscribeParamsValidator.parseParams(url);
-		console.log('📡 匹配普通订阅路由', queryParams);
+		try {
+			const queryParams = SubscribeParamsValidator.parseParams(url);
+			console.log('📡 匹配普通订阅路由', queryParams);
 
-		if (pathname !== '/' && queryParams.token !== null) {
-			// 验证token
-			const uid = pathname.slice(1);
-			const userManager = new UserManager(env);
-			const authConfig = await userManager.validateAndGetUser(uid, queryParams.token);
-			if (!authConfig) return new Response('Unauthorized', { status: 401 });
+			if (pathname !== '/' && queryParams.token !== null) {
+				// 验证token
+				const uid = pathname.slice(1);
+				const userManager = new UserManager(env);
+				const authConfig = await userManager.validateAndGetUser(uid, queryParams.token);
+				if (!authConfig) {
+					return AuthUtils.createErrorResponse('Unauthorized', 401);
+				}
 
-			console.log(`👤 提取用户ID: ${uid}`);
-			const clashHandler = new ClashHandler();
-			const response = await clashHandler.handle(request, env, { authConfig });
-			if (response) return response;
+				console.log(`👤 提取用户ID: ${uid}`);
+				const clashHandler = new ClashHandler();
+				const response = await clashHandler.handle(request, env, { authConfig });
+				if (response) return response;
+			}
+		} catch (error) {
+			console.error('订阅路由验证失败:', error);
+			return AuthUtils.createErrorResponse('Bad Request', 400);
 		}
 
 		console.log('❌ 没有匹配的路由');

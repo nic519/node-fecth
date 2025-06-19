@@ -328,7 +328,7 @@ export class UserManager {
 	 */
 	async validateAndGetUser(userId: string, accessToken: string): Promise<DBUser | null> {
 		if (!userId || !accessToken) {
-			console.log('验证失败: 缺少参数 userId 或 accessToken');
+			console.log('🔒 验证失败: 缺少参数 userId 或 accessToken');
 			return null;
 		}
 
@@ -336,22 +336,46 @@ export class UserManager {
 			const userConfigResponse = await this.getUserConfig(userId);
 
 			if (!userConfigResponse) {
-				console.log(`验证失败: 用户配置不存在 - ${userId}`);
+				console.log(`🔒 验证失败: 用户配置不存在 - ${userId}`);
 				return null;
 			}
 
 			const { config } = userConfigResponse;
 
 			if (accessToken !== config.accessToken) {
-				console.log(`验证失败: token 无效 - ${userId}`);
+				console.log(`🔒 验证失败: token 无效 - ${userId}`);
 				return null;
 			}
 
+			console.log(`✅ 用户验证成功: ${userId} (来源: ${userConfigResponse.meta.source})`);
 			// 返回 DBUser 实例
 			return new DBUser(config);
 		} catch (error) {
-			console.error(`验证用户token失败: ${userId}`, error);
+			console.error(`❌ 验证用户token失败: ${userId}`, error);
 			return null;
 		}
+	}
+
+	/**
+	 * 批量验证多个用户token（用于管理员操作）
+	 * @param users 用户验证请求数组
+	 * @returns 验证结果数组
+	 */
+	async batchValidateUsers(
+		users: Array<{ userId: string; accessToken: string }>
+	): Promise<Array<{ userId: string; isValid: boolean; user?: DBUser }>> {
+		const results = await Promise.all(
+			users.map(async ({ userId, accessToken }) => {
+				const user = await this.validateAndGetUser(userId, accessToken);
+				return {
+					userId,
+					isValid: !!user,
+					user: user || undefined,
+				};
+			})
+		);
+
+		console.log(`📊 批量验证完成: ${results.filter((r) => r.isValid).length}/${results.length} 用户验证通过`);
+		return results;
 	}
 }

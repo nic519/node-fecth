@@ -1,6 +1,7 @@
 import { RouteHandler } from '@/types/routes.types';
 import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
 import { UserConfig } from '@/types/user-config.schema';
+import { AuthUtils } from '@/utils/authUtils';
 
 /**
  * 身份验证结果接口
@@ -52,55 +53,12 @@ export class UserConfigHandler implements RouteHandler {
 	}
 
 	/**
-	 * 统一的身份验证和权限验证方法
-	 */
-	private async authenticate(request: Request, env: Env, userId?: string): Promise<AuthResult> {
-		// 验证访问令牌
-		const accessToken = this.getAccessToken(request);
-		if (!accessToken) {
-			return {
-				success: false,
-				response: new Response('Unauthorized: Missing access token', { status: 401 }),
-			};
-		}
-
-		const userManager = new UserManager(env);
-
-		// 如果提供了userId，验证用户权限
-		if (userId) {
-			if (!userManager.validateAndGetUser(userId, accessToken)) {
-				return {
-					success: false,
-					response: new Response('Forbidden: Invalid access token', { status: 403 }),
-				};
-			}
-		}
-
-		return {
-			success: true,
-			userManager,
-		};
-	}
-
-	/**
-	 * 生成标准的CORS响应头
-	 */
-	private getCorsHeaders(): HeadersInit {
-		return {
-			'Content-Type': 'application/json',
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-		};
-	}
-
-	/**
 	 * 获取指定用户配置
 	 */
 	private async getUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await this.authenticate(request, env, userId);
+			const authResult = await AuthUtils.authenticate(request, env, userId);
 			if (!authResult.success) {
 				return authResult.response!;
 			}
@@ -115,34 +73,25 @@ export class UserConfigHandler implements RouteHandler {
 				// 返回YAML格式
 				const yamlResponse = await userManager.getUserConfigYaml(userId);
 				if (!yamlResponse) {
-					return new Response('User config not found', { status: 404 });
+					return AuthUtils.createErrorResponse('User config not found', 404);
 				}
 
-				return new Response(
-					JSON.stringify({
-						yaml: yamlResponse.yaml,
-						meta: yamlResponse.meta,
-					}),
-					{
-						status: 200,
-						headers: this.getCorsHeaders(),
-					}
-				);
+				return AuthUtils.createSuccessResponse({
+					yaml: yamlResponse.yaml,
+					meta: yamlResponse.meta,
+				});
 			} else {
 				// 返回JSON格式（默认）
 				const configResponse = await userManager.getUserConfig(userId);
 				if (!configResponse) {
-					return new Response('User config not found', { status: 404 });
+					return AuthUtils.createErrorResponse('User config not found', 404);
 				}
 
-				return new Response(JSON.stringify(configResponse), {
-					status: 200,
-					headers: this.getCorsHeaders(),
-				});
+				return AuthUtils.createSuccessResponse(configResponse);
 			}
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
-			return new Response('Internal Server Error', { status: 500 });
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}
 
@@ -152,7 +101,7 @@ export class UserConfigHandler implements RouteHandler {
 	private async getAllUsers(request: Request, env: Env): Promise<Response> {
 		try {
 			// 身份验证（超级管理员权限）
-			const authResult = await this.authenticate(request, env);
+			const authResult = await AuthUtils.authenticate(request, env);
 			if (!authResult.success) {
 				return authResult.response!;
 			}
@@ -175,13 +124,10 @@ export class UserConfigHandler implements RouteHandler {
 				})
 			);
 
-			return new Response(JSON.stringify({ users: userList }), {
-				status: 200,
-				headers: this.getCorsHeaders(),
-			});
+			return AuthUtils.createSuccessResponse({ users: userList });
 		} catch (error) {
 			console.error('获取用户列表失败', error);
-			return new Response('Internal Server Error', { status: 500 });
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}
 
@@ -191,7 +137,7 @@ export class UserConfigHandler implements RouteHandler {
 	private async updateUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await this.authenticate(request, env, userId);
+			const authResult = await AuthUtils.authenticate(request, env, userId);
 			if (!authResult.success) {
 				return authResult.response!;
 			}
@@ -208,17 +154,17 @@ export class UserConfigHandler implements RouteHandler {
 					const { parse } = await import('yaml');
 					config = parse(body.yaml) as UserConfig;
 				} catch (error) {
-					return new Response('Bad Request: Invalid YAML format', { status: 400 });
+					return AuthUtils.createErrorResponse('Bad Request: Invalid YAML format', 400);
 				}
 			} else if (body.config) {
 				// 处理JSON格式的请求（向后兼容）
 				config = body.config;
 			} else {
-				return new Response('Bad Request: Missing config or yaml data', { status: 400 });
+				return AuthUtils.createErrorResponse('Bad Request: Missing config or yaml data', 400);
 			}
 
 			if (!config) {
-				return new Response('Bad Request: Invalid config data', { status: 400 });
+				return AuthUtils.createErrorResponse('Bad Request: Invalid config data', 400);
 			}
 
 			// 使用Zod验证配置
@@ -226,38 +172,23 @@ export class UserConfigHandler implements RouteHandler {
 			const validation = validateUserConfig(config);
 
 			if (!validation.isValid) {
-				return new Response(
-					JSON.stringify({
-						error: 'Validation failed',
-						details: validation.errors,
-					}),
-					{
-						status: 400,
-						headers: this.getCorsHeaders(),
-					}
-				);
+				return AuthUtils.createErrorResponse('Validation failed', 400, 'application/json');
 			}
 
 			// 保存用户配置
 			const success = await userManager.saveUserConfig(userId, config);
 			if (!success) {
-				return new Response('Failed to save user config', { status: 500 });
+				return AuthUtils.createErrorResponse('Failed to save user config', 500);
 			}
 
-			return new Response(
-				JSON.stringify({
-					message: 'User config saved successfully',
-					userId,
-					timestamp: new Date().toISOString(),
-				}),
-				{
-					status: 200,
-					headers: this.getCorsHeaders(),
-				}
-			);
+			return AuthUtils.createSuccessResponse({
+				message: 'User config saved successfully',
+				userId,
+				timestamp: new Date().toISOString(),
+			});
 		} catch (error) {
 			console.error(`更新用户配置失败: ${userId}`, error);
-			return new Response('Internal Server Error', { status: 500 });
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}
 
@@ -267,7 +198,7 @@ export class UserConfigHandler implements RouteHandler {
 	private async deleteUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await this.authenticate(request, env, userId);
+			const authResult = await AuthUtils.authenticate(request, env, userId);
 			if (!authResult.success) {
 				return authResult.response!;
 			}
@@ -277,42 +208,18 @@ export class UserConfigHandler implements RouteHandler {
 			// 删除用户配置
 			const success = await userManager.deleteUserConfig(userId);
 			if (!success) {
-				return new Response('Failed to delete user config', { status: 500 });
+				return AuthUtils.createErrorResponse('Failed to delete user config', 500);
 			}
 
-			return new Response(
-				JSON.stringify({
-					success: true,
-					message: 'User config deleted successfully',
-					userId,
-					timestamp: new Date().toISOString(),
-				}),
-				{
-					status: 200,
-					headers: this.getCorsHeaders(),
-				}
-			);
+			return AuthUtils.createSuccessResponse({
+				success: true,
+				message: 'User config deleted successfully',
+				userId,
+				timestamp: new Date().toISOString(),
+			});
 		} catch (error) {
 			console.error(`删除用户配置失败: ${userId}`, error);
-			return new Response('Internal Server Error', { status: 500 });
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
-	}
-
-	/**
-	 * 从请求中提取访问令牌
-	 */
-	private getAccessToken(request: Request): string | null {
-		// 从查询参数获取
-		const url = new URL(request.url);
-		const tokenFromQuery = url.searchParams.get('token');
-		if (tokenFromQuery) return tokenFromQuery;
-
-		// 从Authorization头获取
-		const authHeader = request.headers.get('Authorization');
-		if (authHeader && authHeader.startsWith('Bearer ')) {
-			return authHeader.substring(7);
-		}
-
-		return null;
 	}
 }

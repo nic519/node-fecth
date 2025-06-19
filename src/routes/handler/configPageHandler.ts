@@ -1,6 +1,7 @@
 import { RouteHandler } from '@/types/routes.types';
 import { UserManager } from '@/module/userManager/userManager';
 import { parse, stringify } from 'yaml';
+import { AuthUtils } from '@/utils/authUtils';
 
 export class ConfigPageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -16,17 +17,14 @@ export class ConfigPageHandler implements RouteHandler {
 			// 路由匹配: /config/:userId
 			if (pathParts[0] === 'config' && pathParts[1]) {
 				const userId = pathParts[1];
-				const token = url.searchParams.get('token');
-
-				if (!token) {
-					return new Response('Missing access token', { status: 401 });
-				}
 
 				// 验证用户权限
-				const userManager = new UserManager(env);
-				if (!userManager.validateAndGetUser(userId, token)) {
-					return new Response('Invalid access token', { status: 403 });
+				const authResult = await AuthUtils.authenticate(request, env, userId);
+				if (!authResult.success) {
+					return authResult.response!;
 				}
+
+				const userManager = authResult.userManager!;
 
 				// 获取用户配置
 				const yamlResponse = await userManager.getUserConfigYaml(userId);
@@ -47,7 +45,7 @@ export class ConfigPageHandler implements RouteHandler {
 			return new Response('Not Found', { status: 404 });
 		} catch (error) {
 			console.error('配置页面处理错误:', error);
-			return new Response('Internal Server Error', { status: 500 });
+			return AuthUtils.createErrorResponse('Internal Server Error', 500, 'text/html');
 		}
 	}
 
