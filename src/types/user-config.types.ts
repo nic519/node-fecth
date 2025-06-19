@@ -1,9 +1,11 @@
-import { UserConfig as BaseUserConfig } from './user.types';
+// 从Zod schema导入类型和验证函数
+export type { UserConfig, SubConfig, AreaCode } from './user-config.schema';
 
-export type UserConfig = BaseUserConfig;
+export { validateUserConfig, validateUserConfigStrict } from './user-config.schema';
 
+// 前端特定的类型定义
 export interface ConfigResponse {
-	config: UserConfig;
+	config: import('./user-config.schema').UserConfig;
 	meta: {
 		lastModified: string;
 		source: string;
@@ -47,8 +49,8 @@ export interface ConfigManager {
 	validateConfig(yaml: string): void;
 	saveConfig(): Promise<void>;
 	resetConfig(): void;
-	configToYaml(config: UserConfig | null): string;
-	yamlToConfig(yaml: string): UserConfig;
+	configToYaml(config: import('./user-config.schema').UserConfig | null): string;
+	yamlToConfig(yaml: string): import('./user-config.schema').UserConfig;
 	getDefaultConfigYaml(): string;
 	formatTime(isoString: string | null): string;
 }

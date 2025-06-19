@@ -1,6 +1,6 @@
 import { RouteHandler } from '@/types/routes.types';
 import { UserManager, UserConfigResponse } from '@/module/userManager/userManager';
-import { UserConfig } from '@/types/user.types';
+import { UserConfig } from '@/types/user-config.schema';
 
 export class UserConfigHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {

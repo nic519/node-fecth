@@ -1,4 +1,4 @@
-import { UserConfig } from '@/types/user.types';
+import { UserConfig } from '../src/types/user-config.schema';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as yamlParse } from 'yaml';

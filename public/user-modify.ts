@@ -5,115 +5,8 @@ import {
 	EditorInterface,
 	ConnectionStatus,
 	ConfigManager,
+	validateUserConfig,
 } from '../src/types/user-config.types';
-
-// 通用配置验证函数
-function validateUserConfig(config: any): { isValid: boolean; errors: string[] } {
-	const errors: string[] = [];
-
-	// 验证规则定义
-	const required = ['subscribe', 'accessToken'];
-	const types = {
-		subscribe: 'string',
-		accessToken: 'string',
-		ruleUrl: 'string',
-		fileName: 'string',
-		excludeRegex: 'string',
-		multiPortMode: 'AreaCode[]',
-		appendSubList: 'SubConfig[]',
-	};
-	const urlFields = ['subscribe', 'ruleUrl'];
-	const allowedFields = ['subscribe', 'accessToken', 'ruleUrl', 'fileName', 'excludeRegex', 'multiPortMode', 'appendSubList'];
-	const validAreaCodes = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'];
-
-	// 验证必需字段
-	for (const field of required) {
-		if (!config[field]) {
-			errors.push(`缺少必需的 ${field} 字段`);
-		}
-	}
-
-	// 验证字段类型
-	for (const [field, expectedType] of Object.entries(types)) {
-		if (config[field] !== undefined) {
-			const actualType = Array.isArray(config[field]) ? 'array' : typeof config[field];
-			const expectedBaseType = expectedType.replace('[]', '');
-
-			if (expectedType.endsWith('[]')) {
-				// 数组类型验证
-				if (!Array.isArray(config[field])) {
-					errors.push(`${field} 字段必须是数组`);
-				} else {
-					// 验证数组元素类型
-					for (let i = 0; i < config[field].length; i++) {
-						if (expectedType === 'AreaCode[]') {
-							// AreaCode数组验证
-							if (!validAreaCodes.includes(config[field][i])) {
-								errors.push(`${field} 数组第${i + 1}个元素必须是有效的地区代码: ${validAreaCodes.join(', ')}`);
-							}
-						} else if (expectedType === 'SubConfig[]') {
-							// SubConfig数组验证
-							const item = config[field][i];
-							if (typeof item !== 'object' || !item.subscribe || !item.flag) {
-								errors.push(`${field} 数组第${i + 1}个元素必须是包含subscribe和flag的对象`);
-							} else {
-								if (typeof item.subscribe !== 'string') {
-									errors.push(`${field} 数组第${i + 1}个元素的subscribe必须是字符串`);
-								}
-								if (typeof item.flag !== 'string') {
-									errors.push(`${field} 数组第${i + 1}个元素的flag必须是字符串`);
-								}
-								if (item.includeArea && !Array.isArray(item.includeArea)) {
-									errors.push(`${field} 数组第${i + 1}个元素的includeArea必须是数组`);
-								}
-								if (item.includeArea && Array.isArray(item.includeArea)) {
-									for (let j = 0; j < item.includeArea.length; j++) {
-										if (!validAreaCodes.includes(item.includeArea[j])) {
-											errors.push(
-												`${field} 数组第${i + 1}个元素的includeArea第${j + 1}个值必须是有效的地区代码: ${validAreaCodes.join(', ')}`
-											);
-										}
-									}
-								}
-							}
-						} else if (typeof config[field][i] !== expectedBaseType) {
-							errors.push(`${field} 数组第${i + 1}个元素必须是${expectedBaseType}`);
-						}
-					}
-				}
-			} else {
-				// 基本类型验证
-				if (actualType !== expectedType) {
-					errors.push(`${field} 字段必须是${expectedType}`);
-				}
-			}
-		}
-	}
-
-	// 验证URL字段
-	for (const field of urlFields) {
-		if (config[field] && typeof config[field] === 'string') {
-			try {
-				new URL(config[field]);
-			} catch {
-				errors.push(`${field} 字段不是有效的URL`);
-			}
-		}
-	}
-
-	// 验证不允许的字段
-	const configKeys = Object.keys(config);
-	for (const key of configKeys) {
-		if (!allowedFields.includes(key)) {
-			errors.push(`不允许的字段: ${key}。只允许以下字段: ${allowedFields.join(', ')}`);
-		}
-	}
-
-	return {
-		isValid: errors.length === 0,
-		errors,
-	};
-}
 
 function configManager(): ConfigManager {
 	return {
@@ -231,7 +124,7 @@ function configManager(): ConfigManager {
 					}
 				}
 
-				// 尝试解析YAML并使用通用验证函数
+				// 尝试解析YAML并使用Zod验证函数
 				const config = this.yamlToConfig(yaml);
 				const validation = validateUserConfig(config);
 

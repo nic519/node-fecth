@@ -1,5 +1,5 @@
 import { UserManager } from '@/module/userManager/userManager';
-import { UserConfig } from '@/types/user.types';
+import { UserConfig } from '@/types/user-config.schema';
 
 // 模拟环境变量
 const mockEnv = {

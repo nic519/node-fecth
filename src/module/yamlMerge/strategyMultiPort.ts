@@ -1,8 +1,8 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashListener, ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
-import { AreaCode } from '@/types/user.types';
+import { AreaCode } from '@/types/user-config.schema';
 import { DBUser } from '@/module/userManager/userManager';
-import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
+import { StrategyUtils } from './utils/strategyUtils';
 
 export class StrategyMultiPort {
 	constructor(private ruleContent: string, private clashContent: string, private userConfig: DBUser) {}
