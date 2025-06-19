@@ -1,4 +1,4 @@
-import { getUserConfig, DBUser } from '@/types/user.types';
+import { DBUser, UserManager } from '@/module/userManager/userManager';
 
 export class AuthUtils {
 	/**
@@ -12,7 +12,7 @@ export class AuthUtils {
 		if (!uid || !token) {
 			return new Response('Unauthorized 缺少参数: uid 或 token', { status: 401 });
 		}
-		const userConfig = getUserConfig(env, uid);
+		const userConfig = UserManager.get(env, uid);
 		if (!userConfig || token !== userConfig.accessToken) {
 			return new Response('Unauthorized', { status: 401 });
 		}

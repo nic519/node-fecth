@@ -1,8 +1,25 @@
 import { RouteHandler } from '@/types/routes.types';
-import { getUserConfig, RESPONSE_HEADERS } from '@/types/user.types';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
+
+// 响应头配置
+const RESPONSE_HEADERS = {
+	// 指定响应内容的类型为YAML，使用UTF-8编码
+	'Content-Type': 'text/yaml; charset=utf-8',
+
+	// 指定Clash配置文件的自动更新间隔（小时）
+	'Profile-Update-Interval': '24',
+
+	// 防止浏览器嗅探响应内容类型，增强安全性
+	'X-Content-Type-Options': 'nosniff',
+
+	// 防止网页被嵌入到iframe中，防止点击劫持攻击
+	'X-Frame-Options': 'DENY',
+
+	// 启用浏览器XSS过滤器，并在检测到攻击时阻止页面加载
+	'X-XSS-Protection': '1; mode=block',
+};
 
 export class ClashHandler implements RouteHandler {
 	private yamlValidator = new YamlValidator();
