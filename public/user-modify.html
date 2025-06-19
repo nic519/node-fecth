@@ -21,7 +21,7 @@
                         </div>
                         <div class="hidden md:block ml-10">
                             <div class="flex items-baseline space-x-4">
-                                <span class="text-sm text-gray-500">用户ID: <span class="font-medium text-gray-900">${userId}</span></span>
+                                <span class="text-sm text-gray-500">用户ID: <span class="font-medium text-gray-900" x-text="userId || '加载中...'"></span></span>
                                 <div class="flex items-center">
                                     <div class="w-2 h-2 rounded-full mr-2" :class="connectionStatus === 'connected' ? 'bg-green-400' : 'bg-red-400'"></div>
                                     <span class="text-sm" :class="connectionStatus === 'connected' ? 'text-green-600' : 'text-red-600'" x-text="connectionStatus === 'connected' ? '已连接' : '连接失败'"></span>
@@ -100,12 +100,12 @@
                         <!-- 编辑器 -->
                         <div class="mt-4">
                             <textarea 
-                                id="editor"
+                                x-model="configContent"
+                                @input="validateConfig($event.target.value)"
                                 rows="20"
                                 class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono"
                                 placeholder="YAML 配置将在这里显示..."
-                                spellcheck="false">
-                            </textarea>
+                                spellcheck="false"></textarea>
                         </div>
 
                         <!-- 底部操作栏 -->
@@ -126,6 +126,12 @@
         </main>
     </div>
 
+    <!-- 服务器端数据传递 -->
+    <script type="application/json" id="server-data">
+        {
+            "configRespone": ${configRespone}
+        }
+    </script>
     <script src="/user-config.js"></script>
 </body>
 </html>

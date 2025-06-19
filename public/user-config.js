@@ -3,7 +3,7 @@ function configManager() {
 	return {
 		// 响应式数据
 		userId: '',
-		editor: null,
+		configContent: '',
 		configPreview: '',
 		validationErrors: [],
 		saving: false,
@@ -13,10 +13,7 @@ function configManager() {
 		connectionStatus: 'connecting',
 
 		// 初始化
-		init() {
-			this.userId = window.location.pathname.split('/')[2] || '';
-			console.log('userId', this.userId);
-
+		init() { 
 			// 检查YAML库是否正确加载
 			console.log('检查YAML库...');
 			if (window.jsyaml) {
@@ -25,81 +22,49 @@ function configManager() {
 				console.error('✗ 未找到YAML库');
 			}
 
-			this.initSimpleEditor();
-			this.loadConfig();
+			// 优先使用服务器端传递的数据
+			this.loadServerData();
 		},
 
-		// 初始化编辑器
-		initSimpleEditor() {
-			const editorElement = document.getElementById('editor');
-			if (!editorElement) {
-				throw new Error('Editor element not found');
-			}
+		// 从服务器端传递的数据中加载配置
+		loadServerData() {
+			const serverDataElement = document.getElementById('server-data');
+			if (serverDataElement) {
+				try { 
 
-			this.editor = {
-				getValue: () => editorElement.value,
-				setValue: (value) => {
-					editorElement.value = value;
-				},
-				onDidChangeModelContent: (callback) => {
-					editorElement.addEventListener('input', callback);
-				},
-			};
-
-			editorElement.value = this.getDefaultConfigYaml();
-			editorElement.addEventListener('input', () => {
-				this.updatePreview();
-			});
-
-			this.updatePreview();
-		},
-
-		// 加载配置
-		async loadConfig() {
-			try {
-				console.log('开始加载配置...');
-				const token = new URLSearchParams(window.location.search).get('token');
-				console.log('Token:', token ? '存在' : '不存在');
-
-				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`);
-				console.log('API响应状态:', response.status);
-
-				if (response.ok) {
-					const data = await response.json();
-					console.log('配置数据:', data);
-
-					this.lastModified = data.meta.lastModified;
-					this.configSource = data.meta.source;
+					const data = JSON.parse(serverDataElement.textContent);
+					const meta = data.configRespone.meta;
+					this.userId = meta.userId;
+					
+					// 更新页面标题
+					document.title = `配置管理 - ${this.userId}`;
+					
+					this.lastModified = meta.lastModified;
+					this.configSource = meta.source;
 					this.connectionStatus = 'connected';
 
-					if (this.editor) {
-						console.log('直接设置YAML内容...');
-						const yaml = this.configToYaml(data.config)
-						this.editor.setValue(yaml);
-						this.updatePreview();
+					if (data.configRespone.config) {
+						console.log('使用服务器端传递的配置数据');
+						const yamlFormat = this.configToYaml(data.configRespone.config)
+						this.configContent = yamlFormat;
+						this.validateConfig(yamlFormat);
+						this.connectionStatus = 'connected';
+						this.configSource = '服务器端';
+						return true;
 					}
-				} else {
-					console.error('API响应错误:', response.status, response.statusText);
-					this.connectionStatus = 'error';
+				} catch (error) {
+					console.error('解析服务器端数据失败:', error);
 				}
-			} catch (error) {
-				console.error('加载配置失败:', error);
-				this.connectionStatus = 'error';
 			}
+			return false;
 		},
 
-		// 更新预览
-		updatePreview() {
-			if (!this.editor) return;
 
-			const yaml = this.editor.getValue();
-			this.configPreview = yaml;
-			this.validateConfig(yaml);
-		},
 
 		// 验证配置
 		validateConfig(yaml) {
 			this.validationErrors = [];
+			this.configPreview = yaml;
 
 			try {
 				// 基本的YAML语法检查
@@ -164,7 +129,7 @@ function configManager() {
 			this.saving = true;
 
 			try {
-				const yaml = this.editor?.getValue() || '';
+				const yaml = this.configContent || '';
 
 				// 验证YAML格式和字段
 				try {

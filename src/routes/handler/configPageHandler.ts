@@ -1,6 +1,7 @@
 import { RouteHandler } from '@/types/routes.types';
 import { UserManager, UserUtils } from '@/module/userManager/userManager'; 
 import { AuthUtils } from '@/utils/authUtils';
+import { ConfigResponse, UserConfig } from '@/types/user-config.types';
 
 export class ConfigPageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -19,12 +20,9 @@ export class ConfigPageHandler implements RouteHandler {
 
 				// 验证用户权限
 				const authResult = await AuthUtils.authenticate(request, env, userId);
-
-				// 获取用户配置 
-				const configYaml = UserUtils.convertToYaml(authResult.config) || this.getDefaultConfigYaml();
-
+ 
 				// 生成HTML页面
-				const html = await this.generateConfigPage(userId, configYaml, request);
+				const html = await this.generateConfigPage(userId, authResult, request);
 
 				return new Response(html, {
 					status: 200,
@@ -45,13 +43,28 @@ export class ConfigPageHandler implements RouteHandler {
 	/**
 	 * 生成配置管理页面HTML（从 HTML 模板文件读取并插值）
 	 */
-	private async generateConfigPage(userId: string, configYaml: string, request: Request): Promise<string> {
+	private async generateConfigPage(userId: string, configRespone: ConfigResponse, request: Request): Promise<string> {
 		const htmlResp = await fetch(new URL('/user-modify.html', request.url));
 		let template = await htmlResp.text();
 
-		// 变量插值
-		template = template.replace(/\$\{userId\}/g, userId).replace(/\$\{configYaml\}/g, configYaml);
+		// 变量插值 - 安全转义HTML特殊字符
+		const escapedConfig = JSON.stringify(configRespone);
+		console.log(`escapedConfig=${escapedConfig}`)
+		template = template 
+			.replace(/\$\{configRespone\}/g, escapedConfig);
 		return template;
+	}
+
+	/**
+	 * 转义HTML特殊字符，防止XSS攻击
+	 */
+	private escapeHtml(text: string): string {
+		return text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#x27;');
 	}
 
 	/**
