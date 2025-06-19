@@ -1,4 +1,119 @@
-import { UserConfig, ConfigResponse, EditorInterface, ConnectionStatus, ConfigManager } from '../src/types/user-config.types';
+import {
+	UserConfig,
+	ConfigResponse,
+	YamlConfigResponse,
+	EditorInterface,
+	ConnectionStatus,
+	ConfigManager,
+} from '../src/types/user-config.types';
+
+// 通用配置验证函数
+function validateUserConfig(config: any): { isValid: boolean; errors: string[] } {
+	const errors: string[] = [];
+
+	// 验证规则定义
+	const required = ['subscribe', 'accessToken'];
+	const types = {
+		subscribe: 'string',
+		accessToken: 'string',
+		ruleUrl: 'string',
+		fileName: 'string',
+		excludeRegex: 'string',
+		multiPortMode: 'AreaCode[]',
+		appendSubList: 'SubConfig[]',
+	};
+	const urlFields = ['subscribe', 'ruleUrl'];
+	const allowedFields = ['subscribe', 'accessToken', 'ruleUrl', 'fileName', 'excludeRegex', 'multiPortMode', 'appendSubList'];
+	const validAreaCodes = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'];
+
+	// 验证必需字段
+	for (const field of required) {
+		if (!config[field]) {
+			errors.push(`缺少必需的 ${field} 字段`);
+		}
+	}
+
+	// 验证字段类型
+	for (const [field, expectedType] of Object.entries(types)) {
+		if (config[field] !== undefined) {
+			const actualType = Array.isArray(config[field]) ? 'array' : typeof config[field];
+			const expectedBaseType = expectedType.replace('[]', '');
+
+			if (expectedType.endsWith('[]')) {
+				// 数组类型验证
+				if (!Array.isArray(config[field])) {
+					errors.push(`${field} 字段必须是数组`);
+				} else {
+					// 验证数组元素类型
+					for (let i = 0; i < config[field].length; i++) {
+						if (expectedType === 'AreaCode[]') {
+							// AreaCode数组验证
+							if (!validAreaCodes.includes(config[field][i])) {
+								errors.push(`${field} 数组第${i + 1}个元素必须是有效的地区代码: ${validAreaCodes.join(', ')}`);
+							}
+						} else if (expectedType === 'SubConfig[]') {
+							// SubConfig数组验证
+							const item = config[field][i];
+							if (typeof item !== 'object' || !item.subscribe || !item.flag) {
+								errors.push(`${field} 数组第${i + 1}个元素必须是包含subscribe和flag的对象`);
+							} else {
+								if (typeof item.subscribe !== 'string') {
+									errors.push(`${field} 数组第${i + 1}个元素的subscribe必须是字符串`);
+								}
+								if (typeof item.flag !== 'string') {
+									errors.push(`${field} 数组第${i + 1}个元素的flag必须是字符串`);
+								}
+								if (item.includeArea && !Array.isArray(item.includeArea)) {
+									errors.push(`${field} 数组第${i + 1}个元素的includeArea必须是数组`);
+								}
+								if (item.includeArea && Array.isArray(item.includeArea)) {
+									for (let j = 0; j < item.includeArea.length; j++) {
+										if (!validAreaCodes.includes(item.includeArea[j])) {
+											errors.push(
+												`${field} 数组第${i + 1}个元素的includeArea第${j + 1}个值必须是有效的地区代码: ${validAreaCodes.join(', ')}`
+											);
+										}
+									}
+								}
+							}
+						} else if (typeof config[field][i] !== expectedBaseType) {
+							errors.push(`${field} 数组第${i + 1}个元素必须是${expectedBaseType}`);
+						}
+					}
+				}
+			} else {
+				// 基本类型验证
+				if (actualType !== expectedType) {
+					errors.push(`${field} 字段必须是${expectedType}`);
+				}
+			}
+		}
+	}
+
+	// 验证URL字段
+	for (const field of urlFields) {
+		if (config[field] && typeof config[field] === 'string') {
+			try {
+				new URL(config[field]);
+			} catch {
+				errors.push(`${field} 字段不是有效的URL`);
+			}
+		}
+	}
+
+	// 验证不允许的字段
+	const configKeys = Object.keys(config);
+	for (const key of configKeys) {
+		if (!allowedFields.includes(key)) {
+			errors.push(`不允许的字段: ${key}。只允许以下字段: ${allowedFields.join(', ')}`);
+		}
+	}
+
+	return {
+		isValid: errors.length === 0,
+		errors,
+	};
+}
 
 function configManager(): ConfigManager {
 	return {
@@ -15,6 +130,19 @@ function configManager(): ConfigManager {
 		init() {
 			this.userId = window.location.pathname.split('/')[2] || '';
 			console.log('userId', this.userId);
+
+			// 检查YAML库是否正确加载
+			console.log('检查YAML库...');
+			if ((window as any).jsyaml) {
+				console.log('✓ js-yaml库已加载');
+			} else if ((window as any).YAML) {
+				console.log('✓ YAML库已加载');
+			} else if ((window as any).yaml) {
+				console.log('✓ yaml库已加载');
+			} else {
+				console.error('✗ 未找到YAML库');
+			}
+
 			this.initSimpleEditor();
 			this.loadConfig();
 		},
@@ -48,20 +176,27 @@ function configManager(): ConfigManager {
 
 		async loadConfig(): Promise<void> {
 			try {
+				console.log('开始加载配置...');
 				const token = new URLSearchParams(window.location.search).get('token');
-				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`);
+				console.log('Token:', token ? '存在' : '不存在');
+
+				const response = await fetch(`/api/config/users/${this.userId}?token=${token}&format=yaml`);
+				console.log('API响应状态:', response.status);
 
 				if (response.ok) {
-					const data: ConfigResponse = await response.json();
+					const data: YamlConfigResponse = await response.json();
+					console.log('配置数据:', data);
+
 					this.lastModified = data.meta.lastModified;
 					this.configSource = data.meta.source;
 					this.connectionStatus = 'connected';
 
 					if (this.editor) {
-						const yaml = this.configToYaml(data.config);
-						this.editor.setValue(yaml);
+						console.log('直接设置YAML内容...');
+						this.editor.setValue(data.yaml);
 					}
 				} else {
+					console.error('API响应错误:', response.status, response.statusText);
 					this.connectionStatus = 'error';
 				}
 			} catch (error) {
@@ -96,22 +231,12 @@ function configManager(): ConfigManager {
 					}
 				}
 
-				// 尝试解析YAML
+				// 尝试解析YAML并使用通用验证函数
 				const config = this.yamlToConfig(yaml);
-				if (!config.subscribe) {
-					this.validationErrors.push('缺少必需的 subscribe 字段');
-				}
-				if (!config.accessToken) {
-					this.validationErrors.push('缺少必需的 accessToken 字段');
-				}
+				const validation = validateUserConfig(config);
 
-				// URL格式验证
-				if (config.subscribe) {
-					try {
-						new URL(config.subscribe);
-					} catch {
-						this.validationErrors.push('subscribe 字段不是有效的URL');
-					}
+				if (!validation.isValid) {
+					this.validationErrors.push(...validation.errors);
 				}
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -129,7 +254,20 @@ function configManager(): ConfigManager {
 
 			try {
 				const yaml = this.editor?.getValue() || '';
-				const config = this.yamlToConfig(yaml);
+
+				// 验证YAML格式和字段
+				try {
+					const config = this.yamlToConfig(yaml);
+					const validation = validateUserConfig(config);
+
+					if (!validation.isValid) {
+						alert(`配置验证失败:\n${validation.errors.join('\n')}`);
+						return;
+					}
+				} catch (error) {
+					alert('YAML格式错误，请检查配置');
+					return;
+				}
 
 				const token = new URLSearchParams(window.location.search).get('token');
 				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`, {
@@ -137,7 +275,7 @@ function configManager(): ConfigManager {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ config }),
+					body: JSON.stringify({ yaml }),
 				});
 
 				if (response.ok) {
@@ -166,115 +304,87 @@ function configManager(): ConfigManager {
 		configToYaml(config: UserConfig | null): string {
 			if (!config) return this.getDefaultConfigYaml();
 
-			const lines: string[] = [];
-			lines.push('# 用户配置');
-			lines.push('# 请根据您的需求修改以下配置');
-			lines.push('');
+			try {
+				// 尝试多种方式访问YAML库
+				let yamlLib: any = null;
 
-			if (config.subscribe) lines.push(`subscribe: "${config.subscribe}"`);
-			if (config.accessToken) lines.push(`accessToken: "${config.accessToken}"`);
-			if (config.ruleUrl) lines.push(`ruleUrl: "${config.ruleUrl}"`);
-			if (config.fileName) lines.push(`fileName: "${config.fileName}"`);
+				// 方式1: js-yaml库
+				if ((window as any).jsyaml) {
+					yamlLib = (window as any).jsyaml;
+				}
+				// 方式2: 全局YAML对象
+				else if ((window as any).YAML) {
+					yamlLib = (window as any).YAML;
+				}
+				// 方式3: 全局yaml对象
+				else if ((window as any).yaml) {
+					yamlLib = (window as any).yaml;
+				}
 
-			if (config.multiPortMode && config.multiPortMode.length > 0) {
-				lines.push(`multiPortMode:${config.multiPortMode.map((code) => `\n  - ${code}`).join('')}`);
-			}
+				if (!yamlLib || !yamlLib.dump) {
+					console.error('YAML库未找到或未正确加载');
+					return this.getDefaultConfigYaml();
+				}
 
-			if (config.appendSubList && config.appendSubList.length > 0) {
-				lines.push('appendSubList:');
-				config.appendSubList.forEach((sub) => {
-					lines.push(`  - subscribe: "${sub.subscribe}"`);
-					lines.push(`    flag: "${sub.flag}"`);
-					if (sub.includeArea && sub.includeArea.length > 0) {
-						lines.push(`    includeArea:${sub.includeArea.map((code) => `\n      - ${code}`).join('')}`);
-					}
+				// js-yaml使用dump方法而不是stringify
+				return yamlLib.dump(config, {
+					indent: 2,
 				});
+			} catch (error) {
+				console.error('YAML序列化失败:', error);
+				return this.getDefaultConfigYaml();
 			}
-
-			if (config.excludeRegex) lines.push(`excludeRegex: "${config.excludeRegex}"`);
-
-			return lines.join('\n');
 		},
 
 		yamlToConfig(yaml: string): UserConfig {
-			const lines = yaml.split('\n');
-			const config: UserConfig = { subscribe: '', accessToken: '' };
-			let currentKey: string | null = null;
-			let currentArray: any[] | null = null;
+			try {
+				// 尝试多种方式访问YAML库
+				let yamlLib: any = null;
 
-			for (const line of lines) {
-				const trimmed = line.trim();
-				if (!trimmed || trimmed.startsWith('#')) continue;
-
-				if (trimmed.includes(':')) {
-					const [key, ...valueParts] = trimmed.split(':');
-					const value = valueParts.join(':').trim();
-
-					if (value === '') {
-						// 数组开始
-						currentKey = key.trim();
-						currentArray = [];
-						(config as any)[currentKey] = currentArray;
-					} else {
-						// 普通键值对
-						currentKey = key.trim();
-						(config as any)[currentKey] = value.replace(/^["']|["']$/g, '');
-						currentArray = null;
-					}
-				} else if (trimmed.startsWith('-') && currentArray) {
-					// 数组项
-					const value = trimmed.substring(1).trim();
-					if (value.includes(':')) {
-						// 对象数组项
-						const [objKey, objValue] = value.split(':').map((s) => s.trim());
-						if (!currentArray[currentArray.length - 1]) {
-							currentArray[currentArray.length - 1] = {};
-						}
-						(currentArray[currentArray.length - 1] as any)[objKey] = objValue.replace(/^["']|["']$/g, '');
-					} else {
-						// 简单数组项
-						currentArray.push(value.replace(/^["']|["']$/g, ''));
-					}
+				// 方式1: js-yaml库
+				if ((window as any).jsyaml) {
+					yamlLib = (window as any).jsyaml;
 				}
-			}
+				// 方式2: 全局YAML对象
+				else if ((window as any).YAML) {
+					yamlLib = (window as any).YAML;
+				}
+				// 方式3: 全局yaml对象
+				else if ((window as any).yaml) {
+					yamlLib = (window as any).yaml;
+				}
 
-			return config;
+				if (!yamlLib || !yamlLib.load) {
+					console.error('YAML库未找到或未正确加载');
+					throw new Error('YAML库未正确加载');
+				}
+
+				// js-yaml使用load方法而不是parse
+				const config = yamlLib.load(yaml) as UserConfig;
+				return config || { subscribe: '', accessToken: '' };
+			} catch (error) {
+				console.error('YAML解析错误:', error);
+				return { subscribe: '', accessToken: '' };
+			}
 		},
 
 		getDefaultConfigYaml(): string {
-			return `# 用户配置模板
-# 请根据您的需求修改以下配置
-
-# 必需的订阅地址
-subscribe: "https://example.com/subscription"
-
-# 必需的访问令牌
+			return `subscribe: "https://example.com/subscription"
 accessToken: "your-access-token"
-
-# 可选的规则模板链接
-# ruleUrl: "https://example.com/rules"
-
-# 可选的文件名
-# fileName: "config.yaml"
-
-# 可选的多端口模式（地区代码）
-# multiPortMode:
-#   - TW
-#   - SG
-#   - JP
-
-# 可选的追加订阅列表
-# appendSubList:
-#   - subscribe: "https://example.com/sub1"
-#     flag: "sub1"
-#     includeArea:
-#       - US
-#       - HK
-#   - subscribe: "https://example.com/sub2"
-#     flag: "sub2"
-
-# 可选的排除正则表达式
-# excludeRegex: ".*test.*"`;
+fileName: "config.yaml"
+excludeRegex: "Standard"
+multiPortMode:
+  - TW
+  - SG
+  - JP
+appendSubList:
+  - subscribe: "https://example.com/sub1"
+    flag: "sub1"
+    includeArea:
+      - US
+      - HK
+  - subscribe: "https://example.com/sub2"
+    flag: "sub2"`;
 		},
 
 		formatTime(isoString: string | null): string {

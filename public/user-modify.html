@@ -6,6 +6,7 @@
     <title>用户配置管理 - ${userId}</title>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="min-h-screen">
@@ -15,22 +16,32 @@
     <div class="floating-sphere sphere-3"></div>
     <div class="floating-sphere sphere-4"></div>
     
-    <div x-data="configManager()" class="container mx-auto px-4 py-8">
+    <div x-data="configManager()" class="h-screen flex flex-col">
         <!-- 头部 -->
-        <div class="glass-card rounded-2xl p-8 mb-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-white mb-2">用户配置管理</h1>
-                    <p class="text-gray-300">用户ID: ${userId}</p>
+        <div class="glass-card-no-border p-6">
+            <div class="container mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">用户配置管理</h1>
+                        <div class="flex items-center mt-2 space-x-4 text-sm text-gray-300">
+                            <span>用户ID: ${userId}</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full status-dot" :class="connectionStatus === 'connected' ? 'bg-green-400' : 'bg-red-400'"></div>
+                                <span x-text="connectionStatus === 'connected' ? '已连接' : '连接失败'"></span>
+                            </div>
+                            <span x-text="'配置来源: ' + (configSource || '环境变量')"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div class="text-sm text-gray-300">
-                        <span x-text="lastSaved ? '最后保存: ' + formatTime(lastSaved) : '未保存'"></span>
+                <div class="flex items-center gap-6">
+                    <div class="text-sm text-gray-300 text-right">
+                        <div x-text="lastSaved ? '最后保存: ' + formatTime(lastSaved) : '未保存'" class="mb-1"></div>
+                        <div x-text="'最后修改: ' + (lastModified ? formatTime(lastModified) : '未知')" class="text-gray-400"></div>
                     </div>
                     <button 
                         @click="saveConfig()" 
                         :disabled="saving"
-                        class="btn-primary px-6 py-3 text-white disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                        class="btn-primary px-6 py-2.5 text-white disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-text="saving ? '保存中...' : '保存配置'"></span>
                     </button>
                 </div>
@@ -38,69 +49,50 @@
         </div>
 
         <!-- 主要内容 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- 配置编辑器 -->
-            <div class="glass-card rounded-2xl p-6">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-white mb-2">配置编辑器</h2>
-                    <p class="text-gray-300">编辑您的用户配置（YAML格式）</p>
-                </div>
-                <div>
-                    <textarea id="editor" class="w-full"></textarea>
-                    <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div class="text-sm text-gray-300">
-                            <span x-text="'行数: ' + (editor ? editor.getModel().getLineCount() : 0)"></span>
+        <div class="flex-1 container mx-auto px-6 py-6 min-h-0">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                <!-- 配置编辑器 -->
+                <div class="glass-card rounded-xl flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/10">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-medium text-white">配置编辑器</h2>
+                            <button 
+                                @click="resetConfig()" 
+                                class="btn-secondary px-3 py-1.5 text-sm text-white">
+                                重置
+                            </button>
                         </div>
-                        <button 
-                            @click="resetConfig()" 
-                            class="btn-secondary px-4 py-2 text-sm text-white w-full sm:w-auto">
-                            重置
-                        </button>
+                        <p class="text-sm text-gray-400 mt-1">编辑您的用户配置（YAML格式）</p>
+                    </div>
+                    <div class="flex-1 min-h-0 relative">
+                        <div class="absolute inset-4">
+                            <textarea id="editor" class="w-full h-full"></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 配置预览 -->
-            <div class="glass-card rounded-2xl p-6">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold text-white mb-2">配置预览</h2>
-                    <p class="text-gray-300">实时预览配置内容</p>
-                </div>
-                <div>
-                    <div class="bg-black/20 rounded-xl p-4 max-h-96 overflow-y-auto backdrop-blur-sm">
-                        <pre x-text="configPreview" class="text-sm text-gray-200 whitespace-pre-wrap break-words"></pre>
+                <!-- 配置预览 -->
+                <div class="glass-card rounded-xl flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/10">
+                        <h2 class="text-lg font-medium text-white">配置预览</h2>
+                        <p class="text-sm text-gray-400 mt-1">实时预览配置内容</p>
                     </div>
-                    <div class="mt-6 space-y-4">
-                        <div x-show="validationErrors.length > 0" class="bg-red-500/15 border border-red-400/20 rounded-xl p-4 backdrop-blur-sm">
-                            <h4 class="text-sm font-medium text-red-200 mb-2">验证错误:</h4>
+                    <div class="flex-1 min-h-0 p-4 flex flex-col">
+                        <div class="flex-1 bg-black/20 rounded-lg p-4 overflow-y-auto backdrop-blur-sm">
+                            <pre x-text="configPreview" class="text-sm text-gray-300 whitespace-pre-wrap break-words"></pre>
+                        </div>
+                        <div x-show="validationErrors.length > 0" class="mt-4 bg-red-500/15 border border-red-400/20 rounded-lg p-3 backdrop-blur-sm">
+                            <h4 class="text-sm font-medium text-red-200 mb-1">验证错误:</h4>
                             <ul class="text-sm text-red-100 space-y-1">
                                 <template x-for="error in validationErrors" :key="error">
                                     <li x-text="error"></li>
                                 </template>
                             </ul>
                         </div>
-                        <div x-show="validationErrors.length === 0 && configPreview" class="bg-green-500/15 border border-green-400/20 rounded-xl p-4 backdrop-blur-sm">
+                        <div x-show="validationErrors.length === 0 && configPreview" class="mt-4 bg-green-500/15 border border-green-400/20 rounded-lg p-3 backdrop-blur-sm">
                             <p class="text-sm text-green-200">✓ 配置格式正确</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 状态栏 -->
-        <div class="mt-8 glass-card-no-border rounded-2xl p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-3 h-3 rounded-full status-dot" :class="connectionStatus === 'connected' ? 'bg-green-400' : 'bg-red-400'"></div>
-                        <span class="text-sm text-gray-300" x-text="connectionStatus === 'connected' ? '已连接' : '连接失败'"></span>
-                    </div>
-                    <div class="text-sm text-gray-300">
-                        <span x-text="'配置来源: ' + (configSource || '环境变量')"></span>
-                    </div>
-                </div>
-                <div class="text-sm text-gray-300">
-                    <span x-text="'最后修改: ' + (lastModified ? formatTime(lastModified) : '未知')"></span>
                 </div>
             </div>
         </div>

@@ -60,21 +60,49 @@ export class UserConfigHandler implements RouteHandler {
 				return new Response('Forbidden: Invalid access token', { status: 403 });
 			}
 
-			// 获取用户配置
-			const configResponse = await userManager.getUserConfig(userId);
-			if (!configResponse) {
-				return new Response('User config not found', { status: 404 });
-			}
+			// 检查请求格式参数
+			const url = new URL(request.url);
+			const format = url.searchParams.get('format');
 
-			return new Response(JSON.stringify(configResponse), {
-				status: 200,
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-				},
-			});
+			if (format === 'yaml') {
+				// 返回YAML格式
+				const yamlResponse = await userManager.getUserConfigYaml(userId);
+				if (!yamlResponse) {
+					return new Response('User config not found', { status: 404 });
+				}
+
+				return new Response(
+					JSON.stringify({
+						yaml: yamlResponse.yaml,
+						meta: yamlResponse.meta,
+					}),
+					{
+						status: 200,
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+							'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+							'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+						},
+					}
+				);
+			} else {
+				// 返回JSON格式（默认）
+				const configResponse = await userManager.getUserConfig(userId);
+				if (!configResponse) {
+					return new Response('User config not found', { status: 404 });
+				}
+
+				return new Response(JSON.stringify(configResponse), {
+					status: 200,
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+					},
+				});
+			}
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
 			return new Response('Internal Server Error', { status: 500 });
@@ -144,11 +172,26 @@ export class UserConfigHandler implements RouteHandler {
 			}
 
 			// 解析请求体
-			const body = (await request.json()) as { config: UserConfig };
-			const config: UserConfig = body.config;
+			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
+			let config: UserConfig;
+
+			if (body.yaml) {
+				// 处理YAML格式的请求
+				try {
+					const { parse } = await import('yaml');
+					config = parse(body.yaml) as UserConfig;
+				} catch (error) {
+					return new Response('Bad Request: Invalid YAML format', { status: 400 });
+				}
+			} else if (body.config) {
+				// 处理JSON格式的请求（向后兼容）
+				config = body.config;
+			} else {
+				return new Response('Bad Request: Missing config or yaml data', { status: 400 });
+			}
 
 			if (!config) {
-				return new Response('Bad Request: Missing config data', { status: 400 });
+				return new Response('Bad Request: Invalid config data', { status: 400 });
 			}
 
 			// 保存用户配置

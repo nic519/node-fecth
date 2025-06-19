@@ -1,19 +1,17 @@
-export interface UserConfig {
-	subscribe?: string;
-	accessToken?: string;
-	ruleUrl?: string;
-	fileName?: string;
-	multiPortMode?: string[];
-	appendSubList?: Array<{
-		subscribe: string;
-		flag: string;
-		includeArea?: string[];
-	}>;
-	excludeRegex?: string;
-}
+import { UserConfig as BaseUserConfig } from './user.types';
+
+export type UserConfig = BaseUserConfig;
 
 export interface ConfigResponse {
 	config: UserConfig;
+	meta: {
+		lastModified: string;
+		source: string;
+	};
+}
+
+export interface YamlConfigResponse {
+	yaml: string;
 	meta: {
 		lastModified: string;
 		source: string;

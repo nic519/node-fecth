@@ -2,6 +2,7 @@ import { GlobalConfig } from '@/config/global-config';
 import { AreaCode, SubConfig, UserConfig } from '@/types/user.types';
 import { parse as yamlParse } from 'yaml';
 import { AuthUtils } from '@/utils/authUtils';
+import { stringify } from 'yaml';
 
 // 用户配置类
 export class DBUser {
@@ -101,6 +102,54 @@ export class UserManager {
 			return null;
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
+			return null;
+		}
+	}
+
+	/**
+	 * 获取用户配置的YAML格式（优先级：KV > 环境变量）
+	 */
+	async getUserConfigYaml(userId: string): Promise<{ yaml: string; meta: UserConfigMeta } | null> {
+		try {
+			// 1. 尝试从KV获取配置
+			const kvConfig = await this.getConfigFromKV(userId);
+			if (kvConfig) {
+				const yaml = stringify(kvConfig.config, {
+					indent: 2,
+					lineWidth: 120,
+					minContentWidth: 20,
+				});
+				return {
+					yaml,
+					meta: {
+						lastModified: kvConfig.meta.lastModified,
+						source: 'kv' as const,
+						userId,
+					},
+				};
+			}
+
+			// 2. 从环境变量获取配置
+			const envConfig = this.getConfigFromEnv(userId);
+			if (envConfig) {
+				const yaml = stringify(envConfig, {
+					indent: 2,
+					lineWidth: 120,
+					minContentWidth: 20,
+				});
+				return {
+					yaml,
+					meta: {
+						lastModified: new Date().toISOString(),
+						source: 'env' as const,
+						userId,
+					},
+				};
+			}
+
+			return null;
+		} catch (error) {
+			console.error(`获取用户配置YAML失败: ${userId}`, error);
 			return null;
 		}
 	}
@@ -270,23 +319,79 @@ export class UserManager {
 			return false;
 		}
 
-		// 可选字段验证
+		// 验证字段类型
+		if (typeof config.subscribe !== 'string' || typeof config.accessToken !== 'string') {
+			return false;
+		}
+
+		// 验证可选字段的类型
+		if (config.fileName && typeof config.fileName !== 'string') {
+			return false;
+		}
+		if (config.excludeRegex && typeof config.excludeRegex !== 'string') {
+			return false;
+		}
+		if (config.flag && typeof config.flag !== 'string') {
+			return false;
+		}
+		if (config.includeArea && typeof config.includeArea !== 'string') {
+			return false;
+		}
+		if (config.ruleUrl && typeof config.ruleUrl !== 'string') {
+			return false;
+		}
+
+		// 验证数组字段
+		if (config.multiPortMode && !Array.isArray(config.multiPortMode)) {
+			return false;
+		}
+		if (config.appendSubList && !Array.isArray(config.appendSubList)) {
+			return false;
+		}
+
+		// 验证数组元素类型
+		if (config.multiPortMode && Array.isArray(config.multiPortMode)) {
+			for (const item of config.multiPortMode) {
+				if (typeof item !== 'string') {
+					return false;
+				}
+			}
+		}
+		if (config.appendSubList && Array.isArray(config.appendSubList)) {
+			for (const item of config.appendSubList) {
+				if (typeof item !== 'string') {
+					return false;
+				}
+			}
+		}
+
+		// 验证不允许的字段
+		const allowedFields = [
+			'subscribe',
+			'accessToken',
+			'fileName',
+			'excludeRegex',
+			'flag',
+			'includeArea',
+			'ruleUrl',
+			'multiPortMode',
+			'appendSubList',
+		];
+
+		const configKeys = Object.keys(config);
+		for (const key of configKeys) {
+			if (!allowedFields.includes(key)) {
+				return false;
+			}
+		}
+
+		// 可选字段URL验证
 		if (config.ruleUrl) {
 			try {
 				new URL(config.ruleUrl);
 			} catch {
 				return false;
 			}
-		}
-
-		// 多端口模式验证
-		if (config.multiPortMode && !Array.isArray(config.multiPortMode)) {
-			return false;
-		}
-
-		// 追加订阅列表验证
-		if (config.appendSubList && !Array.isArray(config.appendSubList)) {
-			return false;
 		}
 
 		return true;

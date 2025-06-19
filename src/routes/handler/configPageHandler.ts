@@ -1,5 +1,6 @@
 import { RouteHandler } from '@/types/routes.types';
 import { UserManager } from '@/module/userManager/userManager';
+import { parse, stringify } from 'yaml';
 
 export class ConfigPageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -28,11 +29,11 @@ export class ConfigPageHandler implements RouteHandler {
 				}
 
 				// 获取用户配置
-				const configResponse = await userManager.getUserConfig(userId);
-				const config = configResponse?.config;
+				const yamlResponse = await userManager.getUserConfigYaml(userId);
+				const configYaml = yamlResponse?.yaml || this.getDefaultConfigYaml();
 
 				// 生成HTML页面
-				const html = await this.generateConfigPage(userId, config, request);
+				const html = await this.generateConfigPage(userId, configYaml, request);
 
 				return new Response(html, {
 					status: 200,
@@ -53,11 +54,9 @@ export class ConfigPageHandler implements RouteHandler {
 	/**
 	 * 生成配置管理页面HTML（从 HTML 模板文件读取并插值）
 	 */
-	private async generateConfigPage(userId: string, config: any, request: Request): Promise<string> {
+	private async generateConfigPage(userId: string, configYaml: string, request: Request): Promise<string> {
 		const htmlResp = await fetch(new URL('/user-modify.html', request.url));
 		let template = await htmlResp.text();
-
-		const configYaml = config ? this.configToYaml(config) : this.getDefaultConfigYaml();
 
 		// 变量插值
 		template = template.replace(/\$\{userId\}/g, userId).replace(/\$\{configYaml\}/g, configYaml);
@@ -65,77 +64,16 @@ export class ConfigPageHandler implements RouteHandler {
 	}
 
 	/**
-	 * 配置对象转YAML字符串
-	 */
-	private configToYaml(config: any): string {
-		if (!config) return this.getDefaultConfigYaml();
-
-		const lines = [];
-		lines.push('# 用户配置');
-		lines.push('# 请根据您的需求修改以下配置');
-		lines.push('');
-
-		if (config.subscribe) lines.push(`subscribe: "${config.subscribe}"`);
-		if (config.accessToken) lines.push(`accessToken: "${config.accessToken}"`);
-		if (config.ruleUrl) lines.push(`ruleUrl: "${config.ruleUrl}"`);
-		if (config.fileName) lines.push(`fileName: "${config.fileName}"`);
-
-		if (config.multiPortMode && config.multiPortMode.length > 0) {
-			lines.push(`multiPortMode:${config.multiPortMode.map((code: string) => `\n  - ${code}`).join('')}`);
-		}
-
-		if (config.appendSubList && config.appendSubList.length > 0) {
-			lines.push('appendSubList:');
-			config.appendSubList.forEach((sub: any) => {
-				lines.push(`  - subscribe: "${sub.subscribe}"`);
-				lines.push(`    flag: "${sub.flag}"`);
-				if (sub.includeArea && sub.includeArea.length > 0) {
-					lines.push(`    includeArea:${sub.includeArea.map((code: string) => `\n      - ${code}`).join('')}`);
-				}
-			});
-		}
-
-		if (config.excludeRegex) lines.push(`excludeRegex: "${config.excludeRegex}"`);
-
-		return lines.join('\n');
-	}
-
-	/**
 	 * 获取默认配置YAML模板
 	 */
 	private getDefaultConfigYaml(): string {
-		return `# 用户配置模板
-# 请根据您的需求修改以下配置
-
-# 必需的订阅地址
-subscribe: "https://example.com/subscription"
-
-# 必需的访问令牌
+		return `subscribe: "https://example.com/subscription"
 accessToken: "your-access-token"
-
-# 可选的规则模板链接
-# ruleUrl: "https://example.com/rules"
-
-# 可选的文件名
-# fileName: "config.yaml"
-
-# 可选的多端口模式（地区代码）
-# multiPortMode:
-#   - TW
-#   - SG
-#   - JP
-
-# 可选的追加订阅列表
-# appendSubList:
-#   - subscribe: "https://example.com/sub1"
-#     flag: "sub1"
-#     includeArea:
-#       - US
-#       - HK
-#   - subscribe: "https://example.com/sub2"
-#     flag: "sub2"
-
-# 可选的排除正则表达式
-# excludeRegex: ".*test.*"`;
+fileName: "config.yaml"
+excludeRegex: "Standard"
+appendSubList:
+  - ""
+flag: "🥷"
+includeArea: "[HK]"`;
 	}
 }
