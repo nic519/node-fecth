@@ -4,7 +4,7 @@ import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
 
 // 响应头配置
-const RESPONSE_HEADERS = {
+const RESPONSE_HEADERS: Record<string, string> = {
 	// 指定响应内容的类型为YAML，使用UTF-8编码
 	'Content-Type': 'text/yaml; charset=utf-8',
 
@@ -22,37 +22,36 @@ const RESPONSE_HEADERS = {
 };
 
 export class ClashHandler implements RouteHandler {
-	private yamlValidator = new YamlValidator();
+	// 构建响应头
+	private buildHeaders(subInfo: string, fileName?: string): Record<string, string> {
+		const headers: Record<string, string> = {
+			...RESPONSE_HEADERS,
+			'Subscription-Userinfo': subInfo,
+		};
+		if (fileName) {
+			headers['Content-Disposition'] = `attachment; filename=${fileName}.yaml`;
+		}
+		return headers;
+	}
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const authConfig = params?.authConfig;
-		if (!authConfig) {
-			return new Response('缺少必要参数: authConfig', { status: 400 });
-		}
+		const authConfig = params!.authConfig;
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
+
+			// 开始构建配置文件
 			const yamlMerge = new YamlMergeFactory(authConfig);
 			const { yamlContent, subInfo } = await yamlMerge.generate();
 
 			// 使用配置验证器验证格式
-			this.yamlValidator.validate(yamlContent);
-
-			var headers = {
-				...RESPONSE_HEADERS,
-				'Subscription-Userinfo': subInfo,
-				'Content-Type': 'text/yaml; charset=utf-8',
-			};
-
-			// 通过URL参数控制是否下载文件
-			if (queryParams.download) {
-				(headers as any)['Content-Disposition'] = `attachment; filename=${authConfig.fileName}.yaml`;
-			}
+			const yamlValidator = new YamlValidator();
+			yamlValidator.validate(yamlContent);
 
 			return new Response(yamlContent, {
 				status: 200,
-				headers: headers,
+				headers: this.buildHeaders(subInfo, queryParams.download ? authConfig.fileName : undefined),
 			});
 		} catch (error) {
 			console.error('Error:', error);
