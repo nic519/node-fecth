@@ -4,9 +4,10 @@ import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
 import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
+import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
+import { ConfigPageHandler } from '@/routes/handler/configPageHandler';
 import { AuthUtils } from '@/utils/authUtils';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
-import { DBUser } from '@/types/user.types';
 
 export class Router {
 	private handlers: Map<string, RouteHandler> = new Map();
@@ -18,6 +19,8 @@ export class Router {
 	private registerHandlers() {
 		this.handlers.set(RoutesPathConfig.storage, new StorageHandler());
 		this.handlers.set(RoutesPathConfig.kv, new KvHandler());
+		this.handlers.set(RoutesPathConfig.userConfig, new UserConfigHandler());
+		this.handlers.set(RoutesPathConfig.configPage, new ConfigPageHandler());
 	}
 
 	async route(request: Request, env: Env): Promise<Response> {
@@ -40,7 +43,27 @@ export class Router {
 			}
 		}
 
-		// 3. 动态路由匹配 - 普通订阅路由 (/:uid 格式)
+		// 3. 动态路由匹配 - 配置页面路由 (/config/:userId)
+		const configPageMatch = pathname.match(/^\/config\/(.+)$/);
+		if (configPageMatch) {
+			const userId = configPageMatch[1];
+			console.log(`📄 匹配配置页面路由: ${userId}`);
+			const configPageHandler = new ConfigPageHandler();
+			const response = await configPageHandler.handle(request, env);
+			if (response) return response;
+		}
+
+		// 4. 动态路由匹配 - 用户配置API路由 (/api/config/users/:userId)
+		const userConfigApiMatch = pathname.match(/^\/api\/config\/users\/(.+)$/);
+		if (userConfigApiMatch) {
+			const userId = userConfigApiMatch[1];
+			console.log(`🔧 匹配用户配置API路由: ${userId}`);
+			const userConfigHandler = new UserConfigHandler();
+			const response = await userConfigHandler.handle(request, env);
+			if (response) return response;
+		}
+
+		// 5. 动态路由匹配 - 普通订阅路由 (/:uid 格式)
 		const queryParams = SubscribeParamsValidator.parseParams(url);
 		console.log('📡 匹配普通订阅路由', queryParams);
 

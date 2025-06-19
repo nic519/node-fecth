@@ -84,9 +84,8 @@ interface UserConfig {
 ```
 
 ### 3.3 前端技术栈
-- **框架**：React + TypeScript
-- **UI库**：[HeroUI](https://www.heroui.com/)
-- **状态管理**：React Context 或 Zustand
+- **框架** Alpine.js + TypeScript
+- **UI库**：TailwindCSS 
 - **编辑器**：Monaco Editor（支持YAML语法高亮）
 - **验证**：YAML Schema 验证
 
@@ -95,8 +94,7 @@ interface UserConfig {
 ### 4.1 主要页面
 
 #### 4.1.1 仪表板页面
-- 配置概览卡片
-- 用户统计图表 
+- 配置概览卡片 
 
 #### 4.1.2 用户管理页面
 - 用户列表表格
@@ -112,6 +110,7 @@ interface UserConfig {
 
 #### 4.2.1 配置编辑流程
 1. 选择用户 → 2. 加载配置 → 3. 编辑配置 → 4. 验证配置 → 5. 保存配置
+2. 用户直接在浏览器输入网址，如：https://domain.com/config/123?token=xxx，进入配置编辑页面
 
 #### 4.2.2 错误处理
 - 实时语法检查

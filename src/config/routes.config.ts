@@ -5,6 +5,10 @@ export const RoutesPathConfig = {
 	kv: '/kv',
 	// 设置个人配置
 	setting: '/setting',
+	// 用户配置管理API
+	userConfig: '/api/config/users',
+	// 配置管理页面
+	configPage: '/config',
 	// 订阅路由，动态参数
 	subscription: '/:uid',
 } as const;
