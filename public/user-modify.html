@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户配置管理 - ${userId}</title>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .monaco-editor { height: 500px; }
         .error-line { background-color: #fef2f2; border-left: 4px solid #ef4444; }
         .success-line { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+        #editor { 
+            width: 100%; 
+            height: 500px; 
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            resize: vertical;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -45,7 +55,7 @@
                     <p class="text-sm text-gray-600 mt-1">编辑您的用户配置（YAML格式）</p>
                 </div>
                 <div class="p-4">
-                    <div id="editor" class="border border-gray-300 rounded-lg overflow-hidden"></div>
+                    <textarea id="editor" class="border border-gray-300 rounded-lg overflow-hidden"></textarea>
                     <div class="mt-4 flex items-center justify-between">
                         <div class="text-sm text-gray-500">
                             <span x-text="'行数: ' + (editor ? editor.getModel().getLineCount() : 0)"></span>
@@ -105,8 +115,6 @@
         </div>
     </div>
 
-    <script>
-        ${jsCode}
-    </script>
+    <script src="/user-modify.js"></script>
 </body>
 </html>
