@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// 配置验证规则
-const CONFIG_VALIDATION_RULES = {
-    // 必需字段
-    required: ['subscribe', 'accessToken'],
-    // 字段类型定义
-    types: {
+// 通用配置验证函数
+function validateUserConfig(config) {
+    const errors = [];
+    // 验证规则定义
+    const required = ['subscribe', 'accessToken'];
+    const types = {
         subscribe: 'string',
         accessToken: 'string',
         ruleUrl: 'string',
@@ -13,25 +13,18 @@ const CONFIG_VALIDATION_RULES = {
         excludeRegex: 'string',
         multiPortMode: 'AreaCode[]',
         appendSubList: 'SubConfig[]',
-    },
-    // 需要URL验证的字段
-    urlFields: ['subscribe', 'ruleUrl'],
-    // 允许的字段列表
-    allowedFields: ['subscribe', 'accessToken', 'ruleUrl', 'fileName', 'excludeRegex', 'multiPortMode', 'appendSubList'],
-    // AreaCode有效值
-    validAreaCodes: ['TW', 'SG', 'JP', 'VN', 'HK', 'US'],
-};
-// 通用配置验证函数
-function validateUserConfig(config) {
-    const errors = [];
+    };
+    const urlFields = ['subscribe', 'ruleUrl'];
+    const allowedFields = ['subscribe', 'accessToken', 'ruleUrl', 'fileName', 'excludeRegex', 'multiPortMode', 'appendSubList'];
+    const validAreaCodes = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'];
     // 验证必需字段
-    for (const field of CONFIG_VALIDATION_RULES.required) {
+    for (const field of required) {
         if (!config[field]) {
             errors.push(`缺少必需的 ${field} 字段`);
         }
     }
     // 验证字段类型
-    for (const [field, expectedType] of Object.entries(CONFIG_VALIDATION_RULES.types)) {
+    for (const [field, expectedType] of Object.entries(types)) {
         if (config[field] !== undefined) {
             const actualType = Array.isArray(config[field]) ? 'array' : typeof config[field];
             const expectedBaseType = expectedType.replace('[]', '');
@@ -45,8 +38,8 @@ function validateUserConfig(config) {
                     for (let i = 0; i < config[field].length; i++) {
                         if (expectedType === 'AreaCode[]') {
                             // AreaCode数组验证
-                            if (!CONFIG_VALIDATION_RULES.validAreaCodes.includes(config[field][i])) {
-                                errors.push(`${field} 数组第${i + 1}个元素必须是有效的地区代码: ${CONFIG_VALIDATION_RULES.validAreaCodes.join(', ')}`);
+                            if (!validAreaCodes.includes(config[field][i])) {
+                                errors.push(`${field} 数组第${i + 1}个元素必须是有效的地区代码: ${validAreaCodes.join(', ')}`);
                             }
                         }
                         else if (expectedType === 'SubConfig[]') {
@@ -67,8 +60,8 @@ function validateUserConfig(config) {
                                 }
                                 if (item.includeArea && Array.isArray(item.includeArea)) {
                                     for (let j = 0; j < item.includeArea.length; j++) {
-                                        if (!CONFIG_VALIDATION_RULES.validAreaCodes.includes(item.includeArea[j])) {
-                                            errors.push(`${field} 数组第${i + 1}个元素的includeArea第${j + 1}个值必须是有效的地区代码: ${CONFIG_VALIDATION_RULES.validAreaCodes.join(', ')}`);
+                                        if (!validAreaCodes.includes(item.includeArea[j])) {
+                                            errors.push(`${field} 数组第${i + 1}个元素的includeArea第${j + 1}个值必须是有效的地区代码: ${validAreaCodes.join(', ')}`);
                                         }
                                     }
                                 }
@@ -89,7 +82,7 @@ function validateUserConfig(config) {
         }
     }
     // 验证URL字段
-    for (const field of CONFIG_VALIDATION_RULES.urlFields) {
+    for (const field of urlFields) {
         if (config[field] && typeof config[field] === 'string') {
             try {
                 new URL(config[field]);
@@ -102,8 +95,8 @@ function validateUserConfig(config) {
     // 验证不允许的字段
     const configKeys = Object.keys(config);
     for (const key of configKeys) {
-        if (!CONFIG_VALIDATION_RULES.allowedFields.includes(key)) {
-            errors.push(`不允许的字段: ${key}。只允许以下字段: ${CONFIG_VALIDATION_RULES.allowedFields.join(', ')}`);
+        if (!allowedFields.includes(key)) {
+            errors.push(`不允许的字段: ${key}。只允许以下字段: ${allowedFields.join(', ')}`);
         }
     }
     return {

@@ -307,8 +307,11 @@ export class UserManager {
 	 * 验证用户配置
 	 */
 	private validateUserConfig(config: UserConfig): boolean {
+		console.log('🔍 开始验证用户配置:', JSON.stringify(config, null, 2));
+
 		// 必填字段验证
 		if (!config.subscribe || !config.accessToken) {
+			console.log('❌ 必填字段验证失败: subscribe=', config.subscribe, 'accessToken=', config.accessToken);
 			return false;
 		}
 
@@ -316,71 +319,83 @@ export class UserManager {
 		try {
 			new URL(config.subscribe);
 		} catch {
+			console.log('❌ subscribe URL格式验证失败:', config.subscribe);
 			return false;
 		}
 
 		// 验证字段类型
 		if (typeof config.subscribe !== 'string' || typeof config.accessToken !== 'string') {
+			console.log('❌ 字段类型验证失败: subscribe类型=', typeof config.subscribe, 'accessToken类型=', typeof config.accessToken);
 			return false;
 		}
 
 		// 验证可选字段的类型
 		if (config.fileName && typeof config.fileName !== 'string') {
+			console.log('❌ fileName类型验证失败:', typeof config.fileName);
 			return false;
 		}
 		if (config.excludeRegex && typeof config.excludeRegex !== 'string') {
-			return false;
-		}
-		if (config.flag && typeof config.flag !== 'string') {
-			return false;
-		}
-		if (config.includeArea && typeof config.includeArea !== 'string') {
+			console.log('❌ excludeRegex类型验证失败:', typeof config.excludeRegex);
 			return false;
 		}
 		if (config.ruleUrl && typeof config.ruleUrl !== 'string') {
+			console.log('❌ ruleUrl类型验证失败:', typeof config.ruleUrl);
 			return false;
 		}
 
 		// 验证数组字段
 		if (config.multiPortMode && !Array.isArray(config.multiPortMode)) {
+			console.log('❌ multiPortMode必须是数组:', typeof config.multiPortMode);
 			return false;
 		}
 		if (config.appendSubList && !Array.isArray(config.appendSubList)) {
+			console.log('❌ appendSubList必须是数组:', typeof config.appendSubList);
 			return false;
 		}
 
 		// 验证数组元素类型
 		if (config.multiPortMode && Array.isArray(config.multiPortMode)) {
-			for (const item of config.multiPortMode) {
-				if (typeof item !== 'string') {
+			for (let i = 0; i < config.multiPortMode.length; i++) {
+				if (typeof config.multiPortMode[i] !== 'string') {
+					console.log(`❌ multiPortMode[${i}]类型验证失败:`, typeof config.multiPortMode[i]);
 					return false;
 				}
 			}
 		}
 		if (config.appendSubList && Array.isArray(config.appendSubList)) {
-			for (const item of config.appendSubList) {
-				if (typeof item !== 'string') {
+			for (let i = 0; i < config.appendSubList.length; i++) {
+				const item = config.appendSubList[i];
+				// SubConfig验证
+				if (typeof item !== 'object' || !item.subscribe || !item.flag) {
+					console.log(`❌ appendSubList[${i}]结构验证失败:`, item);
 					return false;
+				}
+				if (typeof item.subscribe !== 'string' || typeof item.flag !== 'string') {
+					console.log(`❌ appendSubList[${i}]字段类型验证失败: subscribe类型=`, typeof item.subscribe, 'flag类型=', typeof item.flag);
+					return false;
+				}
+				if (item.includeArea && !Array.isArray(item.includeArea)) {
+					console.log(`❌ appendSubList[${i}].includeArea必须是数组:`, typeof item.includeArea);
+					return false;
+				}
+				if (item.includeArea && Array.isArray(item.includeArea)) {
+					for (let j = 0; j < item.includeArea.length; j++) {
+						if (typeof item.includeArea[j] !== 'string') {
+							console.log(`❌ appendSubList[${i}].includeArea[${j}]类型验证失败:`, typeof item.includeArea[j]);
+							return false;
+						}
+					}
 				}
 			}
 		}
 
 		// 验证不允许的字段
-		const allowedFields = [
-			'subscribe',
-			'accessToken',
-			'fileName',
-			'excludeRegex',
-			'flag',
-			'includeArea',
-			'ruleUrl',
-			'multiPortMode',
-			'appendSubList',
-		];
+		const allowedFields = ['subscribe', 'accessToken', 'fileName', 'excludeRegex', 'ruleUrl', 'multiPortMode', 'appendSubList'];
 
 		const configKeys = Object.keys(config);
 		for (const key of configKeys) {
 			if (!allowedFields.includes(key)) {
+				console.log('❌ 不允许的字段:', key, '允许的字段:', allowedFields);
 				return false;
 			}
 		}
@@ -390,10 +405,12 @@ export class UserManager {
 			try {
 				new URL(config.ruleUrl);
 			} catch {
+				console.log('❌ ruleUrl URL格式验证失败:', config.ruleUrl);
 				return false;
 			}
 		}
 
+		console.log('✅ 用户配置验证通过');
 		return true;
 	}
 
