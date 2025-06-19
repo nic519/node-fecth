@@ -1,4 +1,6 @@
-function configManager() {
+import { UserConfig, ConfigResponse, EditorInterface, ConnectionStatus, ConfigManager } from '../src/types/user-config.types';
+
+function configManager(): ConfigManager {
 	return {
 		editor: null,
 		configPreview: '',
@@ -18,36 +20,39 @@ function configManager() {
 		},
 
 		initSimpleEditor() {
-			// 使用简单的 textarea 替代 Monaco Editor
+			const editorElement = document.getElementById('editor') as HTMLTextAreaElement;
+			if (!editorElement) {
+				throw new Error('Editor element not found');
+			}
+
 			this.editor = {
-				getValue: () => document.getElementById('editor').value,
-				setValue: (value) => {
-					document.getElementById('editor').value = value;
+				getValue: (): string => editorElement.value,
+				setValue: (value: string): void => {
+					editorElement.value = value;
 				},
-				onDidChangeModelContent: (callback) => {
-					document.getElementById('editor').addEventListener('input', callback);
+				onDidChangeModelContent: (callback: () => void): void => {
+					editorElement.addEventListener('input', callback);
 				},
 				getModel: () => ({
-					getLineCount: () => document.getElementById('editor').value.split('\n').length,
+					getLineCount: (): number => editorElement.value.split('\n').length,
 				}),
 			};
 
-			// 设置初始值
-			document.getElementById('editor').value = this.getDefaultConfigYaml();
-
-			// 添加输入事件监听
-			document.getElementById('editor').addEventListener('input', () => {
+			editorElement.value = this.getDefaultConfigYaml();
+			editorElement.addEventListener('input', () => {
 				this.updatePreview();
 			});
 
 			this.updatePreview();
 		},
 
-		async loadConfig() {
+		async loadConfig(): Promise<void> {
 			try {
-				const response = await fetch(`/api/config/users/${this.userId}?token=${new URLSearchParams(window.location.search).get('token')}`);
+				const token = new URLSearchParams(window.location.search).get('token');
+				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`);
+
 				if (response.ok) {
-					const data = await response.json();
+					const data: ConfigResponse = await response.json();
 					this.lastModified = data.meta.lastModified;
 					this.configSource = data.meta.source;
 					this.connectionStatus = 'connected';
@@ -73,13 +78,12 @@ function configManager() {
 			this.validateConfig(yaml);
 		},
 
-		validateConfig(yaml) {
+		validateConfig(yaml: string) {
 			this.validationErrors = [];
 
 			try {
 				// 基本的YAML语法检查
 				const lines = yaml.split('\n');
-				let indentLevel = 0;
 
 				for (let i = 0; i < lines.length; i++) {
 					const line = lines[i].trim();
@@ -110,11 +114,12 @@ function configManager() {
 					}
 				}
 			} catch (error) {
-				this.validationErrors.push(`YAML解析错误: ${error.message}`);
+				const errorMessage = error instanceof Error ? error.message : '未知错误';
+				this.validationErrors.push(`YAML解析错误: ${errorMessage}`);
 			}
 		},
 
-		async saveConfig() {
+		async saveConfig(): Promise<void> {
 			if (this.validationErrors.length > 0) {
 				alert('配置有错误，请先修复后再保存');
 				return;
@@ -123,10 +128,11 @@ function configManager() {
 			this.saving = true;
 
 			try {
-				const yaml = this.editor.getValue();
+				const yaml = this.editor?.getValue() || '';
 				const config = this.yamlToConfig(yaml);
 
-				const response = await fetch(`/api/config/users/${this.userId}?token=${new URLSearchParams(window.location.search).get('token')}`, {
+				const token = new URLSearchParams(window.location.search).get('token');
+				const response = await fetch(`/api/config/users/${this.userId}?token=${token}`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -153,14 +159,14 @@ function configManager() {
 
 		resetConfig() {
 			if (confirm('确定要重置配置吗？这将丢失所有未保存的更改。')) {
-				this.editor.setValue(this.getDefaultConfigYaml());
+				this.editor?.setValue(this.getDefaultConfigYaml());
 			}
 		},
 
-		configToYaml(config) {
+		configToYaml(config: UserConfig | null): string {
 			if (!config) return this.getDefaultConfigYaml();
 
-			const lines = [];
+			const lines: string[] = [];
 			lines.push('# 用户配置');
 			lines.push('# 请根据您的需求修改以下配置');
 			lines.push('');
@@ -176,7 +182,7 @@ function configManager() {
 
 			if (config.appendSubList && config.appendSubList.length > 0) {
 				lines.push('appendSubList:');
-				config.appendSubList.forEach((sub, index) => {
+				config.appendSubList.forEach((sub) => {
 					lines.push(`  - subscribe: "${sub.subscribe}"`);
 					lines.push(`    flag: "${sub.flag}"`);
 					if (sub.includeArea && sub.includeArea.length > 0) {
@@ -190,11 +196,11 @@ function configManager() {
 			return lines.join('\n');
 		},
 
-		yamlToConfig(yaml) {
+		yamlToConfig(yaml: string): UserConfig {
 			const lines = yaml.split('\n');
-			const config = {};
-			let currentKey = null;
-			let currentArray = null;
+			const config: UserConfig = { subscribe: '', accessToken: '' };
+			let currentKey: string | null = null;
+			let currentArray: any[] | null = null;
 
 			for (const line of lines) {
 				const trimmed = line.trim();
@@ -208,11 +214,11 @@ function configManager() {
 						// 数组开始
 						currentKey = key.trim();
 						currentArray = [];
-						config[currentKey] = currentArray;
+						(config as any)[currentKey] = currentArray;
 					} else {
 						// 普通键值对
 						currentKey = key.trim();
-						config[currentKey] = value.replace(/^["']|["']$/g, '');
+						(config as any)[currentKey] = value.replace(/^["']|["']$/g, '');
 						currentArray = null;
 					}
 				} else if (trimmed.startsWith('-') && currentArray) {
@@ -224,7 +230,7 @@ function configManager() {
 						if (!currentArray[currentArray.length - 1]) {
 							currentArray[currentArray.length - 1] = {};
 						}
-						currentArray[currentArray.length - 1][objKey] = objValue.replace(/^["']|["']$/g, '');
+						(currentArray[currentArray.length - 1] as any)[objKey] = objValue.replace(/^["']|["']$/g, '');
 					} else {
 						// 简单数组项
 						currentArray.push(value.replace(/^["']|["']$/g, ''));
@@ -235,7 +241,7 @@ function configManager() {
 			return config;
 		},
 
-		getDefaultConfigYaml() {
+		getDefaultConfigYaml(): string {
 			return `# 用户配置模板
 # 请根据您的需求修改以下配置
 
@@ -271,10 +277,13 @@ accessToken: "your-access-token"
 # excludeRegex: ".*test.*"`;
 		},
 
-		formatTime(isoString) {
+		formatTime(isoString: string | null): string {
 			if (!isoString) return '未知';
 			const date = new Date(isoString);
 			return date.toLocaleString('zh-CN');
 		},
 	};
 }
+
+// 导出函数供全局使用
+(window as any).configManager = configManager;
