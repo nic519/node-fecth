@@ -36,7 +36,7 @@ export class ClashHandler implements RouteHandler {
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const authConfig = params!.authConfig;
+		const authConfig = params!.dbUser;
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);

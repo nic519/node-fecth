@@ -68,7 +68,7 @@ export class AuthUtils {
 		// 验证访问令牌
 		const accessToken = this.getAccessToken(request);
 		if (!accessToken) {
-			throw Error('no access token')
+			throw Error('no access token');
 		}
 
 		const userManager = new UserManager(env);
@@ -77,11 +77,11 @@ export class AuthUtils {
 		if (userId) {
 			const user = await userManager.validateAndGetUser(userId, accessToken);
 			if (!user) {
-				throw Error(' Invalid access token') 
-			} 
+				throw Error(' Invalid access token');
+			}
 			return user;
 		}
-		throw Error(' No user id') ;
+		throw Error(' No user id');
 	}
 
 	/**
@@ -112,7 +112,6 @@ export class AuthUtils {
 		return {
 			success: true,
 			user,
-			userManager,
 		};
 	}
 

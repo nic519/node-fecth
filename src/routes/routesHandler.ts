@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
-import { RouteHandler } from '@/types/routes.types';
 import { RoutesPathConfig } from '@/config/routes.config';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { KvHandler } from '@/module/kv/kvHandler';
@@ -9,7 +8,7 @@ import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { ConfigPageHandler } from '@/routes/handler/configPageHandler';
-import { UserManager } from '@/module/userManager/userManager';
+import { DBUser, UserManager } from '@/module/userManager/userManager';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
 
 export class Router {
@@ -157,10 +156,11 @@ export class Router {
 					if (!authConfig) {
 						return c.json({ error: 'Unauthorized' }, 401);
 					}
+					const dbUser = new DBUser(authConfig.config);
 
 					console.log(`👤 用户认证成功: ${uid}`);
 					const clashHandler = new ClashHandler();
-					const response = await clashHandler.handle(c.req.raw, c.env, { authConfig });
+					const response = await clashHandler.handle(c.req.raw, c.env, { dbUser });
 					return response || c.text('Clash handler failed', 500);
 				} else {
 					return c.json(
