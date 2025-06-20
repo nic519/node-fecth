@@ -1,12 +1,12 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashProxy } from '@/types/clash.types';
-import { DBUser } from '@/module/userManager/userManager';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
-import { StrategyMultiPort } from './strategyMultiPort';
+import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
+import { InnerUser } from '@/module/userManager/innerUserConfig';
 
 export class StrategyMultiSub {
-	constructor(private userConfig: DBUser, private mainClashContent: string) {}
+	constructor(private userConfig: InnerUser, private mainClashContent: string) {}
 
 	/// 取出所有proxy
 	private async getProxyList(): Promise<ClashProxy[]> {

@@ -1,4 +1,4 @@
-import { UserConfig } from '../src/types/user-config.schema';
+import { UserConfig } from '@/types/user.types';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as yamlParse } from 'yaml';
@@ -7,6 +7,7 @@ import { parse as yamlParse } from 'yaml';
 const userVarsPath: string = path.join(__dirname, '..', '.dev.users.yaml');
 const devVarsPath: string = path.join(__dirname, '..', '.dev.vars');
 
+// 输出所有用户的订阅链接
 function printLink(yamlContent: string) {
 	const yamlObj = yamlParse(yamlContent) as Record<string, UserConfig>;
 	for (const userId in yamlObj) {
@@ -15,6 +16,11 @@ function printLink(yamlContent: string) {
 }
 
 try {
+	if (fs.existsSync(userVarsPath) == false) {
+		// 在mac才需要执行这个脚本
+		process.exit(1);
+	}
+
 	// 读取 .dev.user.vars 文件内容
 	const userVarsContent: string = fs.readFileSync(userVarsPath, 'utf8');
 	printLink(userVarsContent);

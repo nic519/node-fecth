@@ -8,7 +8,8 @@ import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { ConfigPageHandler } from '@/routes/handler/configPageHandler';
-import { DBUser, UserManager } from '@/module/userManager/userManager';
+import { UserManager } from '@/module/userManager/userManager';
+import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
 
 export class Router {
@@ -156,11 +157,11 @@ export class Router {
 					if (!authConfig) {
 						return c.json({ error: 'Unauthorized' }, 401);
 					}
-					const dbUser = new DBUser(authConfig.config);
+					const innerUser = new InnerUser(authConfig.config);
 
 					console.log(`👤 用户认证成功: ${uid}`);
 					const clashHandler = new ClashHandler();
-					const response = await clashHandler.handle(c.req.raw, c.env, { dbUser });
+					const response = await clashHandler.handle(c.req.raw, c.env, { innerUser: innerUser });
 					return response || c.text('Clash handler failed', 500);
 				} else {
 					return c.json(

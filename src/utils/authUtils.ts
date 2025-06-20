@@ -2,23 +2,6 @@ import { UserManager } from '@/module/userManager/userManager';
 import { ConfigResponse } from '@/types/user-config.types';
 
 /**
- * 身份验证结果接口
- */
-export interface AuthResult {
-	success: boolean;
-	user?: ConfigResponse;
-	response?: Response;
-}
-
-/**
- * 令牌提取结果接口
- */
-export interface TokenResult {
-	userId: string;
-	accessToken: string;
-}
-
-/**
  * 统一的身份验证工具类
  */
 export class AuthUtils {
@@ -39,22 +22,6 @@ export class AuthUtils {
 		}
 
 		return null;
-	}
-
-	/**
-	 * 从URL查询参数中提取用户ID和访问令牌
-	 * 通常用于KV Handler等场景
-	 */
-	static extractTokenFromQuery(request: Request): TokenResult | null {
-		const url = new URL(request.url);
-		const userId = url.searchParams.get('uid');
-		const accessToken = url.searchParams.get('token');
-
-		if (!userId || !accessToken) {
-			return null;
-		}
-
-		return { userId, accessToken };
 	}
 
 	/**
@@ -82,37 +49,6 @@ export class AuthUtils {
 			return user;
 		}
 		throw Error(' No user id');
-	}
-
-	/**
-	 * 基于查询参数的身份验证（用于KV Handler等场景）
-	 * @param request HTTP请求对象
-	 * @param env 环境变量
-	 * @returns 验证结果
-	 */
-	static async authenticateFromQuery(request: Request, env: Env): Promise<AuthResult> {
-		const tokenResult = this.extractTokenFromQuery(request);
-		if (!tokenResult) {
-			return {
-				success: false,
-				response: new Response('Unauthorized: Missing uid or token parameters', { status: 401 }),
-			};
-		}
-
-		const userManager = new UserManager(env);
-		const user = await userManager.validateAndGetUser(tokenResult.userId, tokenResult.accessToken);
-
-		if (!user) {
-			return {
-				success: false,
-				response: new Response('Unauthorized: Invalid credentials', { status: 401 }),
-			};
-		}
-
-		return {
-			success: true,
-			user,
-		};
 	}
 
 	/**

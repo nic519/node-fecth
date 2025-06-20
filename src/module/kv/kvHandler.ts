@@ -9,10 +9,7 @@ export class KvHandler implements RouteHandler {
 
 		try {
 			// 统一验证身份
-			const authResult = await AuthUtils.authenticateFromQuery(request, env);
-			if (!authResult.success) {
-				return authResult.response!;
-			}
+			await AuthUtils.authenticate(request, env);
 
 			// 生产环境或有KV binding的环境，直接处理
 			const kvService = new KvService(env);

@@ -1,11 +1,11 @@
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyDirectly } from '@/module/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
-import { DBUser } from '@/module/userManager/userManager';
 import { StrategyMultiSub } from './strategyMultiSub';
+import { InnerUser } from '@/module/userManager/innerUserConfig';
 
 export class YamlMergeFactory {
-	constructor(private userConfig: DBUser) {}
+	constructor(private userConfig: InnerUser) {}
 
 	async fastStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
 		const ruleContent = await TrafficUtils.fetchRawContent(this.userConfig.ruleUrl);

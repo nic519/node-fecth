@@ -1,43 +1,7 @@
-import { GlobalConfig } from '@/config/global-config';
-import { AreaCode, SubConfig, UserConfig } from '@/types/user-config.schema';
+import { UserConfig } from '@/types/user-config.schema';
 import { parse as yamlParse } from 'yaml';
-import { stringify } from 'yaml';
 import { validateUserConfig } from '@/types/user-config.schema';
 import { ConfigResponse, UserConfigMeta } from '@/types/user-config.types';
-
-// 用户配置类
-export class DBUser {
-	readonly subscribe: string;
-	readonly accessToken: string;
-	readonly ruleUrl: string;
-	readonly fileName: string;
-	readonly multiPortMode?: AreaCode[];
-	readonly appendSubList?: SubConfig[];
-	readonly excludeRegex?: string;
- 
-
-	constructor(config: UserConfig) {
-		this.subscribe = config.subscribe;
-		this.accessToken = config.accessToken;
-		this.ruleUrl = config.ruleUrl || GlobalConfig.ruleUrl;
-		this.fileName = config.fileName || '';
-		this.multiPortMode = config.multiPortMode;
-		this.appendSubList = config.appendSubList;
-		this.excludeRegex = config.excludeRegex;
-	}
-} 
-
-export class UserUtils {
-	// 将用户配置转换为YAML格式
-	static convertToYaml(config: UserConfig): string {
-		const yaml = stringify(config, {
-			indent: 2,
-			lineWidth: 120,
-			minContentWidth: 20,
-		});
-		return yaml;
-	}
-}
 
 export class UserManager {
 	private env: Env;
@@ -71,7 +35,7 @@ export class UserManager {
 			console.error(`获取用户配置失败: ${userId}`, error);
 			return null;
 		}
-	}  
+	}
 
 	/**
 	 * 从KV存储获取用户配置
@@ -106,10 +70,10 @@ export class UserManager {
 	 */
 	private getConfigFromEnv(userId: string): UserConfig | null {
 		try {
-			const dbUser = this.env.DB_USER;
-			if (!dbUser) return null;
+			const envUser = this.env.DB_USER;
+			if (!envUser) return null;
 
-			const users = yamlParse(dbUser) as Record<string, UserConfig>;
+			const users = yamlParse(envUser) as Record<string, UserConfig>;
 			return users[userId] || null;
 		} catch (error) {
 			console.error(`从环境变量获取配置失败: ${userId}`, error);
@@ -189,10 +153,10 @@ export class UserManager {
 	 */
 	private getEnvUsersList(): string[] {
 		try {
-			const dbUser = this.env.DB_USER;
-			if (!dbUser) return [];
+			const envUsers = this.env.DB_USER;
+			if (!envUsers) return [];
 
-			const users = yamlParse(dbUser) as Record<string, UserConfig>;
+			const users = yamlParse(envUsers) as Record<string, UserConfig>;
 			return Object.keys(users);
 		} catch (error) {
 			console.error('从环境变量获取用户列表失败', error);
@@ -243,7 +207,7 @@ export class UserManager {
 	 * 验证用户token并获取用户配置（支持KV存储）
 	 * @param userId 用户ID
 	 * @param accessToken 访问token
-	 * @returns 验证通过返回DBUser，验证失败返回null
+	 * @returns 验证通过返回ConfigResponse，验证失败返回null
 	 */
 	async validateAndGetUser(userId: string, accessToken: string): Promise<ConfigResponse | null> {
 		if (!userId || !accessToken) {
@@ -267,7 +231,6 @@ export class UserManager {
 			}
 
 			console.log(`✅ 用户验证成功: ${userId} (来源: ${userConfigResponse.meta.source})`);
-			// 返回 DBUser 实例
 			return userConfigResponse;
 		} catch (error) {
 			console.error(`❌ 验证用户token失败: ${userId}`, error);

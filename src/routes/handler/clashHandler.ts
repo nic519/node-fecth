@@ -2,6 +2,7 @@ import { RouteHandler } from '@/types/routes.types';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/url-params.types';
+import { InnerUser } from '@/module/userManager/innerUserConfig';
 
 // 响应头配置
 const RESPONSE_HEADERS: Record<string, string> = {
@@ -36,13 +37,13 @@ export class ClashHandler implements RouteHandler {
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const authConfig = params!.dbUser;
+		const innerUser: InnerUser = params!.innerUser;
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 
 			// 开始构建配置文件
-			const yamlMerge = new YamlMergeFactory(authConfig);
+			const yamlMerge = new YamlMergeFactory(innerUser);
 			const { yamlContent, subInfo } = await yamlMerge.generate();
 
 			// 使用配置验证器验证格式
@@ -51,7 +52,7 @@ export class ClashHandler implements RouteHandler {
 
 			return new Response(yamlContent, {
 				status: 200,
-				headers: this.buildHeaders(subInfo, queryParams.download ? authConfig.fileName : undefined),
+				headers: this.buildHeaders(subInfo, queryParams.download ? innerUser.fileName : undefined),
 			});
 		} catch (error) {
 			console.error('Error:', error);
