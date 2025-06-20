@@ -1,16 +1,7 @@
-import { RouteHandler } from '@/types/routes.types';
 import { UserManager } from '@/module/userManager/userManager';
+import { RouteHandler } from '@/types/routes.types';
 import { UserConfig } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
-
-/**
- * 身份验证结果接口
- */
-interface AuthResult {
-	success: boolean;
-	userManager?: UserManager;
-	response?: Response;
-}
 
 export class UserConfigHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {

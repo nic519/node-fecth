@@ -1,7 +1,7 @@
+import { GlobalConfig } from '@/config/global-config';
 import { RouteHandler } from '@/types/routes.types';
-import { UserManager } from '@/module/userManager/userManager';
+import { ConfigResponse } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
-import { ConfigResponse, UserConfig } from '@/types/user-config.types';
 
 export class ConfigPageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -22,7 +22,7 @@ export class ConfigPageHandler implements RouteHandler {
 				const authResult = await AuthUtils.authenticate(request, env, userId);
 
 				// 生成HTML页面
-				const html = await this.generateConfigPage(userId, authResult, request);
+				const html = await this.generateConfigPage(userId, authResult, request, env);
 
 				return new Response(html, {
 					status: 200,
@@ -43,15 +43,19 @@ export class ConfigPageHandler implements RouteHandler {
 	/**
 	 * 生成配置管理页面HTML（从 HTML 模板文件读取并插值）
 	 */
-	private async generateConfigPage(userId: string, configRespone: ConfigResponse, request: Request): Promise<string> {
-		const htmlResp = await fetch(new URL('/user-modify.html', request.url));
-		let template = await htmlResp.text();
+	private async generateConfigPage(userId: string, configResponse: ConfigResponse, request: Request, env: Env): Promise<string> {
+		let template: string;
+		if (GlobalConfig.isDev) {
+			template = await fetch(new URL('/user-modify.html', request.url)).then((res: Response) => res.text());
+		} else {
+			template = await env.ASSETS.fetch(new URL('/user-modify.html', request.url)).then((res: Response) => res.text());
+		}
 
 		// 变量插值 - 安全转义HTML特殊字符
-		const escapedConfig = JSON.stringify(configRespone);
+		const escapedConfig = JSON.stringify(configResponse);
 		console.log(`escapedConfig=${escapedConfig}`);
-		template = template.replace(/\$\{configRespone\}/g, escapedConfig);
-		return template;
+		const processedTemplate = template.replace(/\$\{configResponse\}/g, escapedConfig);
+		return processedTemplate;
 	}
 
 	/**
@@ -59,19 +63,5 @@ export class ConfigPageHandler implements RouteHandler {
 	 */
 	private escapeHtml(text: string): string {
 		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
-	}
-
-	/**
-	 * 获取默认配置YAML模板
-	 */
-	private getDefaultConfigYaml(): string {
-		return `subscribe: "https://example.com/subscription"
-accessToken: "your-access-token"
-fileName: "config.yaml"
-excludeRegex: "Standard"
-appendSubList:
-  - ""
-flag: "🥷"
-includeArea: "[HK]"`;
 	}
 }

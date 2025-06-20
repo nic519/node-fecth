@@ -32,7 +32,7 @@ function configManager() {
 			if (serverDataElement) {
 				try {
 					const data = JSON.parse(serverDataElement.textContent);
-					const meta = data.configRespone.meta;
+					const meta = data.configResponse.meta;
 					this.userId = meta.userId;
 
 					// 更新页面标题
@@ -42,9 +42,9 @@ function configManager() {
 					this.configSource = meta.source;
 					this.connectionStatus = 'connected';
 
-					if (data.configRespone.config) {
+					if (data.configResponse.config) {
 						console.log('使用服务器端传递的配置数据');
-						const yamlFormat = this.configToYaml(data.configRespone.config);
+						const yamlFormat = this.configToYaml(data.configResponse.config);
 						this.configContent = yamlFormat;
 						this.validateConfig(yamlFormat);
 						this.connectionStatus = 'connected';
