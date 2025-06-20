@@ -1,5 +1,5 @@
 import { RouteHandler } from '@/types/routes.types';
-import { UserManager, UserUtils } from '@/module/userManager/userManager';
+import { UserManager } from '@/module/userManager/userManager';
 import { UserConfig } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
 
@@ -60,7 +60,6 @@ export class UserConfigHandler implements RouteHandler {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
 			return AuthUtils.createSuccessResponse(authResult);
-			 
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
@@ -74,7 +73,7 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证（超级管理员权限）
 			const authResult = await AuthUtils.authenticate(request, env);
-			 
+
 			// 获取所有用户列表
 			const userManager = new UserManager(env);
 			const users = await userManager.getAllUsers();
@@ -106,7 +105,7 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-	 
+
 			// 解析请求体
 			const body = (await request.json()) as { yaml?: string };
 			let config: UserConfig;
@@ -132,7 +131,7 @@ export class UserConfigHandler implements RouteHandler {
 			const validation = validateUserConfig(config);
 
 			if (!validation.isValid) {
-				return AuthUtils.createErrorResponse('Validation failed', 400, 'application/json');
+				return AuthUtils.createErrorResponse(validation.errors.join('\n'), 400);
 			}
 
 			// 保存用户配置
@@ -160,8 +159,7 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
-		 
-			
+
 			const userManager = new UserManager(env);
 
 			// 删除用户配置

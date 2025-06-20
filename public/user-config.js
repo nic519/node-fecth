@@ -13,7 +13,7 @@ function configManager() {
 		connectionStatus: 'connecting',
 
 		// 初始化
-		init() { 
+		init() {
 			// 检查YAML库是否正确加载
 			console.log('检查YAML库...');
 			if (window.jsyaml) {
@@ -30,22 +30,21 @@ function configManager() {
 		loadServerData() {
 			const serverDataElement = document.getElementById('server-data');
 			if (serverDataElement) {
-				try { 
-
+				try {
 					const data = JSON.parse(serverDataElement.textContent);
 					const meta = data.configRespone.meta;
 					this.userId = meta.userId;
-					
+
 					// 更新页面标题
 					document.title = `配置管理 - ${this.userId}`;
-					
+
 					this.lastModified = meta.lastModified;
 					this.configSource = meta.source;
 					this.connectionStatus = 'connected';
 
 					if (data.configRespone.config) {
 						console.log('使用服务器端传递的配置数据');
-						const yamlFormat = this.configToYaml(data.configRespone.config)
+						const yamlFormat = this.configToYaml(data.configRespone.config);
 						this.configContent = yamlFormat;
 						this.validateConfig(yamlFormat);
 						this.connectionStatus = 'connected';
@@ -58,8 +57,6 @@ function configManager() {
 			}
 			return false;
 		},
-
-
 
 		// 验证配置
 		validateConfig(yaml) {
@@ -157,8 +154,8 @@ function configManager() {
 				} else {
 					// 处理后端返回的详细错误信息
 					const errorData = await response.json().catch(() => null);
-					if (errorData && errorData.details) {
-						alert(`配置验证失败:\n${errorData.details.join('\n')}`);
+					if (errorData && errorData.message) {
+						this.validationErrors = [errorData.message];
 					} else {
 						const error = await response.text();
 						alert(`保存失败: ${error}`);
@@ -166,7 +163,7 @@ function configManager() {
 				}
 			} catch (error) {
 				console.error('保存配置失败:', error);
-				alert('保存失败，请检查网络连接');
+				alert('保存失败，请检查网络连接', error);
 			} finally {
 				this.saving = false;
 			}

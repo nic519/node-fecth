@@ -1,5 +1,5 @@
 import { RouteHandler } from '@/types/routes.types';
-import { UserManager, UserUtils } from '@/module/userManager/userManager'; 
+import { UserManager } from '@/module/userManager/userManager';
 import { AuthUtils } from '@/utils/authUtils';
 import { ConfigResponse, UserConfig } from '@/types/user-config.types';
 
@@ -20,7 +20,7 @@ export class ConfigPageHandler implements RouteHandler {
 
 				// 验证用户权限
 				const authResult = await AuthUtils.authenticate(request, env, userId);
- 
+
 				// 生成HTML页面
 				const html = await this.generateConfigPage(userId, authResult, request);
 
@@ -49,9 +49,8 @@ export class ConfigPageHandler implements RouteHandler {
 
 		// 变量插值 - 安全转义HTML特殊字符
 		const escapedConfig = JSON.stringify(configRespone);
-		console.log(`escapedConfig=${escapedConfig}`)
-		template = template 
-			.replace(/\$\{configRespone\}/g, escapedConfig);
+		console.log(`escapedConfig=${escapedConfig}`);
+		template = template.replace(/\$\{configRespone\}/g, escapedConfig);
 		return template;
 	}
 
@@ -59,12 +58,7 @@ export class ConfigPageHandler implements RouteHandler {
 	 * 转义HTML特殊字符，防止XSS攻击
 	 */
 	private escapeHtml(text: string): string {
-		return text
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#x27;');
+		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 	}
 
 	/**

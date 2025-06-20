@@ -7,7 +7,10 @@
 		"deploy": "wrangler deploy --keep-vars",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
-		"predev": "yarn convert-vars"
+		"predev": "yarn convert-vars && yarn type-check",
+		"type-check": "tsc --noEmit",
+		"type-check:watch": "tsc --noEmit --watch",
+		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",

@@ -67,7 +67,7 @@ export class AuthUtils {
 	 * 创建统一的错误响应
 	 */
 	static createErrorResponse(message: string, status: number, contentType: string = 'application/json'): Response {
-		const body = contentType === 'application/json' ? JSON.stringify({ error: message }) : message;
+		const body = JSON.stringify({ message: message });
 
 		return new Response(body, {
 			status,
