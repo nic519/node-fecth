@@ -28,7 +28,7 @@ export type AreaCode = z.infer<typeof AreaCodeSchema>;
 
 // 验证函数
 export function validateUserConfig(data: unknown): { isValid: boolean; errors: string[] } {
-	const result = UserConfigSchema.safeParse(data);
+	const result = UserConfigSchema.strict().safeParse(data);
 
 	if (result.success) {
 		return { isValid: true, errors: [] };

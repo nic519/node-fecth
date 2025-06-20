@@ -6,6 +6,13 @@ import { ConfigResponse, UserConfigMeta } from '@/types/user-config.types';
 export class UserManager {
 	private env: Env;
 
+	private kvUserConfigKey(userId: string) {
+		return `user:${userId}:config`;
+	}
+	private kvUserMetaKey(userId: string) {
+		return `user:${userId}:meta`;
+	}
+
 	constructor(env: Env) {
 		this.env = env;
 	}
@@ -42,8 +49,8 @@ export class UserManager {
 	 */
 	private async getConfigFromKV(userId: string): Promise<ConfigResponse | null> {
 		try {
-			const configKey = `user:${userId}:config`;
-			const metaKey = `user:${userId}:meta`;
+			const configKey = this.kvUserConfigKey(userId);
+			const metaKey = this.kvUserMetaKey(userId);
 
 			const [configData, metaData] = await Promise.all([this.env.USERS_KV.get(configKey), this.env.USERS_KV.get(metaKey)]);
 
@@ -91,8 +98,8 @@ export class UserManager {
 				throw new Error('用户配置验证失败');
 			}
 
-			const configKey = `user:${userId}:config`;
-			const metaKey = `user:${userId}:meta`;
+			const configKey = this.kvUserConfigKey(userId);
+			const metaKey = this.kvUserMetaKey(userId);
 
 			const meta: UserConfigMeta = {
 				lastModified: new Date().toISOString(),
