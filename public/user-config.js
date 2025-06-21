@@ -10,10 +10,12 @@ function configManager() {
 		subscribeURL: '',
 		validationErrors: [],
 		saving: false,
+		saveSuccess: false,
 		lastSaved: null,
 		lastModified: null,
 		configSource: '',
 		connectionStatus: 'connecting',
+		copySuccess: false,
 
 		// 初始化
 		init() {
@@ -27,7 +29,41 @@ function configManager() {
 
 			// 优先使用服务器端传递的数据
 			this.loadServerData();
-			this.subscribeURL = window.location.href.replace('/config');
+			this.subscribeURL = window.location.href.replace('/config', '');
+		},
+		
+		async copySubscribeURL() {
+			try {
+				await navigator.clipboard.writeText(this.subscribeURL);
+				this.copySuccess = true;
+				// 2秒后恢复原始图标
+				setTimeout(() => {
+					this.copySuccess = false;
+				}, 2000);
+			} catch (error) {
+				console.error('复制失败:', error);
+				// 如果剪贴板API不可用，可以使用降级方案
+				this.fallbackCopyToClipboard(this.subscribeURL);
+			}
+		},
+
+		// 降级复制方案
+		fallbackCopyToClipboard(text) {
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			try {
+				document.execCommand('copy');
+				this.copySuccess = true;
+				setTimeout(() => {
+					this.copySuccess = false;
+				}, 2000);
+			} catch (error) {
+				console.error('降级复制也失败了:', error);
+			}
+			document.body.removeChild(textArea);
 		},
 
 		// 从服务器端传递的数据中加载配置
@@ -123,11 +159,12 @@ function configManager() {
 		// 保存配置
 		async saveConfig() {
 			if (this.validationErrors.length > 0) {
-				alert('配置有错误，请先修复后再保存');
+				// 将错误提示放到验证错误区域，不使用alert
 				return;
 			}
 
 			this.saving = true;
+			this.saveSuccess = false;
 
 			try {
 				const yaml = this.configContent || '';
@@ -137,7 +174,7 @@ function configManager() {
 					const config = this.yamlToConfig(yaml);
 					// 这里可以添加更多验证逻辑
 				} catch (error) {
-					alert('YAML格式错误，请检查配置');
+					this.validationErrors = ['YAML格式错误，请检查配置'];
 					return;
 				}
 
@@ -154,7 +191,12 @@ function configManager() {
 					this.lastSaved = new Date().toISOString();
 					this.configSource = 'kv';
 					this.connectionStatus = 'connected';
-					alert('配置保存成功！');
+					this.saveSuccess = true;
+					
+					// 3秒后恢复原始状态
+					setTimeout(() => {
+						this.saveSuccess = false;
+					}, 3000);
 				} else {
 					// 处理后端返回的详细错误信息
 					const errorData = await response.json().catch(() => null);
@@ -162,12 +204,12 @@ function configManager() {
 						this.validationErrors = [errorData.message];
 					} else {
 						const error = await response.text();
-						alert(`保存失败: ${error}`);
+						this.validationErrors = [`保存失败: ${error}`];
 					}
 				}
 			} catch (error) {
 				console.error('保存配置失败:', error);
-				alert('保存失败，请检查网络连接', error);
+				this.validationErrors = ['保存失败，请检查网络连接'];
 			} finally {
 				this.saving = false;
 			}
