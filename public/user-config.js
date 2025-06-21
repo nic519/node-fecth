@@ -1,3 +1,5 @@
+const { subscribe } = require("diagnostics_channel");
+
 // 用户配置管理器 - 使用 Alpine.js
 function configManager() {
 	return {
@@ -5,6 +7,7 @@ function configManager() {
 		userId: '',
 		configContent: '',
 		configPreview: '',
+		subscribeURL: '',
 		validationErrors: [],
 		saving: false,
 		lastSaved: null,
@@ -24,6 +27,7 @@ function configManager() {
 
 			// 优先使用服务器端传递的数据
 			this.loadServerData();
+			this.subscribeURL = window.location.href.replace('/config');
 		},
 
 		// 从服务器端传递的数据中加载配置

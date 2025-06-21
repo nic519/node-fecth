@@ -2,9 +2,10 @@ import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashListener, ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
+import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiPort {
-	constructor(private ruleContent: string, private clashContent: string, private userConfig: InnerUser) {}
+	constructor(private preMergeInfo: PreMergeInfo, private userConfig: InnerUser) {}
 
 	/// 创建listeners
 	createListeners(proxyList: ClashProxy[]): ClashListener[] {
@@ -47,12 +48,12 @@ export class StrategyMultiPort {
 	/// 取出所有proxy-provider
 	generate(): string {
 		// 1.删除proxy-providers
-		const yamlObj = yamlParse(this.ruleContent);
+		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
 		delete yamlObj['proxy-providers'];
 
 		// 2.添加proxy
 		const proxyList = StrategyUtils.getProxyList({
-			clashContent: this.clashContent,
+			clashContent: this.preMergeInfo.clashContent,
 			excludeRegex: this.userConfig.excludeRegex,
 		});
 		if (yamlObj['proxies']) {

@@ -16,7 +16,7 @@ class SubscriptionService {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		console.log('🔑 开始处理请求');
-		initGlobalConfig(request);
+		initGlobalConfig(request, env);
 
 		const service = new SubscriptionService(env);
 		return service.handleRequest(request);
