@@ -6,6 +6,7 @@
 
 ## 功能特性
 
+### 用户配置管理
 - ✅ 支持KV存储和环境变量两种配置源
 - ✅ 配置优先级：KV > 环境变量
 - ✅ Web前端界面进行可视化配置管理
@@ -13,6 +14,15 @@
 - ✅ 实时配置验证和语法检查
 - ✅ YAML格式配置编辑
 - ✅ 配置预览和错误提示
+
+### 超级管理员功能
+- ✅ 系统统计和监控仪表板
+- ✅ 用户列表管理和批量操作
+- ✅ 用户配置查看和编辑
+- ✅ 用户流量信息显示和刷新
+- ✅ 配置模板管理和应用
+- ✅ 操作日志记录和查询
+- ✅ 基于superAdminToken的权限控制
 
 ## API接口
 
@@ -70,6 +80,147 @@ DELETE /api/config/users/:userId?token=xxx
 GET /api/config/users?token=xxx
 ```
 
+## 超级管理员API接口
+
+### 1. 获取系统统计数据
+```
+GET /api/admin/stats?superToken=xxx
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "totalUsers": 25,
+    "activeUsers": 18,
+    "kvConfigUsers": 12,
+    "envConfigUsers": 13,
+    "configCompleteRate": 92.5,
+    "todayNewUsers": 3
+  }
+}
+```
+
+### 2. 获取用户列表
+```
+GET /api/admin/users?superToken=xxx
+```
+
+### 3. 获取用户详情
+```
+GET /api/admin/users/:userId?superToken=xxx
+```
+
+### 4. 更新用户配置
+```
+PUT /api/admin/users/:userId?superToken=xxx
+Content-Type: application/json
+
+{
+  "config": {
+    "subscribe": "https://example.com/subscription",
+    "accessToken": "user-access-token"
+  }
+}
+```
+
+### 5. 删除用户
+```
+DELETE /api/admin/users/:userId?superToken=xxx
+```
+
+### 6. 创建用户
+```
+POST /api/admin/users?superToken=xxx
+Content-Type: application/json
+
+{
+  "userId": "newuser",
+  "config": {
+    "subscribe": "https://example.com/subscription",
+    "accessToken": "user-access-token"
+  }
+}
+```
+
+### 7. 批量操作用户
+```
+POST /api/admin/users/batch?superToken=xxx
+Content-Type: application/json
+
+{
+  "userIds": ["user1", "user2", "user3"],
+  "operation": "delete"
+}
+```
+
+### 8. 获取配置模板列表
+```
+GET /api/admin/templates?superToken=xxx
+```
+
+### 9. 创建配置模板
+```
+POST /api/admin/templates?superToken=xxx
+Content-Type: application/json
+
+{
+  "name": "企业模板",
+  "description": "企业用户的标准配置模板",
+  "template": {
+    "ruleUrl": "https://company.com/rules",
+    "multiPortMode": ["TW", "SG", "JP"]
+  }
+}
+```
+
+### 10. 应用模板到用户
+```
+POST /api/admin/templates/:templateId/apply?superToken=xxx
+Content-Type: application/json
+
+{
+  "userId": "target-user"
+}
+```
+
+### 11. 获取操作日志
+```
+GET /api/admin/logs?superToken=xxx&date=2024-01-01&limit=50
+```
+
+### 12. 获取系统健康状态
+```
+GET /api/admin/health?superToken=xxx
+```
+
+### 13. 刷新用户流量信息
+```
+POST /api/admin/users/:userId/traffic/refresh?superToken=xxx
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "流量信息刷新成功",
+    "userId": "user123",
+    "trafficInfo": {
+      "upload": 1234567890,
+      "download": 9876543210,
+      "total": 21474836480,
+      "used": 11111111100,
+      "remaining": 10363725380,
+      "expire": 1640995200,
+      "isExpired": false,
+      "usagePercent": 51.73
+    }
+  }
+}
+```
+
 ## Web界面
 
 ### 访问配置管理页面
@@ -77,12 +228,33 @@ GET /api/config/users?token=xxx
 https://your-domain.com/config/:userId?token=xxx
 ```
 
+## 超级管理员Web界面
+
+### 访问超级管理员控制台
+```
+https://your-domain.com/admin/dashboard?superToken=xxx
+```
+
+### 界面功能
+- **控制台**：系统统计数据和最近活动展示
+- **用户管理**：用户列表查看、编辑、删除和批量操作，流量使用情况显示
+- **系统监控**：实时监控系统状态和性能指标（开发中）
+- **配置模板**：配置模板管理和应用（开发中）
+
+### 页面路径
+- `/admin/dashboard` - 控制台首页
+- `/admin/users` - 用户管理页面
+- `/admin/monitor` - 系统监控页面
+- `/admin/templates` - 配置模板页面
+
 ### 页面功能
 - **配置编辑器**：支持YAML语法高亮的代码编辑器
 - **实时预览**：配置修改后的实时预览效果
 - **配置验证**：实时验证配置格式和必填字段
 - **保存功能**：一键保存配置到KV存储
 - **重置功能**：重置为默认配置模板
+- **流量监控**：显示用户订阅流量使用情况，包括进度条和使用百分比
+- **流量刷新**：一键刷新用户的最新流量信息
 
 ## 配置格式
 
@@ -146,12 +318,23 @@ id = "your-kv-namespace-id"
 }
 ```
 
+### 3. 超级管理员配置
+在环境变量中设置超级管理员访问令牌：
+```
+SUPER_ADMIN_TOKEN=your-super-admin-token-here
+```
+
 ## 安全考虑
 
-1. **身份验证**：所有API调用都需要有效的accessToken
-2. **权限控制**：用户只能访问和修改自己的配置
+1. **身份验证**：
+   - 用户API：需要有效的accessToken
+   - 超级管理员API：需要有效的superAdminToken
+2. **权限控制**：
+   - 用户只能访问和修改自己的配置
+   - 超级管理员可以管理所有用户和系统设置
 3. **输入验证**：配置数据会进行格式和类型验证
 4. **CORS支持**：API支持跨域请求
+5. **操作审计**：超级管理员的所有操作都会记录日志
 
 ## 使用流程
 
@@ -161,6 +344,16 @@ id = "your-kv-namespace-id"
 4. **验证配置**：系统会实时验证配置格式
 5. **保存配置**：点击保存按钮将配置存储到KV
 6. **使用配置**：系统会自动使用最新的配置
+
+## 超级管理员使用流程
+
+1. **设置超级管理员令牌**：在环境变量中配置 `SUPER_ADMIN_TOKEN`
+2. **访问管理控制台**：打开 `https://your-domain.com/admin/dashboard?superToken=xxx`
+3. **查看系统统计**：在控制台查看用户数量、活跃度等统计信息
+4. **管理用户**：在用户管理页面查看、编辑、删除用户配置
+5. **批量操作**：对多个用户进行批量操作（删除、禁用等）
+6. **配置模板**：创建和管理配置模板，应用到用户
+7. **查看日志**：查看所有管理员操作的审计日志
 
 ## 错误处理
 
@@ -176,18 +369,26 @@ id = "your-kv-namespace-id"
 ```
 src/module/userManager/
 ├── userManager.ts          # 用户配置管理核心逻辑
+├── superAdminManager.ts    # 超级管理员管理核心逻辑
 ├── users-kv.md            # 产品需求文档
+├── super-admin.md         # 超级管理员需求文档
 └── README.md              # 使用说明文档
 
 src/routes/handler/
-├── userConfigHandler.ts   # API处理器
-└── configPageHandler.ts   # Web页面处理器
+├── userConfigHandler.ts   # 用户API处理器
+├── superAdminHandler.ts   # 超级管理员API处理器
+└── pages/
+    ├── configPageHandler.ts   # 用户配置页面处理器
+    └── adminPageHandler.ts    # 超级管理员页面处理器
 ```
 
 ### 核心类
 - `UserManager`: 用户配置管理核心类
-- `UserConfigHandler`: API请求处理器
-- `ConfigPageHandler`: Web页面处理器
+- `SuperAdminManager`: 超级管理员管理核心类
+- `UserConfigHandler`: 用户API请求处理器
+- `SuperAdminHandler`: 超级管理员API请求处理器
+- `ConfigPageHandler`: 用户配置Web页面处理器
+- `AdminPageHandler`: 超级管理员Web页面处理器
 
 ### 扩展功能
 - 支持更多配置字段

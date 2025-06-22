@@ -6,6 +6,7 @@ declare namespace Cloudflare {
 		KV_BINDING: KVNamespace;
 		USERS_KV: KVNamespace;
 		DB_USER: string;
+		SUPER_ADMIN_TOKEN?: string;
 		ASSETS: Fetcher;
 	}
 }

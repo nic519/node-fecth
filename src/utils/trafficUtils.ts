@@ -44,7 +44,7 @@ export class TrafficUtils {
 		await env?.USERS_KV.put(KvKey(this.clashSubUrl), JSON.stringify(clashContent)); 
 	} 
 
-	async fetchFromKV(): Promise< ClashContent | null> {
+	async fetchFromKV(expireCheck: boolean = true): Promise< ClashContent | null> {
 		const env = GlobalConfig.env;
 		const clashContentStr = await env?.USERS_KV.get(KvKey(this.clashSubUrl)); 
 		if (clashContentStr == null) {
@@ -56,7 +56,7 @@ export class TrafficUtils {
 		// 将字符串转换回 Date 对象
 		clashContent.fetchTime = new Date(clashContent.fetchTime);
 		
-		if (clashContent.fetchTime.getTime() + cacheAvailableTime < Date.now()) {
+		if (expireCheck && clashContent.fetchTime.getTime() + cacheAvailableTime < Date.now()) {
 			console.log('🔑 从KV中获取到clash内容 已过期');
 			return null;
 		} 
