@@ -314,7 +314,7 @@ export class AdminPageHandler implements RouteHandler {
 					
 					viewUser(user) {
 						// 简化实现 - 显示用户详情
-						alert('查看用户: ' + user.userId);
+						alert('查看用户: ' + JSON.stringify(user));
 					},
 					
 					editUser(user) {
