@@ -2,6 +2,7 @@ import { UserManager } from '@/module/userManager/userManager';
 import { RouteHandler } from '@/types/routes.types';
 import { UserConfig } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
+import { SuperAdminHandler } from './superAdminHandler';
 
 export class UserConfigHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -14,13 +15,6 @@ export class UserConfigHandler implements RouteHandler {
 		try {
 					// 解析路径参数
 		const pathParts = pathname.split('/').filter(Boolean);
-
-		// 路由匹配: /api/config/allUsers - 获取所有用户列表
-		if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'allUsers') {
-			if (method === 'GET') {
-				return await this.getAllUsers(request, env);
-			}
-		}
 
 		// 路由匹配: /api/config/users/:userId
 		if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'users') {
@@ -63,62 +57,7 @@ export class UserConfigHandler implements RouteHandler {
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}
-
-	/**
-	 * 获取所有用户列表
-	 */
-	private async getAllUsers(request: Request, env: Env): Promise<Response> {
-		try {
-			// 身份验证（超级管理员权限）
-			// 对于获取所有用户列表，我们需要验证 superToken
-			const url = new URL(request.url);
-			const superToken = url.searchParams.get('superToken') || 
-				AuthUtils.getAccessToken(request);
-			
-			if (!superToken) {
-				return AuthUtils.createErrorResponse('缺少超级管理员令牌', 401);
-			}
-
-			// 简单验证超级管理员令牌（实际项目中应该有更严格的验证）
-			// 这里暂时使用简单的验证逻辑
-			if (superToken !== '123' && superToken !== 'super-admin-token') {
-				return AuthUtils.createErrorResponse('无效的超级管理员令牌', 403);
-			}
-
-			// 获取所有用户列表
-			const userManager = new UserManager(env);
-			const users = await userManager.getAllUsers();
-
-			// 为每个用户获取基本信息
-			const userList = await Promise.all(
-				users.map(async (userId) => {
-					try {
-						const configResponse = await userManager.getUserConfig(userId);
-						return {
-							userId,
-							hasConfig: !!configResponse,
-							source: configResponse?.meta.source || 'none',
-							lastModified: configResponse?.meta.lastModified || null,
-						};
-					} catch (error) {
-						console.error(`获取用户 ${userId} 配置失败:`, error);
-						// 返回基本用户信息
-						return {
-							userId,
-							hasConfig: false,
-							source: 'error',
-							lastModified: null,
-						};
-					}
-				})
-			);
-
-			return AuthUtils.createSuccessResponse({ users: userList });
-		} catch (error) {
-			console.error('获取用户列表失败', error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
-		}
-	}
+ 
 
 	/**
 	 * 更新用户配置

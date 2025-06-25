@@ -1,57 +1,8 @@
 import { UserConfig } from '@/types/user.types';
 import { UserManager } from './userManager';
 import { TrafficUtils } from '@/utils/trafficUtils';
+import { SuperAdminStats, UserSummary, ConfigTemplate, AdminOperation } from '@/module/userManager/types/supper-admin.types';
 
-export interface SuperAdminStats {
-	totalUsers: number;
-	activeUsers: number;
-	kvConfigUsers: number;
-	envConfigUsers: number;
-	configCompleteRate: number;
-	todayNewUsers: number;
-}
-
-export interface UserSummary {
-	userId: string;
-	hasConfig: boolean;
-	source: 'kv' | 'env' | 'none';
-	lastModified: string | null;
-	createdAt: string | null;
-	isActive: boolean;
-	subscribeUrl?: string;
-	status: 'active' | 'inactive' | 'disabled';
-	trafficInfo?: {
-		upload: number;
-		download: number;
-		total: number;
-		used: number;
-		remaining: number;
-		expire?: number;
-		isExpired: boolean;
-		usagePercent: number;
-	};
-}
-
-export interface AdminOperation {
-	timestamp: string;
-	operation: string;
-	targetUserId?: string;
-	adminId: string;
-	result: 'success' | 'error';
-	details?: string;
-	ipAddress?: string;
-}
-
-export interface ConfigTemplate {
-	id: string;
-	name: string;
-	description: string;
-	template: Partial<UserConfig>;
-	isDefault: boolean;
-	createdAt: string;
-	updatedAt: string;
-	usageCount: number;
-}
 
 export class SuperAdminManager {
 	private env: Env;
@@ -154,7 +105,6 @@ export class SuperAdminManager {
 					hasConfig: !!configResponse,
 					source: configResponse?.meta.source || 'none',
 					lastModified: configResponse?.meta.lastModified || null,
-					createdAt: configResponse?.meta.lastModified || null, // 简化实现
 					isActive: !!(configResponse?.config.subscribe && configResponse?.config.accessToken),
 					subscribeUrl,
 					status: configResponse ? 'active' : 'inactive',

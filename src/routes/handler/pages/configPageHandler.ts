@@ -47,11 +47,5 @@ export class ConfigPageHandler implements RouteHandler {
 			return AuthUtils.createErrorResponse('Internal Server Error', 500, 'text/html');
 		}
 	}
-
-	/**
-	 * 转义HTML特殊字符，防止XSS攻击
-	 */
-	private escapeHtml(text: string): string {
-		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
-	}
+ 
 }
