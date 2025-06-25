@@ -6,4 +6,5 @@
 - 引用代码的时候，用绝对路径，@开头的那种写法
 
 ### 前端交互
-- 如果要生成前端页面，请使用hono+jsx+TailwindCSS方案 
+- 使用hono+jsx+TailwindCSS方案 
+- 使用alpinejs来处理前端页面的交互
