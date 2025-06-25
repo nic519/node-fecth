@@ -33,7 +33,6 @@ export function UsersPage({ superToken, users: initialUsers }: UsersPageProps) {
 			<div 
 				className="space-y-6"
 				x-data={`usersManager('${superToken}')`}
-				x-init="init()"
 			>
 				{/* 页面标题和操作按钮 */}
 				<div className="flex justify-between items-center">
@@ -220,8 +219,7 @@ export function UsersPage({ superToken, users: initialUsers }: UsersPageProps) {
 				</div>
 			</div>
 
-			{/* 引入 Alpine.js 和组件逻辑 */}
-			<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+			{/* 引入组件逻辑 */}
 			<script src="/js/admin/users-alpine.js"></script>
 		</AdminLayout>
 	);
