@@ -1,5 +1,5 @@
 import { GlobalConfig } from "@/config/global-config";
-import { time } from "console";
+// import { time } from "console"; // 移除未使用的导入
 
 const KvKey = (url: string) => `clash-sub:${url}`;
 

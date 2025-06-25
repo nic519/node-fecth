@@ -3,24 +3,24 @@
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-		"target": "es2021",
+		"target": "ES2020",
     /* Specify a set of bundled library declaration files that describe the target runtime environment. */
-		"lib": ["es2021", "dom"],
+		"lib": ["ES2021", "DOM"],
     /* Specify what JSX code is generated. */
 		"jsx": "react-jsx",
 
     /* Specify what module code is generated. */
-		"module": "commonjs",
+		"module": "ESNext",
     /* Specify how TypeScript looks up a file from a given module specifier. */
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		/* Base directory to resolve non-relative module names. */
 		"baseUrl": ".",
 		/* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": ["./src/*"]
 		},
     /* Specify type package names to be included without being referenced in a source file. */
-		"types": ["@cloudflare/workers-types", "node"],
+		"types": ["@cloudflare/workers-types", "jest", "node"],
     /* Enable importing .json files */
 		"resolveJsonModule": true,
 
@@ -43,6 +43,12 @@
 		"strict": true,
 
     /* Skip type checking all .d.ts files. */
-		"skipLibCheck": true
+		"skipLibCheck": true,
+
+    /* Enable interoperability between CommonJS and ES modules. */
+		"esModuleInterop": true,
+
+    /* Enable JSX import source. */
+		"jsxImportSource": "hono/jsx"
 	}
 }
