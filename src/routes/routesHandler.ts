@@ -151,6 +151,19 @@ export class Router {
 		// API 路由组
 		const apiRoute = this.app.basePath('/api');
 
+		// 获取所有用户列表API: /api/config/allUsers
+		apiRoute.all('/config/allUsers', async (c) => {
+			console.log(`🔧 获取所有用户API: ${c.req.method} /api/config/allUsers`);
+			try {
+				const userConfigHandler = new UserConfigHandler();
+				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				return response || c.text('User config handler failed', 500);
+			} catch (error) {
+				console.error('❌ 获取所有用户API错误:', error);
+				return c.json({ error: 'Internal Server Error' }, 500);
+			}
+		});
+
 		// 用户配置API: /api/config/users/:userId
 		apiRoute.all('/config/users/:userId', async (c) => {
 			const userId = c.req.param('userId');
