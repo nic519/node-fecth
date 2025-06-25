@@ -1,4 +1,9 @@
 ## 技术栈
-- typescript
-- 如果要生成前端页面，请使用hono+jsx方案
-- 使用TailwindCSS来设计前端页面 
+
+### 基础
+- 使用yarn来管理第三方包
+- 使用typescript
+- 引用代码的时候，用绝对路径，@开头的那种写法
+
+### 前端交互
+- 如果要生成前端页面，请使用hono+jsx+TailwindCSS方案 

@@ -2,6 +2,7 @@ import { GlobalConfig } from '@/config/global-config';
 import { RouteHandler } from '@/types/routes.types';
 import { ConfigResponse } from '@/types/user-config.types';
 import { AuthUtils } from '@/utils/authUtils';
+import { UserConfigPage } from '@/components/pages/UserConfigPage';
 
 export class ConfigPageHandler implements RouteHandler {
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -20,11 +21,18 @@ export class ConfigPageHandler implements RouteHandler {
 
 				// 验证用户权限
 				const authResult = await AuthUtils.authenticate(request, env, userId);
+				
+				// 从 URL 参数获取 token
+				const token = url.searchParams.get('token') || '';
 
-				// 生成HTML页面
-				const html = await this.generateConfigPage(userId, authResult, request, env);
+				// 使用 JSX 组件生成页面
+				const html = UserConfigPage({ 
+					userId, 
+					configResponse: authResult, 
+					token 
+				});
 
-				return new Response(html, {
+				return new Response(html as string, {
 					status: 200,
 					headers: {
 						'Content-Type': 'text/html;charset=utf-8',
@@ -38,24 +46,6 @@ export class ConfigPageHandler implements RouteHandler {
 			console.error('配置页面处理错误:', error);
 			return AuthUtils.createErrorResponse('Internal Server Error', 500, 'text/html');
 		}
-	}
-
-	/**
-	 * 生成配置管理页面HTML（从 HTML 模板文件读取并插值）
-	 */
-	private async generateConfigPage(userId: string, configResponse: ConfigResponse, request: Request, env: Env): Promise<string> {
-		let template: string;
-		if (GlobalConfig.isDev) {
-			template = await fetch(new URL('/user-modify.html', request.url)).then((res: Response) => res.text());
-		} else {
-			template = await env.ASSETS.fetch(new URL('/user-modify.html', request.url)).then((res: Response) => res.text());
-		}
-
-		// 变量插值 - 安全转义HTML特殊字符
-		const escapedConfig = JSON.stringify(configResponse);
-		console.log(`escapedConfig=${escapedConfig}`);
-		const processedTemplate = template.replace(/\$\{configResponse\}/g, escapedConfig);
-		return processedTemplate;
 	}
 
 	/**
