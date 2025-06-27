@@ -16,6 +16,8 @@ function configManager() {
 		configSource: '',
 		connectionStatus: 'connecting',
 		copySuccess: false,
+		showHelp: false, // 控制字段说明的显示隐藏
+		hasUserInteracted: false, // 追踪用户是否手动操作过帮助说明
 
 		// 初始化
 		init() {
@@ -26,6 +28,10 @@ function configManager() {
 			} else {
 				console.error('✗ 未找到YAML库');
 			}
+
+			// 响应式显示侧边栏：大屏幕默认显示，小屏幕默认隐藏
+			this.updateHelpVisibility();
+			window.addEventListener('resize', () => this.updateHelpVisibility());
 
 			// 优先使用服务器端传递的数据
 			this.loadServerData();
@@ -274,6 +280,20 @@ appendSubList:
 			if (!isoString) return '未知';
 			const date = new Date(isoString);
 			return date.toLocaleString('zh-CN');
+		},
+
+		// 根据屏幕大小更新帮助说明的显示状态
+		updateHelpVisibility() {
+			const isLargeScreen = window.innerWidth >= 1024; // lg 断点
+			if (isLargeScreen) {
+				this.showHelp = true;
+			} else {
+				// 小屏幕保持用户的选择状态，不自动更改
+				// 只在首次初始化时设为 false
+				if (!this.hasUserInteracted) {
+					this.showHelp = false;
+				}
+			}
 		},
 	};
 }
