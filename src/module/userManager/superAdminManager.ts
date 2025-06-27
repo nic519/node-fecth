@@ -102,6 +102,7 @@ export class SuperAdminManager {
 
 				const summary: UserSummary = {
 					userId,
+					token: configResponse?.config.accessToken || '',
 					hasConfig: !!configResponse,
 					source: configResponse?.meta.source || 'none',
 					lastModified: configResponse?.meta.lastModified || null,

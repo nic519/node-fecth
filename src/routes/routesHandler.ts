@@ -9,7 +9,7 @@ import { AdminPageHandler } from '@/routes/handler/pages/adminPageHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
-import { SubscribeParamsValidator } from '@/types/url-params.types';
+import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';

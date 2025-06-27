@@ -1,7 +1,7 @@
 import { RouteHandler } from '@/types/routes.types';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
-import { SubscribeParamsValidator } from '@/types/url-params.types';
+import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 
 // 响应头配置

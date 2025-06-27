@@ -102,14 +102,11 @@ document.addEventListener('alpine:init', () => {
 		},
 		
 		// 处理用户操作
-		handleUserAction(action, userId) {
+		handleUserAction(action, userId, token) {
 			switch(action) {
 				case 'view':
-					window.open('/admin/users/' + userId + '?superToken=' + encodeURIComponent(this.superToken), '_blank');
-					break;
-				case 'edit':
-					window.location.href = '/admin/users/' + userId + '/edit?superToken=' + encodeURIComponent(this.superToken);
-					break;
+					window.open('/config/' + userId + '?token=' + encodeURIComponent(token), '_blank');
+					break; 
 				case 'refresh':
 					this.refreshUserTraffic(userId);
 					break;
