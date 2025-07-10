@@ -1,8 +1,9 @@
 import { RouteHandler } from '@/types/routes.types';
-import { SuperAdminManager, UserSummary, SuperAdminStats, ConfigTemplate } from '@/module/userManager/superAdminManager';
+import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { UserConfig } from '@/types/user.types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { ConfigTemplate } from '@/module/userManager/types/supper-admin.types';
 
 export class SuperAdminHandler implements RouteHandler {
 	private app: Hono<{ Bindings: Env }>;

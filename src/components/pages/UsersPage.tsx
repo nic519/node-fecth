@@ -2,6 +2,7 @@ import { AdminLayout } from '../AdminLayout';
 
 interface UserSummary {
 	userId: string;
+	token: string;
 	hasConfig: boolean;
 	source: 'kv' | 'env' | 'none';
 	lastModified: string | null; 
@@ -187,8 +188,7 @@ export function UsersPage({ superToken, users: initialUsers }: UsersPageProps) {
 										<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="formatDateTime(user.lastModified)"></td>
 										<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
 											<div className="flex space-x-2">
-												<button className="text-blue-600 hover:text-blue-900" x-on:click="handleUserAction('view', user.userId)">查看</button>
-												<button className="text-green-600 hover:text-green-900" x-on:click="handleUserAction('edit', user.userId)">编辑</button>
+												<button className="text-blue-600 hover:text-blue-900" x-on:click="handleUserAction('view', user.userId, user.token)">查看</button>
 												<button className="text-orange-600 hover:text-orange-900" x-on:click="handleUserAction('refresh', user.userId)">刷新</button>
 												<button className="text-red-600 hover:text-red-900" x-on:click="handleUserAction('delete', user.userId)">删除</button>
 											</div>

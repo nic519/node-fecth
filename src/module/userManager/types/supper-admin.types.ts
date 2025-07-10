@@ -11,6 +11,7 @@ export interface SuperAdminStats {
 
 export interface UserSummary {
 	userId: string;
+	token: string;
 	hasConfig: boolean;
 	source: 'kv' | 'env' | 'none';
 	lastModified: string | null; 
