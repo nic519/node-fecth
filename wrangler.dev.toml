@@ -2,6 +2,11 @@
 name = "node-fetch-dev"
 main = "src/index.ts"
 compatibility_date = "2025-02-14"
+compatibility_flags = ["nodejs_compat"]
+
+# 开发配置
+[vars]
+NODE_ENV = "development"
 
 # KV 绑定
 [[kv_namespaces]]
@@ -10,4 +15,10 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 
 [[kv_namespaces]]
 binding = "USERS_KV"
-id = "52fa82d5a9c3438195385f592be41ef9" 
+id = "52fa82d5a9c3438195385f592be41ef9"
+
+# 开发模式特定配置
+[dev]
+port = 8787
+local_protocol = "http"
+upstream_protocol = "https" 

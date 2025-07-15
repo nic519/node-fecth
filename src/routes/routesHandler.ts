@@ -7,6 +7,7 @@ import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
+import { DocsHandler } from '@/routes/docs-handler';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -55,6 +56,31 @@ export class Router {
 		// 健康检查路由
 		this.app.get('/health', (c) => {
 			return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+		});
+
+		// API 文档路由
+		this.app.all('/docs', async (c) => {
+			console.log('📚 API文档路由');
+			try {
+				const handler = new DocsHandler();
+				const response = await handler.handle(c.req.raw, c.env);
+				return response || c.text('Docs handler failed', 500);
+			} catch (error) {
+				console.error('❌ 文档路由错误:', error);
+				return c.text('Internal Server Error', 500);
+			}
+		});
+
+		this.app.all('/openapi.json', async (c) => {
+			console.log('📋 OpenAPI规范路由');
+			try {
+				const handler = new DocsHandler();
+				const response = await handler.handle(c.req.raw, c.env);
+				return response || c.text('OpenAPI handler failed', 500);
+			} catch (error) {
+				console.error('❌ OpenAPI规范错误:', error);
+				return c.text('Internal Server Error', 500);
+			}
 		});
 
 		// 精确匹配的静态路由

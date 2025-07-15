@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'preact/hooks';
-import { adminApi } from '@/api/client';
 import type { SystemStats, SystemInfo, ServiceStatus, SystemLog } from '@/types/user-config';
 
 export function AdminMonitor() {
-  const [systemStats, setSystemStats] = useState<SystemStats>({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [systemStats, _setSystemStats] = useState<SystemStats>({
     cpu: 23,
     memory: 45,
     disk: 67,
     network: 8.5
   });
 
-  const [systemInfo, setSystemInfo] = useState<SystemInfo>({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [systemInfo, _setSystemInfo] = useState<SystemInfo>({
     os: 'Ubuntu 22.04.3 LTS',
     uptime: '89天 15小时 42分钟',
     totalMemory: '32 GB',
@@ -19,7 +20,8 @@ export function AdminMonitor() {
     availableDisk: '660 GB'
   });
 
-  const [services, setServices] = useState<ServiceStatus[]>([
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [services, _setServices] = useState<ServiceStatus[]>([
     { name: 'Cloudflare Workers', status: 'running', description: '运行中' },
     { name: 'KV 存储', status: 'running', description: '运行中' },
     { name: '代理节点', status: 'running', description: '25/25 正常' },
@@ -28,7 +30,8 @@ export function AdminMonitor() {
     { name: '备份服务', status: 'pending', description: '计划中' }
   ]);
 
-  const [recentLogs, setRecentLogs] = useState<SystemLog[]>([
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [recentLogs, _setRecentLogs] = useState<SystemLog[]>([
     { time: '2024-01-15 14:35:12', level: 'INFO', message: '用户 premium_001 成功登录' },
     { time: '2024-01-15 14:33:45', level: 'INFO', message: '新用户注册：trial_user_002' },
     { time: '2024-01-15 14:30:22', level: 'WARN', message: 'API 请求频率过高，来源：203.0.113.45' },

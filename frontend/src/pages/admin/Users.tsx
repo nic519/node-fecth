@@ -107,7 +107,7 @@ export function AdminUsers() {
       switch (action) {
         case 'view':
           if (token) {
-            window.open(`/config?userId=${userId}&token=${token}`, '_blank');
+            window.open(`/config/${userId}?token=${token}`, '_blank');
           }
           break;
         case 'refresh':

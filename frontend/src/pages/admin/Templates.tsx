@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'preact/hooks';
-import { adminApi } from '@/api/client';
 import type { ConfigTemplate } from '@/types/user-config';
 
 export function AdminTemplates() {
@@ -257,7 +256,12 @@ rules:
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">模板列表</h3>
             </div>
-            <div className="divide-y divide-gray-200">
+            {loading ? (
+              <div className="p-6 text-center">
+                <div className="text-gray-500">加载中...</div>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
               {templates.map((template) => (
                 <div key={template.id} className="p-6">
                   <div className="flex items-center justify-between">
@@ -309,7 +313,8 @@ rules:
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* 配置编辑器 */}

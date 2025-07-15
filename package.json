@@ -11,10 +11,12 @@
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"build:frontend": "cd frontend && yarn build",
 		"cf-typegen": "wrangler types",
-		"predev": "yarn convert-vars && yarn type-check",
+		"predev": "yarn convert-vars && yarn type-check && yarn docs:generate",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "tsc --noEmit --watch",
-		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'"
+		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'",
+		"docs:generate": "ts-node scripts/generate-openapi.ts",
+		"docs:watch": "nodemon --watch src --ext ts --exec \"yarn docs:generate\""
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
@@ -27,6 +29,8 @@
 		"wrangler": "^4.16.0"
 	},
 	"dependencies": {
+		"@hono/swagger-ui": "^0.5.2",
+		"@hono/zod-openapi": "^0.19.10",
 		"hono": "^4.8.0",
 		"yaml": "^2.7.0",
 		"zod": "^3.25.67"
