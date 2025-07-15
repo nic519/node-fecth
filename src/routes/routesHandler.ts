@@ -4,8 +4,6 @@ import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { UserManager } from '@/module/userManager/userManager';
 import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
-import { ConfigPageHandler } from '@/routes/handler/pages/configPageHandler';
-import { AdminPageHandler } from '@/routes/handler/pages/adminPageHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
@@ -99,31 +97,7 @@ export class Router {
 			}
 		});
 
-		// 配置页面处理器
-		this.app.all(RoutesPathConfig.configPage, async (c) => {
-			console.log(`✅ 静态路由匹配: ${RoutesPathConfig.configPage}`);
-			try {
-				const handler = new ConfigPageHandler();
-				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('Handler returned null', 500);
-			} catch (error) {
-				console.error(`❌ 处理器错误 ${RoutesPathConfig.configPage}:`, error);
-				return c.text('Internal Server Error', 500);
-			}
-		});
 
-		// 超级管理员页面处理器
-		this.app.all('/admin/*', async (c) => {
-			console.log(`✅ 超级管理员页面路由匹配: ${c.req.path}`);
-			try {
-				const handler = new AdminPageHandler();
-				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('Handler returned null', 500);
-			} catch (error) {
-				console.error(`❌ 超级管理员页面处理器错误:`, error);
-				return c.text('Internal Server Error', 500);
-			}
-		});
 
 		// 超级管理员API处理器
 		this.app.all('/api/admin/*', async (c) => {
@@ -138,15 +112,7 @@ export class Router {
 			}
 		});
 
-		// 配置页面路由组
-		const configRoute = this.app.basePath('/config');
 
-		// 兼容方式: /config/:userId
-		configRoute.get('/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`📄 配置页面 (路径参数): ${userId}`);
-			return this.handleConfigPage(c);
-		});
 
 		// API 路由组
 		const apiRoute = this.app.basePath('/api');
@@ -252,16 +218,7 @@ export class Router {
 		});
 	}
 
-	private async handleConfigPage(c: any) {
-		try {
-			const configPageHandler = new ConfigPageHandler();
-			const response = await configPageHandler.handle(c.req.raw, c.env);
-			return response || c.text('Config page handler failed', 500);
-		} catch (error) {
-			console.error('❌ 配置页面错误:', error);
-			return c.json({ error: 'Internal Server Error' }, 500);
-		}
-	}
+
 
 	async route(request: Request, env: Env): Promise<Response> {
 		return this.app.fetch(request, env);
