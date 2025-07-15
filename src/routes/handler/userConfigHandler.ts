@@ -122,6 +122,83 @@ export class UserConfigHandler implements RouteHandler {
 	}
 
 	/**
+	 * 创建用户配置
+	 */
+	private async createUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+		try {
+			// 验证超级管理员权限 (创建用户需要管理员权限)
+			const url = new URL(request.url);
+			const superToken = url.searchParams.get('superToken');
+			if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
+				return AuthUtils.createErrorResponse('Unauthorized: Super admin token required for user creation', 401);
+			}
+
+			// 检查用户是否已存在
+			const userManager = new UserManager(env);
+			const existingUser = await userManager.getUserConfig(userId);
+			if (existingUser) {
+				return AuthUtils.createErrorResponse('Conflict: User already exists', 409);
+			}
+
+			// 解析请求体
+			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
+			let config: UserConfig;
+
+			if (body.config) {
+				// 处理前端发送的JSON格式配置
+				config = body.config;
+			} else if (body.yaml) {
+				// 处理YAML格式的请求
+				try {
+					const { parse } = await import('yaml');
+					config = parse(body.yaml) as UserConfig;
+				} catch (error) {
+					return AuthUtils.createErrorResponse('Bad Request: Invalid YAML format', 400);
+				}
+			} else {
+				return AuthUtils.createErrorResponse('Bad Request: Missing config or yaml data', 400);
+			}
+
+			if (!config) {
+				return AuthUtils.createErrorResponse('Bad Request: Invalid config data', 400);
+			}
+
+			// 使用Zod验证配置
+			try {
+				UserConfigSchema.parse(config);
+			} catch (error: any) {
+				const errorMessage = error.errors?.map((e: any) => e.message).join('\n') || 'Invalid config format';
+				return AuthUtils.createErrorResponse(errorMessage, 400);
+			}
+
+			// 创建用户配置
+			const success = await userManager.saveUserConfig(userId, config);
+			if (!success) {
+				return AuthUtils.createErrorResponse('Failed to create user config', 500);
+			}
+
+			// 返回201状态码表示资源已创建
+			return new Response(JSON.stringify({
+				message: 'User created successfully',
+				userId,
+				config,
+				timestamp: new Date().toISOString(),
+			}), {
+				status: 201,
+				headers: {
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+				},
+			});
+		} catch (error) {
+			console.error(`创建用户配置失败: ${userId}`, error);
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
+		}
+	}
+
+	/**
 	 * 删除用户配置
 	 */
 	private async deleteUserConfig(request: Request, env: Env, userId: string): Promise<Response> {

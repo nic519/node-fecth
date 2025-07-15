@@ -266,6 +266,51 @@ class OpenAPIGenerator {
         },
         required: ['status', 'timestamp'],
         description: '健康检查响应'
+      },
+      CreateUserRequest: {
+        type: 'object',
+        properties: {
+          userId: {
+            type: 'string',
+            description: '新用户的唯一标识符',
+            example: 'user123'
+          },
+          config: {
+            $ref: '#/components/schemas/UserConfig',
+            description: '用户配置信息'
+          },
+          yaml: {
+            type: 'string',
+            description: 'YAML格式的用户配置（与config二选一）'
+          }
+        },
+        required: ['userId'],
+        description: '创建用户请求'
+      },
+      CreateUserResponse: {
+        type: 'object',
+        properties: {
+          message: {
+            type: 'string',
+            description: '创建结果消息',
+            example: 'User created successfully'
+          },
+          userId: {
+            type: 'string',
+            description: '创建的用户ID'
+          },
+          config: {
+            $ref: '#/components/schemas/UserConfig',
+            description: '创建的用户配置'
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            description: '创建时间'
+          }
+        },
+        required: ['message', 'userId', 'timestamp'],
+        description: '创建用户成功响应'
       }
     };
   }
@@ -300,6 +345,13 @@ class OpenAPIGenerator {
       console.warn(`⚠️  处理器目录不存在: ${handlersDir}`);
     }
 
+    // 分析KV模块中的处理器
+    const kvHandlerPath = path.join(process.cwd(), 'src/module/kv/kvHandler.ts');
+    if (fs.existsSync(kvHandlerPath)) {
+      console.log(`📄 分析KV处理器: kvHandler.ts`);
+      this.analyzeHandlerFile(kvHandlerPath);
+    }
+
     // 添加基础路由
     this.addBaseRoutes();
     
@@ -321,7 +373,7 @@ class OpenAPIGenerator {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
       
-      // 提取路由定义 (简化版正则，实际可用 AST 分析)
+      // 提取 apiRoute.xxx() 形式的路由定义
       const apiRouteMatches = content.match(/apiRoute\.(\w+)\(['"`]([^'"`]+)['"`]/g);
       if (apiRouteMatches) {
         apiRouteMatches.forEach((match: string) => {
@@ -339,6 +391,9 @@ class OpenAPIGenerator {
               } else if (path.startsWith('/config/users/')) {
                 description = '用户配置管理';
                 tags = ['用户配置'];
+              } else if (path === '/create/user') {
+                description = '创建新用户';
+                tags = ['管理员']; // 创建用户需要管理员权限
               }
               
               this.routes.push({
@@ -353,9 +408,52 @@ class OpenAPIGenerator {
         });
       }
 
+      // 提取 this.app.xxx() 形式的API路由定义
+      const appApiMatches = content.match(/this\.app\.(\w+)\(['"`](\/api\/[^'"`]+)['"`]/g);
+      if (appApiMatches) {
+        appApiMatches.forEach((match: string) => {
+          const matchResult = match.match(/(\w+)\(['"`](\/api\/[^'"`]+)['"`]/);
+          if (matchResult) {
+            const [, method, fullPath] = matchResult;
+            if (method && fullPath) {
+              let description = '';
+              let tags = ['api'];
+              
+              if (fullPath === '/api/create/user') {
+                description = '创建新用户';
+                tags = ['管理员'];
+              } else if (fullPath.startsWith('/api/admin/')) {
+                description = '超级管理员API接口';
+                tags = ['管理员'];
+              } else if (fullPath.startsWith('/api/config/users')) {
+                description = '用户配置管理';
+                tags = ['用户配置'];
+              } else if (fullPath.startsWith('/api/config/')) {
+                description = '配置管理';
+                tags = ['配置'];
+              } else if (fullPath.startsWith('/api/storage')) {
+                description = '存储API';
+                tags = ['存储'];
+              } else if (fullPath.startsWith('/api/kv')) {
+                description = 'KV存储API';
+                tags = ['存储'];
+              }
+              
+              this.routes.push({
+                method: method.toUpperCase(),
+                path: fullPath,
+                handler: 'MainApp',
+                description: description || `${method.toUpperCase()} 操作`,
+                tags: tags
+              });
+            }
+          }
+        });
+      }
+
       // 提取超级管理员路由
       const adminMatches = content.match(/\/api\/admin\/\*/g);
-      if (adminMatches) {
+      if (adminMatches && !appApiMatches?.some((m: string) => m.includes('/api/admin/'))) {
         this.routes.push({
           method: 'ALL',
           path: '/api/admin/*',
@@ -459,16 +557,28 @@ class OpenAPIGenerator {
         this.routes.push(
           {
             method: 'GET',
-            path: '/api/storage/{key}',
-            handler: 'StorageHandler.getValue',
-            description: '获取存储的值',
+            path: '/api/storage',
+            handler: 'StorageHandler.getContent',
+            description: '获取存储的内容',
+            tags: ['存储']
+          }
+        );
+      }
+
+      if (filename === 'kvHandler') {
+        this.routes.push(
+          {
+            method: 'GET',
+            path: '/api/kv',
+            handler: 'KvHandler.getValue',
+            description: '获取KV存储的值',
             tags: ['存储']
           },
           {
-            method: 'PUT',
-            path: '/api/storage/{key}',
-            handler: 'StorageHandler.setValue',
-            description: '设置存储的值',
+            method: 'POST',
+            path: '/api/kv',
+            handler: 'KvHandler.setValue',
+            description: '设置KV存储的值',
             tags: ['存储']
           }
         );
@@ -580,6 +690,7 @@ ${new Date().toISOString()}`
         : '管理员接口：批量创建用户账户',
       '/admin/users/{userId}': '管理员接口：删除指定用户及其所有相关数据',
       '/admin/users/{userId}/traffic/refresh': '管理员接口：强制刷新用户的流量统计信息',
+      '/create/user': '管理员接口：创建新用户账户，需要提供用户ID和配置信息',
       '/clash/{userId}': '生成用户专用的Clash配置文件，支持多种订阅源合并',
       '/storage/{key}': route.method === 'GET'
         ? '从KV存储中获取指定键的值'
@@ -763,6 +874,23 @@ ${new Date().toISOString()}`
           }
         }
       };
+    } else if (normalizedPath === '/create/user' && route.method === 'PUT') {
+      responses['201'] = {
+        description: '用户创建成功',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/CreateUserResponse' }
+          }
+        }
+      };
+      responses['409'] = {
+        description: '用户已存在',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' }
+          }
+        }
+      };
     } else if (['POST', 'PUT', 'DELETE'].includes(route.method)) {
       responses['200'] = {
         description: '操作成功',
@@ -788,6 +916,17 @@ ${new Date().toISOString()}`
 
   private generateRequestBody(route: RouteInfo) {
     const normalizedPath = this.normalizeApiPath(route.path);
+    
+    if (normalizedPath === '/create/user' && route.method === 'PUT') {
+      return {
+        required: true,
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+          }
+        }
+      };
+    }
     
     if (normalizedPath.includes('/users') && ['POST', 'PUT'].includes(route.method)) {
       return {

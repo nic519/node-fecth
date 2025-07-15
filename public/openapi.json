@@ -3,7 +3,7 @@
   "info": {
     "title": "Node-Fetch API",
     "version": "1.0.0",
-    "description": "订阅管理和用户配置 API 自动生成文档\n\n## 功能特性\n- 🔐 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-15T16:37:22.983Z"
+    "description": "订阅管理和用户配置 API 自动生成文档\n\n## 功能特性\n- 🔐 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-15T17:35:03.512Z"
   },
   "servers": [
     {
@@ -16,12 +16,188 @@
     }
   ],
   "paths": {
-    "/config/allUsers": {
-      "all": {
-        "summary": "获取所有用户列表",
-        "description": "管理员接口：获取系统中所有用户的摘要信息，包括用户状态、流量信息等",
+    "/create/user": {
+      "put": {
+        "summary": "创建新用户",
+        "description": "管理员接口：创建新用户账户，需要提供用户ID和配置信息",
         "tags": [
           "管理员"
+        ],
+        "parameters": [
+          {
+            "name": "superToken",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "用户创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "用户已存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/*": {
+      "all": {
+        "summary": "超级管理员API接口",
+        "description": "超级管理员API接口",
+        "tags": [
+          "管理员"
+        ],
+        "parameters": [
+          {
+            "name": "superToken",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/config/allUsers": {
+      "all": {
+        "summary": "配置管理",
+        "description": "管理员接口：获取系统中所有用户的摘要信息，包括用户状态、流量信息等",
+        "tags": [
+          "配置"
         ],
         "parameters": [
           {
@@ -172,23 +348,23 @@
         ]
       }
     },
-    "/admin/*": {
+    "/config/users": {
       "all": {
-        "summary": "超级管理员API接口",
-        "description": "超级管理员API接口",
+        "summary": "用户配置管理",
+        "description": "用户配置管理",
         "tags": [
-          "管理员"
+          "用户配置"
         ],
         "parameters": [
           {
-            "name": "superToken",
+            "name": "token",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员访问令牌",
-            "example": "super_secret_token"
+            "description": "用户访问令牌",
+            "example": "user_access_token"
           }
         ],
         "responses": {
@@ -245,7 +421,7 @@
         },
         "security": [
           {
-            "SuperTokenAuth": []
+            "TokenAuth": []
           }
         ]
       }
@@ -354,35 +530,14 @@
         }
       }
     },
-    "/storage/{key}": {
+    "/storage": {
       "get": {
-        "summary": "获取存储的值",
-        "description": "从KV存储中获取指定键的值",
+        "summary": "获取存储的内容",
+        "description": "获取存储的内容",
         "tags": [
           "存储"
         ],
-        "parameters": [
-          {
-            "name": "key",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "存储键名",
-            "example": "config_key"
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "用户访问令牌",
-            "example": "user_access_token"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "请求成功",
@@ -431,116 +586,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "TokenAuth": []
-          }
-        ]
-      },
-      "put": {
-        "summary": "设置存储的值",
-        "description": "将数据存储到KV存储中的指定键",
-        "tags": [
-          "存储"
-        ],
-        "parameters": [
-          {
-            "name": "key",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "存储键名",
-            "example": "config_key"
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "用户访问令牌",
-            "example": "user_access_token"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "操作成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "请求参数错误",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "未授权访问",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "权限不足",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "服务器内部错误",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "TokenAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": "string",
-                    "description": "要存储的值"
-                  }
-                },
-                "required": [
-                  "value"
-                ]
               }
             }
           }
@@ -1276,6 +1321,128 @@
         ]
       }
     },
+    "/kv": {
+      "get": {
+        "summary": "获取KV存储的值",
+        "description": "获取KV存储的值",
+        "tags": [
+          "存储"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "设置KV存储的值",
+        "description": "设置KV存储的值",
+        "tags": [
+          "存储"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "服务健康检查",
@@ -1595,6 +1762,57 @@
           "timestamp"
         ],
         "description": "健康检查响应"
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "新用户的唯一标识符",
+            "example": "user123"
+          },
+          "config": {
+            "$ref": "#/components/schemas/UserConfig",
+            "description": "用户配置信息"
+          },
+          "yaml": {
+            "type": "string",
+            "description": "YAML格式的用户配置（与config二选一）"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "description": "创建用户请求"
+      },
+      "CreateUserResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "创建结果消息",
+            "example": "User created successfully"
+          },
+          "userId": {
+            "type": "string",
+            "description": "创建的用户ID"
+          },
+          "config": {
+            "$ref": "#/components/schemas/UserConfig",
+            "description": "创建的用户配置"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "创建时间"
+          }
+        },
+        "required": [
+          "message",
+          "userId",
+          "timestamp"
+        ],
+        "description": "创建用户成功响应"
       }
     },
     "securitySchemes": {
