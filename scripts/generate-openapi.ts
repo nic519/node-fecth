@@ -48,7 +48,7 @@ class OpenAPIGenerator {
 
   // 检查路径是否需要认证
   private requiresAuth(normalizedPath: string, tags: string[]): 'super' | 'user' | 'none' {
-    if (tags.includes('管理员') || normalizedPath.startsWith('/admin/')) {
+    if (tags.includes('管理员') || normalizedPath.startsWith('/admin/') || normalizedPath === '/config/allUsers') {
       return 'super';
     }
     if (normalizedPath.startsWith('/config/') || normalizedPath.startsWith('/storage/')) {
@@ -329,11 +329,24 @@ class OpenAPIGenerator {
           if (matchResult) {
             const [, method, path] = matchResult;
             if (method && path) {
+              // 为实际的 API 路由添加更准确的标签和描述
+              let description = '';
+              let tags = ['api'];
+              
+              if (path === '/config/allUsers') {
+                description = '获取所有用户列表';
+                tags = ['管理员']; // 这个接口需要管理员权限
+              } else if (path.startsWith('/config/users/')) {
+                description = '用户配置管理';
+                tags = ['用户配置'];
+              }
+              
               this.routes.push({
                 method: method.toUpperCase(),
                 path: `/api${path}`,
                 handler: 'apiRoute',
-                tags: ['api']
+                description: description || `${method.toUpperCase()} 操作`,
+                tags: tags
               });
             }
           }
@@ -347,7 +360,7 @@ class OpenAPIGenerator {
           method: 'ALL',
           path: '/api/admin/*',
           handler: 'SuperAdminHandler',
-          tags: ['admin'],
+          tags: ['管理员'],
           description: '超级管理员API接口'
         });
       }
@@ -391,14 +404,9 @@ class OpenAPIGenerator {
             handler: 'UserConfigHandler.deleteUserConfig',
             description: '删除用户配置',
             tags: ['用户配置']
-          },
-          {
-            method: 'GET',
-            path: '/api/config/users',
-            handler: 'UserConfigHandler.getAllUsers',
-            description: '获取所有用户列表(需要管理员权限)',
-            tags: ['用户配置', '管理员']
           }
+          // 移除重复的 /api/config/users GET 接口，因为它与 /api/admin/users 功能重复
+          // 获取所有用户列表应该只属于管理员功能，使用 /api/admin/users
         );
       }
 
@@ -409,28 +417,28 @@ class OpenAPIGenerator {
             path: '/api/admin/users',
             handler: 'SuperAdminHandler.getUsersList',
             description: '获取用户列表',
-            tags: ['管理员', '用户管理']
+            tags: ['管理员']
           },
           {
             method: 'POST',
             path: '/api/admin/users',
             handler: 'SuperAdminHandler.createUser',
             description: '创建新用户',
-            tags: ['管理员', '用户管理']
+            tags: ['管理员']
           },
           {
             method: 'DELETE',
             path: '/api/admin/users/{userId}',
             handler: 'SuperAdminHandler.deleteUser',
             description: '删除指定用户',
-            tags: ['管理员', '用户管理']
+            tags: ['管理员']
           },
           {
             method: 'POST',
             path: '/api/admin/users/{userId}/traffic/refresh',
             handler: 'SuperAdminHandler.refreshUserTraffic',
             description: '刷新用户流量信息',
-            tags: ['管理员', '流量管理']
+            tags: ['管理员']
           }
         );
       }
@@ -561,12 +569,12 @@ ${new Date().toISOString()}`
   private getDetailedDescription(route: RouteInfo, normalizedPath: string): string {
     const descriptions: Record<string, string> = {
       '/health': '检查服务运行状态，返回服务版本和时间戳信息',
+      '/config/allUsers': '管理员接口：获取系统中所有用户的摘要信息，包括用户状态、流量信息等',
       '/config/users/{userId}': route.method === 'GET' 
         ? '根据用户ID获取完整的用户配置信息，包括订阅URL、规则配置等'
         : route.method === 'DELETE'
         ? '删除指定用户的所有配置信息，操作不可逆'
         : '创建或更新用户配置，支持部分更新',
-      '/config/users': '获取系统中所有用户的摘要信息，包括用户状态、流量信息等',
       '/admin/users': route.method === 'GET'
         ? '管理员接口：获取详细的用户列表，包括流量统计和状态信息'
         : '管理员接口：批量创建用户账户',

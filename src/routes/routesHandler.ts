@@ -71,31 +71,6 @@ export class Router {
 			}
 		});
 
-		// OpenAPI 规范路由 - 直接从文件读取
-		this.app.get('/openapi.json', async (c) => {
-			console.log('📋 OpenAPI规范路由');
-			try {
-				// 在开发环境中从文件系统读取
-				const fs = await import('fs');
-				const path = await import('path');
-				const filePath = path.join(process.cwd(), 'public', 'openapi.json');
-				
-				if (fs.existsSync(filePath)) {
-					const content = fs.readFileSync(filePath, 'utf-8');
-					return c.json(JSON.parse(content), 200, {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						'Cache-Control': 'public, max-age=300'
-					});
-				} else {
-					return c.json({ error: 'OpenAPI spec not found' }, 404);
-				}
-			} catch (error) {
-				console.error('❌ OpenAPI规范错误:', error);
-				return c.json({ error: 'Failed to load OpenAPI spec' }, 500);
-			}
-		});
-
 		// 精确匹配的静态路由
 		// 存储处理器
 		this.app.all(RoutesPathConfig.storage, async (c) => {

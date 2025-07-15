@@ -3,7 +3,7 @@
   "info": {
     "title": "Node-Fetch API",
     "version": "1.0.0",
-    "description": "订阅管理和用户配置 API 自动生成文档\n\n## 功能特性\n- 🔐 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-15T16:26:14.653Z"
+    "description": "订阅管理和用户配置 API 自动生成文档\n\n## 功能特性\n- 🔐 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-15T16:37:22.983Z"
   },
   "servers": [
     {
@@ -18,21 +18,21 @@
   "paths": {
     "/config/allUsers": {
       "all": {
-        "summary": "ALL /config/allUsers",
-        "description": "ALL 操作",
+        "summary": "获取所有用户列表",
+        "description": "管理员接口：获取系统中所有用户的摘要信息，包括用户状态、流量信息等",
         "tags": [
-          "api"
+          "管理员"
         ],
         "parameters": [
           {
-            "name": "token",
+            "name": "superToken",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "用户访问令牌",
-            "example": "user_access_token"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
@@ -89,17 +89,17 @@
         },
         "security": [
           {
-            "TokenAuth": []
+            "SuperTokenAuth": []
           }
         ]
       }
     },
     "/config/users/:userId": {
       "all": {
-        "summary": "ALL /config/users/:userId",
-        "description": "ALL 操作",
+        "summary": "用户配置管理",
+        "description": "用户配置管理",
         "tags": [
-          "api"
+          "用户配置"
         ],
         "parameters": [
           {
@@ -177,7 +177,7 @@
         "summary": "超级管理员API接口",
         "description": "超级管理员API接口",
         "tags": [
-          "admin"
+          "管理员"
         ],
         "parameters": [
           {
@@ -552,8 +552,7 @@
         "summary": "获取用户列表",
         "description": "管理员接口：获取详细的用户列表，包括流量统计和状态信息",
         "tags": [
-          "管理员",
-          "用户管理"
+          "管理员"
         ],
         "parameters": [
           {
@@ -632,8 +631,7 @@
         "summary": "创建新用户",
         "description": "管理员接口：批量创建用户账户",
         "tags": [
-          "管理员",
-          "用户管理"
+          "管理员"
         ],
         "parameters": [
           {
@@ -721,8 +719,7 @@
         "summary": "删除指定用户",
         "description": "管理员接口：删除指定用户及其所有相关数据",
         "tags": [
-          "管理员",
-          "用户管理"
+          "管理员"
         ],
         "parameters": [
           {
@@ -810,8 +807,7 @@
         "summary": "刷新用户流量信息",
         "description": "管理员接口：强制刷新用户的流量统计信息",
         "tags": [
-          "管理员",
-          "流量管理"
+          "管理员"
         ],
         "parameters": [
           {
@@ -1276,88 +1272,6 @@
         "security": [
           {
             "TokenAuth": []
-          }
-        ]
-      }
-    },
-    "/config/users": {
-      "get": {
-        "summary": "获取所有用户列表(需要管理员权限)",
-        "description": "获取系统中所有用户的摘要信息，包括用户状态、流量信息等",
-        "tags": [
-          "用户配置",
-          "管理员"
-        ],
-        "parameters": [
-          {
-            "name": "superToken",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "超级管理员访问令牌",
-            "example": "super_secret_token"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "用户列表",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserSummary"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "请求参数错误",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "未授权访问",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "权限不足",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "服务器内部错误",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "SuperTokenAuth": []
           }
         ]
       }
