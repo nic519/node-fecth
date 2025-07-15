@@ -1,4 +1,4 @@
-import { UserConfig } from "@/types/user.types";
+import { UserConfig } from "@/types/openapi-schemas";
 
 export interface SuperAdminStats {
 	totalUsers: number;

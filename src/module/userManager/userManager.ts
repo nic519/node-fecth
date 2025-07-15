@@ -1,7 +1,5 @@
-import { UserConfig } from '@/types/user-config.schema';
+import { UserConfig, ConfigResponse, UserConfigMeta, UserConfigSchema } from '@/types/openapi-schemas';
 import { parse as yamlParse } from 'yaml';
-import { validateUserConfig } from '@/types/user-config.schema';
-import { ConfigResponse, UserConfigMeta } from '@/types/user-config.types';
 
 export class UserManager {
 	private env: Env;
@@ -199,15 +197,14 @@ export class UserManager {
 	private validateConfigFormat(config: UserConfig): boolean {
 		console.log('🔍 开始验证用户配置:', JSON.stringify(config, null, 2));
 
-		const validation = validateUserConfig(config);
-
-		if (!validation.isValid) {
-			console.log('❌ 用户配置验证失败:', validation.errors);
+		try {
+			UserConfigSchema.parse(config);
+			console.log('✅ 用户配置验证通过');
+			return true;
+		} catch (error) {
+			console.log('❌ 用户配置验证失败:', error);
 			return false;
 		}
-
-		console.log('✅ 用户配置验证通过');
-		return true;
 	}
 
 	/**

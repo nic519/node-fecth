@@ -50,5 +50,7 @@
 
     /* Enable JSX import source. */
 		"jsxImportSource": "hono/jsx"
-	}
+	},
+	"include": ["src/**/*", "scripts/**/*", "functions/**/*", "worker-configuration.d.ts"],
+	"exclude": ["frontend", "node_modules", "dist"]
 }

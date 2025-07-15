@@ -1,4 +1,4 @@
-import { UserConfig } from '@/types/user.types';
+import { UserConfig } from '@/types/openapi-schemas';
 import { UserManager } from './userManager';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { SuperAdminStats, UserSummary, ConfigTemplate, AdminOperation } from '@/module/userManager/types/supper-admin.types';

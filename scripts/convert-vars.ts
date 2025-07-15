@@ -1,4 +1,4 @@
-import { UserConfig } from '@/types/user.types';
+import { UserConfig } from '@/types/openapi-schemas';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as yamlParse } from 'yaml';

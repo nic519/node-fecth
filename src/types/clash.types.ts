@@ -1,4 +1,4 @@
-import { AreaCode } from '@/types/user-config.schema';
+import { AreaCode } from '@/types/openapi-schemas';
 
 export interface ClashYaml {
 	proxies: ClashProxy[];

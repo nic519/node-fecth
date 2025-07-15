@@ -1,6 +1,7 @@
 import { RouteHandler } from '@/types/routes.types';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
-import { UserConfig } from '@/types/user.types';
+import { CustomError } from '@/utils/customError';
+import { UserConfig } from '@/types/openapi-schemas';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { ConfigTemplate } from '@/module/userManager/types/supper-admin.types';

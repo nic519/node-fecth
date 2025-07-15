@@ -1,5 +1,5 @@
 import { GlobalConfig } from '@/config/global-config';
-import { AreaCode, SubConfig, UserConfig } from '@/types/user.types';
+import { AreaCode, SubConfig, UserConfig } from '@/types/openapi-schemas';
 
 // 用户配置类
 export class InnerUser {

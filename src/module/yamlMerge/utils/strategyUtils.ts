@@ -1,5 +1,5 @@
 import { ClashProxy, ProxyAreaInfo, SubInfo } from '@/types/clash.types';
-import { AreaCode } from '@/types/user-config.schema';
+import { AreaCode } from '@/types/openapi-schemas';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ProxyAreaObjects } from '@/config/proxy-area.config';
 

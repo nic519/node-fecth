@@ -1,6 +1,6 @@
 import { UserManager } from '@/module/userManager/userManager';
 import { RouteHandler } from '@/types/routes.types';
-import { UserConfig } from '@/types/user-config.types';
+import { UserConfig, UserConfigSchema } from '@/types/openapi-schemas';
 import { AuthUtils } from '@/utils/authUtils';
 import { SuperAdminHandler } from './superAdminHandler';
 
@@ -96,11 +96,11 @@ export class UserConfigHandler implements RouteHandler {
 			}
 
 			// 使用Zod验证配置
-			const { validateUserConfig } = await import('@/types/user-config.schema');
-			const validation = validateUserConfig(config);
-
-			if (!validation.isValid) {
-				return AuthUtils.createErrorResponse(validation.errors.join('\n'), 400);
+			try {
+				UserConfigSchema.parse(config);
+			} catch (error: any) {
+				const errorMessage = error.errors?.map((e: any) => e.message).join('\n') || 'Invalid config format';
+				return AuthUtils.createErrorResponse(errorMessage, 400);
 			}
 
 			// 保存用户配置

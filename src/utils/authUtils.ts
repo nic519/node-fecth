@@ -1,5 +1,6 @@
+import { Base64Utils } from './base64Utils';
+import { ConfigResponse } from '@/types/openapi-schemas';
 import { UserManager } from '@/module/userManager/userManager';
-import { ConfigResponse } from '@/types/user-config.types';
 
 /**
  * 统一的身份验证工具类
