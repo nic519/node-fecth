@@ -9,15 +9,17 @@ export class IgnoreHandler implements RouteHandler {
 		if (
 			pathname === '/favicon.ico' ||
 			pathname === '/robots.txt' ||
+			pathname === '/openapi.json' ||
 			pathname.startsWith('/static/') ||
 			pathname.endsWith('.ico') ||
 			pathname.endsWith('.png') ||
 			pathname.endsWith('.jpg') ||
 			pathname.endsWith('.gif') ||
 			pathname.endsWith('.css') ||
-			pathname.endsWith('.js')
+			pathname.endsWith('.js') ||
+			pathname.endsWith('.json')
 		) {
-			return new Response(null, { status: 204 }); // 返回 204 No Content
+			return null; // 让静态文件服务器处理
 		}
 		return null;
 	}

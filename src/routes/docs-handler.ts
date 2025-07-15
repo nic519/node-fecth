@@ -1,149 +1,10 @@
 import { RouteHandler } from '@/types/routes.types';
 
-// 将 OpenAPI 规范作为静态内容
-const openApiSpec = {
-  openapi: '3.0.0',
-  info: {
-    title: 'Node-Fetch API',
-    version: '1.0.0',
-    description: '订阅管理和用户配置 API 文档'
-  },
-  servers: [
-    {
-      url: '/api',
-      description: 'API 服务器'
-    }
-  ],
-  paths: {
-    '/health': {
-      get: {
-        summary: '健康检查',
-        description: '检查服务状态',
-        tags: ['监控'],
-        responses: {
-          '200': {
-            description: '服务正常',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    status: { type: 'string', example: 'ok' },
-                    timestamp: { type: 'string', format: 'date-time' },
-                    version: { type: 'string', example: '1.0.0' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    '/api/config/users/{userId}': {
-      get: {
-        summary: '获取用户配置',
-        description: '根据用户ID获取用户配置信息',
-        tags: ['用户配置'],
-        parameters: [
-          {
-            name: 'userId',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: '用户ID'
-          }
-        ],
-        responses: {
-          '200': {
-            description: '用户配置信息',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    userId: { type: 'string' },
-                    config: { type: 'object' },
-                    lastUpdated: { type: 'string', format: 'date-time' }
-                  }
-                }
-              }
-            }
-          },
-          '404': {
-            description: '用户不存在',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ErrorResponse'
-                }
-              }
-            }
-          }
-        }
-      },
-      put: {
-        summary: '更新用户配置',
-        description: '更新指定用户的配置信息',
-        tags: ['用户配置'],
-        parameters: [
-          {
-            name: 'userId',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: '用户ID'
-          }
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  config: { type: 'object' }
-                }
-              }
-            }
-          }
-        },
-        responses: {
-          '200': {
-            description: '配置更新成功',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean' },
-                    message: { type: 'string' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  components: {
-    schemas: {
-      ErrorResponse: {
-        type: 'object',
-        properties: {
-          error: { type: 'string' },
-          message: { type: 'string' },
-          timestamp: { type: 'string', format: 'date-time' }
-        }
-      }
-    }
-  }
-};
-
 export class DocsHandler implements RouteHandler {
   canHandle(request: Request): boolean {
     const url = new URL(request.url);
-    return url.pathname === '/docs' || url.pathname === '/openapi.json';
+    // 只处理 /docs 路径，/openapi.json 由静态文件服务
+    return url.pathname === '/docs';
   }
 
   async handle(request: Request, env: Env): Promise<Response> {
@@ -151,9 +12,7 @@ export class DocsHandler implements RouteHandler {
     const pathname = url.pathname;
 
     try {
-      if (pathname === '/openapi.json') {
-        return this.serveOpenAPISpec();
-      } else if (pathname === '/docs') {
+      if (pathname === '/docs') {
         return this.serveSwaggerUI();
       }
       
@@ -162,16 +21,6 @@ export class DocsHandler implements RouteHandler {
       console.error('文档处理错误:', error);
       return new Response('Internal Server Error', { status: 500 });
     }
-  }
-
-  private serveOpenAPISpec(): Response {
-    return new Response(JSON.stringify(openApiSpec, null, 2), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=300'
-      }
-    });
   }
 
   private serveSwaggerUI(): Response {
@@ -202,6 +51,9 @@ export class DocsHandler implements RouteHandler {
     .swagger-ui .topbar .download-url-wrapper {
       display: none;
     }
+    .swagger-ui .info .title {
+      color: #1f2937;
+    }
   </style>
 </head>
 <body>
@@ -211,6 +63,7 @@ export class DocsHandler implements RouteHandler {
   <script>
     window.onload = function() {
       const ui = SwaggerUIBundle({
+        // 使用静态生成的 openapi.json 文件
         url: '/openapi.json',
         dom_id: '#swagger-ui',
         deepLinking: true,
@@ -231,10 +84,13 @@ export class DocsHandler implements RouteHandler {
         tryItOutEnabled: true,
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function() {
-          console.log('Swagger UI 加载完成');
+          console.log('✅ Swagger UI 已加载，使用自动生成的 API 文档');
+        },
+        onFailure: function(error) {
+          console.error('❌ 加载 OpenAPI 规范失败:', error);
         },
         requestInterceptor: function(request) {
-          console.log('API 请求:', request);
+          console.log('🔗 API 请求:', request.url);
           return request;
         }
       });

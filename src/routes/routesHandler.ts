@@ -71,15 +71,28 @@ export class Router {
 			}
 		});
 
-		this.app.all('/openapi.json', async (c) => {
+		// OpenAPI 规范路由 - 直接从文件读取
+		this.app.get('/openapi.json', async (c) => {
 			console.log('📋 OpenAPI规范路由');
 			try {
-				const handler = new DocsHandler();
-				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('OpenAPI handler failed', 500);
+				// 在开发环境中从文件系统读取
+				const fs = await import('fs');
+				const path = await import('path');
+				const filePath = path.join(process.cwd(), 'public', 'openapi.json');
+				
+				if (fs.existsSync(filePath)) {
+					const content = fs.readFileSync(filePath, 'utf-8');
+					return c.json(JSON.parse(content), 200, {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*',
+						'Cache-Control': 'public, max-age=300'
+					});
+				} else {
+					return c.json({ error: 'OpenAPI spec not found' }, 404);
+				}
 			} catch (error) {
 				console.error('❌ OpenAPI规范错误:', error);
-				return c.text('Internal Server Error', 500);
+				return c.json({ error: 'Failed to load OpenAPI spec' }, 500);
 			}
 		});
 
@@ -174,8 +187,8 @@ export class Router {
 		this.app.get('/:uid', async (c) => {
 			const uid = c.req.param('uid');
 
-			// 跳过一些特殊路径
-			if (['favicon.ico', 'robots.txt', 'health'].includes(uid)) {
+			// 跳过一些特殊路径和静态文件
+			if (['favicon.ico', 'robots.txt', 'health', 'openapi.json'].includes(uid)) {
 				return c.notFound();
 			}
 

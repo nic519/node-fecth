@@ -3,7 +3,7 @@
   "info": {
     "title": "Node-Fetch API",
     "version": "1.0.0",
-    "description": "订阅管理和用户配置 API 自动生成文档"
+    "description": "订阅管理和用户配置 API 自动生成文档\n\n## 功能特性\n- 🔐 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-15T16:26:14.653Z"
   },
   "servers": [
     {
@@ -16,40 +16,10 @@
     }
   ],
   "paths": {
-    "/api/config/allUsers": {
+    "/config/allUsers": {
       "all": {
-        "summary": "ALL /api/config/allUsers",
-        "tags": [
-          "api"
-        ],
-        "parameters": [],
-        "responses": {
-          "401": {
-            "description": "未授权",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "服务器内部错误",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/config/users/:userId": {
-      "all": {
-        "summary": "ALL /api/config/users/:userId",
+        "summary": "ALL /config/allUsers",
+        "description": "ALL 操作",
         "tags": [
           "api"
         ],
@@ -61,12 +31,43 @@
             "schema": {
               "type": "string"
             },
-            "description": "访问令牌"
+            "description": "用户访问令牌",
+            "example": "user_access_token"
           }
         ],
         "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -85,12 +86,96 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ]
       }
     },
-    "/api/admin/*": {
+    "/config/users/:userId": {
+      "all": {
+        "summary": "ALL /config/users/:userId",
+        "description": "ALL 操作",
+        "tags": [
+          "api"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户访问令牌",
+            "example": "user_access_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/*": {
       "all": {
         "summary": "超级管理员API接口",
+        "description": "超级管理员API接口",
         "tags": [
           "admin"
         ],
@@ -102,12 +187,152 @@
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员令牌"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/clash/{userId}": {
+      "get": {
+        "summary": "获取用户的Clash配置",
+        "description": "生成用户专用的Clash配置文件，支持多种订阅源合并",
+        "tags": [
+          "订阅",
+          "Clash"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户唯一标识符",
+            "example": "user123"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "clash",
+                "v2ray",
+                "ss"
+              ],
+              "default": "clash"
+            },
+            "description": "配置文件类型"
+          },
+          {
+            "name": "udp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            },
+            "description": "是否启用UDP"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clash配置文件",
+            "content": {
+              "text/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -129,12 +354,206 @@
         }
       }
     },
-    "/api/admin/users": {
+    "/storage/{key}": {
+      "get": {
+        "summary": "获取存储的值",
+        "description": "从KV存储中获取指定键的值",
+        "tags": [
+          "存储"
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "存储键名",
+            "example": "config_key"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户访问令牌",
+            "example": "user_access_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "设置存储的值",
+        "description": "将数据存储到KV存储中的指定键",
+        "tags": [
+          "存储"
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "存储键名",
+            "example": "config_key"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户访问令牌",
+            "example": "user_access_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "description": "要存储的值"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users": {
       "get": {
         "summary": "获取用户列表",
+        "description": "管理员接口：获取详细的用户列表，包括流量统计和状态信息",
         "tags": [
-          "admin",
-          "users"
+          "管理员",
+          "用户管理"
         ],
         "parameters": [
           {
@@ -144,12 +563,13 @@
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员令牌"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "用户列表",
             "content": {
               "application/json": {
                 "schema": {
@@ -161,8 +581,28 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -181,13 +621,19 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ]
       },
       "post": {
         "summary": "创建新用户",
+        "description": "管理员接口：批量创建用户账户",
         "tags": [
-          "admin",
-          "users"
+          "管理员",
+          "用户管理"
         ],
         "parameters": [
           {
@@ -197,7 +643,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员令牌"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
@@ -211,8 +658,28 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -232,6 +699,11 @@
             }
           }
         },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -244,12 +716,13 @@
         }
       }
     },
-    "/api/admin/users/{userId}": {
+    "/admin/users/{userId}": {
       "delete": {
-        "summary": "删除用户",
+        "summary": "删除指定用户",
+        "description": "管理员接口：删除指定用户及其所有相关数据",
         "tags": [
-          "admin",
-          "users"
+          "管理员",
+          "用户管理"
         ],
         "parameters": [
           {
@@ -259,7 +732,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "userId 参数"
+            "description": "用户唯一标识符",
+            "example": "user123"
           },
           {
             "name": "superToken",
@@ -268,7 +742,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员令牌"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
@@ -282,8 +757,28 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -302,16 +797,21 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ]
       }
     },
-    "/api/admin/users/{userId}/traffic/refresh": {
+    "/admin/users/{userId}/traffic/refresh": {
       "post": {
         "summary": "刷新用户流量信息",
+        "description": "管理员接口：强制刷新用户的流量统计信息",
         "tags": [
-          "admin",
-          "users",
-          "traffic"
+          "管理员",
+          "流量管理"
         ],
         "parameters": [
           {
@@ -321,7 +821,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "userId 参数"
+            "description": "用户唯一标识符",
+            "example": "user123"
           },
           {
             "name": "superToken",
@@ -330,7 +831,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "超级管理员令牌"
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
           }
         ],
         "responses": {
@@ -344,8 +846,28 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -365,6 +887,11 @@
             }
           }
         },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -377,12 +904,12 @@
         }
       }
     },
-    "/api/config/users/{userId}": {
+    "/config/users/{userId}": {
       "get": {
         "summary": "获取指定用户配置",
+        "description": "根据用户ID获取完整的用户配置信息，包括订阅URL、规则配置等",
         "tags": [
-          "users",
-          "config"
+          "用户配置"
         ],
         "parameters": [
           {
@@ -392,7 +919,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "userId 参数"
+            "description": "用户唯一标识符",
+            "example": "user123"
           },
           {
             "name": "token",
@@ -401,12 +929,13 @@
             "schema": {
               "type": "string"
             },
-            "description": "访问令牌"
+            "description": "用户访问令牌",
+            "example": "user_access_token"
           }
         ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "用户配置信息",
             "content": {
               "application/json": {
                 "schema": {
@@ -415,8 +944,8 @@
               }
             }
           },
-          "401": {
-            "description": "未授权",
+          "400": {
+            "description": "请求参数错误",
             "content": {
               "application/json": {
                 "schema": {
@@ -425,8 +954,8 @@
               }
             }
           },
-          "500": {
-            "description": "服务器内部错误",
+          "401": {
+            "description": "未授权访问",
             "content": {
               "application/json": {
                 "schema": {
@@ -434,48 +963,19 @@
                 }
               }
             }
-          }
-        }
-      },
-      "post": {
-        "summary": "更新用户配置",
-        "tags": [
-          "users",
-          "config"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "userId 参数"
           },
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "访问令牌"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "操作成功",
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           },
-          "401": {
-            "description": "未授权",
+          "404": {
+            "description": "用户不存在",
             "content": {
               "application/json": {
                 "schema": {
@@ -495,6 +995,193 @@
             }
           }
         },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "创建或更新用户配置",
+        "description": "创建或更新用户配置，支持部分更新",
+        "tags": [
+          "用户配置"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户唯一标识符",
+            "example": "user123"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户访问令牌",
+            "example": "user_access_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserConfig"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新用户配置",
+        "description": "创建或更新用户配置，支持部分更新",
+        "tags": [
+          "用户配置"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户唯一标识符",
+            "example": "user123"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "用户访问令牌",
+            "example": "user_access_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -508,9 +1195,9 @@
       },
       "delete": {
         "summary": "删除用户配置",
+        "description": "删除指定用户的所有配置信息，操作不可逆",
         "tags": [
-          "users",
-          "config"
+          "用户配置"
         ],
         "parameters": [
           {
@@ -520,7 +1207,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "userId 参数"
+            "description": "用户唯一标识符",
+            "example": "user123"
           },
           {
             "name": "token",
@@ -529,7 +1217,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "访问令牌"
+            "description": "用户访问令牌",
+            "example": "user_access_token"
           }
         ],
         "responses": {
@@ -543,8 +1232,28 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -563,20 +1272,37 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ]
       }
     },
-    "/api/config/users": {
+    "/config/users": {
       "get": {
-        "summary": "获取所有用户列表",
+        "summary": "获取所有用户列表(需要管理员权限)",
+        "description": "获取系统中所有用户的摘要信息，包括用户状态、流量信息等",
         "tags": [
-          "users",
-          "admin"
+          "用户配置",
+          "管理员"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "superToken",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "超级管理员访问令牌",
+            "example": "super_secret_token"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "成功",
+            "description": "用户列表",
             "content": {
               "application/json": {
                 "schema": {
@@ -588,8 +1314,95 @@
               }
             }
           },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "未授权",
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SuperTokenAuth": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "服务健康检查",
+        "description": "检查服务运行状态，返回服务版本和时间戳信息",
+        "tags": [
+          "系统"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "服务健康状态",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "权限不足",
             "content": {
               "application/json": {
                 "schema": {
@@ -619,50 +1432,96 @@
         "properties": {
           "subscribe": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "订阅URL地址"
           },
           "accessToken": {
-            "type": "string"
+            "type": "string",
+            "description": "用户访问令牌"
           },
           "ruleUrl": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "规则URL地址",
+            "nullable": true
           },
           "fileName": {
-            "type": "string"
+            "type": "string",
+            "description": "配置文件名称",
+            "nullable": true
           },
           "multiPortMode": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AreaCode"
-            }
+            },
+            "description": "多端口模式配置"
           },
           "appendSubList": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SubConfig"
-            }
+            },
+            "description": "附加订阅列表"
           },
           "excludeRegex": {
-            "type": "string"
+            "type": "string",
+            "description": "排除正则表达式",
+            "nullable": true
           }
         },
         "required": [
           "subscribe",
           "accessToken"
-        ]
+        ],
+        "description": "用户配置对象"
+      },
+      "AreaCode": {
+        "type": "string",
+        "enum": [
+          "HK",
+          "TW",
+          "SG",
+          "JP",
+          "KR",
+          "US",
+          "UK",
+          "DE",
+          "FR"
+        ],
+        "description": "地区代码"
+      },
+      "SubConfig": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "name"
+        ],
+        "description": "订阅配置"
       },
       "UserSummary": {
         "type": "object",
         "properties": {
           "userId": {
-            "type": "string"
+            "type": "string",
+            "description": "用户ID"
           },
           "token": {
-            "type": "string"
+            "type": "string",
+            "description": "用户令牌"
           },
           "hasConfig": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否有配置"
           },
           "source": {
             "type": "string",
@@ -670,17 +1529,21 @@
               "kv",
               "env",
               "none"
-            ]
+            ],
+            "description": "配置来源"
           },
           "lastModified": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "最后修改时间"
           },
           "isActive": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否激活"
           },
           "subscribeUrl": {
-            "type": "string"
+            "type": "string",
+            "description": "订阅URL"
           },
           "status": {
             "type": "string",
@@ -688,72 +1551,150 @@
               "active",
               "inactive",
               "disabled"
-            ]
+            ],
+            "description": "用户状态"
           },
           "trafficInfo": {
-            "$ref": "#/components/schemas/TrafficInfo"
+            "$ref": "#/components/schemas/TrafficInfo",
+            "description": "流量信息"
           }
-        }
+        },
+        "required": [
+          "userId",
+          "token",
+          "hasConfig"
+        ],
+        "description": "用户摘要信息"
       },
       "TrafficInfo": {
         "type": "object",
         "properties": {
           "upload": {
-            "type": "number"
+            "type": "number",
+            "description": "上传流量(字节)"
           },
           "download": {
-            "type": "number"
+            "type": "number",
+            "description": "下载流量(字节)"
           },
           "total": {
-            "type": "number"
+            "type": "number",
+            "description": "总流量(字节)"
           },
           "used": {
-            "type": "number"
+            "type": "number",
+            "description": "已用流量(字节)"
           },
           "remaining": {
-            "type": "number"
+            "type": "number",
+            "description": "剩余流量(字节)"
           },
           "expire": {
-            "type": "number"
+            "type": "number",
+            "description": "过期时间戳"
           },
           "isExpired": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "是否已过期"
           },
           "usagePercent": {
-            "type": "number"
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "code": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "使用百分比"
           }
         },
-        "required": [
-          "error"
-        ]
+        "description": "流量统计信息"
       },
       "SuccessResponse": {
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "操作是否成功"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "响应消息"
           },
           "data": {
-            "type": "object"
+            "type": "object",
+            "description": "响应数据",
+            "nullable": true
           }
-        }
+        },
+        "required": [
+          "success"
+        ],
+        "description": "成功响应"
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "错误类型"
+          },
+          "message": {
+            "type": "string",
+            "description": "错误消息"
+          },
+          "code": {
+            "type": "number",
+            "description": "错误代码"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "错误发生时间"
+          }
+        },
+        "required": [
+          "error",
+          "message"
+        ],
+        "description": "错误响应"
+      },
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "description": "服务状态"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "检查时间"
+          },
+          "version": {
+            "type": "string",
+            "description": "服务版本"
+          }
+        },
+        "required": [
+          "status",
+          "timestamp"
+        ],
+        "description": "健康检查响应"
+      }
+    },
+    "securitySchemes": {
+      "TokenAuth": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "token",
+        "description": "用户访问令牌"
+      },
+      "SuperTokenAuth": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "superToken",
+        "description": "超级管理员令牌"
       }
     }
   }

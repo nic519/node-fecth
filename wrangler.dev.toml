@@ -21,4 +21,8 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 [dev]
 port = 8787
 local_protocol = "http"
-upstream_protocol = "https" 
+upstream_protocol = "https"
+
+# 静态文件配置
+[assets]
+directory = "public" 
