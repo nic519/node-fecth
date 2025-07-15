@@ -392,7 +392,7 @@ class OpenAPIGenerator {
                 description = '用户配置管理';
                 tags = ['用户配置'];
               } else if (path === '/create/user') {
-                description = '创建新用户';
+                description = '创建新用户 (Pages部署)';
                 tags = ['管理员']; // 创建用户需要管理员权限
               }
               
@@ -408,7 +408,7 @@ class OpenAPIGenerator {
         });
       }
 
-      // 提取 this.app.xxx() 形式的API路由定义
+      // 提取 this.app.xxx() 形式的API路由定义 (带 /api 前缀)
       const appApiMatches = content.match(/this\.app\.(\w+)\(['"`](\/api\/[^'"`]+)['"`]/g);
       if (appApiMatches) {
         appApiMatches.forEach((match: string) => {
@@ -437,6 +437,37 @@ class OpenAPIGenerator {
               } else if (fullPath.startsWith('/api/kv')) {
                 description = 'KV存储API';
                 tags = ['存储'];
+              }
+              
+              this.routes.push({
+                method: method.toUpperCase(),
+                path: fullPath,
+                handler: 'MainApp',
+                description: description || `${method.toUpperCase()} 操作`,
+                tags: tags
+              });
+            }
+          }
+        });
+      }
+
+      // 提取 this.app.xxx() 形式的非API路由定义 (Worker部署专用)
+      const appOtherMatches = content.match(/this\.app\.(\w+)\(['"`](\/(?!api\/)[^'"`]+)['"`]/g);
+      if (appOtherMatches) {
+        appOtherMatches.forEach((match: string) => {
+          const matchResult = match.match(/(\w+)\(['"`](\/(?!api\/)[^'"`]+)['"`]/);
+          if (matchResult) {
+            const [, method, fullPath] = matchResult;
+            if (method && fullPath) {
+              let description = '';
+              let tags = ['api'];
+              
+              if (fullPath === '/create/user') {
+                description = '创建新用户 (Worker部署)';
+                tags = ['管理员'];
+              } else if (fullPath === '/health') {
+                description = '健康检查';
+                tags = ['系统'];
               }
               
               this.routes.push({

@@ -110,9 +110,9 @@ export class Router {
 
 		// 直接在主应用上定义API路由 (避免basePath问题)
 		
-		// 创建用户API: /api/create/user (最具体的路由，必须在前面)
-		this.app.put('/api/create/user', async (c) => {
-			console.log(`🆕 创建用户API: PUT /api/create/user`);
+		// 创建用户API: /create/user (Worker部署无需/api前缀)
+		this.app.put('/create/user', async (c) => {
+			console.log(`🆕 创建用户API: PUT /create/user`);
 			
 			try {
 				const body = await c.req.json();
@@ -202,7 +202,7 @@ export class Router {
 			const uid = c.req.param('uid');
 
 			// 跳过一些特殊路径、静态文件和API路径
-			if (['favicon.ico', 'robots.txt', 'health', 'openapi.json', 'api'].includes(uid)) {
+			if (['favicon.ico', 'robots.txt', 'health', 'openapi.json', 'api', 'create'].includes(uid)) {
 				return c.notFound();
 			}
 
@@ -257,7 +257,7 @@ export class Router {
 						'/config?user=<userId>', 
 						'/config/:userId', 
 						'/api/config/users/:userId',
-						'PUT /api/create/user',
+						'PUT /create/user',
 						'/:uid?token=<token>'
 					],
 				},

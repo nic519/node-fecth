@@ -1,15 +1,15 @@
 export const RoutesPathConfig = {
-	// === API接口 (以 /api 开头) ===
-	// 存储内容API
-	storage: '/api/storage',
+	// === API接口 ===
+	// 存储内容API (Pages部署时需要 /api 前缀)
+	storage: '/storage',
 	// KV存储操作API（GET获取/POST存储）
-	kv: '/api/kv',
+	kv: '/kv',
 	// 用户配置管理API
-	userConfig: '/api/config/users',
-	// 创建用户API (PUT方法)
-	createUser: '/api/create/user',
+	userConfig: '/config/users',
+	// 创建用户API (PUT方法) - Worker部署可以不要/api前缀
+	createUser: '/create/user',
 	
-	// === 页面路由 (不以 /api 开头) ===
+	// === 页面路由 ===
 	// 设置个人配置页面
 	setting: '/setting',
 	// 配置管理页面
