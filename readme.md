@@ -13,16 +13,33 @@ clash/sing-box等工具，优势就是他们的分组策略，可以做得很灵
 1. 当把节点给 sub.dler.io 这类转换器的时候，会生成随机的、无效的节点去转换，等转换回来后，再用真实的节点去替换
 2. 当把最终结果返回给客户端的时候，会对结果进行校验，通过才会下发，否则status code 返回 500，避免在自动更新订阅的场景，无效节点下发到客户端而影响上网的问题
 
-## 本地调试
-```bash
-yarn start
+## 开发调试
 
+### 启动完整开发环境
+```bash
+yarn dev
+```
+同时启动前端(3000端口)和后端(8787端口)开发服务器
+
+### 分别启动
+```bash
+# 仅启动后端
+yarn dev:backend
+
+# 仅启动前端  
+yarn dev:frontend
 ```
 
 ## 部署
+
+### Pages 部署 (推荐)
 ```bash
-yarn run deploy
+yarn deploy
 ```
+构建前端并部署到 Cloudflare Pages
+
+### 详细说明
+查看 [DEPLOYMENT.md](./DEPLOYMENT.md) 了解完整的部署配置和最佳实践
 
 在worker里面需要设置json环境变量：
 

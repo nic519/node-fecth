@@ -1,0 +1,27 @@
+# Cloudflare Pages 配置
+name = "node-fetch-pages"
+compatibility_date = "2025-02-14"
+
+[build]
+command = "yarn build:frontend"
+destination_dir = "frontend/dist"
+
+[build.environment_variables]
+VITE_API_BASE_URL = "/api"
+
+# Functions 配置 (用于 /api/* 路由)
+[functions]
+directory = "functions"
+
+# KV 绑定
+[[kv_namespaces]]
+binding = "KV_BINDING"
+id = "52fa82d5a9c3438195385f592be41ef9"
+
+[[kv_namespaces]]
+binding = "USERS_KV" 
+id = "52fa82d5a9c3438195385f592be41ef9"
+
+# 环境变量 (可通过 UI 或 CLI 设置)
+# [vars]
+# SUPER_ADMIN_TOKEN = "your-secret-token" 

@@ -166,6 +166,10 @@ dist
 .dev.*
 .wrangler/
 
+# 开发配置 (包含敏感信息)
+.dev.vars
+.dev.user.vars
+
 .prettierrc
 .yarn/
 .vscode/

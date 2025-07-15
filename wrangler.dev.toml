@@ -1,0 +1,13 @@
+# 开发模式 Wrangler 配置
+name = "node-fetch-dev"
+main = "src/index.ts"
+compatibility_date = "2025-02-14"
+
+# KV 绑定
+[[kv_namespaces]]
+binding = "KV_BINDING"
+id = "52fa82d5a9c3438195385f592be41ef9"
+
+[[kv_namespaces]]
+binding = "USERS_KV"
+id = "52fa82d5a9c3438195385f592be41ef9" 
