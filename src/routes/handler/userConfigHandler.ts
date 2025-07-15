@@ -5,6 +5,11 @@ import { AuthUtils } from '@/utils/authUtils';
 import { SuperAdminHandler } from './superAdminHandler';
 
 export class UserConfigHandler implements RouteHandler {
+	canHandle(request: Request): boolean {
+		const url = new URL(request.url);
+		return url.pathname.startsWith('/api/config/users/');
+	}
+
 	async handle(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
 		const pathname = url.pathname;
@@ -13,29 +18,29 @@ export class UserConfigHandler implements RouteHandler {
 		console.log(`🔧 用户配置管理请求: ${method} ${pathname}`);
 
 		try {
-					// 解析路径参数
-		const pathParts = pathname.split('/').filter(Boolean);
+			// 解析路径参数
+			const pathParts = pathname.split('/').filter(Boolean);
 
-		// 路由匹配: /api/config/users/:userId
-		if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'users') {
-			const userId = pathParts[3]; // 可选的用户ID
+			// 路由匹配: /api/config/users/:userId
+			if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'users') {
+				const userId = pathParts[3]; // 可选的用户ID
 
-			if (method === 'GET') {
-				if (userId) {
-					// GET /api/config/users/:userId - 获取指定用户配置
-					return await this.getUserConfig(request, env, userId);
-				} else {
-					// GET /api/config/users - 获取所有用户列表
-					return await this.getAllUsers(request, env);
+				if (method === 'GET') {
+					if (userId) {
+						// GET /api/config/users/:userId - 获取指定用户配置
+						return await this.getUserConfig(request, env, userId);
+					} else {
+						// GET /api/config/users - 获取所有用户列表
+						return await this.getAllUsers(request, env);
+					}
+				} else if (method === 'POST' && userId) {
+					// POST /api/config/users/:userId - 更新用户配置
+					return await this.updateUserConfig(request, env, userId);
+				} else if (method === 'DELETE' && userId) {
+					// DELETE /api/config/users/:userId - 删除用户配置
+					return await this.deleteUserConfig(request, env, userId);
 				}
-			} else if (method === 'POST' && userId) {
-				// POST /api/config/users/:userId - 更新用户配置
-				return await this.updateUserConfig(request, env, userId);
-			} else if (method === 'DELETE' && userId) {
-				// DELETE /api/config/users/:userId - 删除用户配置
-				return await this.deleteUserConfig(request, env, userId);
 			}
-		}
 
 			return new Response('Not Found', { status: 404 });
 		} catch (error) {
@@ -68,10 +73,13 @@ export class UserConfigHandler implements RouteHandler {
 			const authResult = await AuthUtils.authenticate(request, env, userId);
 
 			// 解析请求体
-			const body = (await request.json()) as { yaml?: string };
+			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
 			let config: UserConfig;
 
-			if (body.yaml) {
+			if (body.config) {
+				// 处理前端发送的JSON格式配置
+				config = body.config;
+			} else if (body.yaml) {
 				// 处理YAML格式的请求
 				try {
 					const { parse } = await import('yaml');
@@ -137,6 +145,32 @@ export class UserConfigHandler implements RouteHandler {
 			});
 		} catch (error) {
 			console.error(`删除用户配置失败: ${userId}`, error);
+			return AuthUtils.createErrorResponse('Internal Server Error', 500);
+		}
+	}
+
+	/**
+	 * 获取所有用户列表
+	 */
+	private async getAllUsers(request: Request, env: Env): Promise<Response> {
+		try {
+			// 验证超级管理员权限
+			const url = new URL(request.url);
+			const superToken = url.searchParams.get('superToken');
+			if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
+				return AuthUtils.createErrorResponse('Unauthorized: Invalid super admin token', 401);
+			}
+
+			const userManager = new UserManager(env);
+			const userList = await userManager.getAllUsers();
+
+			return AuthUtils.createSuccessResponse({
+				users: userList,
+				count: userList.length,
+				timestamp: new Date().toISOString(),
+			});
+		} catch (error) {
+			console.error('获取所有用户列表失败:', error);
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}

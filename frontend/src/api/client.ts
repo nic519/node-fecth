@@ -3,8 +3,7 @@ import type { ConfigResponse, UserConfig, AdminStats, UserSummary } from '@/type
 
 // 环境配置
 const config = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 
-    (import.meta.env.DEV ? 'http://localhost:8787/api' : '/api'),
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
   isDev: import.meta.env.DEV
 };
 
@@ -68,27 +67,45 @@ export const adminApi = {
    * 获取系统统计数据
    */
   async getStats(superToken: string): Promise<AdminStats> {
-    return apiClient.get('admin/stats', {
+    const response = await apiClient.get('admin/stats', {
       searchParams: { superToken }
-    }).json<AdminStats>();
+    }).json<{ success: boolean; data: AdminStats }>();
+    
+    if (!response.success) {
+      throw new Error('获取系统统计数据失败');
+    }
+    
+    return response.data;
   },
 
   /**
    * 获取用户列表
    */
   async getUsers(superToken: string): Promise<UserSummary[]> {
-    return apiClient.get('admin/users', {
+    const response = await apiClient.get('admin/users', {
       searchParams: { superToken }
-    }).json<UserSummary[]>();
+    }).json<{ success: boolean; data: { users: UserSummary[] } }>();
+    
+    if (!response.success) {
+      throw new Error('获取用户列表失败');
+    }
+    
+    return response.data.users;
   },
 
   /**
    * 获取用户详情
    */
   async getUserDetail(userId: string, superToken: string): Promise<ConfigResponse> {
-    return apiClient.get(`admin/users/${userId}`, {
+    const response = await apiClient.get(`admin/users/${userId}`, {
       searchParams: { superToken }
-    }).json<ConfigResponse>();
+    }).json<{ success: boolean; data: ConfigResponse }>();
+    
+    if (!response.success) {
+      throw new Error('获取用户详情失败');
+    }
+    
+    return response.data;
   },
 
   /**
@@ -105,28 +122,42 @@ export const adminApi = {
    * 删除用户（管理员）
    */
   async deleteUser(userId: string, superToken: string): Promise<void> {
-    await apiClient.delete(`admin/users/${userId}`, {
+    const response = await apiClient.delete(`admin/users/${userId}`, {
       searchParams: { superToken }
-    });
+    }).json<{ success: boolean; data?: any; error?: string }>();
+    
+    if (!response.success) {
+      throw new Error(response.error || '删除用户失败');
+    }
   },
 
   /**
    * 创建用户（管理员）
    */
   async createUser(userId: string, config: UserConfig, superToken: string): Promise<void> {
-    await apiClient.post('admin/users', {
+    const response = await apiClient.post('admin/users', {
       json: { userId, config },
       searchParams: { superToken }
-    });
+    }).json<{ success: boolean; data?: any; error?: string }>();
+    
+    if (!response.success) {
+      throw new Error(response.error || '创建用户失败');
+    }
   },
 
   /**
    * 刷新用户流量信息
    */
   async refreshUserTraffic(userId: string, superToken: string): Promise<any> {
-    return apiClient.post(`admin/users/${userId}/traffic/refresh`, {
+    const response = await apiClient.post(`admin/users/${userId}/traffic/refresh`, {
       searchParams: { superToken }
-    }).json();
+    }).json<{ success: boolean; data?: any; error?: string }>();
+    
+    if (!response.success) {
+      throw new Error(response.error || '刷新用户流量信息失败');
+    }
+    
+    return response.data;
   }
 };
 

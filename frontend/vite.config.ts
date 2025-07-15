@@ -13,6 +13,14 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    proxy: {
+      // 代理 API 请求到后端服务器
+      '/api': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   build: {
     outDir: 'dist',
@@ -20,6 +28,6 @@ export default defineConfig({
   },
   define: {
     // 确保环境变量在构建时可用
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL),
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || '/api'),
   }
 }) 

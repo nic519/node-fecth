@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { adminApi } from '@/api/client';
-import type { UserSummary } from '@/types/user-config';
+import type { UserSummary, UserConfig } from '@/types/user-config';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserSummary[]>([]);
@@ -29,41 +29,15 @@ export function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // 这里需要实现 API 调用，暂时使用模拟数据
-      const mockUsers: UserSummary[] = [
-        {
-          userId: 'premium_001',
-          token: 'token_123',
-          hasConfig: true,
-          source: 'kv',
-          lastModified: '2024-01-15 14:30:00',
-          isActive: true,
-          subscribeUrl: 'https://example.com/premium_001',
-          status: 'active',
-          trafficInfo: {
-            upload: 1024 * 1024 * 100,
-            download: 1024 * 1024 * 500,
-            total: 1024 * 1024 * 1024 * 10,
-            used: 1024 * 1024 * 600,
-            remaining: 1024 * 1024 * 1024 * 9.4,
-            usagePercent: 6,
-            isExpired: false
-          }
-        },
-        {
-          userId: 'trial_user_002',
-          token: 'token_456',
-          hasConfig: false,
-          source: 'none',
-          lastModified: null,
-          isActive: false,
-          status: 'inactive'
-        }
-      ];
-      setUsers(mockUsers);
       setError(null);
+      
+      // 调用真实的管理员 API 获取用户列表
+      const userList = await adminApi.getUsers(superToken);
+      setUsers(userList);
     } catch (err) {
+      console.error('获取用户列表失败:', err);
       setError(err instanceof Error ? err.message : '加载用户数据失败');
+      setUsers([]); // 确保错误时清空用户列表
     } finally {
       setLoading(false);
     }
@@ -129,29 +103,70 @@ export function AdminUsers() {
   };
 
   const handleUserAction = async (action: string, userId: string, token?: string) => {
-    switch (action) {
-      case 'view':
-        if (token) {
-          window.open(`/config?userId=${userId}&token=${token}`, '_blank');
-        }
-        break;
-      case 'refresh':
-        // 刷新用户数据
-        await fetchUsers();
-        break;
-      case 'delete':
-        if (confirm(`确定要删除用户 ${userId} 吗？`)) {
-          // 执行删除操作
-          console.log('Delete user:', userId);
-        }
-        break;
+    try {
+      switch (action) {
+        case 'view':
+          if (token) {
+            window.open(`/config?userId=${userId}&token=${token}`, '_blank');
+          }
+          break;
+        case 'refresh':
+          // 刷新单个用户的流量信息
+          try {
+            await adminApi.refreshUserTraffic(userId, superToken);
+            await fetchUsers(); // 重新加载所有用户数据
+          } catch (err) {
+            console.error('刷新用户流量失败:', err);
+            alert('刷新用户流量失败: ' + (err instanceof Error ? err.message : '未知错误'));
+          }
+          break;
+        case 'delete':
+          if (confirm(`确定要删除用户 ${userId} 吗？此操作不可撤销！`)) {
+            try {
+              await adminApi.deleteUser(userId, superToken);
+              await fetchUsers(); // 重新加载用户列表
+              alert(`用户 ${userId} 删除成功`);
+            } catch (err) {
+              console.error('删除用户失败:', err);
+              alert('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'));
+            }
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('用户操作失败:', error);
+      setError(error instanceof Error ? error.message : '操作失败');
     }
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     const userId = prompt('请输入新用户ID:');
-    if (userId) {
-      console.log('Add user:', userId);
+    if (!userId || !userId.trim()) {
+      return;
+    }
+
+    const accessToken = prompt('请输入用户访问令牌:');
+    if (!accessToken || !accessToken.trim()) {
+      return;
+    }
+
+    const subscribe = prompt('请输入订阅链接:');
+    if (!subscribe || !subscribe.trim()) {
+      return;
+    }
+
+    try {
+      const userConfig: UserConfig = {
+        subscribe: subscribe.trim(),
+        accessToken: accessToken.trim()
+      };
+
+      await adminApi.createUser(userId.trim(), userConfig, superToken);
+      await fetchUsers(); // 重新加载用户列表
+      alert(`用户 ${userId} 创建成功`);
+    } catch (error) {
+      console.error('创建用户失败:', error);
+      alert('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'));
     }
   };
 
@@ -194,7 +209,7 @@ export function AdminUsers() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">用户管理</h2>
-              <p className="text-gray-600 mt-1">管理系统中的所有用户账户 (数据来自超级管理员 API)</p>
+              <p className="text-gray-600 mt-1">管理系统中的所有用户账户，支持实时查看、创建、删除和流量管理</p>
             </div>
             <button 
               onClick={handleAddUser}
@@ -256,7 +271,7 @@ export function AdminUsers() {
           <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
-                用户列表 (超级管理员 API 数据)
+                用户列表
                 {loading && <span className="text-sm text-gray-500 ml-2">加载中...</span>}
               </h3>
             </div>
