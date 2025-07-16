@@ -8,7 +8,7 @@ import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
-import { healthRoute } from '@/routes/openapi-routes';
+import { deleteUserConfigRoute, getUserConfigRoute, healthRoute, updateUserConfigRoute } from '@/routes/openapi-routes';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
@@ -95,43 +95,43 @@ export class Router {
 			return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 		});
 
-		// 用户配置相关路由（兼容现有处理器）
-		this.app.get('/api/config/users/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+		// 用户配置相关路由（使用 OpenAPI 定义）
+		this.app.openapi(getUserConfigRoute, async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`🔧 用户配置API: GET ${uid}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.json({ error: 'Handler returned null' }, 500);
+				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
 			} catch (error) {
 				console.error('❌ 获取用户配置错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		this.app.put('/api/config/users/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+		this.app.openapi(updateUserConfigRoute, async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`🔧 用户配置API: PUT ${uid}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.json({ error: 'Handler returned null' }, 500);
+				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
 			} catch (error) {
 				console.error('❌ 更新用户配置错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		this.app.delete('/api/config/users/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+		this.app.openapi(deleteUserConfigRoute, async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`🔧 用户配置API: DELETE ${uid}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.json({ error: 'Handler returned null' }, 500);
+				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
 			} catch (error) {
 				console.error('❌ 删除用户配置错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
@@ -140,15 +140,15 @@ export class Router {
 
 			try {
 				const body = await c.req.json();
-				const { userId, ...requestData } = body;
+				const { uid, ...requestData } = body;
 
-				if (!userId) {
-					return c.json({ error: 'Missing userId in request body' }, 400);
+				if (!uid) {
+					return c.json({ error: 'Missing uid in request body' }, 400);
 				}
 
 				// 构造一个符合UserConfigHandler预期的请求
 				const originalUrl = new URL(c.req.url);
-				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${userId}`;
+				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${uid}`;
 
 				const modifiedRequest = new Request(newUrl, {
 					method: 'PUT',
@@ -198,45 +198,6 @@ export class Router {
 			}
 		});
 
-		// 直接在主应用上定义API路由 (避免basePath问题)
-
-		// 创建用户API: /create/user (Worker部署无需/api前缀)
-		this.app.put('/create/user', async (c) => {
-			console.log(`🆕 创建用户API: PUT /create/user`);
-
-			try {
-				const body = await c.req.json();
-				const { userId, ...requestData } = body;
-
-				if (!userId) {
-					return c.json({ error: 'Missing userId in request body' }, 400);
-				}
-
-				// 构造一个符合UserConfigHandler预期的请求
-				const originalUrl = new URL(c.req.url);
-				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${userId}`;
-
-				const modifiedRequest = new Request(newUrl, {
-					method: 'PUT',
-					headers: c.req.raw.headers,
-					body: JSON.stringify(requestData),
-				});
-
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(modifiedRequest, c.env);
-				return response || c.text('User creation failed', 500);
-			} catch (error) {
-				console.error('❌ 创建用户API错误:', error);
-				return c.json(
-					{
-						error: 'Internal Server Error',
-						message: error instanceof Error ? error.message : 'Unknown error',
-					},
-					500
-				);
-			}
-		});
-
 		// 超级管理员API处理器
 		this.app.all('/api/admin/*', async (c) => {
 			console.log(`✅ 超级管理员API路由匹配: ${c.req.path}`);
@@ -259,20 +220,6 @@ export class Router {
 				return response || c.text('User config handler failed', 500);
 			} catch (error) {
 				console.error('❌ 获取所有用户API错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
-			}
-		});
-
-		// 用户配置API: /api/config/users/:userId (带参数的路由)
-		this.app.all('/api/config/users/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
-			try {
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.text('User config handler failed', 500);
-			} catch (error) {
-				console.error('❌ 用户配置API错误:', error);
 				return c.json({ error: 'Internal Server Error' }, 500);
 			}
 		});
@@ -347,9 +294,9 @@ export class Router {
 					method: c.req.method,
 					availableRoutes: [
 						'/health',
-						'/config?user=<userId>',
-						'/config/:userId',
-						'/api/config/users/:userId',
+						'/config?user=<uid>',
+						'/config/:uid',
+						'/api/config/users/:uid',
 						'PUT /create/user',
 						'/:uid?token=<token>',
 					],

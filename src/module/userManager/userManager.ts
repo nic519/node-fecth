@@ -1,4 +1,4 @@
-import { UserConfig, ConfigResponse, UserConfigMeta, UserConfigSchema } from '@/types/openapi-schemas';
+import { ConfigResponse, UserConfig, UserConfigMeta, UserConfigSchema } from '@/types/openapi-schemas';
 import { parse as yamlParse } from 'yaml';
 
 export class UserManager {
@@ -31,7 +31,7 @@ export class UserManager {
 			if (envConfig) {
 				return {
 					config: envConfig,
-					meta: { lastModified: new Date().toISOString(), source: 'env' as const, userId },
+					meta: { lastModified: new Date().toISOString(), source: 'env' as const, uid: userId },
 				};
 			}
 
@@ -45,10 +45,10 @@ export class UserManager {
 	/**
 	 * 从KV存储获取用户配置
 	 */
-	private async getConfigFromKV(userId: string): Promise<ConfigResponse | null> {
+	private async getConfigFromKV(uid: string): Promise<ConfigResponse | null> {
 		try {
-			const configKey = this.kvUserConfigKey(userId);
-			const metaKey = this.kvUserMetaKey(userId);
+			const configKey = this.kvUserConfigKey(uid);
+			const metaKey = this.kvUserMetaKey(uid);
 
 			const [configData, metaData] = await Promise.all([this.env.USERS_KV.get(configKey), this.env.USERS_KV.get(metaKey)]);
 
@@ -60,12 +60,12 @@ export class UserManager {
 				: {
 						lastModified: new Date().toISOString(),
 						source: 'kv' as const,
-						userId,
+						uid: uid,
 				  };
 
 			return { config, meta };
 		} catch (error) {
-			console.error(`从KV获取配置失败: ${userId}`, error);
+			console.error(`从KV获取配置失败: ${uid}`, error);
 			return null;
 		}
 	}
@@ -89,28 +89,28 @@ export class UserManager {
 	/**
 	 * 保存用户配置到KV存储
 	 */
-	async saveUserConfig(userId: string, config: UserConfig): Promise<boolean> {
+	async saveUserConfig(uid: string, config: UserConfig): Promise<boolean> {
 		try {
 			// 验证配置
 			if (!this.validateConfigFormat(config)) {
 				throw new Error('用户配置验证失败');
 			}
 
-			const configKey = this.kvUserConfigKey(userId);
-			const metaKey = this.kvUserMetaKey(userId);
+			const configKey = this.kvUserConfigKey(uid);
+			const metaKey = this.kvUserMetaKey(uid);
 
 			const meta: UserConfigMeta = {
 				lastModified: new Date().toISOString(),
 				source: 'kv',
-				userId,
+				uid,
 			};
 
 			await Promise.all([this.env.USERS_KV.put(configKey, JSON.stringify(config)), this.env.USERS_KV.put(metaKey, JSON.stringify(meta))]);
 
-			console.log(`✅ 用户配置保存成功: ${userId}`);
+			console.log(`✅ 用户配置保存成功: ${uid}`);
 			return true;
 		} catch (error) {
-			console.error(`保存用户配置失败: ${userId}`, error);
+			console.error(`保存用户配置失败: ${uid}`, error);
 			return false;
 		}
 	}

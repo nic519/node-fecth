@@ -26,7 +26,7 @@ const SuperAdminTokenParamSchema = z.object({
 });
 
 const UserIdParamSchema = z.object({
-	userId: z.string().describe('用户唯一标识符'),
+	uid: z.string().describe('用户唯一标识符'),
 });
 
 // =============================================================================
@@ -57,7 +57,7 @@ export const healthRoute = createRoute({
 
 export const getUserConfigRoute = createRoute({
 	method: 'get',
-	path: '/api/config/users/{userId}',
+	path: '/api/config/users/{uid}',
 	summary: '获取用户配置',
 	description: '获取指定用户的配置信息',
 	tags: ['用户配置'],
@@ -95,7 +95,7 @@ export const getUserConfigRoute = createRoute({
 
 export const updateUserConfigRoute = createRoute({
 	method: 'put',
-	path: '/api/config/users/{userId}',
+	path: '/api/config/users/{uid}',
 	summary: '更新用户配置',
 	description: '更新指定用户的配置信息',
 	tags: ['用户配置'],
@@ -140,7 +140,7 @@ export const updateUserConfigRoute = createRoute({
 
 export const deleteUserConfigRoute = createRoute({
 	method: 'delete',
-	path: '/api/config/users/{userId}',
+	path: '/api/config/users/{uid}',
 	summary: '删除用户配置',
 	description: '删除指定用户的配置信息',
 	tags: ['用户配置'],
