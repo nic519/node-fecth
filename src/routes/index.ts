@@ -1,6 +1,6 @@
-export { Router } from '@/routes/routesHandler';
-export { StorageHandler } from '@/routes/handler/storageHandler';
 export { KvHandler } from '@/module/kv/kvHandler';
 export { ClashHandler as SubRudeHandler } from '@/routes/handler/clashHandler';
-export { RoutesPathConfig as Routes } from '@/config/routes.config';
+export { StorageHandler } from '@/routes/handler/storageHandler';
+export { ROUTE_PATHS as Routes } from '@/routes/openapi-routes';
+export { Router } from '@/routes/routesHandler';
 export type { RouteHandler, RouteMatch } from '@/types/routes.types';
