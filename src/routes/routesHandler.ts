@@ -1,3 +1,4 @@
+import { GlobalConfig } from '@/config/global-config';
 import { RoutesPathConfig } from '@/config/routes.config';
 import { KvHandler } from '@/module/kv/kvHandler';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
@@ -5,21 +6,20 @@ import { UserManager } from '@/module/userManager/userManager';
 import { ClashHandler } from '@/routes/handler/clashHandler';
 import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
-import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
-import { DocsHandler } from '@/routes/docs-handler';
+import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
+import { healthRoute } from '@/routes/openapi-routes';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
-import { Hono } from 'hono';
+import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { CommonUtils } from '@/utils/commonUtils';
-import { GlobalConfig } from '@/config/global-config';
 
 export class Router {
-	private app: Hono<{ Bindings: Env }>;
+	private app: OpenAPIHono<{ Bindings: Env }>;
 
 	constructor() {
-		this.app = new Hono<{ Bindings: Env }>();
+		this.app = new OpenAPIHono<{ Bindings: Env }>();
 		this.setupMiddleware();
 		this.setupRoutes();
 	}
@@ -61,25 +61,115 @@ export class Router {
 			return next();
 		});
 
-		// 健康检查路由
-		this.app.get('/health', (c) => {
+		// OpenAPI 文档路由
+		this.app.doc('/openapi.json', {
+			openapi: '3.0.0',
+			info: {
+				title: 'Node-Fetch API',
+				version: '1.0.0',
+				description: `订阅管理和用户配置 API
+
+## 功能特性
+- 🔐 用户配置管理
+- 📊 流量统计
+- 🔄 订阅转换
+- 👥 用户管理（管理员功能）
+- 🗄️ KV 存储服务
+
+## 认证说明
+大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。`,
+			},
+			servers: [
+				{ url: '/api', description: 'API 服务器' },
+				{ url: 'http://localhost:8787/api', description: '开发服务器' },
+			],
+		});
+
+		// Swagger UI 文档路由（在开发环境才能访问）
+		if (GlobalConfig.isDev) {
+			this.app.get('/docs', swaggerUI({ url: '/openapi.json' }));
+		}
+
+		// 健康检查路由（使用 OpenAPI 定义）
+		this.app.openapi(healthRoute, (c) => {
 			return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 		});
 
-		// API 文档路由（在开发环境才能访问）
-		if (GlobalConfig.isDev) {
-			this.app.all('/docs', async (c) => {
-				console.log('📚 API文档路由');
-				try {
-					const handler = new DocsHandler();
-					const response = await handler.handle(c.req.raw, c.env);
-					return response || c.text('Docs handler failed', 500);
-				} catch (error) {
-					console.error('❌ 文档路由错误:', error);
-					return c.text('Internal Server Error', 500);
+		// 用户配置相关路由（兼容现有处理器）
+		this.app.get('/api/config/users/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+			try {
+				const userConfigHandler = new UserConfigHandler();
+				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				return response || c.json({ error: 'Handler returned null' }, 500);
+			} catch (error) {
+				console.error('❌ 获取用户配置错误:', error);
+				return c.json({ error: 'Internal Server Error' }, 500);
+			}
+		});
+
+		this.app.put('/api/config/users/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+			try {
+				const userConfigHandler = new UserConfigHandler();
+				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				return response || c.json({ error: 'Handler returned null' }, 500);
+			} catch (error) {
+				console.error('❌ 更新用户配置错误:', error);
+				return c.json({ error: 'Internal Server Error' }, 500);
+			}
+		});
+
+		this.app.delete('/api/config/users/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`🔧 用户配置API: ${c.req.method} ${userId}`);
+			try {
+				const userConfigHandler = new UserConfigHandler();
+				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				return response || c.json({ error: 'Handler returned null' }, 500);
+			} catch (error) {
+				console.error('❌ 删除用户配置错误:', error);
+				return c.json({ error: 'Internal Server Error' }, 500);
+			}
+		});
+
+		this.app.put('/create/user', async (c) => {
+			console.log(`🆕 创建用户API: PUT /create/user`);
+
+			try {
+				const body = await c.req.json();
+				const { userId, ...requestData } = body;
+
+				if (!userId) {
+					return c.json({ error: 'Missing userId in request body' }, 400);
 				}
-			});
-		}
+
+				// 构造一个符合UserConfigHandler预期的请求
+				const originalUrl = new URL(c.req.url);
+				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${userId}`;
+
+				const modifiedRequest = new Request(newUrl, {
+					method: 'PUT',
+					headers: c.req.raw.headers,
+					body: JSON.stringify(requestData),
+				});
+
+				const userConfigHandler = new UserConfigHandler();
+				const response = await userConfigHandler.handle(modifiedRequest, c.env);
+				return response || c.json({ error: 'User creation failed' }, 500);
+			} catch (error) {
+				console.error('❌ 创建用户API错误:', error);
+				return c.json(
+					{
+						error: 'Internal Server Error',
+						message: error instanceof Error ? error.message : 'Unknown error',
+					},
+					500
+				);
+			}
+		});
 
 		// API接口路由
 		// 存储API处理器
@@ -109,15 +199,15 @@ export class Router {
 		});
 
 		// 直接在主应用上定义API路由 (避免basePath问题)
-		
+
 		// 创建用户API: /create/user (Worker部署无需/api前缀)
 		this.app.put('/create/user', async (c) => {
 			console.log(`🆕 创建用户API: PUT /create/user`);
-			
+
 			try {
 				const body = await c.req.json();
 				const { userId, ...requestData } = body;
-				
+
 				if (!userId) {
 					return c.json({ error: 'Missing userId in request body' }, 400);
 				}
@@ -137,10 +227,13 @@ export class Router {
 				return response || c.text('User creation failed', 500);
 			} catch (error) {
 				console.error('❌ 创建用户API错误:', error);
-				return c.json({ 
-					error: 'Internal Server Error',
-					message: error instanceof Error ? error.message : 'Unknown error'
-				}, 500);
+				return c.json(
+					{
+						error: 'Internal Server Error',
+						message: error instanceof Error ? error.message : 'Unknown error',
+					},
+					500
+				);
 			}
 		});
 
@@ -253,12 +346,12 @@ export class Router {
 					path: c.req.path,
 					method: c.req.method,
 					availableRoutes: [
-						'/health', 
-						'/config?user=<userId>', 
-						'/config/:userId', 
+						'/health',
+						'/config?user=<userId>',
+						'/config/:userId',
 						'/api/config/users/:userId',
 						'PUT /create/user',
-						'/:uid?token=<token>'
+						'/:uid?token=<token>',
 					],
 				},
 				404
@@ -277,8 +370,6 @@ export class Router {
 			);
 		});
 	}
-
-
 
 	async route(request: Request, env: Env): Promise<Response> {
 		return this.app.fetch(request, env);

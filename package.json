@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"convert-vars": "ts-node scripts/convert-vars.ts",
+		"convert-vars": "tsx scripts/convert-vars.ts",
 		"deploy": "yarn deploy:pages",
 		"deploy:pages": "yarn build:frontend && wrangler pages deploy frontend/dist",
 		"dev:backend": "wrangler dev --config wrangler.dev.toml --port 8787",
@@ -11,12 +11,12 @@
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"build:frontend": "cd frontend && yarn build",
 		"cf-typegen": "wrangler types",
-		"predev": "yarn convert-vars && yarn type-check && yarn docs:generate",
+		"predev": "yarn convert-vars && yarn type-check",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "tsc --noEmit --watch",
 		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'",
-		"docs:generate": "ts-node scripts/generate-openapi.ts",
-		"docs:watch": "nodemon --watch src/routes --watch src/types --ext ts --exec \"yarn docs:generate\" --verbose"
+		"docs:static": "tsx scripts/generate-openapi.ts",
+		"docs:watch": "nodemon --watch src/routes --watch src/types --ext ts --exec \"yarn docs:static\" --verbose"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",
@@ -26,6 +26,7 @@
 		"jest": "^29.7.0",
 		"nodemon": "^3.0.0",
 		"ts-node": "^10.9.1",
+		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
 		"wrangler": "^4.16.0"
 	},
