@@ -7,7 +7,6 @@ import {
 	ErrorResponseSchema,
 	SuccessResponseSchema,
 	TrafficInfoSchema,
-	UserConfigMetaSchema,
 	UserConfigSchema,
 	UserSummarySchema,
 } from '@/types/openapi-schemas';
@@ -19,17 +18,18 @@ import { createRoute, z } from '@hono/zod-openapi';
 
 export const ROUTE_PATHS = {
 	// === OpenAPI 标准路由 ===
-	health: '/health',
-	userConfig: '/api/config/users/{uid}',
-	allUsersLegacy: '/api/config/allUsers',
-	generalUserConfig: '/api/config/users',
-	createUser: '/create/user',
-	adminUsers: '/api/admin/users',
+	health: '/api/health',
+	// 用户配置路由
+	userUpdate: '/api/config/user/update/{uid}',
+	userDetail: '/api/config/user/detail/{uid}',
+	// 管理员路由
+	adminUserCreate: '/api/admin/user/create',
+	adminUserDelete: '/api/admin/user/delete/{uid}',
+	allUsers: '/api/admin/user/all',
 
 	// === 非 OpenAPI 路由（路径常量） ===
 	storage: '/storage',
 	kv: '/kv',
-	adminPrefix: '/api/admin',
 	subscription: '/:uid',
 } as const;
 
@@ -83,47 +83,9 @@ export const healthRoute = createRoute({
 // 用户配置管理路由
 // =============================================================================
 
-export const getUserConfigRoute = createRoute({
-	method: 'get',
-	path: ROUTE_PATHS.userConfig,
-	summary: '获取用户配置',
-	description: '获取指定用户的配置信息',
-	tags: ['用户配置'],
-	request: {
-		params: UserIdParamSchema,
-		query: UserTokenParamSchema,
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: UserConfigSchema,
-				},
-			},
-			description: '用户配置信息',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-	},
-});
-
-export const updateUserConfigRoute = createRoute({
-	method: 'put',
-	path: ROUTE_PATHS.userConfig,
+export const userUpdateRoute = createRoute({
+	method: 'post',
+	path: ROUTE_PATHS.userUpdate,
 	summary: '更新用户配置',
 	description: '更新指定用户的配置信息',
 	tags: ['用户配置'],
@@ -166,51 +128,13 @@ export const updateUserConfigRoute = createRoute({
 	},
 });
 
-export const deleteUserConfigRoute = createRoute({
-	method: 'delete',
-	path: ROUTE_PATHS.userConfig,
-	summary: '删除用户配置',
-	description: '删除指定用户的配置信息',
-	tags: ['用户配置'],
-	request: {
-		params: UserIdParamSchema,
-		query: UserTokenParamSchema,
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: SuccessResponseSchema,
-				},
-			},
-			description: '删除成功',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-	},
-});
-
 // =============================================================================
 // 管理员路由
 // =============================================================================
 
-export const getAllUsersRoute = createRoute({
+export const adminGetUsersRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.adminUsers,
+	path: ROUTE_PATHS.allUsers,
 	summary: '获取所有用户列表',
 	description: '获取系统中所有用户的摘要信息（需要管理员权限）',
 	tags: ['管理员'],
@@ -237,58 +161,25 @@ export const getAllUsersRoute = createRoute({
 	},
 });
 
-// 为了兼容旧API，添加 /api/config/allUsers 路由
-export const getAllUsersLegacyRoute = createRoute({
+// 用户详情
+export const getUserDetailRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.allUsersLegacy,
-	summary: '获取所有用户列表（兼容路由）',
-	description: '获取系统中所有用户的摘要信息（需要管理员权限）- 兼容旧API路径',
+	path: ROUTE_PATHS.userDetail,
+	summary: '用户详情',
+	description: '获取指定用户的详细信息',
 	tags: ['用户配置'],
 	request: {
-		query: SuperAdminTokenParamSchema,
+		params: UserIdParamSchema,
+		query: UserTokenParamSchema,
 	},
 	responses: {
 		200: {
 			content: {
 				'application/json': {
-					schema: z.array(UserSummarySchema),
+					schema: UserConfigSchema,
 				},
 			},
-			description: '用户列表',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-	},
-});
-
-// 通用用户配置路由（不带用户ID的路由）
-export const generalUserConfigRoute = createRoute({
-	method: 'get',
-	path: ROUTE_PATHS.generalUserConfig,
-	summary: '通用用户配置操作',
-	description: '处理不带特定用户ID的用户配置请求',
-	tags: ['用户配置'],
-	request: {
-		query: z.object({
-			user: z.string().optional().describe('用户标识符（查询参数）'),
-			token: z.string().optional().describe('用户访问令牌'),
-			superToken: z.string().optional().describe('超级管理员访问令牌'),
-		}),
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: z.union([UserConfigSchema, z.array(UserSummarySchema)]),
-				},
-			},
-			description: '用户配置或用户列表',
+			description: '用户详情',
 		},
 		400: {
 			content: {
@@ -682,9 +573,9 @@ export const kvDeleteRoute = createRoute({
 	},
 });
 
-export const createUserRoute = createRoute({
-	method: 'put',
-	path: ROUTE_PATHS.createUser,
+export const adminUserCreateRoute = createRoute({
+	method: 'post',
+	path: ROUTE_PATHS.adminUserCreate,
 	summary: '创建新用户',
 	description: '创建新用户配置（需要管理员权限）',
 	tags: ['管理员'],
@@ -829,171 +720,15 @@ export const getSystemStatsRoute = createRoute({
 	},
 });
 
-// 批量操作用户
-export const batchOperateUsersRoute = createRoute({
-	method: 'post',
-	path: '/api/admin/users/batch',
-	summary: '批量操作用户',
-	description: '批量删除、禁用或启用用户',
-	tags: ['管理员'],
-	request: {
-		query: SuperAdminTokenParamSchema,
-		body: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						userIds: z.array(z.string()).describe('用户ID列表'),
-						operation: z.enum(['delete', 'disable', 'enable']).describe('操作类型'),
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							message: z.string(),
-							result: z.object({
-								success: z.number(),
-								failed: z.number(),
-								details: z.array(
-									z.object({
-										userId: z.string(),
-										success: z.boolean(),
-										error: z.string().optional(),
-									})
-								),
-							}),
-						}),
-					}),
-				},
-			},
-			description: '批量操作结果',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-	},
-});
-
-// 获取用户详情
-export const getUserDetailsRoute = createRoute({
-	method: 'get',
-	path: '/api/admin/users/{userId}',
-	summary: '获取用户详情',
-	description: '获取指定用户的详细信息',
-	tags: ['管理员'],
-	request: {
-		params: z.object({
-			userId: z.string().describe('用户ID'),
-		}),
-		query: SuperAdminTokenParamSchema,
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							userId: z.string(),
-							config: UserConfigSchema,
-							meta: UserConfigMetaSchema,
-						}),
-					}),
-				},
-			},
-			description: '用户详情',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-	},
-});
-
-// 管理员更新用户配置
-export const adminUpdateUserConfigRoute = createRoute({
-	method: 'put',
-	path: '/api/admin/users/{userId}',
-	summary: '管理员更新用户配置',
-	description: '管理员更新指定用户的配置信息',
-	tags: ['管理员'],
-	request: {
-		params: z.object({
-			userId: z.string().describe('用户ID'),
-		}),
-		query: SuperAdminTokenParamSchema,
-		body: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						config: UserConfigSchema,
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: SuccessResponseSchema,
-				},
-			},
-			description: '更新成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-	},
-});
-
 // 管理员删除用户
 export const adminDeleteUserRoute = createRoute({
-	method: 'delete',
-	path: '/api/admin/users/{userId}',
+	method: 'get',
+	path: ROUTE_PATHS.adminUserDelete,
 	summary: '管理员删除用户',
 	description: '管理员删除指定用户及其所有数据',
 	tags: ['管理员'],
 	request: {
-		params: z.object({
-			userId: z.string().describe('用户ID'),
-		}),
+		params: UserIdParamSchema,
 		query: SuperAdminTokenParamSchema,
 	},
 	responses: {

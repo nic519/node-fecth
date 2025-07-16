@@ -118,17 +118,17 @@ export class UserManager {
 	/**
 	 * 删除用户配置
 	 */
-	async deleteUserConfig(userId: string): Promise<boolean> {
+	async deleteUserConfig(uid: string): Promise<boolean> {
 		try {
-			const configKey = `user:${userId}:config`;
-			const metaKey = `user:${userId}:meta`;
+			const configKey = `user:${uid}:config`;
+			const metaKey = `user:${uid}:meta`;
 
 			await Promise.all([this.env.USERS_KV.delete(configKey), this.env.USERS_KV.delete(metaKey)]);
 
-			console.log(`✅ 用户配置删除成功: ${userId}`);
+			console.log(`✅ 用户配置删除成功: ${uid}`);
 			return true;
 		} catch (error) {
-			console.error(`删除用户配置失败: ${userId}`, error);
+			console.error(`删除用户配置失败: ${uid}`, error);
 			return false;
 		}
 	}

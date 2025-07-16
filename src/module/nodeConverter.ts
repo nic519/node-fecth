@@ -11,13 +11,20 @@ export class NodeConverter {
 	}
 
 	convertBySub() {
-		const config = this.innerUser.config;
-		console.log(`💾 转换订阅节点: ${JSON.stringify(config)}`);
+		// 直接访问innerUser的属性，而不是通过config
+		console.log(
+			`💾 转换订阅节点: ${JSON.stringify({
+				subscribe: this.innerUser.subscribe,
+				accessToken: this.innerUser.accessToken,
+				ruleUrl: this.innerUser.ruleUrl,
+				fileName: this.innerUser.fileName,
+			})}`
+		);
 
 		try {
 			// 优先使用配置中的 subscribe
-			if (config.subscribe && config.subscribe.trim() !== '') {
-				return this.convertNodes(config.subscribe);
+			if (this.innerUser.subscribe && this.innerUser.subscribe.trim() !== '') {
+				return this.convertNodes(this.innerUser.subscribe);
 			}
 
 			throw new Error('订阅链接为空');

@@ -1,10 +1,9 @@
-import { RouteHandler } from '@/types/routes.types';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
-import { CustomError } from '@/utils/customError';
+import { ConfigTemplate } from '@/module/userManager/types/supper-admin.types';
 import { UserConfig } from '@/types/openapi-schemas';
+import { RouteHandler } from '@/types/routes.types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { ConfigTemplate } from '@/module/userManager/types/supper-admin.types';
 
 export class SuperAdminHandler implements RouteHandler {
 	private app: Hono<{ Bindings: Env }>;
@@ -27,20 +26,26 @@ export class SuperAdminHandler implements RouteHandler {
 
 	private setupMiddleware() {
 		// CORS 中间件
-		this.app.use('*', cors({
-			origin: '*',
-			allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-			allowHeaders: ['Content-Type']
-		}));
+		this.app.use(
+			'*',
+			cors({
+				origin: '*',
+				allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+				allowHeaders: ['Content-Type'],
+			})
+		);
 
 		// 超级管理员权限验证中间件
 		this.app.use('*', async (c, next) => {
 			const authResult = await this.authenticateSuperAdmin(c.req.raw, c.env);
 			if (!authResult.success) {
-				return c.json({
-					success: false,
-					error: authResult.message
-				}, 401);
+				return c.json(
+					{
+						success: false,
+						error: authResult.message,
+					},
+					401
+				);
 			}
 			await next();
 		});
@@ -53,39 +58,22 @@ export class SuperAdminHandler implements RouteHandler {
 		});
 
 		// 用户管理路由组
-		const usersRoute = this.app.basePath('/api/admin/users');
-		
+		const usersRoute = this.app.basePath('/api/admin/user');
+
 		// 获取用户列表
-		usersRoute.get('/', async (c) => {
+		usersRoute.get('/all', async (c) => {
 			return await this.getUsersList(c);
 		});
 
 		// 创建用户
-		usersRoute.post('/', async (c) => {
+		usersRoute.post('/create', async (c) => {
 			return await this.createUser(c);
 		});
 
-		// 批量操作用户
-		usersRoute.post('/batch', async (c) => {
-			return await this.batchOperateUsers(c);
-		});
-
-		// 获取用户详情
-		usersRoute.get('/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			return await this.getUserDetails(c, userId);
-		});
-
-		// 更新用户配置
-		usersRoute.put('/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			return await this.updateUserConfig(c, userId);
-		});
-
 		// 删除用户
-		usersRoute.delete('/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			return await this.deleteUser(c, userId);
+		usersRoute.get('/delete/:uid', async (c) => {
+			const uid = c.req.param('uid');
+			return await this.deleteUser(c, uid);
 		});
 
 		// 刷新用户流量信息
@@ -139,7 +127,7 @@ export class SuperAdminHandler implements RouteHandler {
 	/**
 	 * 验证超级管理员权限
 	 */
-	private async authenticateSuperAdmin(request: Request, env: Env): Promise<{ success: boolean, message: string }> {
+	private async authenticateSuperAdmin(request: Request, env: Env): Promise<{ success: boolean; message: string }> {
 		const url = new URL(request.url);
 		const token = url.searchParams.get('superToken');
 
@@ -166,14 +154,17 @@ export class SuperAdminHandler implements RouteHandler {
 			const stats = await adminManager.getSystemStats();
 			return c.json({
 				success: true,
-				data: stats
+				data: stats,
 			});
 		} catch (error) {
 			console.error('获取系统统计失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get system stats'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to get system stats',
+				},
+				500
+			);
 		}
 	}
 
@@ -186,100 +177,45 @@ export class SuperAdminHandler implements RouteHandler {
 			const users = await adminManager.getUserSummaryList();
 			return c.json({
 				success: true,
-				data: { users }
+				data: { users },
 			});
 		} catch (error) {
 			console.error('获取用户列表失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get users list'
-			}, 500);
-		}
-	}
-
-	/**
-	 * 获取用户详情
-	 */
-	private async getUserDetails(c: any, userId: string): Promise<Response> {
-		try {
-			const adminManager = new SuperAdminManager(c.env);
-			// 这里需要从UserManager获取详细信息
-			const userManager = (adminManager as any).userManager;
-			const configResponse = await userManager.getUserConfig(userId);
-			
-			if (!configResponse) {
-				return c.json({
+			return c.json(
+				{
 					success: false,
-					error: 'User not found'
-				}, 404);
-			}
-
-			return c.json({
-				success: true,
-				data: {
-					userId,
-					config: configResponse.config,
-					meta: configResponse.meta
-				}
-			});
-		} catch (error) {
-			console.error('获取用户详情失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get user details'
-			}, 500);
-		}
-	}
-
-	/**
-	 * 更新用户配置
-	 */
-	private async updateUserConfig(c: any, userId: string): Promise<Response> {
-		try {
-			const adminManager = new SuperAdminManager(c.env);
-			const body = await c.req.json() as { config: UserConfig };
-			const userManager = (adminManager as any).userManager;
-			
-			await userManager.saveUserConfig(userId, body.config);
-			
-			return c.json({
-				success: true,
-				data: {
-					message: '用户配置更新成功',
-					userId
-				}
-			});
-		} catch (error) {
-			console.error('更新用户配置失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to update user config'
-			}, 500);
+					error: 'Failed to get users list',
+				},
+				500
+			);
 		}
 	}
 
 	/**
 	 * 删除用户
 	 */
-	private async deleteUser(c: any, userId: string): Promise<Response> {
+	private async deleteUser(c: any, uid: string): Promise<Response> {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			
-			await adminManager.deleteUser(userId, adminId);
+
+			await adminManager.deleteUser(uid, adminId);
 			return c.json({
 				success: true,
 				data: {
 					message: '用户删除成功',
-					userId
-				}
+					uid,
+				},
 			});
 		} catch (error) {
 			console.error('删除用户失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to delete user'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to delete user',
+				},
+				500
+			);
 		}
 	}
 
@@ -290,54 +226,27 @@ export class SuperAdminHandler implements RouteHandler {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const body = await c.req.json() as { userId: string, config: UserConfig };
-			
+			const body = (await c.req.json()) as { userId: string; config: UserConfig };
+
 			await adminManager.createUser(body.userId, body.config, adminId);
-			
+
 			return c.json({
 				success: true,
 				data: {
 					message: '用户创建成功',
-					userId: body.userId
-				}
+					userId: body.userId,
+				},
 			});
 		} catch (error) {
 			console.error('创建用户失败:', error);
 			const errorMessage = error instanceof Error ? error.message : '创建用户失败';
-			return c.json({
-				success: false,
-				error: errorMessage
-			}, 500);
-		}
-	}
-
-	/**
-	 * 批量操作用户
-	 */
-	private async batchOperateUsers(c: any): Promise<Response> {
-		try {
-			const adminManager = new SuperAdminManager(c.env);
-			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const body = await c.req.json() as { 
-				userIds: string[], 
-				operation: 'delete' | 'disable' | 'enable' 
-			};
-			
-			const result = await adminManager.batchOperateUsers(body.userIds, body.operation, adminId);
-			
-			return c.json({
-				success: true,
-				data: {
-					message: '批量操作完成',
-					result
-				}
-			});
-		} catch (error) {
-			console.error('批量操作失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to batch operate users'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: errorMessage,
+				},
+				500
+			);
 		}
 	}
 
@@ -349,22 +258,25 @@ export class SuperAdminHandler implements RouteHandler {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
 			const trafficInfo = await adminManager.refreshUserTrafficInfo(userId, adminId);
-			
+
 			return c.json({
 				success: true,
 				data: {
 					message: '流量信息刷新成功',
 					userId,
-					trafficInfo
-				}
+					trafficInfo,
+				},
 			});
 		} catch (error) {
 			console.error('刷新用户流量信息失败:', error);
 			const errorMessage = error instanceof Error ? error.message : '刷新流量信息失败';
-			return c.json({
-				success: false,
-				error: errorMessage
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: errorMessage,
+				},
+				500
+			);
 		}
 	}
 
@@ -377,14 +289,17 @@ export class SuperAdminHandler implements RouteHandler {
 			const templates = await adminManager.getConfigTemplates();
 			return c.json({
 				success: true,
-				data: { templates }
+				data: { templates },
 			});
 		} catch (error) {
 			console.error('获取配置模板失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get config templates'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to get config templates',
+				},
+				500
+			);
 		}
 	}
 
@@ -394,22 +309,25 @@ export class SuperAdminHandler implements RouteHandler {
 	private async createConfigTemplate(c: any): Promise<Response> {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
-			const body = await c.req.json() as Omit<ConfigTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>;
+			const body = (await c.req.json()) as Omit<ConfigTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>;
 			const template = await adminManager.createConfigTemplate(body);
-			
+
 			return c.json({
 				success: true,
 				data: {
 					message: '配置模板创建成功',
-					template
-				}
+					template,
+				},
 			});
 		} catch (error) {
 			console.error('创建配置模板失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to create config template'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to create config template',
+				},
+				500
+			);
 		}
 	}
 
@@ -418,10 +336,13 @@ export class SuperAdminHandler implements RouteHandler {
 	 */
 	private async updateConfigTemplate(c: any, templateId: string): Promise<Response> {
 		// 简化实现 - 实际需要实现模板更新逻辑
-		return c.json({
-			success: false,
-			error: 'Template update not implemented yet'
-		}, 501);
+		return c.json(
+			{
+				success: false,
+				error: 'Template update not implemented yet',
+			},
+			501
+		);
 	}
 
 	/**
@@ -429,10 +350,13 @@ export class SuperAdminHandler implements RouteHandler {
 	 */
 	private async deleteConfigTemplate(c: any, templateId: string): Promise<Response> {
 		// 简化实现 - 实际需要实现模板删除逻辑
-		return c.json({
-			success: false,
-			error: 'Template deletion not implemented yet'
-		}, 501);
+		return c.json(
+			{
+				success: false,
+				error: 'Template deletion not implemented yet',
+			},
+			501
+		);
 	}
 
 	/**
@@ -442,25 +366,28 @@ export class SuperAdminHandler implements RouteHandler {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const body = await c.req.json() as { userId: string };
-			
+			const body = (await c.req.json()) as { userId: string };
+
 			await adminManager.applyTemplateToUser(templateId, body.userId, adminId);
-			
+
 			return c.json({
 				success: true,
 				data: {
 					message: '模板应用成功',
 					templateId,
-					userId: body.userId
-				}
+					userId: body.userId,
+				},
 			});
 		} catch (error) {
 			console.error('应用模板失败:', error);
 			const errorMessage = error instanceof Error ? error.message : '应用模板失败';
-			return c.json({
-				success: false,
-				error: errorMessage
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: errorMessage,
+				},
+				500
+			);
 		}
 	}
 
@@ -472,19 +399,22 @@ export class SuperAdminHandler implements RouteHandler {
 			const adminManager = new SuperAdminManager(c.env);
 			const date = c.req.query('date') || undefined;
 			const limit = parseInt(c.req.query('limit') || '100');
-			
+
 			const logs = await adminManager.getAdminLogs(date, limit);
-			
+
 			return c.json({
 				success: true,
-				data: { logs }
+				data: { logs },
 			});
 		} catch (error) {
 			console.error('获取操作日志失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get admin logs'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to get admin logs',
+				},
+				500
+			);
 		}
 	}
 
@@ -501,20 +431,23 @@ export class SuperAdminHandler implements RouteHandler {
 				stats: {
 					totalUsers: stats.totalUsers,
 					activeUsers: stats.activeUsers,
-					configCompleteRate: stats.configCompleteRate
-				}
+					configCompleteRate: stats.configCompleteRate,
+				},
 			};
-			
+
 			return c.json({
 				success: true,
-				data: health
+				data: health,
 			});
 		} catch (error) {
 			console.error('获取健康状态失败:', error);
-			return c.json({
-				success: false,
-				error: 'Failed to get health status'
-			}, 500);
+			return c.json(
+				{
+					success: false,
+					error: 'Failed to get health status',
+				},
+				500
+			);
 		}
 	}
-} 
+}

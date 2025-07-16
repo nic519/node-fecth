@@ -9,17 +9,15 @@ import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import {
 	ROUTE_PATHS,
-	createUserRoute,
-	deleteUserConfigRoute,
-	generalUserConfigRoute,
-	getAllUsersLegacyRoute,
-	getAllUsersRoute,
+	adminDeleteUserRoute,
+	adminGetUsersRoute,
+	adminUserCreateRoute,
 	getSubscriptionRoute,
-	getUserConfigRoute,
+	getUserDetailRoute,
 	healthRoute,
 	kvRoute,
 	storageRoute,
-	updateUserConfigRoute,
+	userUpdateRoute,
 } from '@/routes/openapi-routes';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
@@ -108,21 +106,8 @@ export class Router {
 			return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 		});
 
-		// 用户配置相关路由
-		this.app.openapi(getUserConfigRoute, async (c) => {
-			const uid = c.req.param('uid');
-			console.log(`🔧 用户配置API: GET ${uid}`);
-			try {
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
-			} catch (error) {
-				console.error('❌ 获取用户配置错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500) as any;
-			}
-		});
-
-		this.app.openapi(updateUserConfigRoute, async (c) => {
+		// 更新用户配置路由
+		this.app.openapi(userUpdateRoute, async (c) => {
 			const uid = c.req.param('uid');
 			console.log(`🔧 用户配置API: PUT ${uid}`);
 			try {
@@ -135,12 +120,13 @@ export class Router {
 			}
 		});
 
-		this.app.openapi(deleteUserConfigRoute, async (c) => {
+		// 删除用户配置路由
+		this.app.openapi(adminDeleteUserRoute, async (c) => {
 			const uid = c.req.param('uid');
 			console.log(`🔧 用户配置API: DELETE ${uid}`);
 			try {
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				const superAdminHandler = new SuperAdminHandler();
+				const response = await superAdminHandler.handle(c.req.raw, c.env);
 				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
 			} catch (error) {
 				console.error('❌ 删除用户配置错误:', error);
@@ -149,35 +135,14 @@ export class Router {
 		});
 
 		// 创建用户路由
-		this.app.openapi(createUserRoute, async (c) => {
+		this.app.openapi(adminUserCreateRoute, async (c) => {
 			const body = c.req.valid('json');
-			console.log(`🆕 创建用户API: PUT ${ROUTE_PATHS.createUser}`);
+			console.log(`🆕 创建用户API: PUT ${ROUTE_PATHS.adminUserCreate}`);
 			try {
 				// 构造一个符合UserConfigHandler预期的请求
-				const originalUrl = new URL(c.req.url);
-				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${body.uid}`;
-
-				const modifiedRequest = new Request(newUrl, {
-					method: 'PUT',
-					headers: c.req.raw.headers,
-					body: JSON.stringify(body.config),
-				});
-
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(modifiedRequest, c.env);
-				if (response?.ok) {
-					return c.json(
-						{
-							success: true,
-							message: '用户创建成功',
-							userId: body.uid,
-							timestamp: new Date().toISOString(),
-						},
-						201
-					);
-				} else {
-					return c.json({ error: 'User creation failed' }, 500);
-				}
+				const superAdminHandler = new SuperAdminHandler();
+				const response = await superAdminHandler.handle(c.req.raw, c.env);
+				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
 			} catch (error) {
 				console.error('❌ 创建用户API错误:', error);
 				return c.json(
@@ -185,7 +150,7 @@ export class Router {
 						error: 'Internal Server Error',
 						message: error instanceof Error ? error.message : 'Unknown error',
 					},
-					500
+					400
 				);
 			}
 		});
@@ -217,7 +182,7 @@ export class Router {
 		});
 
 		// 管理员相关路由
-		this.app.openapi(getAllUsersRoute, async (c) => {
+		this.app.openapi(adminGetUsersRoute, async (c) => {
 			console.log(`✅ 管理员API: 获取所有用户`);
 			try {
 				const handler = new SuperAdminHandler();
@@ -229,25 +194,12 @@ export class Router {
 			}
 		});
 
-		// 兼容性路由：获取所有用户列表
-		this.app.openapi(getAllUsersLegacyRoute, async (c) => {
-			console.log(`🔧 获取所有用户API(兼容): ${c.req.method} ${ROUTE_PATHS.allUsersLegacy}`);
+		// 用户详情
+		this.app.openapi(getUserDetailRoute, async (c) => {
+			console.log(`🔧 用户详情API: ${c.req.method} ${ROUTE_PATHS.userDetail}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return (response || c.text('User config handler failed', 500)) as any;
-			} catch (error) {
-				console.error('❌ 获取所有用户API错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500) as any;
-			}
-		});
-
-		// 通用配置API
-		this.app.openapi(generalUserConfigRoute, async (c) => {
-			console.log(`🔧 通用配置API: ${c.req.method} ${ROUTE_PATHS.generalUserConfig}`);
-			try {
-				const userConfigHandler = new UserConfigHandler();
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
+				const response = await userConfigHandler.getUserConfig(c.req.raw, c.env, c.req.param('uid'));
 				return (response || c.text('User config handler failed', 500)) as any;
 			} catch (error) {
 				console.error('❌ 通用配置API错误:', error);

@@ -1,13 +1,12 @@
 import { UserManager } from '@/module/userManager/userManager';
-import { RouteHandler } from '@/types/routes.types';
 import { UserConfig, UserConfigSchema } from '@/types/openapi-schemas';
+import { RouteHandler } from '@/types/routes.types';
 import { AuthUtils } from '@/utils/authUtils';
-import { SuperAdminHandler } from './superAdminHandler';
 
 export class UserConfigHandler implements RouteHandler {
 	canHandle(request: Request): boolean {
 		const url = new URL(request.url);
-		return url.pathname.startsWith('/api/config/users/');
+		return url.pathname.startsWith('/api/config/user/');
 	}
 
 	async handle(request: Request, env: Env): Promise<Response> {
@@ -24,16 +23,7 @@ export class UserConfigHandler implements RouteHandler {
 			// 路由匹配: /api/config/users/:userId
 			if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'users') {
 				const userId = pathParts[3]; // 可选的用户ID
-
-				if (method === 'GET') {
-					if (userId) {
-						// GET /api/config/users/:userId - 获取指定用户配置
-						return await this.getUserConfig(request, env, userId);
-					} else {
-						// GET /api/config/users - 获取所有用户列表
-						return await this.getAllUsers(request, env);
-					}
-				} else if (method === 'POST' && userId) {
+				if (method === 'POST' && userId) {
 					// POST /api/config/users/:userId - 更新用户配置
 					return await this.updateUserConfig(request, env, userId);
 				} else if (method === 'DELETE' && userId) {
@@ -52,7 +42,7 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 获取指定用户配置
 	 */
-	private async getUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+	async getUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
@@ -62,12 +52,11 @@ export class UserConfigHandler implements RouteHandler {
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
 		}
 	}
- 
 
 	/**
 	 * 更新用户配置
 	 */
-	private async updateUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+	async updateUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
 		try {
 			// 身份验证
 			const authResult = await AuthUtils.authenticate(request, env, userId);
@@ -178,20 +167,23 @@ export class UserConfigHandler implements RouteHandler {
 			}
 
 			// 返回201状态码表示资源已创建
-			return new Response(JSON.stringify({
-				message: 'User created successfully',
-				userId,
-				config,
-				timestamp: new Date().toISOString(),
-			}), {
-				status: 201,
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-				},
-			});
+			return new Response(
+				JSON.stringify({
+					message: 'User created successfully',
+					userId,
+					config,
+					timestamp: new Date().toISOString(),
+				}),
+				{
+					status: 201,
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+					},
+				}
+			);
 		} catch (error) {
 			console.error(`创建用户配置失败: ${userId}`, error);
 			return AuthUtils.createErrorResponse('Internal Server Error', 500);
