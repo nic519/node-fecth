@@ -14,9 +14,7 @@
 		"predev": "yarn convert-vars && yarn type-check",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "tsc --noEmit --watch",
-		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'",
-		"docs:static": "tsx scripts/generate-openapi.ts",
-		"docs:watch": "nodemon --watch src/routes --watch src/types --ext ts --exec \"yarn docs:static\" --verbose"
+		"lint": "tsc --noEmit && echo '✅ TypeScript类型检查通过'"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250214.0",

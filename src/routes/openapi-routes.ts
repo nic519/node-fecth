@@ -1,7 +1,13 @@
 import {
+	AdminHealthCheckSchema,
+	AdminLogSchema,
+	ConfigTemplateSchema,
+	CreateConfigTemplateRequestSchema,
 	CreateUserRequestSchema,
 	ErrorResponseSchema,
 	SuccessResponseSchema,
+	TrafficInfoSchema,
+	UserConfigMetaSchema,
 	UserConfigSchema,
 	UserSummarySchema,
 } from '@/types/openapi-schemas';
@@ -767,6 +773,589 @@ export const getSubscriptionRoute = createRoute({
 				},
 			},
 			description: '请求参数错误',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// =============================================================================
+// 超级管理员路由
+// =============================================================================
+
+// 系统统计
+export const getSystemStatsRoute = createRoute({
+	method: 'get',
+	path: '/api/admin/stats',
+	summary: '获取系统统计',
+	description: '获取系统的统计信息，包括用户数量、流量等',
+	tags: ['管理员'],
+	request: {
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							totalUsers: z.number(),
+							activeUsers: z.number(),
+							configCompleteRate: z.number(),
+							totalTraffic: z.number(),
+							usedTraffic: z.number(),
+							timestamp: z.string(),
+						}),
+					}),
+				},
+			},
+			description: '系统统计信息',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 批量操作用户
+export const batchOperateUsersRoute = createRoute({
+	method: 'post',
+	path: '/api/admin/users/batch',
+	summary: '批量操作用户',
+	description: '批量删除、禁用或启用用户',
+	tags: ['管理员'],
+	request: {
+		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						userIds: z.array(z.string()).describe('用户ID列表'),
+						operation: z.enum(['delete', 'disable', 'enable']).describe('操作类型'),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							message: z.string(),
+							result: z.object({
+								success: z.number(),
+								failed: z.number(),
+								details: z.array(
+									z.object({
+										userId: z.string(),
+										success: z.boolean(),
+										error: z.string().optional(),
+									})
+								),
+							}),
+						}),
+					}),
+				},
+			},
+			description: '批量操作结果',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 获取用户详情
+export const getUserDetailsRoute = createRoute({
+	method: 'get',
+	path: '/api/admin/users/{userId}',
+	summary: '获取用户详情',
+	description: '获取指定用户的详细信息',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			userId: z.string().describe('用户ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							userId: z.string(),
+							config: UserConfigSchema,
+							meta: UserConfigMetaSchema,
+						}),
+					}),
+				},
+			},
+			description: '用户详情',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '用户不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 管理员更新用户配置
+export const adminUpdateUserConfigRoute = createRoute({
+	method: 'put',
+	path: '/api/admin/users/{userId}',
+	summary: '管理员更新用户配置',
+	description: '管理员更新指定用户的配置信息',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			userId: z.string().describe('用户ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						config: UserConfigSchema,
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: SuccessResponseSchema,
+				},
+			},
+			description: '更新成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '用户不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 管理员删除用户
+export const adminDeleteUserRoute = createRoute({
+	method: 'delete',
+	path: '/api/admin/users/{userId}',
+	summary: '管理员删除用户',
+	description: '管理员删除指定用户及其所有数据',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			userId: z.string().describe('用户ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: SuccessResponseSchema,
+				},
+			},
+			description: '删除成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '用户不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 刷新用户流量信息
+export const refreshUserTrafficRoute = createRoute({
+	method: 'post',
+	path: '/api/admin/users/{userId}/traffic/refresh',
+	summary: '刷新用户流量信息',
+	description: '强制刷新指定用户的流量统计信息',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			userId: z.string().describe('用户ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							message: z.string(),
+							userId: z.string(),
+							trafficInfo: TrafficInfoSchema,
+						}),
+					}),
+				},
+			},
+			description: '刷新成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '用户不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 获取配置模板列表
+export const getConfigTemplatesRoute = createRoute({
+	method: 'get',
+	path: '/api/admin/templates',
+	summary: '获取配置模板列表',
+	description: '获取所有可用的配置模板',
+	tags: ['管理员'],
+	request: {
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							templates: z.array(ConfigTemplateSchema),
+						}),
+					}),
+				},
+			},
+			description: '配置模板列表',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 创建配置模板
+export const createConfigTemplateRoute = createRoute({
+	method: 'post',
+	path: '/api/admin/templates',
+	summary: '创建配置模板',
+	description: '创建新的配置模板',
+	tags: ['管理员'],
+	request: {
+		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: CreateConfigTemplateRequestSchema,
+				},
+			},
+		},
+	},
+	responses: {
+		201: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							message: z.string(),
+							template: ConfigTemplateSchema,
+						}),
+					}),
+				},
+			},
+			description: '模板创建成功',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 更新配置模板
+export const updateConfigTemplateRoute = createRoute({
+	method: 'put',
+	path: '/api/admin/templates/{templateId}',
+	summary: '更新配置模板',
+	description: '更新指定的配置模板',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			templateId: z.string().describe('模板ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: CreateConfigTemplateRequestSchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: SuccessResponseSchema,
+				},
+			},
+			description: '更新成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '模板不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 删除配置模板
+export const deleteConfigTemplateRoute = createRoute({
+	method: 'delete',
+	path: '/api/admin/templates/{templateId}',
+	summary: '删除配置模板',
+	description: '删除指定的配置模板',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			templateId: z.string().describe('模板ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: SuccessResponseSchema,
+				},
+			},
+			description: '删除成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '模板不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 应用模板到用户
+export const applyTemplateRoute = createRoute({
+	method: 'post',
+	path: '/api/admin/templates/{templateId}/apply',
+	summary: '应用模板到用户',
+	description: '将指定模板应用到用户配置',
+	tags: ['管理员'],
+	request: {
+		params: z.object({
+			templateId: z.string().describe('模板ID'),
+		}),
+		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						userId: z.string().describe('目标用户ID'),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							message: z.string(),
+							templateId: z.string(),
+							userId: z.string(),
+						}),
+					}),
+				},
+			},
+			description: '应用成功',
+		},
+		404: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '模板或用户不存在',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 获取管理员日志
+export const getAdminLogsRoute = createRoute({
+	method: 'get',
+	path: '/api/admin/logs',
+	summary: '获取管理员操作日志',
+	description: '获取管理员的操作日志',
+	tags: ['管理员'],
+	request: {
+		query: z.object({
+			superToken: z.string().describe('超级管理员访问令牌'),
+			date: z.string().optional().describe('日期过滤 (YYYY-MM-DD)'),
+			limit: z.string().optional().describe('返回数量限制'),
+		}),
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: z.object({
+							logs: z.array(AdminLogSchema),
+						}),
+					}),
+				},
+			},
+			description: '操作日志',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+// 管理员健康检查
+export const adminHealthRoute = createRoute({
+	method: 'get',
+	path: '/api/admin/health',
+	summary: '管理员健康检查',
+	description: '获取系统健康状态信息',
+	tags: ['管理员'],
+	request: {
+		query: SuperAdminTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						success: z.boolean(),
+						data: AdminHealthCheckSchema,
+					}),
+				},
+			},
+			description: '健康状态',
 		},
 		401: {
 			content: {

@@ -224,3 +224,65 @@ export type CreateConfigTemplateRequest = z.infer<typeof CreateConfigTemplateReq
 // =============================================================================
 
 export type ApiError = ErrorResponse;
+
+// =============================================================================
+// 管理员API 额外 Schemas
+// =============================================================================
+
+// 用户详情 Schema
+export const UserDetailsSchema = z.object({
+	userId: z.string().describe('用户ID'),
+	config: UserConfigSchema.describe('用户配置'),
+	meta: UserConfigMetaSchema.describe('配置元数据'),
+	trafficInfo: TrafficInfoSchema.optional().describe('流量信息'),
+});
+
+// 批量操作请求 Schema
+export const BatchOperationRequestSchema = z.object({
+	userIds: z.array(z.string()).describe('用户ID列表'),
+	operation: z.enum(['delete', 'disable', 'enable']).describe('操作类型'),
+});
+
+// 批量操作结果 Schema
+export const BatchOperationResultSchema = z.object({
+	success: z.number().describe('成功数量'),
+	failed: z.number().describe('失败数量'),
+	details: z
+		.array(
+			z.object({
+				userId: z.string(),
+				success: z.boolean(),
+				error: z.string().optional(),
+			})
+		)
+		.describe('详细结果'),
+});
+
+// 应用模板请求 Schema
+export const ApplyTemplateRequestSchema = z.object({
+	userId: z.string().describe('目标用户ID'),
+});
+
+// 管理员日志 Schema
+export const AdminLogSchema = z.object({
+	id: z.string().describe('日志ID'),
+	adminId: z.string().describe('管理员ID'),
+	action: z.string().describe('操作类型'),
+	targetId: z.string().optional().describe('目标对象ID'),
+	details: z.string().optional().describe('操作详情'),
+	timestamp: z.string().describe('操作时间'),
+	ip: z.string().optional().describe('操作IP'),
+});
+
+// 管理员健康状态 Schema - 重命名避免冲突
+export const AdminHealthCheckSchema = z.object({
+	status: z.enum(['healthy', 'warning', 'error']).describe('健康状态'),
+	timestamp: z.string().describe('检查时间'),
+	stats: z
+		.object({
+			totalUsers: z.number(),
+			activeUsers: z.number(),
+			configCompleteRate: z.number(),
+		})
+		.describe('系统统计'),
+});

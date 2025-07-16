@@ -7,8 +7,20 @@ import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
-import { ROUTE_PATHS, deleteUserConfigRoute, getUserConfigRoute, healthRoute, updateUserConfigRoute } from '@/routes/openapi-routes';
-import { SubscribeParamsValidator } from '@/types/request/url-params.types';
+import {
+	ROUTE_PATHS,
+	createUserRoute,
+	deleteUserConfigRoute,
+	generalUserConfigRoute,
+	getAllUsersLegacyRoute,
+	getAllUsersRoute,
+	getSubscriptionRoute,
+	getUserConfigRoute,
+	healthRoute,
+	kvRoute,
+	storageRoute,
+	updateUserConfigRoute,
+} from '@/routes/openapi-routes';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
@@ -89,12 +101,14 @@ export class Router {
 			this.app.get('/docs', swaggerUI({ url: '/openapi.json' }));
 		}
 
-		// 健康检查路由（使用 OpenAPI 定义）
+		// === OpenAPI 标准路由 ===
+
+		// 健康检查路由
 		this.app.openapi(healthRoute, (c) => {
 			return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 		});
 
-		// 用户配置相关路由（使用 OpenAPI 定义）
+		// 用户配置相关路由
 		this.app.openapi(getUserConfigRoute, async (c) => {
 			const uid = c.req.param('uid');
 			console.log(`🔧 用户配置API: GET ${uid}`);
@@ -134,30 +148,36 @@ export class Router {
 			}
 		});
 
-		this.app.put(ROUTE_PATHS.createUser, async (c) => {
+		// 创建用户路由
+		this.app.openapi(createUserRoute, async (c) => {
+			const body = c.req.valid('json');
 			console.log(`🆕 创建用户API: PUT ${ROUTE_PATHS.createUser}`);
-
 			try {
-				const body = await c.req.json();
-				const { uid, ...requestData } = body;
-
-				if (!uid) {
-					return c.json({ error: 'Missing uid in request body' }, 400);
-				}
-
 				// 构造一个符合UserConfigHandler预期的请求
 				const originalUrl = new URL(c.req.url);
-				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${uid}`;
+				const newUrl = `${originalUrl.protocol}//${originalUrl.host}/api/config/users/${body.uid}`;
 
 				const modifiedRequest = new Request(newUrl, {
 					method: 'PUT',
 					headers: c.req.raw.headers,
-					body: JSON.stringify(requestData),
+					body: JSON.stringify(body.config),
 				});
 
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(modifiedRequest, c.env);
-				return response || c.json({ error: 'User creation failed' }, 500);
+				if (response?.ok) {
+					return c.json(
+						{
+							success: true,
+							message: '用户创建成功',
+							userId: body.uid,
+							timestamp: new Date().toISOString(),
+						},
+						201
+					);
+				} else {
+					return c.json({ error: 'User creation failed' }, 500);
+				}
 			} catch (error) {
 				console.error('❌ 创建用户API错误:', error);
 				return c.json(
@@ -170,107 +190,90 @@ export class Router {
 			}
 		});
 
-		// API接口路由
-		// 存储API处理器 (保持原来的简单方式)
-		this.app.all(ROUTE_PATHS.storage, async (c) => {
-			console.log(`✅ 存储API路由匹配: ${ROUTE_PATHS.storage}`);
+		// 存储相关路由
+		this.app.openapi(storageRoute, async (c) => {
+			console.log(`✅ 存储API路由匹配: GET ${ROUTE_PATHS.storage}`);
 			try {
 				const handler = new StorageHandler();
 				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('Handler returned null', 500);
+				return (response || c.text('Handler returned null', 500)) as any;
 			} catch (error) {
-				console.error(`❌ 存储API处理器错误 ${ROUTE_PATHS.storage}:`, error);
-				return c.text('Internal Server Error', 500);
+				console.error(`❌ 存储API处理器错误:`, error);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		// KV存储API处理器 (保持原来的简单方式)
-		this.app.all(ROUTE_PATHS.kv, async (c) => {
-			console.log(`✅ KV存储API路由匹配: ${ROUTE_PATHS.kv}`);
+		// KV存储相关路由
+		this.app.openapi(kvRoute, async (c) => {
+			console.log(`✅ KV存储API路由匹配: GET ${ROUTE_PATHS.kv}`);
 			try {
 				const handler = new KvHandler();
 				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('Handler returned null', 500);
+				return (response || c.text('Handler returned null', 500)) as any;
 			} catch (error) {
-				console.error(`❌ KV存储API处理器错误 ${ROUTE_PATHS.kv}:`, error);
-				return c.text('Internal Server Error', 500);
+				console.error(`❌ KV存储API处理器错误:`, error);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		// 超级管理员API处理器
-		this.app.all(`${ROUTE_PATHS.adminPrefix}/*`, async (c) => {
-			console.log(`✅ 超级管理员API路由匹配: ${c.req.path}`);
+		// 管理员相关路由
+		this.app.openapi(getAllUsersRoute, async (c) => {
+			console.log(`✅ 管理员API: 获取所有用户`);
 			try {
 				const handler = new SuperAdminHandler();
 				const response = await handler.handle(c.req.raw, c.env);
-				return response || c.text('Handler returned null', 500);
+				return (response || c.text('Handler returned null', 500)) as any;
 			} catch (error) {
-				console.error(`❌ 超级管理员API处理器错误:`, error);
-				return c.text('Internal Server Error', 500);
+				console.error(`❌ 管理员API处理器错误:`, error);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		// 获取所有用户列表API
-		this.app.all(ROUTE_PATHS.allUsersLegacy, async (c) => {
-			console.log(`🔧 获取所有用户API: ${c.req.method} ${ROUTE_PATHS.allUsersLegacy}`);
+		// 兼容性路由：获取所有用户列表
+		this.app.openapi(getAllUsersLegacyRoute, async (c) => {
+			console.log(`🔧 获取所有用户API(兼容): ${c.req.method} ${ROUTE_PATHS.allUsersLegacy}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.text('User config handler failed', 500);
+				return (response || c.text('User config handler failed', 500)) as any;
 			} catch (error) {
 				console.error('❌ 获取所有用户API错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		// 通用配置API (最通用的路由，放在最后)
-		this.app.all(ROUTE_PATHS.generalUserConfig, async (c) => {
+		// 通用配置API
+		this.app.openapi(generalUserConfigRoute, async (c) => {
 			console.log(`🔧 通用配置API: ${c.req.method} ${ROUTE_PATHS.generalUserConfig}`);
 			try {
 				const userConfigHandler = new UserConfigHandler();
 				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				return response || c.text('User config handler failed', 500);
+				return (response || c.text('User config handler failed', 500)) as any;
 			} catch (error) {
 				console.error('❌ 通用配置API错误:', error);
-				return c.json({ error: 'Internal Server Error' }, 500);
+				return c.json({ error: 'Internal Server Error' }, 500) as any;
 			}
 		});
 
-		// 订阅路由 (需要在最后定义，避免冲突)
-		this.app.get('/:uid', async (c) => {
+		// 订阅路由
+		this.app.openapi(getSubscriptionRoute, async (c) => {
 			const uid = c.req.param('uid');
+			const query = c.req.valid('query');
 
-			// 跳过一些特殊路径、静态文件和API路径
-			if (['favicon.ico', 'robots.txt', 'health', 'openapi.json', 'api', 'create'].includes(uid)) {
-				return c.notFound();
-			}
+			console.log(`📡 订阅路由: ${uid}`, query);
 
 			try {
-				const url = new URL(c.req.url);
-				const queryParams = SubscribeParamsValidator.parseParams(url);
-				console.log(`📡 订阅路由: ${uid}`, queryParams);
-
-				if (queryParams.token !== null) {
-					const userManager = new UserManager(c.env);
-					const authConfig = await userManager.validateAndGetUser(uid, queryParams.token);
-					if (!authConfig) {
-						return c.json({ error: 'Unauthorized' }, 401);
-					}
-					const innerUser = new InnerUser(authConfig.config);
-
-					console.log(`👤 用户认证成功: ${uid}`);
-					const clashHandler = new ClashHandler();
-					const response = await clashHandler.handle(c.req.raw, c.env, { innerUser: innerUser });
-					return response || c.text('Clash handler failed', 500);
-				} else {
-					return c.json(
-						{
-							error: '需要token参数',
-							usage: `/${uid}?token=<your_token>`,
-						},
-						400
-					);
+				const userManager = new UserManager(c.env);
+				const authConfig = await userManager.validateAndGetUser(uid, query.token);
+				if (!authConfig) {
+					return c.json({ error: 'Unauthorized' }, 401);
 				}
+				const innerUser = new InnerUser(authConfig.config);
+
+				console.log(`👤 用户认证成功: ${uid}`);
+				const clashHandler = new ClashHandler();
+				const response = await clashHandler.handle(c.req.raw, c.env, { innerUser: innerUser });
+				return (response || c.text('Clash handler failed', 500)) as any;
 			} catch (error) {
 				console.error('❌ 订阅路由错误:', error);
 				return c.json(
@@ -279,7 +282,7 @@ export class Router {
 						message: error instanceof Error ? error.message : 'Unknown error',
 					},
 					400
-				);
+				) as any;
 			}
 		});
 
@@ -291,14 +294,7 @@ export class Router {
 					error: 'Not Found',
 					path: c.req.path,
 					method: c.req.method,
-					availableRoutes: [
-						'/health',
-						'/config?user=<uid>',
-						'/config/:uid',
-						'/api/config/users/:uid',
-						'PUT /create/user',
-						'/:uid?token=<token>',
-					],
+					availableRoutes: ['/health', '/api/config/users/:uid', '/create/user', '/:uid?token=<token>'],
 				},
 				404
 			);
