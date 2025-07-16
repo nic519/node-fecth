@@ -1,0 +1,90 @@
+import { ErrorResponseSchema, SuccessResponseSchema, UserConfigSchema } from '@/types/openapi-schemas';
+import { createRoute } from '@hono/zod-openapi';
+import { ROUTE_PATHS, UserIdParamSchema, UserTokenParamSchema } from './common';
+
+// =============================================================================
+// 用户配置管理路由
+// =============================================================================
+
+export const userUpdateRoute = createRoute({
+	method: 'post',
+	path: ROUTE_PATHS.userUpdate,
+	summary: '更新用户配置',
+	description: '更新指定用户的配置信息',
+	tags: ['用户配置'],
+	request: {
+		params: UserIdParamSchema,
+		query: UserTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: UserConfigSchema,
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: SuccessResponseSchema,
+				},
+			},
+			description: '更新成功',
+		},
+		400: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '请求参数错误',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});
+
+export const getUserDetailRoute = createRoute({
+	method: 'get',
+	path: ROUTE_PATHS.userDetail,
+	summary: '用户详情',
+	description: '获取指定用户的详细信息',
+	tags: ['用户配置'],
+	request: {
+		params: UserIdParamSchema,
+		query: UserTokenParamSchema,
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: UserConfigSchema,
+				},
+			},
+			description: '用户详情',
+		},
+		400: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '请求参数错误',
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: ErrorResponseSchema,
+				},
+			},
+			description: '未授权访问',
+		},
+	},
+});

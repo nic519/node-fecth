@@ -1,6 +1,6 @@
 // 节点转换器类
 import { InnerUser } from '@/module/userManager/innerUserConfig';
-import { ROUTE_PATHS } from '@/routes/openapi-routes';
+import { ROUTE_PATHS } from '@/routes/openapi';
 import { CommonUtils } from '@/utils/commonUtils';
 
 export class NodeConverter {
