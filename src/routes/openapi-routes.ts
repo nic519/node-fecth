@@ -18,14 +18,14 @@ import { createRoute, z } from '@hono/zod-openapi';
 
 export const ROUTE_PATHS = {
 	// === OpenAPI 标准路由 ===
-	health: '/api/health',
+	health: '/health',
 	// 用户配置路由
-	userUpdate: '/api/config/user/update/{uid}',
-	userDetail: '/api/config/user/detail/{uid}',
+	userUpdate: '/config/user/update/{uid}',
+	userDetail: '/config/user/detail/{uid}',
 	// 管理员路由
-	adminUserCreate: '/api/admin/user/create',
-	adminUserDelete: '/api/admin/user/delete/{uid}',
-	allUsers: '/api/admin/user/all',
+	adminUserCreate: '/admin/user/create',
+	adminUserDelete: '/admin/user/delete/{uid}',
+	allUsers: '/admin/user/all',
 
 	// === 非 OpenAPI 路由（路径常量） ===
 	storage: '/storage',

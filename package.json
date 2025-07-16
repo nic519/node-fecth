@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
+		"generate-openapi": "tsx scripts/generate-openapi.ts",
 		"deploy": "yarn deploy:pages",
 		"deploy:pages": "yarn build:frontend && wrangler pages deploy frontend/dist",
 		"dev:backend": "wrangler dev --config wrangler.dev.toml --port 8787",

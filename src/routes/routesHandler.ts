@@ -268,4 +268,35 @@ export class Router {
 	async route(request: Request, env: Env): Promise<Response> {
 		return this.app.fetch(request, env);
 	}
+
+	/**
+	 * 获取 OpenAPI 文档（用于生成静态文件）
+	 */
+	getOpenAPIDocument() {
+		return this.app.getOpenAPI31Document({
+			openapi: '3.1.0',
+			info: {
+				title: 'Node-Fetch API',
+				version: '1.0.0',
+				description: `订阅管理和用户配置 API - 自动生成文档
+
+## 功能特性
+- 🔐 用户配置管理
+- 📊 流量统计
+- 🔄 订阅转换
+- 👥 用户管理（管理员功能）
+- 🗄️ KV 存储服务
+
+## 认证说明
+大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。
+
+## 生成时间
+${new Date().toISOString()}`,
+			},
+			servers: [
+				{ url: '/api', description: 'API 服务器' },
+				{ url: 'http://localhost:8787/api', description: '开发服务器' },
+			],
+		});
+	}
 }
