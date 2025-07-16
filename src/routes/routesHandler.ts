@@ -88,10 +88,7 @@ export class Router {
 ## 认证说明
 大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。`,
 			},
-			servers: [
-				{ url: '/api', description: 'API 服务器' },
-				{ url: 'http://localhost:8787/api', description: '开发服务器' },
-			],
+			servers: [{ url: 'http://localhost:8787', description: '开发服务器' }],
 		});
 
 		// Swagger UI 文档路由（在开发环境才能访问）
@@ -293,10 +290,7 @@ export class Router {
 ## 生成时间
 ${new Date().toISOString()}`,
 			},
-			servers: [
-				{ url: '/api', description: 'API 服务器' },
-				{ url: 'http://localhost:8787/api', description: '开发服务器' },
-			],
+			servers: [{ url: 'http://localhost:8787', description: '开发服务器' }],
 		});
 	}
 }
