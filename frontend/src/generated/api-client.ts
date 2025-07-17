@@ -3,8 +3,15 @@
 // 🚀 oazapfts 生成的类型安全 API 客户端 (Hono 最佳实践)
 // ===================================================================
 // 
-// 此文件由 oazapfts 基于 OpenAPI 规范自动生成
-// 提供完整的类型安全和智能提示
+// 此文件由 oazapfts 基于 OpenAPI 规范自动生成，已自动解包装响应
+// 直接返回业务层数据结构，无需手动处理 HTTP 状态码
+// 
+// 期望的响应结构：
+// {
+//   code: 0,
+//   msg: string,
+//   data: { ... }
+// }
 // 
 // 使用方法：
 // import { getHealth, defaults } from '@/generated/api-client';
@@ -12,8 +19,8 @@
 // // 配置基础URL（如果需要）
 // defaults.baseUrl = 'https://api.example.com';
 // 
-// // 直接调用函数，享受完整的类型安全
-// const health = await getHealth();
+// // 直接调用函数，自动解包装响应
+// const result = await getHealth(); // 直接得到业务数据
 //
 /**
  * Node-Fetch API
@@ -151,7 +158,7 @@ export function getConfigUserDetailByUid(uid: string, token: string, opts?: Oaza
 /**
  * 管理员删除用户
  */
-export function getAdminUserDeleteByUid(uid: string, superToken: string, opts?: Oazapfts.RequestOpts) {
+export function adminDeleteUser(uid: string, superToken: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {
@@ -182,7 +189,7 @@ export function getAdminUserDeleteByUid(uid: string, superToken: string, opts?: 
 /**
  * 创建新用户
  */
-export function postAdminUserCreate(superToken: string, body?: {
+export function adminUserCreate(superToken: string, body?: {
     uid: string;
     config: {
         subscribe: string;
@@ -237,7 +244,7 @@ export function postAdminUserCreate(superToken: string, body?: {
 /**
  * 获取所有用户列表
  */
-export function getAdminUserAll(superToken: string, opts?: Oazapfts.RequestOpts) {
+export function adminGetUsers(superToken: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {

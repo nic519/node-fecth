@@ -5,7 +5,7 @@
 // 此文件基于函数名模式自动生成模块化导出，零硬编码
 //
 // 🎯 特点：
-// - 直接重新导出原始函数，保持完整类型信息
+// - 自动解包装响应，直接返回业务层数据
 // - 基于函数名模式自动分组，无硬编码逻辑
 // - 支持直接导入和模块化导入两种方式
 // - 完全遵循 Hono 轻量级设计理念
@@ -16,32 +16,74 @@
 //
 // ===================================================================
 
-// 重新导出所有原始函数（推荐直接使用）
-export {
-  getHealth,
-  postConfigUserUpdateByUid,
-  getConfigUserDetailByUid,
-  getAdminUserDeleteByUid,
-  postAdminUserCreate,
-  getAdminUserAll,
-  getStorage,
-  getKv,
-  getByUid
+// 导入原始函数（带下划线前缀）
+import {
+  getHealth as _getHealth,
+  postConfigUserUpdateByUid as _postConfigUserUpdateByUid,
+  getConfigUserDetailByUid as _getConfigUserDetailByUid,
+  adminDeleteUser as _adminDeleteUser,
+  adminUserCreate as _adminUserCreate,
+  adminGetUsers as _adminGetUsers,
+  getStorage as _getStorage,
+  getKv as _getKv,
+  getByUid as _getByUid
 } from './api-client';
+
+// 解包装的 getHealth 函数
+export const getHealth = async (...args: Parameters<typeof _getHealth>) => {
+  const response = await _getHealth(...args);
+  return response.data;
+};
+
+// 解包装的 postConfigUserUpdateByUid 函数
+export const postConfigUserUpdateByUid = async (...args: Parameters<typeof _postConfigUserUpdateByUid>) => {
+  const response = await _postConfigUserUpdateByUid(...args);
+  return response.data;
+};
+
+// 解包装的 getConfigUserDetailByUid 函数
+export const getConfigUserDetailByUid = async (...args: Parameters<typeof _getConfigUserDetailByUid>) => {
+  const response = await _getConfigUserDetailByUid(...args);
+  return response.data;
+};
+
+// 解包装的 adminDeleteUser 函数
+export const adminDeleteUser = async (...args: Parameters<typeof _adminDeleteUser>) => {
+  const response = await _adminDeleteUser(...args);
+  return response.data;
+};
+
+// 解包装的 adminUserCreate 函数
+export const adminUserCreate = async (...args: Parameters<typeof _adminUserCreate>) => {
+  const response = await _adminUserCreate(...args);
+  return response.data;
+};
+
+// 解包装的 adminGetUsers 函数
+export const adminGetUsers = async (...args: Parameters<typeof _adminGetUsers>) => {
+  const response = await _adminGetUsers(...args);
+  return response.data;
+};
+
+// 解包装的 getStorage 函数
+export const getStorage = async (...args: Parameters<typeof _getStorage>) => {
+  const response = await _getStorage(...args);
+  return response.data;
+};
+
+// 解包装的 getKv 函数
+export const getKv = async (...args: Parameters<typeof _getKv>) => {
+  const response = await _getKv(...args);
+  return response.data;
+};
+
+// 解包装的 getByUid 函数
+export const getByUid = async (...args: Parameters<typeof _getByUid>) => {
+  const response = await _getByUid(...args);
+  return response.data;
+};
 
 // 模块化组织（可选使用）
-import {
-  getHealth,
-  postConfigUserUpdateByUid,
-  getConfigUserDetailByUid,
-  getAdminUserDeleteByUid,
-  postAdminUserCreate,
-  getAdminUserAll,
-  getStorage,
-  getKv,
-  getByUid
-} from './api-client';
-
 export const modules = {
   // health 模块 (1 个函数)
   health: {
@@ -56,9 +98,9 @@ export const modules = {
 
   // admin 模块 (3 个函数)
   admin: {
-    getAdminUserDeleteByUid,
-    postAdminUserCreate,
-    getAdminUserAll
+    adminDeleteUser,
+    adminUserCreate,
+    adminGetUsers
   },
 
   // storage 模块 (2 个函数)
@@ -87,18 +129,18 @@ export default modules;
 // 使用示例
 // ===================================================================
 //
-// 方式1：直接使用原始函数（推荐，完整类型支持）
-// import { getHealth, getAdminUserAll } from '@/generated/api-adapters';
-// const health = await getHealth();
-// const users = await getAdminUserAll(token);
+// 方式1：直接使用解包装函数（推荐，直接得到业务数据）
+// import { getHealth, adminGetUsers } from '@/generated/api-adapters';
+// const health = await getHealth(); // 直接得到 { code: 0, msg: "", data: {...} }
+// const users = await adminGetUsers(token); // 直接得到 { code: 0, msg: "", data: { users: [...], count: 10, timestamp: "..." } }
 //
 // 方式2：使用模块化接口
 // import { modules } from '@/generated/api-adapters';
 // const health = await modules.health.getHealth();
-// const users = await modules.admin.getAdminUserAll(token);
+// const users = await modules.admin.adminGetUsers(token);
 //
 // 方式3：向后兼容
 // import { adminApi } from '@/generated/api-adapters';
-// const users = await adminApi.getAdminUserAll(token);
+// const users = await adminApi.adminGetUsers(token);
 //
 // ===================================================================

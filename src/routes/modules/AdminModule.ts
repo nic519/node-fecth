@@ -2,7 +2,7 @@ import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { ROUTE_PATHS, adminDeleteUserRoute, adminGetUsersRoute, adminUserCreateRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { UserConfig } from '@/types/openapi-schemas';
+import { ResponseCodes, UserConfig } from '@/types/openapi-schemas';
 
 /**
  * 管理员功能路由模块
@@ -68,8 +68,13 @@ export class AdminModule extends BaseRouteModule {
 				const userSummaries = await superAdminManager.getUserSummaryList();
 				
 				return c.json({
-					success: true,
-					data: userSummaries,
+					code: ResponseCodes.SUCCESS,
+					msg: '获取所有用户成功',
+					data: {
+						users: userSummaries,
+						count: userSummaries.length,
+						timestamp: new Date().toISOString(),
+					},
 				});
 			} catch (error) {
 				const errorResponse = this.handleError(error, '获取所有用户');

@@ -25,8 +25,8 @@ export function AdminDashboard() {
       // 使用健康检查API作为基础状态信息
       const healthResponse = await getHealth();
       
-      // 检查响应状态
-      if (healthResponse.status !== 200) {
+      // 检查业务响应码
+      if (healthResponse.code !== 0) {
         setError('获取系统状态失败');
         return;
       }
@@ -36,12 +36,12 @@ export function AdminDashboard() {
         totalUsers: 0,
         activeUsers: 0,
         todayRequests: 0,
-        systemStatus: healthResponse.data.data.status,
+        systemStatus: healthResponse.data.status,
         totalTraffic: '0 MB',
         todayTraffic: '0 MB',
         serverNodes: 1,
         uptime: '0h 0m',
-        timestamp: healthResponse.data.data.timestamp
+        timestamp: healthResponse.data.timestamp
       };
       
       setStats(basicStats);

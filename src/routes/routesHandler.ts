@@ -134,9 +134,6 @@ export class Router {
 ## 认证说明
 大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。
 
-## 生成时间
-${new Date().toISOString()}
-
 ## 已注册模块
 ${this.routeRegistry
 	.getRegisteredModules()

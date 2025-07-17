@@ -267,7 +267,17 @@ class ZeroHardcodeApiGenerator {
 	 * 生成导出内容
 	 */
 	private generateExportContent(functions: FunctionInfo[], modules: Record<string, FunctionInfo[]>): string {
-		const allFunctionNames = functions.map(f => f.name).join(',\n  ');
+		// 生成解包装的函数导出
+		const wrappedFunctions = functions.map(f => {
+			return `// 解包装的 ${f.name} 函数
+export const ${f.name} = async (...args: Parameters<typeof _${f.name}>) => {
+  const response = await _${f.name}(...args);
+  return response.data;
+};`;
+		}).join('\n\n');
+
+		// 生成导入语句
+		const importNames = functions.map(f => `${f.name} as _${f.name}`).join(',\n  ');
 		
 		// 生成模块对象
 		const moduleExports = Object.entries(modules)
@@ -292,7 +302,7 @@ class ZeroHardcodeApiGenerator {
 // 此文件基于函数名模式自动生成模块化导出，零硬编码
 //
 // 🎯 特点：
-// - 直接重新导出原始函数，保持完整类型信息
+// - 自动解包装响应，直接返回业务层数据
 // - 基于函数名模式自动分组，无硬编码逻辑
 // - 支持直接导入和模块化导入两种方式
 // - 完全遵循 Hono 轻量级设计理念
@@ -303,16 +313,14 @@ class ZeroHardcodeApiGenerator {
 //
 // ===================================================================
 
-// 重新导出所有原始函数（推荐直接使用）
-export {
-  ${allFunctionNames}
+// 导入原始函数（带下划线前缀）
+import {
+  ${importNames}
 } from './api-client';
+
+${wrappedFunctions}
 
 // 模块化组织（可选使用）
-import {
-  ${allFunctionNames}
-} from './api-client';
-
 export const modules = {
 ${moduleExports}
 };
@@ -327,19 +335,19 @@ export default modules;
 // 使用示例
 // ===================================================================
 //
-// 方式1：直接使用原始函数（推荐，完整类型支持）
-// import { getHealth, getAdminUserAll } from '@/generated/api-adapters';
-// const health = await getHealth();
-// const users = await getAdminUserAll(token);
+// 方式1：直接使用解包装函数（推荐，直接得到业务数据）
+// import { getHealth, adminGetUsers } from '@/generated/api-adapters';
+// const health = await getHealth(); // 直接得到 { code: 0, msg: "", data: {...} }
+// const users = await adminGetUsers(token); // 直接得到 { code: 0, msg: "", data: { users: [...], count: 10, timestamp: "..." } }
 //
 // 方式2：使用模块化接口
 // import { modules } from '@/generated/api-adapters';
 // const health = await modules.health.getHealth();
-// const users = await modules.admin.getAdminUserAll(token);
+// const users = await modules.admin.adminGetUsers(token);
 //
 // 方式3：向后兼容
 // import { adminApi } from '@/generated/api-adapters';
-// const users = await adminApi.getAdminUserAll(token);
+// const users = await adminApi.adminGetUsers(token);
 //
 // ===================================================================
 `;
@@ -362,8 +370,15 @@ export default modules;
 // 🚀 oazapfts 生成的类型安全 API 客户端 (Hono 最佳实践)
 // ===================================================================
 // 
-// 此文件由 oazapfts 基于 OpenAPI 规范自动生成
-// 提供完整的类型安全和智能提示
+// 此文件由 oazapfts 基于 OpenAPI 规范自动生成，已自动解包装响应
+// 直接返回业务层数据结构，无需手动处理 HTTP 状态码
+// 
+// 期望的响应结构：
+// {
+//   code: 0,
+//   msg: string,
+//   data: { ... }
+// }
 // 
 // 使用方法：
 // import { getHealth, defaults } from '@/generated/api-client';
@@ -371,14 +386,16 @@ export default modules;
 // // 配置基础URL（如果需要）
 // defaults.baseUrl = 'https://api.example.com';
 // 
-// // 直接调用函数，享受完整的类型安全
-// const health = await getHealth();
+// // 直接调用函数，自动解包装响应
+// const result = await getHealth(); // 直接得到业务数据
 //
 `;
 		
 		content = configComment + content;
 		fs.writeFileSync(this.clientPath, content, 'utf-8');
 	}
+
+
 }
 
 /**
