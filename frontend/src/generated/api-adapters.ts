@@ -25,18 +25,7 @@ export const adminApi = {
   // 获取所有用户
   async getAllUsers(superToken: string) {
     const response = await getAdminUserAll(superToken);
-    const rawData = handleResponse(response) as any;
-    
-    // 转换实际API响应格式为前端期望格式
-    if (rawData.success) {
-      return {
-        code: 0,
-        msg: 'success',
-        data: rawData.data
-      };
-    } else {
-      throw new Error('API请求失败');
-    }
+    return handleResponse(response);
   },
 
   // 删除用户

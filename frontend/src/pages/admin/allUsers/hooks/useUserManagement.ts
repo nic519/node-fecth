@@ -51,12 +51,8 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 				return;
 			}
 			
-			// 从响应结构中提取用户列表数据，并转换字段名
-			const usersWithCorrectFields = response.data.users.map((user: any) => ({
-				...user,
-				uid: user.userId || user.uid  // 将userId映射为uid
-			}));
-			setUsers(usersWithCorrectFields);
+			// 从响应结构中提取用户列表数据
+			setUsers(response.data.users);
 		} catch (err) {
 			console.error('获取用户列表失败:', err);
 			setError(err instanceof Error ? err.message : '加载用户数据失败');

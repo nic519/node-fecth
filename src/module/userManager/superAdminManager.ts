@@ -1,5 +1,5 @@
-import { AdminOperation, ConfigTemplate, SuperAdminStats, UserSummary } from '@/module/userManager/types/supper-admin.types';
-import { UserConfig } from '@/types/openapi-schemas';
+import { AdminOperation, ConfigTemplate, SuperAdminStats } from '@/module/userManager/types/supper-admin.types';
+import { UserConfig, UserSummary } from '@/types/openapi-schemas';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { UserManager } from './userManager';
 
@@ -98,7 +98,7 @@ export class SuperAdminManager {
 				}
 
 				const summary: UserSummary = {
-					userId,
+					uid: userId,  // 修复字段名：使用 uid 而不是 userId
 					token: configResponse?.config.accessToken || '',
 					hasConfig: !!configResponse,
 					source: configResponse?.meta.source || 'none',

@@ -175,16 +175,24 @@ export class SuperAdminHandler implements RouteHandler {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const users = await adminManager.getUserSummaryList();
+			
+			// 符合 UsersListResponseSchema 的响应格式
 			return c.json({
-				success: true,
-				data: { users },
+				code: 0,
+				msg: '获取用户列表成功',
+				data: {
+					users,
+					count: users.length,
+					timestamp: new Date().toISOString(),
+				},
 			});
 		} catch (error) {
 			console.error('获取用户列表失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to get users list',
+					code: 500,
+					msg: '获取用户列表失败',
+					data: null,
 				},
 				500
 			);
