@@ -38,8 +38,8 @@ export class SuperAdminManager {
 			let todayNewUsers = 0;
 
 			// 分析每个用户的配置状态
-			for (const userId of userList) {
-				const configResponse = await this.userManager.getUserConfig(userId);
+			for (const uid of userList) {
+				const configResponse = await this.userManager.getUserConfig(uid);
 				if (configResponse) {
 					if (configResponse.meta.source === 'kv') {
 						kvConfigUsers++;
@@ -83,8 +83,8 @@ export class SuperAdminManager {
 			const userList = await this.userManager.getAllUsers();
 			const summaries: UserSummary[] = [];
 
-			for (const userId of userList) {
-				const configResponse = await this.userManager.getUserConfig(userId);
+			for (const uid of userList) {
+				const configResponse = await this.userManager.getUserConfig(uid);
 				const subscribeUrl = configResponse?.config.subscribe;
 
 				// 获取流量信息（仅当有订阅地址时）
@@ -93,12 +93,12 @@ export class SuperAdminManager {
 					try {
 						trafficInfo = await this.getUserTrafficInfo(subscribeUrl);
 					} catch (error) {
-						console.warn(`获取用户 ${userId} 流量信息失败:`, error);
+						console.warn(`获取用户 ${uid} 流量信息失败:`, error);
 					}
 				}
 
 				const summary: UserSummary = {
-					uid: userId,  // 修复字段名：使用 uid 而不是 userId
+					uid: uid,   
 					token: configResponse?.config.accessToken || '',
 					hasConfig: !!configResponse,
 					source: configResponse?.meta.source || 'none',
@@ -211,24 +211,24 @@ export class SuperAdminManager {
 		const success: string[] = [];
 		const failed: string[] = [];
 
-		for (const userId of userIds) {
+		for (const uid of userIds) {
 			try {
 				switch (operation) {
 					case 'delete':
-						await this.deleteUser(userId, adminId);
+						await this.deleteUser(uid, adminId);
 						break;
 					case 'disable':
 						// 暂时通过删除KV配置来禁用（简化实现）
-						await this.userManager.deleteUserConfig(userId);
+						await this.userManager.deleteUserConfig(uid);
 						break;
 					case 'enable':
 						// 启用需要恢复默认配置（简化实现）
 						break;
 				}
-				success.push(userId);
+				success.push(uid);
 			} catch (error) {
-				console.error(`批量操作用户 ${userId} 失败:`, error);
-				failed.push(userId);
+				console.error(`批量操作用户 ${uid} 失败:`, error);
+				failed.push(uid);
 			}
 		}
 
@@ -296,7 +296,7 @@ export class SuperAdminManager {
 	/**
 	 * 应用模板到用户
 	 */
-	async applyTemplateToUser(templateId: string, userId: string, adminId: string): Promise<void> {
+	async applyTemplateToUser(templateId: string, uid: string, adminId: string): Promise<void> {
 		try {
 			const templates = await this.getConfigTemplates();
 			const template = templates.find((t) => t.id === templateId);
@@ -306,7 +306,7 @@ export class SuperAdminManager {
 			}
 
 			// 获取用户当前配置
-			const currentConfig = await this.userManager.getUserConfig(userId);
+			const currentConfig = await this.userManager.getUserConfig(uid);
 
 			// 合并模板配置（保留用户的必要字段如accessToken）
 			const mergedConfig: UserConfig = {
@@ -316,7 +316,7 @@ export class SuperAdminManager {
 			} as UserConfig;
 
 			// 更新用户配置
-			await this.userManager.saveUserConfig(userId, mergedConfig);
+			await this.userManager.saveUserConfig(uid, mergedConfig);
 
 			// 更新模板使用计数
 			template.usageCount++;
@@ -329,10 +329,10 @@ export class SuperAdminManager {
 			await this.logAdminOperation({
 				timestamp: new Date().toISOString(),
 				operation: 'apply_template',
-				targetUserId: userId,
+				targetUserId: uid,
 				adminId,
 				result: 'success',
-				details: `应用模板 ${template.name} 到用户 ${userId}`,
+				details: `应用模板 ${template.name} 到用户 ${uid}`,
 			});
 		} catch (error) {
 			console.error('应用模板失败:', error);
@@ -412,11 +412,11 @@ export class SuperAdminManager {
 	/**
 	 * 刷新用户流量信息（从远程获取最新数据）
 	 */
-	async refreshUserTrafficInfo(userId: string, adminId: string): Promise<UserSummary['trafficInfo']> {
+	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<UserSummary['trafficInfo']> {
 		try {
-			const configResponse = await this.userManager.getUserConfig(userId);
+			const configResponse = await this.userManager.getUserConfig(uid);
 			if (!configResponse?.config.subscribe) {
-				throw new Error(`用户 ${userId} 没有订阅地址`);
+				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
 			const trafficUtils = new TrafficUtils(configResponse.config.subscribe);
@@ -432,21 +432,21 @@ export class SuperAdminManager {
 			await this.logAdminOperation({
 				timestamp: new Date().toISOString(),
 				operation: 'refresh_traffic',
-				targetUserId: userId,
+				targetUserId: uid,
 				adminId,
 				result: 'success',
-				details: `刷新用户流量信息: ${userId}`,
+				details: `刷新用户流量信息: ${uid}`,
 			});
 
 			return trafficInfo;
 		} catch (error) {
-			console.error(`刷新用户流量信息失败 (${userId}):`, error);
+			console.error(`刷新用户流量信息失败 (${uid}):`, error);
 
 			// 记录错误日志
 			await this.logAdminOperation({
 				timestamp: new Date().toISOString(),
 				operation: 'refresh_traffic',
-				targetUserId: userId,
+				targetUserId: uid,
 				adminId,
 				result: 'error',
 				details: `刷新用户流量信息失败: ${error instanceof Error ? error.message : String(error)}`,

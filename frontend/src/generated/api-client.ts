@@ -1,20 +1,19 @@
 
 // ===================================================================
-// 🚀 完全动态生成的 API 客户端
+// 🚀 oazapfts 生成的类型安全 API 客户端 (Hono 最佳实践)
 // ===================================================================
 // 
-// 所有API方法都基于OpenAPI规范自动生成，新增接口会自动包含
+// 此文件由 oazapfts 基于 OpenAPI 规范自动生成
+// 提供完整的类型安全和智能提示
 // 
 // 使用方法：
-// import { getHealth, postConfigUserUpdateByUid, defaults } from '@/generated/api-client';
+// import { getHealth, defaults } from '@/generated/api-client';
 // 
-// // 配置基础URL和认证
+// // 配置基础URL（如果需要）
 // defaults.baseUrl = 'https://api.example.com';
-// defaults.headers.Authorization = 'Bearer your-token';
 // 
-// // 直接调用生成的方法
+// // 直接调用函数，享受完整的类型安全
 // const health = await getHealth();
-// const result = await postConfigUserUpdateByUid('uid', 'token', { config: {...} });
 //
 /**
  * Node-Fetch API

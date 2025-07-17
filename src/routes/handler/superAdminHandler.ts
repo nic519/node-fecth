@@ -77,9 +77,9 @@ export class SuperAdminHandler implements RouteHandler {
 		});
 
 		// 刷新用户流量信息
-		usersRoute.post('/:userId/traffic/refresh', async (c) => {
-			const userId = c.req.param('userId');
-			return await this.refreshUserTraffic(c, userId);
+		usersRoute.post('/:uid/traffic/refresh', async (c) => {
+			const uid = c.req.param('uid');
+			return await this.refreshUserTraffic(c, uid);
 		});
 
 		// 配置模板管理路由组

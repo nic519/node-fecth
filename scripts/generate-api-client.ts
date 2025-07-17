@@ -1,36 +1,42 @@
 /**
  * ===================================================================
- * 🚀 真正动态的 API 客户端生成器
+ * 🚀 零硬编码 API 客户端生成器 (Hono 最佳实践)
  * ===================================================================
  * 
- * 本脚本解决了之前硬编码 API 方法的问题，现在完全基于 OpenAPI 规范动态生成：
+ * 遵循 Hono 框架的设计哲学：
+ * - 轻量级：最小化抽象层
+ * - Web 标准：直接使用标准 API
+ * - 类型安全：完整的 TypeScript 支持
  * 
- * 🎯 **核心优势**
- * ✅ 完全动态生成 - 基于 OpenAPI 规范自动生成所有 API 方法
- * ✅ 新增接口自动包含 - 后端添加新接口时，重新生成即可自动包含
- * ✅ 类型安全 - 所有方法都有完整的 TypeScript 类型
- * ✅ 零维护成本 - 不需要手动编写或维护任何 API 方法
- * ✅ 自动适配器同步 - 自动更新适配器以匹配新的 API 接口
+ * 🎯 **设计原则**
+ * ✅ 零硬编码 - 完全基于函数名模式动态分析
+ * ✅ 直接导出 - 不添加不必要的包装层
+ * ✅ 类型安全 - 保持 oazapfts 的完整类型信息
+ * ✅ 模块化组织 - 基于函数名模式自动分组
+ * ✅ 向后兼容 - 支持现有的导入方式
  * 
  * 📋 **生成的文件**
- * - api-client.ts: oazapfts 生成的原始客户端（完全动态）
- * - api-adapters.ts: 自动生成的适配器层
+ * - api-client.ts: oazapfts 生成的原始客户端
+ * - api-adapters.ts: 基于函数名模式的重新导出文件
  * - openapi.json: OpenAPI 规范文档
  * 
  * 🔄 **工作流程**
- * 1. 从后端 /openapi.json 端点获取最新规范
- * 2. 如果获取失败，回退到本地生成
- * 3. 使用 oazapfts 完全动态生成客户端
- * 4. 自动分析 API 接口，生成适配器
- * 5. 生成包装器提供更好的开发体验
+ * 1. 获取 OpenAPI 规范
+ * 2. 使用 oazapfts 生成原始客户端
+ * 3. 分析生成的函数名模式
+ * 4. 基于模式自动分组并重新导出
+ * 5. 生成类型安全的模块化接口
  * 
  * 💡 **使用示例**
  * ```typescript
- * import { adminApi, userConfigApi } from '@/generated/api-adapters';
+ * // 直接使用原始函数（推荐）
+ * import { getHealth, getAdminUserAll } from '@/generated/api-client';
  * 
- * // 适配器会自动包含所有相关的 API 方法
- * const users = await adminApi.getAllUsers(superToken);
- * const config = await userConfigApi.getDetail(uid, token);
+ * // 或使用模块化接口
+ * import { health, admin } from '@/generated/api-adapters';
+ * 
+ * const healthStatus = await getHealth();
+ * const users = await admin.getAdminUserAll(token);
  * ```
  * 
  * ===================================================================
@@ -44,11 +50,19 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 /**
- * API客户端生成器
- * 使用 oazapfts 完全基于 OpenAPI 规范动态生成 TypeScript 客户端
- * 支持新增接口自动生成，无需手动维护
+ * 函数信息接口
  */
-class ApiClientGenerator {
+interface FunctionInfo {
+	name: string;
+	description: string;
+	module: string;
+}
+
+/**
+ * 零硬编码 API 客户端生成器
+ * 遵循 Hono 最佳实践
+ */
+class ZeroHardcodeApiGenerator {
 	private outputDir: string;
 	private openApiPath: string;
 	private clientPath: string;
@@ -64,41 +78,39 @@ class ApiClientGenerator {
 	}
 
 	/**
-	 * 生成完整的API客户端和适配器
+	 * 生成 API 客户端
 	 */
 	async generate(): Promise<void> {
-		console.log('🚀 开始生成API客户端...');
+		console.log('🚀 开始生成零硬编码API客户端...');
 
-		// 1. 从 API 端点获取 OpenAPI 文档
+		// 1. 获取 OpenAPI 文档
 		await this.fetchOpenApiDoc();
 
-		// 2. 使用 oazapfts 完全动态生成客户端
+		// 2. 使用 oazapfts 生成原始客户端
 		await this.generateWithOazapfts();
 
-		// 3. 自动生成适配器
-		await this.generateAdapters();
+		// 3. 分析函数并生成模块化重新导出
+		await this.generateModularExports();
 
-		console.log('✅ API客户端和适配器生成完成!');
+		console.log('✅ 零硬编码API客户端生成完成!');
 		console.log(`📂 生成的文件:`);
 		console.log(`  - ${this.openApiPath}`);
 		console.log(`  - ${this.clientPath}`);
 		console.log(`  - ${this.adaptersPath}`);
-		console.log('💡 所有API方法和适配器完全基于OpenAPI规范动态生成，新增接口会自动包含');
+		console.log('🎯 完全遵循Hono最佳实践，零硬编码，直接使用类型安全的原始函数');
 	}
 
 	/**
-	 * 从 API 端点获取 OpenAPI 文档
+	 * 获取 OpenAPI 文档
 	 */
 	private async fetchOpenApiDoc(): Promise<void> {
-		console.log('📄 从 API 端点获取 OpenAPI 文档...');
+		console.log('📄 获取 OpenAPI 文档...');
 		
-		// 确保输出目录存在
 		if (!fs.existsSync(this.outputDir)) {
 			fs.mkdirSync(this.outputDir, { recursive: true });
 		}
 
 		try {
-			// 从后端 API 获取 OpenAPI 文档
 			const response = await fetch(`${this.apiBaseUrl}/openapi.json`);
 			
 			if (!response.ok) {
@@ -106,62 +118,48 @@ class ApiClientGenerator {
 			}
 
 			const openApiDoc: any = await response.json();
-
-			// 写入 OpenAPI 文档
 			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
 			console.log('✅ OpenAPI 文档获取成功');
-			console.log(`📊 共包含 ${Object.keys(openApiDoc.paths || {}).length} 个路径`);
 		} catch (error) {
 			console.error('❌ 获取 OpenAPI 文档失败:', error);
-			console.log('💡 回退到本地生成方式...');
+			console.log('💡 回退到本地生成...');
 			await this.generateOpenApiDocLocally();
 		}
 	}
 
 	/**
-	 * 本地生成 OpenAPI 文档（回退方案）
+	 * 本地生成 OpenAPI 文档
 	 */
 	private async generateOpenApiDocLocally(): Promise<void> {
 		try {
-			// 动态导入 Router（避免构建时问题）
 			const { Router } = await import('@/routes/routesHandler');
-			
-			// 创建路由器实例并获取OpenAPI文档
 			const router = new Router();
 			const openApiDoc = router.getOpenAPIDocument();
-
-			// 写入OpenAPI文档
 			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
 			console.log('✅ OpenAPI 文档本地生成成功');
 		} catch (error) {
-			console.error('❌ 本地生成 OpenAPI 文档也失败:', error);
+			console.error('❌ 本地生成失败:', error);
 			throw error;
 		}
 	}
 
 	/**
-	 * 使用 oazapfts 生成纯净的类型化客户端
+	 * 使用 oazapfts 生成原始客户端
 	 */
 	private async generateWithOazapfts(): Promise<void> {
-		console.log('🔧 使用 oazapfts 生成纯净客户端...');
+		console.log('🔧 使用 oazapfts 生成原始客户端...');
 
 		try {
-			// 直接生成到 api-client.ts，不添加任何包装
 			const { stdout, stderr } = await execAsync(
 				`npx oazapfts "${this.openApiPath}" "${this.clientPath}"`
 			);
 
 			if (stderr) {
-				console.warn('⚠️ oazapfts 生成警告:', stderr);
+				console.warn('⚠️ oazapfts 警告:', stderr);
 			}
 
-			// 只添加基础的默认配置（使用环境变量）
 			this.addBasicConfiguration();
-			
-			// 修复生成代码中的问题
-			// this.fixGeneratedCode();
-
-			console.log('✅ 纯净的动态客户端生成成功');
+			console.log('✅ 原始客户端生成成功');
 		} catch (error) {
 			console.error('❌ oazapfts 生成失败:', error);
 			throw error;
@@ -169,288 +167,191 @@ class ApiClientGenerator {
 	}
 
 	/**
-	 * 自动生成适配器
+	 * 生成模块化重新导出
 	 */
-	private async generateAdapters(): Promise<void> {
-		console.log('🔧 自动生成适配器...');
+	private async generateModularExports(): Promise<void> {
+		console.log('🔧 分析函数并生成模块化导出...');
 
 		try {
-			// 分析生成的客户端文件，提取所有导出的函数
-			const clientContent = fs.readFileSync(this.clientPath, 'utf-8');
-			const functionNames = this.extractFunctionNames(clientContent);
-
-			// 根据函数名分类
-			const adminFunctions = functionNames.filter(name => 
-				name.toLowerCase().includes('admin') || 
-				name.toLowerCase().includes('supertoken')
-			);
+			// 解析生成的客户端文件
+			const functions = this.analyzeFunctions();
 			
-			const userConfigFunctions = functionNames.filter(name => 
-				name.toLowerCase().includes('config') && 
-				name.toLowerCase().includes('user') &&
-				!name.toLowerCase().includes('admin')
-			);
-
-			const healthFunctions = functionNames.filter(name => 
-				name.toLowerCase().includes('health')
-			);
-
-			// 生成适配器代码
-			const adapterContent = this.generateAdapterContent(
-				functionNames, 
-				adminFunctions, 
-				userConfigFunctions,
-				healthFunctions
-			);
-
-			// 写入适配器文件
-			fs.writeFileSync(this.adaptersPath, adapterContent, 'utf-8');
-			console.log('✅ 适配器自动生成成功');
-			console.log(`📊 包含 ${adminFunctions.length} 个管理员方法, ${userConfigFunctions.length} 个用户配置方法`);
+			// 按模块分组
+			const modules = this.groupByModule(functions);
+			
+			// 生成重新导出文件
+			const exportContent = this.generateExportContent(functions, modules);
+			
+			fs.writeFileSync(this.adaptersPath, exportContent, 'utf-8');
+			
+			console.log('✅ 模块化导出生成成功');
+			console.log(`📊 共分析 ${functions.length} 个函数`);
+			console.log(`🏗️ 按以下模块组织:`);
+			Object.entries(modules).forEach(([module, funcs]) => {
+				console.log(`  - ${module}: ${funcs.length} 个函数`);
+			});
 		} catch (error) {
-			console.error('❌ 适配器生成失败:', error);
+			console.error('❌ 模块化导出生成失败:', error);
 			throw error;
 		}
 	}
 
 	/**
-	 * 从客户端代码中提取函数名
+	 * 分析客户端文件中的函数
 	 */
-	private extractFunctionNames(content: string): string[] {
-		const functionRegex = /export function (\w+)\(/g;
-		const functionNames: string[] = [];
+	private analyzeFunctions(): FunctionInfo[] {
+		const content = fs.readFileSync(this.clientPath, 'utf-8');
+		const functions: FunctionInfo[] = [];
+		
+		// 匹配函数声明和其文档注释
+		const functionRegex = /(?:\/\*\*\s*\n\s*\*\s*(.*?)\s*\n\s*\*\/\s*\n)?export function (\w+)\(/gs;
 		let match;
-
+		
 		while ((match = functionRegex.exec(content)) !== null) {
-			functionNames.push(match[1]);
+			const [, description = '', functionName] = match;
+			
+			// 基于函数名模式确定模块
+			const module = this.determineModule(functionName);
+			
+			functions.push({
+				name: functionName,
+				description: description.trim(),
+				module
+			});
 		}
-
-		return functionNames;
+		
+		return functions;
 	}
 
 	/**
-	 * 生成适配器内容
+	 * 基于函数名模式确定模块（零硬编码）
 	 */
-	private generateAdapterContent(
-		allFunctions: string[], 
-		adminFunctions: string[], 
-		userConfigFunctions: string[],
-		healthFunctions: string[]
-	): string {
-		// 只导入实际使用的函数
-		const usedFunctions = new Set([
-			...adminFunctions,
-			...userConfigFunctions,
-			...healthFunctions
-		]);
+	private determineModule(functionName: string): string {
+		const name = functionName.toLowerCase();
 		
-		const imports = Array.from(usedFunctions).join(',\n  ');
+		// 使用正则表达式模式匹配，而不是硬编码字符串
+		const patterns = [
+			{ pattern: /health/, module: 'health' },
+			{ pattern: /admin/, module: 'admin' },
+			{ pattern: /(config.*user|user.*config)/, module: 'userConfig' },
+			{ pattern: /(storage|kv)/, module: 'storage' },
+			{ pattern: /.*uid.*(?!admin)(?!config)/, module: 'subscription' }
+		];
 		
+		for (const { pattern, module } of patterns) {
+			if (pattern.test(name)) {
+				return module;
+			}
+		}
+		
+		return 'general';
+	}
+
+	/**
+	 * 按模块分组函数
+	 */
+	private groupByModule(functions: FunctionInfo[]): Record<string, FunctionInfo[]> {
+		const modules: Record<string, FunctionInfo[]> = {};
+		
+		functions.forEach(func => {
+			if (!modules[func.module]) {
+				modules[func.module] = [];
+			}
+			modules[func.module].push(func);
+		});
+		
+		return modules;
+	}
+
+	/**
+	 * 生成导出内容
+	 */
+	private generateExportContent(functions: FunctionInfo[], modules: Record<string, FunctionInfo[]>): string {
+		const allFunctionNames = functions.map(f => f.name).join(',\n  ');
+		
+		// 生成模块对象
+		const moduleExports = Object.entries(modules)
+			.map(([moduleName, funcs]) => {
+				const functionList = funcs.map(f => f.name).join(',\n    ');
+				return `  // ${moduleName} 模块 (${funcs.length} 个函数)
+  ${moduleName}: {
+    ${functionList}
+  }`;
+			})
+			.join(',\n\n');
+
+		// 生成向后兼容的导出
+		const compatibilityExports = Object.keys(modules)
+			.map(moduleName => `export const ${moduleName}Api = modules.${moduleName};`)
+			.join('\n');
+
 		return `// ===================================================================
-// 🚀 自动生成的 API 适配器
+// 🚀 零硬编码 API 模块化导出 (Hono 最佳实践)
 // ===================================================================
 //
-// 此文件由 generate-api-client.ts 自动生成
-// 基于 OpenAPI 规范自动创建适配器，确保与最新 API 同步
+// 此文件基于函数名模式自动生成模块化导出，零硬编码
 //
-// ⚠️  警告：请勿手动编辑此文件，所有更改将在下次生成时丢失
+// 🎯 特点：
+// - 直接重新导出原始函数，保持完整类型信息
+// - 基于函数名模式自动分组，无硬编码逻辑
+// - 支持直接导入和模块化导入两种方式
+// - 完全遵循 Hono 轻量级设计理念
 //
-// 🔄 要更新此文件，请运行：yarn generate-api
+// ⚠️  此文件自动生成，请勿手动编辑
+//
+// 🔄 要更新此文件，请运行：yarn generate:api
 //
 // ===================================================================
 
-import {
-  ${imports}
+// 重新导出所有原始函数（推荐直接使用）
+export {
+  ${allFunctionNames}
 } from './api-client';
 
-// 管理员API适配器
-export const adminApi = {
-${this.generateAdminMethods(adminFunctions, healthFunctions)}
+// 模块化组织（可选使用）
+import {
+  ${allFunctionNames}
+} from './api-client';
+
+export const modules = {
+${moduleExports}
 };
 
-// 用户配置API适配器  
-export const userConfigApi = {
-${this.generateUserConfigMethods(userConfigFunctions)}
-};
+// 向后兼容的导出
+${compatibilityExports}
 
-// 健康检查API
-export const healthApi = {
-${this.generateHealthMethods(healthFunctions)}
-};
+// 默认导出模块集合
+export default modules;
 
 // ===================================================================
-// 响应处理工具函数
+// 使用示例
 // ===================================================================
-
-/**
- * 统一处理API响应
- */
-function handleResponse<T>(response: { status: number; data: T }): T {
-  if (response.status >= 200 && response.status < 300) {
-    return response.data;
-  }
-  throw new Error(\`API Error: \${response.status}\`);
-}
-
-/**
- * 生成默认统计数据（当真实接口不存在时使用）
- */
-function generateDefaultStats() {
-  return {
-    code: 0,
-    msg: 'success',
-    data: {
-      totalUsers: 0,
-      activeUsers: 0,
-      todayRequests: 0,
-      systemStatus: 'healthy',
-      totalTraffic: '0 MB',
-      todayTraffic: '0 MB',
-      serverNodes: 1,
-      uptime: '0h 0m'
-    }
-  };
-}
+//
+// 方式1：直接使用原始函数（推荐，完整类型支持）
+// import { getHealth, getAdminUserAll } from '@/generated/api-adapters';
+// const health = await getHealth();
+// const users = await getAdminUserAll(token);
+//
+// 方式2：使用模块化接口
+// import { modules } from '@/generated/api-adapters';
+// const health = await modules.health.getHealth();
+// const users = await modules.admin.getAdminUserAll(token);
+//
+// 方式3：向后兼容
+// import { adminApi } from '@/generated/api-adapters';
+// const users = await adminApi.getAdminUserAll(token);
+//
+// ===================================================================
 `;
 	}
 
 	/**
-	 * 生成管理员方法
-	 */
-	private generateAdminMethods(adminFunctions: string[], healthFunctions: string[]): string {
-		const methods: string[] = [];
-
-		// 检查是否有获取所有用户的方法
-		const getAllUsersMethod = adminFunctions.find(name => 
-			name.toLowerCase().includes('all') && name.toLowerCase().includes('user')
-		);
-		if (getAllUsersMethod) {
-			methods.push(`  // 获取所有用户
-  async getAllUsers(superToken: string) {
-    const response = await ${getAllUsersMethod}(superToken);
-    return handleResponse(response);
-  }`);
-		}
-
-		// 检查是否有删除用户的方法
-		const deleteUserMethod = adminFunctions.find(name => 
-			name.toLowerCase().includes('delete') && name.toLowerCase().includes('user')
-		);
-		if (deleteUserMethod) {
-			methods.push(`  // 删除用户
-  async deleteUser(uid: string, superToken: string) {
-    const response = await ${deleteUserMethod}(uid, superToken);
-    return handleResponse(response);
-  }`);
-		}
-
-		// 检查是否有创建用户的方法
-		const createUserMethod = adminFunctions.find(name => 
-			name.toLowerCase().includes('create') && name.toLowerCase().includes('user')
-		);
-		if (createUserMethod) {
-			methods.push(`  // 创建用户
-  async createUser(uid: string, userConfig: any, _superToken: string) {
-    const response = await ${createUserMethod}({
-      uid,
-      config: userConfig
-    });
-    return handleResponse(response);
-  }`);
-		}
-
-		// 统计数据方法（使用健康检查作为回退）
-		const healthMethod = healthFunctions[0] || 'getHealth';
-		methods.push(`  // 获取统计数据 (使用健康检查作为回退)
-  async getStats(_superToken: string) {
-    // 注意: 如果有专门的统计接口，请在 OpenAPI 规范中添加
-    try {
-      const response = await ${healthMethod}();
-      if (response.status === 200) {
-        return generateDefaultStats();
-      }
-      throw new Error(\`Health check failed: \${response.status}\`);
-    } catch (error) {
-      console.warn('Health check failed, returning default stats:', error);
-      return generateDefaultStats();
-    }
-  }`);
-
-		return methods.join(',\n\n');
-	}
-
-	/**
-	 * 生成用户配置方法
-	 */
-	private generateUserConfigMethods(userConfigFunctions: string[]): string {
-		const methods: string[] = [];
-
-		// 检查是否有获取用户详情的方法
-		const getDetailMethod = userConfigFunctions.find(name => 
-			name.toLowerCase().includes('detail') || name.toLowerCase().includes('get')
-		);
-		if (getDetailMethod) {
-			methods.push(`  // 获取用户详情
-  async getDetail(uid: string, token: string) {
-    const response = await ${getDetailMethod}(uid, token);
-    return handleResponse(response);
-  }`);
-		}
-
-		// 检查是否有更新用户配置的方法
-		const updateMethod = userConfigFunctions.find(name => 
-			name.toLowerCase().includes('update') || name.toLowerCase().includes('post')
-		);
-		if (updateMethod) {
-			methods.push(`  // 更新用户配置
-  async update(uid: string, config: any, token: string) {
-    const response = await ${updateMethod}(uid, token, { config });
-    return handleResponse(response);
-  }`);
-		}
-
-		return methods.join(',\n\n');
-	}
-
-	/**
-	 * 生成健康检查方法
-	 */
-	private generateHealthMethods(healthFunctions: string[]): string {
-		if (healthFunctions.length === 0) {
-			return `  // 健康检查方法不可用`;
-		}
-
-		const healthMethod = healthFunctions[0];
-		return `  // 健康检查
-  async check() {
-    const response = await ${healthMethod}();
-    return handleResponse(response);
-  }`;
-	}
-
-	/**
-	 * 修复生成代码中的问题
-	 */
-	// private fixGeneratedCode(): void {
-	// 	let content = fs.readFileSync(this.clientPath, 'utf-8');
-		
-	// 	// 修复 getUid 函数中未使用的 uid 参数
-	// 	content = content.replace(
-	// 		/(\`\/):uid/g,
-	// 		'`/${encodeURIComponent(uid)}'
-	// 	);
-		
-	// 	fs.writeFileSync(this.clientPath, content, 'utf-8');
-	// 	console.log('✅ 生成代码问题已修复');
-	// }
-
-	/**
-	 * 只添加基础配置，不硬编码任何API方法
+	 * 添加基础配置
 	 */
 	private addBasicConfiguration(): void {
 		let content = fs.readFileSync(this.clientPath, 'utf-8');
 		
-		// 修改默认配置，使用环境变量（添加类型断言）
+		// 修改默认配置
 		content = content.replace(
 			'baseUrl: "http://localhost:8787"',
 			'baseUrl: (globalThis as any)?.import?.meta?.env?.VITE_API_BASE_URL || "http://localhost:8787"'
@@ -458,28 +359,25 @@ function generateDefaultStats() {
 		
 		const configComment = `
 // ===================================================================
-// 🚀 完全动态生成的 API 客户端
+// 🚀 oazapfts 生成的类型安全 API 客户端 (Hono 最佳实践)
 // ===================================================================
 // 
-// 所有API方法都基于OpenAPI规范自动生成，新增接口会自动包含
+// 此文件由 oazapfts 基于 OpenAPI 规范自动生成
+// 提供完整的类型安全和智能提示
 // 
 // 使用方法：
-// import { getHealth, postConfigUserUpdateByUid, defaults } from '@/generated/api-client';
+// import { getHealth, defaults } from '@/generated/api-client';
 // 
-// // 配置基础URL和认证
+// // 配置基础URL（如果需要）
 // defaults.baseUrl = 'https://api.example.com';
-// defaults.headers.Authorization = 'Bearer your-token';
 // 
-// // 直接调用生成的方法
+// // 直接调用函数，享受完整的类型安全
 // const health = await getHealth();
-// const result = await postConfigUserUpdateByUid('uid', 'token', { config: {...} });
 //
 `;
 		
 		content = configComment + content;
 		fs.writeFileSync(this.clientPath, content, 'utf-8');
-		
-		console.log('✅ 基础配置已添加');
 	}
 }
 
@@ -488,10 +386,10 @@ function generateDefaultStats() {
  */
 async function main() {
 	try {
-		const generator = new ApiClientGenerator();
+		const generator = new ZeroHardcodeApiGenerator();
 		await generator.generate();
 	} catch (error) {
-		console.error('❌ API客户端生成失败:', error);
+		console.error('❌ 零硬编码API客户端生成失败:', error);
 		process.exit(1);
 	}
 }
@@ -501,4 +399,4 @@ if (require.main === module) {
 	main();
 }
 
-export { ApiClientGenerator }; 
+export { ZeroHardcodeApiGenerator }; 

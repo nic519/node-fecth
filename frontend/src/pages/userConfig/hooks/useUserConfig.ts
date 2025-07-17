@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { userConfigApi } from '@/generated/api-adapters';
+// 直接使用类型安全的原始函数（Hono 最佳实践）
+import { getConfigUserDetailByUid, postConfigUserUpdateByUid } from '@/generated/api-adapters';
 import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, yamlToConfig, validateConfig } from '../utils/configUtils';
 
@@ -45,16 +46,22 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const loadConfig = async () => {
 		try {
 			setLoading(true);
-			const response = await userConfigApi.getDetail(uid, token);
+			const response = await getConfigUserDetailByUid(uid, token);
 			
 			// 检查响应状态
-			if (response.code !== 0) {
-				setError(response.msg || '获取配置失败');
+			if (response.status !== 200) {
+				setError('获取配置失败');
 				return;
 			}
 			
-			// 从新的响应结构中提取配置数据
-			const configData = response.data;
+			// 检查业务响应码
+			if (response.data.code !== 0) {
+				setError(response.data.msg || '获取配置失败');
+				return;
+			}
+			
+			// 从 oazapfts 响应结构中提取配置数据
+			const configData = response.data.data;
 			setConfig(configData);
 			setConfigSource((configData.meta as any).source || '环境变量');
 
@@ -88,15 +95,15 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-			const response = await userConfigApi.update(uid, newConfig, token);
+			const response = await postConfigUserUpdateByUid(uid, token, { config: newConfig });
 			
 			// 检查响应是否成功
-			if (response.code === 0) {
+			if (response.status === 200 && response.data.code === 0) {
 				setSaveSuccess(true);
 				setLastSaved(new Date());
 				setTimeout(() => setSaveSuccess(false), 3000);
 			} else {
-				setError(response.msg || '保存配置失败');
+				setError(response.data?.msg || '保存配置失败');
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : '保存配置失败');

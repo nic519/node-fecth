@@ -54,32 +54,32 @@ export class UserConfigHandler implements RouteHandler {
 		// 用户配置管理路由组
 		const configRoute = this.app.basePath('/config/user');
 
-		// 获取用户配置详情 - GET /config/user/detail/:userId
-		configRoute.get('/detail/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`📖 处理获取用户详情: ${userId}`);
-			return await this.getUserConfig(c, userId);
+		// 获取用户配置详情 - GET /config/user/detail/:uid
+		configRoute.get('/detail/:uid', async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`📖 处理获取用户详情: ${uid}`);
+			return await this.getUserConfig(c, uid);
 		});
 
-		// 更新用户配置 - POST /config/user/update/:userId
-		configRoute.post('/update/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`📝 处理更新用户配置: ${userId}`);
-			return await this.updateUserConfig(c, userId);
+		// 更新用户配置 - POST /config/user/update/:uid
+		configRoute.post('/update/:uid', async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`📝 处理更新用户配置: ${uid}`);
+			return await this.updateUserConfig(c, uid);
 		});
 
-		// 创建用户配置 - POST /config/user/create/:userId
-		configRoute.post('/create/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`➕ 处理创建用户配置: ${userId}`);
-			return await this.createUserConfig(c, userId);
+		// 创建用户配置 - POST /config/user/create/:uid
+		configRoute.post('/create/:uid', async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`➕ 处理创建用户配置: ${uid}`);
+			return await this.createUserConfig(c, uid);
 		});
 
-		// 删除用户配置 - DELETE /config/user/delete/:userId
-		configRoute.delete('/delete/:userId', async (c) => {
-			const userId = c.req.param('userId');
-			console.log(`🗑️ 处理删除用户配置: ${userId}`);
-			return await this.deleteUserConfig(c, userId);
+		// 删除用户配置 - DELETE /config/user/delete/:uid
+		configRoute.delete('/delete/:uid', async (c) => {
+			const uid = c.req.param('uid');
+			console.log(`🗑️ 处理删除用户配置: ${uid}`);
+			return await this.deleteUserConfig(c, uid);
 		});
 
 		// 获取所有用户列表 - GET /config/user/all

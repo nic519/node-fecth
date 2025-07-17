@@ -29,10 +29,10 @@ export class AuthUtils {
 	 * 统一的身份验证方法
 	 * @param request HTTP请求对象
 	 * @param env 环境变量
-	 * @param userId 可选的用户ID，如果不提供则只验证令牌存在
+	 * @param uid 可选的用户ID，如果不提供则只验证令牌存在
 	 * @returns 验证结果
 	 */
-	static async authenticate(request: Request, env: Env, userId?: string): Promise<ConfigResponse> {
+	static async authenticate(request: Request, env: Env, uid?: string): Promise<ConfigResponse> {
 		// 验证访问令牌
 		const accessToken = this.getAccessToken(request);
 		if (!accessToken) {
@@ -41,9 +41,9 @@ export class AuthUtils {
 
 		const userManager = new UserManager(env);
 
-		// 如果提供了userId，验证用户权限
-		if (userId) {
-			const user = await userManager.validateAndGetUser(userId, accessToken);
+		// 如果提供了uid，验证用户权限
+		if (uid) {
+			const user = await userManager.validateAndGetUser(uid, accessToken);
 			if (!user) {
 				throw Error(' Invalid access token');
 			}
