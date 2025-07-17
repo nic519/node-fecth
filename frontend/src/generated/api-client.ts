@@ -1,223 +1,74 @@
 // ===================================================================
-// 🤖 自动生成的API客户端 - 请勿手动修改
-// 生成时间: 2025-07-17T16:47:50.982Z
-// 基于: OpenAPI 3.1.0 规范
+// 🤖 完全动态生成的API客户端包装器 - 请勿手动修改
+// 生成时间: 2025-07-17T17:27:15.063Z
+// 基于: oazapfts (完全动态生成)
 // ===================================================================
 
-import ky from 'ky';
-import type { components } from './api-types';
-import type { 
-	UserDetailResponse, 
-	UsersListResponse, 
-	AdminStatsResponse, 
-	SuccessResponse,
-	UserConfig 
-} from '@/types/user-config';
+// 导入原始生成的客户端
+import * as rawApi from './api-client-raw';
 
-// 类型别名，方便使用
-export type UserSummary = components['schemas']['UserSummarySchema'];
-export type AdminStats = components['schemas']['AdminStatsSchema'];
-export type ConfigResponse = components['schemas']['ConfigResponseSchema'];
-export type ErrorResponse = components['schemas']['ErrorResponseSchema'];
-
-// API配置
-const config = {
-	apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-	isDev: import.meta.env.DEV,
+// 配置默认选项
+const defaultOptions: rawApi.RequestOpts = {
+	// 可以在这里设置全局默认配置
 };
 
-// 创建基础API客户端
-const apiClient = ky.create({
-	prefixUrl: config.apiBaseUrl,
-	timeout: 30000,
-	retry: {
-		limit: 2,
-		methods: ['get'],
+// 重新导出所有生成的API函数和类型
+export * from './api-client-raw';
+
+// 导出默认配置的 API 实例
+export const api = {
+	// 直接使用 rawApi 的所有方法，这样新增的接口会自动出现
+	...rawApi,
+	
+	// 可以在这里添加一些便利方法
+	configure: (options: Partial<rawApi.RequestOpts>) => {
+		Object.assign(rawApi.defaults, options);
 	},
-	hooks: {
-		beforeError: [
-			(error) => {
-				const { response } = error;
-				if (response && response.body) {
-					error.name = 'ApiError';
-					error.message = `请求失败: ${response.status} ${response.statusText}`;
-				}
-				return error;
-			},
-		],
+	
+	setBaseUrl: (baseUrl: string) => {
+		rawApi.defaults.basePath = baseUrl;
 	},
+	
+	setAuth: (token: string) => {
+		rawApi.defaults.headers = {
+			...rawApi.defaults.headers,
+			Authorization: `Bearer ${token}`,
+		};
+	},
+};
+
+// 导出便利的分组API（可选，但保持动态性）
+export const createApiGroups = () => {
+	// 这里可以通过反射动态创建分组，但为了简单起见，暂时手动维护
+	// 新的接口会通过 rawApi 自动暴露，也可以通过 api.* 访问
+	
+	return {
+		// 所有方法都通过 api 暴露，支持动态添加
+		health: {
+			check: api.health || (() => { throw new Error('health endpoint not found'); }),
+		},
+		// 可以根据需要添加更多分组，但主要通过 api.* 使用
+	};
+};
+
+// 默认导出配置好的 API 实例
+export default api;
+
+/*
+使用示例：
+
+import api from './api-client';
+
+// 直接使用（推荐，支持新增接口自动生成）
+const result = await api.getSomeEndpoint();
+
+// 配置
+api.setBaseUrl('https://api.example.com');
+api.setAuth('your-token');
+
+// 自定义配置
+api.configure({
+	headers: { 'Custom-Header': 'value' }
 });
 
-// ===================================================================
-// 用户配置API
-// ===================================================================
-
-export const userConfigApi = {
-	/**
-	 * 获取用户详情
-	 */
-	async getDetail(uid: string, token: string): Promise<UserDetailResponse> {
-		return apiClient
-			.get(`config/user/detail/${uid}`, {
-				searchParams: { token },
-			})
-			.json<UserDetailResponse>();
-	},
-
-	/**
-	 * 更新用户配置
-	 */
-	async update(uid: string, config: UserConfig, token: string): Promise<SuccessResponse> {
-		return apiClient.post(`config/user/update/${uid}`, {
-			json: { config },
-			searchParams: { token },
-		}).json<SuccessResponse>();
-	},
-
-	/**
-	 * 删除用户配置
-	 */
-	async delete(uid: string, token: string): Promise<SuccessResponse> {
-		return apiClient.delete(`config/user/delete/${uid}`, {
-			searchParams: { token },
-		}).json<SuccessResponse>();
-	},
-};
-
-// ===================================================================
-// 管理员API
-// ===================================================================
-
-export const adminApi = {
-	/**
-	 * 获取所有用户列表
-	 */
-	async getAllUsers(superToken: string): Promise<UsersListResponse> {
-		return apiClient
-			.get('config/user/all', {
-				searchParams: { superToken },
-			})
-			.json<UsersListResponse>();
-	},
-
-	/**
-	 * 创建新用户
-	 */
-	async createUser(uid: string, config: UserConfig, superToken: string): Promise<SuccessResponse> {
-		return apiClient
-			.post(`config/user/create/${uid}`, {
-				json: { config },
-				searchParams: { superToken },
-			})
-			.json<SuccessResponse>();
-	},
-
-	/**
-	 * 删除用户
-	 */
-	async deleteUser(uid: string, superToken: string): Promise<SuccessResponse> {
-		return apiClient
-			.delete(`config/user/delete/${uid}`, {
-				searchParams: { superToken },
-			})
-			.json<SuccessResponse>();
-	},
-
-	/**
-	 * 获取系统统计数据
-	 */
-	async getStats(superToken: string): Promise<AdminStatsResponse> {
-		return apiClient
-			.get('admin/stats', {
-				searchParams: { superToken },
-			})
-			.json<AdminStatsResponse>();
-	},
-};
-
-// ===================================================================
-// 订阅API
-// ===================================================================
-
-export const subscriptionApi = {
-	/**
-	 * 获取订阅配置
-	 */
-	async getConfig(
-		uid: string, 
-		token: string, 
-		options?: {
-			type?: 'clash' | 'v2ray' | 'ss';
-			udp?: boolean;
-			download?: boolean;
-		}
-	): Promise<string> {
-		return apiClient
-			.get(uid, {
-				searchParams: { 
-					token, 
-					...options 
-				},
-			})
-			.text();
-	},
-};
-
-// ===================================================================
-// 存储API
-// ===================================================================
-
-export const storageApi = {
-	/**
-	 * 存储操作
-	 */
-	async operation(action: string, key?: string, token?: string): Promise<any> {
-		return apiClient
-			.get('storage', {
-				searchParams: { 
-					action, 
-					...(key && { key }), 
-					...(token && { token }) 
-				},
-			})
-			.json();
-	},
-};
-
-// ===================================================================
-// KV存储API
-// ===================================================================
-
-export const kvApi = {
-	/**
-	 * KV存储操作
-	 */
-	async operation(params: Record<string, string>): Promise<any> {
-		return apiClient
-			.get('kv', {
-				searchParams: params,
-			})
-			.json();
-	},
-};
-
-// ===================================================================
-// 健康检查API
-// ===================================================================
-
-export const healthApi = {
-	/**
-	 * 健康检查
-	 */
-	async check(): Promise<{ code: number; msg: string; data: { status: string; timestamp: string } }> {
-		return apiClient
-			.get('health')
-			.json();
-	},
-};
-
-// 导出配置供其他模块使用
-export { config };
-
-// 导出类型定义
-export type * from './api-types';
+*/

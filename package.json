@@ -5,7 +5,6 @@
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
 		"generate:api": "tsx scripts/generate-api-client.ts",
-		"generate:openapi": "tsx scripts/generate-openapi.ts",
 		"watch:api": "tsx scripts/watch-api-changes.ts",
 		"deploy": "yarn deploy:pages",
 		"deploy:pages": "yarn build:frontend && wrangler pages deploy frontend/dist",
@@ -22,6 +21,7 @@
 		"@cloudflare/workers-types": "^4.20250214.0",
 		"@types/node": "^24.0.3",
 		"concurrently": "^9.2.0",
+		"oazapfts": "^6.3.0",
 		"ts-node": "^10.9.1",
 		"tsx": "^4.20.3",
 		"typescript": "^5.5.2",
@@ -30,6 +30,7 @@
 	"dependencies": {
 		"@hono/swagger-ui": "^0.5.2",
 		"@hono/zod-openapi": "^0.19.10",
+		"@oazapfts/runtime": "^1.0.4",
 		"hono": "^4.8.0",
 		"yaml": "^2.7.0",
 		"zod": "^3.25.67"

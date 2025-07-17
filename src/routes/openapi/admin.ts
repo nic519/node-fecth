@@ -147,7 +147,7 @@ export const adminDeleteUserRoute = createRoute({
 // 系统统计
 export const getSystemStatsRoute = createRoute({
 	method: 'get',
-	path: '/api/admin/stats',
+	path: '/admin/stats',
 	summary: '获取系统统计',
 	description: '获取系统的统计信息，包括用户数量、流量等',
 	tags: ['管理员'],
@@ -177,7 +177,7 @@ export const getSystemStatsRoute = createRoute({
 // 刷新用户流量信息
 export const refreshUserTrafficRoute = createRoute({
 	method: 'post',
-	path: '/api/admin/users/{userId}/traffic/refresh',
+	path: '/admin/users/{userId}/traffic/refresh',
 	summary: '刷新用户流量信息',
 	description: '强制刷新指定用户的流量统计信息',
 	tags: ['管理员'],
@@ -218,7 +218,7 @@ export const refreshUserTrafficRoute = createRoute({
 // 获取配置模板列表
 export const getConfigTemplatesRoute = createRoute({
 	method: 'get',
-	path: '/api/admin/templates',
+	path: '/admin/templates',
 	summary: '获取配置模板列表',
 	description: '获取所有可用的配置模板',
 	tags: ['管理员'],
@@ -248,7 +248,7 @@ export const getConfigTemplatesRoute = createRoute({
 // 创建配置模板
 export const createConfigTemplateRoute = createRoute({
 	method: 'post',
-	path: '/api/admin/templates',
+	path: '/admin/templates',
 	summary: '创建配置模板',
 	description: '创建新的配置模板',
 	tags: ['管理员'],
@@ -285,7 +285,7 @@ export const createConfigTemplateRoute = createRoute({
 // 更新配置模板
 export const updateConfigTemplateRoute = createRoute({
 	method: 'put',
-	path: '/api/admin/templates/{templateId}',
+	path: '/admin/templates/{templateId}',
 	summary: '更新配置模板',
 	description: '更新指定的配置模板',
 	tags: ['管理员'],
@@ -333,7 +333,7 @@ export const updateConfigTemplateRoute = createRoute({
 // 删除配置模板
 export const deleteConfigTemplateRoute = createRoute({
 	method: 'delete',
-	path: '/api/admin/templates/{templateId}',
+	path: '/admin/templates/{templateId}',
 	summary: '删除配置模板',
 	description: '删除指定的配置模板',
 	tags: ['管理员'],
@@ -374,7 +374,7 @@ export const deleteConfigTemplateRoute = createRoute({
 // 应用模板到用户
 export const applyTemplateRoute = createRoute({
 	method: 'post',
-	path: '/api/admin/templates/{templateId}/apply',
+	path: '/admin/templates/{templateId}/apply',
 	summary: '应用模板到用户',
 	description: '将指定模板应用到用户配置',
 	tags: ['管理员'],
@@ -431,7 +431,7 @@ export const applyTemplateRoute = createRoute({
 // 获取管理员日志
 export const getAdminLogsRoute = createRoute({
 	method: 'get',
-	path: '/api/admin/logs',
+	path: '/admin/logs',
 	summary: '获取管理员操作日志',
 	description: '获取管理员的操作日志',
 	tags: ['管理员'],

@@ -1,4 +1,47 @@
-import { Router } from '@/routes/routesHandler';
+/**
+ * ===================================================================
+ * 🚀 真正动态的 API 客户端生成器
+ * ===================================================================
+ * 
+ * 本脚本解决了之前硬编码 API 方法的问题，现在完全基于 OpenAPI 规范动态生成：
+ * 
+ * 🎯 **核心优势**
+ * ✅ 完全动态生成 - 基于 OpenAPI 规范自动生成所有 API 方法
+ * ✅ 新增接口自动包含 - 后端添加新接口时，重新生成即可自动包含
+ * ✅ 类型安全 - 所有方法都有完整的 TypeScript 类型
+ * ✅ 零维护成本 - 不需要手动编写或维护任何 API 方法
+ * 
+ * 📋 **生成的文件**
+ * - api-client-raw.ts: oazapfts 生成的原始客户端（完全动态）
+ * - api-client.ts: 包装器，提供便利方法和配置
+ * - openapi.json: OpenAPI 规范文档
+ * 
+ * 🔄 **工作流程**
+ * 1. 从后端 /openapi.json 端点获取最新规范
+ * 2. 如果获取失败，回退到本地生成
+ * 3. 使用 oazapfts 完全动态生成客户端
+ * 4. 生成包装器提供更好的开发体验
+ * 
+ * 💡 **使用示例**
+ * ```typescript
+ * import api from '@/generated/api-client';
+ * 
+ * // 所有方法都是动态生成的，支持新增接口
+ * const health = await api.getHealth();
+ * const userDetail = await api.getConfigUserDetailByUid('uid123', 'token');
+ * 
+ * // 配置
+ * api.setBaseUrl('https://api.example.com');
+ * api.setAuth('your-token');
+ * ```
+ * 
+ * 🆚 **对比之前的问题**
+ * - ❌ 之前：硬编码 API 方法，新增接口需要手动添加
+ * - ✅ 现在：完全动态生成，新增接口自动包含
+ * 
+ * ===================================================================
+ */
+
 import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
@@ -8,19 +51,20 @@ const execAsync = promisify(exec);
 
 /**
  * API客户端生成器
- * 基于OpenAPI规范自动生成前端TypeScript客户端代码
+ * 使用 oazapfts 完全基于 OpenAPI 规范动态生成 TypeScript 客户端
+ * 支持新增接口自动生成，无需手动维护
  */
 class ApiClientGenerator {
 	private outputDir: string;
 	private openApiPath: string;
-	private typesPath: string;
 	private clientPath: string;
+	private apiBaseUrl: string;
 
 	constructor() {
 		this.outputDir = path.join(process.cwd(), 'frontend', 'src', 'generated');
 		this.openApiPath = path.join(this.outputDir, 'openapi.json');
-		this.typesPath = path.join(this.outputDir, 'api-types.ts');
 		this.clientPath = path.join(this.outputDir, 'api-client.ts');
+		this.apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:8787';
 	}
 
 	/**
@@ -29,304 +73,189 @@ class ApiClientGenerator {
 	async generate(): Promise<void> {
 		console.log('🚀 开始生成API客户端...');
 
-		// 1. 生成OpenAPI文档
-		await this.generateOpenApiDoc();
+		// 1. 从 API 端点获取 OpenAPI 文档
+		await this.fetchOpenApiDoc();
 
-		// 2. 生成TypeScript类型定义
-		await this.generateTypes();
+		// 2. 使用 oazapfts 完全动态生成客户端
+		await this.generateWithOazapfts();
 
-		// 3. 生成API客户端代码
-		await this.generateClientCode();
+		// 3. 生成包装器以提供更好的 DX
+		await this.generateClientWrapper();
 
 		console.log('✅ API客户端生成完成!');
 		console.log(`📂 生成的文件:`);
 		console.log(`  - ${this.openApiPath}`);
-		console.log(`  - ${this.typesPath}`);
 		console.log(`  - ${this.clientPath}`);
+		console.log(`  - ${this.clientPath.replace('.ts', '-raw.ts')}`);
 	}
 
 	/**
-	 * 生成OpenAPI文档
+	 * 从 API 端点获取 OpenAPI 文档
 	 */
-	private async generateOpenApiDoc(): Promise<void> {
-		console.log('📄 生成OpenAPI文档...');
+	private async fetchOpenApiDoc(): Promise<void> {
+		console.log('📄 从 API 端点获取 OpenAPI 文档...');
 		
 		// 确保输出目录存在
 		if (!fs.existsSync(this.outputDir)) {
 			fs.mkdirSync(this.outputDir, { recursive: true });
 		}
 
-		// 创建路由器实例并获取OpenAPI文档
-		const router = new Router();
-		const openApiDoc = router.getOpenAPIDocument();
+		try {
+			// 从后端 API 获取 OpenAPI 文档
+			const response = await fetch(`${this.apiBaseUrl}/openapi.json`);
+			
+			if (!response.ok) {
+				throw new Error(`无法获取 OpenAPI 文档: ${response.status} ${response.statusText}`);
+			}
 
-		// 写入OpenAPI文档
-		fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
-		console.log('✅ OpenAPI文档生成成功');
+			const openApiDoc: any = await response.json();
+
+			// 写入 OpenAPI 文档
+			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
+			console.log('✅ OpenAPI 文档获取成功');
+			console.log(`📊 共包含 ${Object.keys(openApiDoc.paths || {}).length} 个路径`);
+		} catch (error) {
+			console.error('❌ 获取 OpenAPI 文档失败:', error);
+			console.log('💡 回退到本地生成方式...');
+			await this.generateOpenApiDocLocally();
+		}
 	}
 
 	/**
-	 * 生成TypeScript类型定义
+	 * 本地生成 OpenAPI 文档（回退方案）
 	 */
-	private async generateTypes(): Promise<void> {
-		console.log('🔧 生成TypeScript类型定义...');
-
+	private async generateOpenApiDocLocally(): Promise<void> {
 		try {
-			// 使用openapi-typescript生成类型定义
-			const { stdout, stderr } = await execAsync(
-				`npx openapi-typescript "${this.openApiPath}" --output "${this.typesPath}"`
-			);
+			// 动态导入 Router（避免构建时问题）
+			const { Router } = await import('@/routes/routesHandler');
+			
+			// 创建路由器实例并获取OpenAPI文档
+			const router = new Router();
+			const openApiDoc = router.getOpenAPIDocument();
 
-			if (stderr) {
-				console.warn('⚠️ 类型生成警告:', stderr);
-			}
-
-			console.log('✅ TypeScript类型定义生成成功');
+			// 写入OpenAPI文档
+			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
+			console.log('✅ OpenAPI 文档本地生成成功');
 		} catch (error) {
-			console.error('❌ 生成TypeScript类型定义失败:', error);
+			console.error('❌ 本地生成 OpenAPI 文档也失败:', error);
 			throw error;
 		}
 	}
 
 	/**
-	 * 生成API客户端代码
+	 * 使用 oazapfts 生成类型化客户端
 	 */
-	private async generateClientCode(): Promise<void> {
-		console.log('🔨 生成API客户端代码...');
+	private async generateWithOazapfts(): Promise<void> {
+		console.log('🔧 使用 oazapfts 生成类型化客户端...');
 
-		const clientCode = this.buildClientCode();
-		fs.writeFileSync(this.clientPath, clientCode, 'utf-8');
-		console.log('✅ API客户端代码生成成功');
+		try {
+			const rawClientPath = this.clientPath.replace('.ts', '-raw.ts');
+			
+			// 使用 oazapfts 生成客户端
+			const { stdout, stderr } = await execAsync(
+				`npx oazapfts "${this.openApiPath}" "${rawClientPath}"`
+			);
+
+			if (stderr) {
+				console.warn('⚠️ oazapfts 生成警告:', stderr);
+			}
+
+			console.log('✅ oazapfts 客户端生成成功');
+		} catch (error) {
+			console.error('❌ oazapfts 生成失败:', error);
+			throw error;
+		}
 	}
 
 	/**
-	 * 构建API客户端代码
+	 * 生成包装器以提供更好的开发体验
 	 */
-	private buildClientCode(): string {
+	private async generateClientWrapper(): Promise<void> {
+		console.log('🎁 生成客户端包装器...');
+
+		const wrapperCode = this.buildWrapperCode();
+		fs.writeFileSync(this.clientPath, wrapperCode, 'utf-8');
+		console.log('✅ 客户端包装器生成成功');
+	}
+
+	/**
+	 * 构建包装器代码
+	 */
+	private buildWrapperCode(): string {
 		return `// ===================================================================
-// 🤖 自动生成的API客户端 - 请勿手动修改
+// 🤖 完全动态生成的API客户端包装器 - 请勿手动修改
 // 生成时间: ${new Date().toISOString()}
-// 基于: OpenAPI 3.1.0 规范
+// 基于: oazapfts (完全动态生成)
 // ===================================================================
 
-import ky from 'ky';
-import type { components } from './api-types';
-import type { 
-	UserDetailResponse, 
-	UsersListResponse, 
-	AdminStatsResponse, 
-	SuccessResponse,
-	UserConfig 
-} from '@/types/user-config';
+// 导入原始生成的客户端
+import * as rawApi from './api-client-raw';
 
-// 类型别名，方便使用
-export type UserSummary = components['schemas']['UserSummarySchema'];
-export type AdminStats = components['schemas']['AdminStatsSchema'];
-export type ConfigResponse = components['schemas']['ConfigResponseSchema'];
-export type ErrorResponse = components['schemas']['ErrorResponseSchema'];
-
-// API配置
-const config = {
-	apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-	isDev: import.meta.env.DEV,
+// 配置默认选项
+const defaultOptions: rawApi.RequestOpts = {
+	// 可以在这里设置全局默认配置
 };
 
-// 创建基础API客户端
-const apiClient = ky.create({
-	prefixUrl: config.apiBaseUrl,
-	timeout: 30000,
-	retry: {
-		limit: 2,
-		methods: ['get'],
+// 重新导出所有生成的API函数和类型
+export * from './api-client-raw';
+
+// 导出默认配置的 API 实例
+export const api = {
+	// 直接使用 rawApi 的所有方法，这样新增的接口会自动出现
+	...rawApi,
+	
+	// 可以在这里添加一些便利方法
+	configure: (options: Partial<rawApi.RequestOpts>) => {
+		Object.assign(rawApi.defaults, options);
 	},
-	hooks: {
-		beforeError: [
-			(error) => {
-				const { response } = error;
-				if (response && response.body) {
-					error.name = 'ApiError';
-					error.message = \`请求失败: \${response.status} \${response.statusText}\`;
-				}
-				return error;
-			},
-		],
+	
+	setBaseUrl: (baseUrl: string) => {
+		rawApi.defaults.basePath = baseUrl;
 	},
+	
+	setAuth: (token: string) => {
+		rawApi.defaults.headers = {
+			...rawApi.defaults.headers,
+			Authorization: \`Bearer \${token}\`,
+		};
+	},
+};
+
+// 导出便利的分组API（可选，但保持动态性）
+export const createApiGroups = () => {
+	// 这里可以通过反射动态创建分组，但为了简单起见，暂时手动维护
+	// 新的接口会通过 rawApi 自动暴露，也可以通过 api.* 访问
+	
+	return {
+		// 所有方法都通过 api 暴露，支持动态添加
+		health: {
+			check: api.health || (() => { throw new Error('health endpoint not found'); }),
+		},
+		// 可以根据需要添加更多分组，但主要通过 api.* 使用
+	};
+};
+
+// 默认导出配置好的 API 实例
+export default api;
+
+/*
+使用示例：
+
+import api from './api-client';
+
+// 直接使用（推荐，支持新增接口自动生成）
+const result = await api.getSomeEndpoint();
+
+// 配置
+api.setBaseUrl('https://api.example.com');
+api.setAuth('your-token');
+
+// 自定义配置
+api.configure({
+	headers: { 'Custom-Header': 'value' }
 });
 
-// ===================================================================
-// 用户配置API
-// ===================================================================
-
-export const userConfigApi = {
-	/**
-	 * 获取用户详情
-	 */
-	async getDetail(uid: string, token: string): Promise<UserDetailResponse> {
-		return apiClient
-			.get(\`config/user/detail/\${uid}\`, {
-				searchParams: { token },
-			})
-			.json<UserDetailResponse>();
-	},
-
-	/**
-	 * 更新用户配置
-	 */
-	async update(uid: string, config: UserConfig, token: string): Promise<SuccessResponse> {
-		return apiClient.post(\`config/user/update/\${uid}\`, {
-			json: { config },
-			searchParams: { token },
-		}).json<SuccessResponse>();
-	},
-
-	/**
-	 * 删除用户配置
-	 */
-	async delete(uid: string, token: string): Promise<SuccessResponse> {
-		return apiClient.delete(\`config/user/delete/\${uid}\`, {
-			searchParams: { token },
-		}).json<SuccessResponse>();
-	},
-};
-
-// ===================================================================
-// 管理员API
-// ===================================================================
-
-export const adminApi = {
-	/**
-	 * 获取所有用户列表
-	 */
-	async getAllUsers(superToken: string): Promise<UsersListResponse> {
-		return apiClient
-			.get('config/user/all', {
-				searchParams: { superToken },
-			})
-			.json<UsersListResponse>();
-	},
-
-	/**
-	 * 创建新用户
-	 */
-	async createUser(uid: string, config: UserConfig, superToken: string): Promise<SuccessResponse> {
-		return apiClient
-			.post(\`config/user/create/\${uid}\`, {
-				json: { config },
-				searchParams: { superToken },
-			})
-			.json<SuccessResponse>();
-	},
-
-	/**
-	 * 删除用户
-	 */
-	async deleteUser(uid: string, superToken: string): Promise<SuccessResponse> {
-		return apiClient
-			.delete(\`config/user/delete/\${uid}\`, {
-				searchParams: { superToken },
-			})
-			.json<SuccessResponse>();
-	},
-
-	/**
-	 * 获取系统统计数据
-	 */
-	async getStats(superToken: string): Promise<AdminStatsResponse> {
-		return apiClient
-			.get('admin/stats', {
-				searchParams: { superToken },
-			})
-			.json<AdminStatsResponse>();
-	},
-};
-
-// ===================================================================
-// 订阅API
-// ===================================================================
-
-export const subscriptionApi = {
-	/**
-	 * 获取订阅配置
-	 */
-	async getConfig(
-		uid: string, 
-		token: string, 
-		options?: {
-			type?: 'clash' | 'v2ray' | 'ss';
-			udp?: boolean;
-			download?: boolean;
-		}
-	): Promise<string> {
-		return apiClient
-			.get(uid, {
-				searchParams: { 
-					token, 
-					...options 
-				},
-			})
-			.text();
-	},
-};
-
-// ===================================================================
-// 存储API
-// ===================================================================
-
-export const storageApi = {
-	/**
-	 * 存储操作
-	 */
-	async operation(action: string, key?: string, token?: string): Promise<any> {
-		return apiClient
-			.get('storage', {
-				searchParams: { 
-					action, 
-					...(key && { key }), 
-					...(token && { token }) 
-				},
-			})
-			.json();
-	},
-};
-
-// ===================================================================
-// KV存储API
-// ===================================================================
-
-export const kvApi = {
-	/**
-	 * KV存储操作
-	 */
-	async operation(params: Record<string, string>): Promise<any> {
-		return apiClient
-			.get('kv', {
-				searchParams: params,
-			})
-			.json();
-	},
-};
-
-// ===================================================================
-// 健康检查API
-// ===================================================================
-
-export const healthApi = {
-	/**
-	 * 健康检查
-	 */
-	async check(): Promise<{ code: number; msg: string; data: { status: string; timestamp: string } }> {
-		return apiClient
-			.get('health')
-			.json();
-	},
-};
-
-// 导出配置供其他模块使用
-export { config };
-
-// 导出类型定义
-export type * from './api-types';
-`;
+*/`;
 	}
 }
 

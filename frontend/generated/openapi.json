@@ -3,7 +3,7 @@
   "info": {
     "title": "Node-Fetch API",
     "version": "1.0.0",
-    "description": "订阅管理和用户配置 API - 自动生成文档\n\n## 功能特性\n- �� 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-17T16:12:09.808Z\n\n## 已注册模块\n- Health\n- User\n- Admin\n- Storage\n- Subscription"
+    "description": "订阅管理和用户配置 API - 自动生成文档\n\n## 功能特性\n- �� 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-17T17:16:46.056Z\n\n## 已注册模块\n- Health\n- User\n- Admin\n- Storage\n- Subscription"
   },
   "servers": [
     {
@@ -105,76 +105,84 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "subscribe": {
-                    "type": "string",
-                    "format": "uri"
-                  },
-                  "accessToken": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "ruleUrl": {
-                    "type": "string",
-                    "format": "uri"
-                  },
-                  "fileName": {
-                    "type": "string"
-                  },
-                  "multiPortMode": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": [
-                        "TW",
-                        "SG",
-                        "JP",
-                        "VN",
-                        "HK",
-                        "US"
-                      ]
-                    }
-                  },
-                  "appendSubList": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "subscribe": {
+                  "config": {
+                    "type": "object",
+                    "properties": {
+                      "subscribe": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "accessToken": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "ruleUrl": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "multiPortMode": {
+                        "type": "array",
+                        "items": {
                           "type": "string",
-                          "format": "uri"
-                        },
-                        "flag": {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "includeArea": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "enum": [
-                              "TW",
-                              "SG",
-                              "JP",
-                              "VN",
-                              "HK",
-                              "US"
-                            ]
-                          }
+                          "enum": [
+                            "TW",
+                            "SG",
+                            "JP",
+                            "VN",
+                            "HK",
+                            "US"
+                          ]
                         }
                       },
-                      "required": [
-                        "subscribe",
-                        "flag"
-                      ]
-                    }
-                  },
-                  "excludeRegex": {
-                    "type": "string"
+                      "appendSubList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "subscribe": {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            "flag": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "includeArea": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "TW",
+                                  "SG",
+                                  "JP",
+                                  "VN",
+                                  "HK",
+                                  "US"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscribe",
+                            "flag"
+                          ]
+                        }
+                      },
+                      "excludeRegex": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "subscribe",
+                      "accessToken"
+                    ]
                   }
                 },
                 "required": [
-                  "subscribe",
-                  "accessToken"
+                  "config"
                 ]
               }
             }

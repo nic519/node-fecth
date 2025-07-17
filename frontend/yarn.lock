@@ -1926,6 +1926,7 @@ __metadata:
     js-yaml: ^4.1.0
     ky: ^1.2.3
     openapi-typescript: ^7.8.0
+    openapi-typescript-fetch: ^2.2.1
     postcss: ^8.4.32
     preact: ^10.19.3
     preact-router: ^4.1.2
@@ -2018,6 +2019,13 @@ __metadata:
   version: 3.0.0
   resolution: "object-hash@npm:3.0.0"
   checksum: 80b4904bb3857c52cc1bfd0b52c0352532ca12ed3b8a6ff06a90cd209dfda1b95cee059a7625eb9da29537027f68ac4619363491eedb2f5d3dddbba97494fd6c
+  languageName: node
+  linkType: hard
+
+"openapi-typescript-fetch@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "openapi-typescript-fetch@npm:2.2.1"
+  checksum: e52d558aaa0a39779f4c7aa80800d4009dc45edace5dacb0c7e630d99bb934a91e7287ae3c31b7ec4c7eb68884b2057bf1b31ca537e99163594dbf3231bd10b1
   languageName: node
   linkType: hard
 
