@@ -116,7 +116,7 @@ export class UserConfigHandler implements RouteHandler {
 				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
 			}
 
-			return ResponseUtils.jsonSuccess(c, {
+			return ResponseUtils.success({
 				config: authResult.data.config,
 				meta: authResult.data.meta,
 			}, '获取用户配置成功');
@@ -153,11 +153,11 @@ export class UserConfigHandler implements RouteHandler {
 				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 			}
 
-			return ResponseUtils.jsonSuccess(c, {
-				message: 'User config saved successfully',
+			return ResponseUtils.success({
+				message: '用户配置保存成功',
 				uid,
 				timestamp: new Date().toISOString(),
-			}, '用户配置保存成功');
+			});
 		} catch (error) {
 			console.error(`❌ 更新用户配置失败: ${uid}`, error);
 			console.error(`❌ 错误堆栈:`, error instanceof Error ? error.stack : error);
@@ -235,8 +235,8 @@ export class UserConfigHandler implements RouteHandler {
 				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '删除用户配置失败');
 			}
 
-			return ResponseUtils.jsonSuccess(c, {
-				message: 'User config deleted successfully',
+			return ResponseUtils.success({
+				message: '用户配置删除成功',
 				uid,
 				timestamp: new Date().toISOString(),
 			}, '用户配置删除成功');
@@ -261,7 +261,7 @@ export class UserConfigHandler implements RouteHandler {
 			const userManager = new UserManager(c.env);
 			const userList = await userManager.getAllUsers();
 
-			return ResponseUtils.jsonSuccess(c, {
+			return ResponseUtils.success({
 				users: userList,
 				count: userList.length,
 				timestamp: new Date().toISOString(),

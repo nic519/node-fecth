@@ -1,20 +1,23 @@
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { ResponseCodes, BaseResponseSchema, SuccessResponseSchema, ErrorResponseSchema } from '@/types/openapi-schemas';
 
 /**
  * 统一响应工具类
  * 所有API响应都使用 {code, data, msg} 格式
+ * 基于 openapi-schemas.ts 中定义的Schema，遵循单一数据源原则
  */
 export class ResponseUtils {
 	/**
 	 * 创建成功响应
 	 */
 	static success<T = any>(data?: T, msg = '操作成功'): Response {
+		const responseData = {
+			code: ResponseCodes.SUCCESS,
+			msg,
+			data,
+		};
+
 		return new Response(
-			JSON.stringify({
-				code: ResponseCodes.SUCCESS,
-				msg,
-				data,
-			}),
+			JSON.stringify(responseData),
 			{
 				status: 200,
 				headers: {
@@ -30,15 +33,18 @@ export class ResponseUtils {
 	/**
 	 * 创建错误响应
 	 */
-	static error(code: number, msg: string, data?: any): Response {
+	static error(code: number, msg: string, data: any = null): Response {
+		const responseData = {
+			code,
+			msg,
+			data,
+		};
+
+		const statusCode = code >= 400 ? code : 500;
 		return new Response(
-			JSON.stringify({
-				code,
-				msg,
-				data,
-			}),
+			JSON.stringify(responseData),
 			{
-				status: code >= 500 ? 500 : code,
+				status: statusCode,
 				headers: {
 					'Content-Type': 'application/json',
 					'Access-Control-Allow-Origin': '*',
@@ -50,72 +56,57 @@ export class ResponseUtils {
 	}
 
 	/**
-	 * 创建JSON响应 (for Hono Context)
+	 * 通用JSON响应创建器
 	 */
-	static json<T = any>(c: any, data?: T, msg = '操作成功', code: number = ResponseCodes.SUCCESS, httpStatus?: number): Response {
-		return c.json(
-			{
-				code,
-				msg,
-				data,
-			},
-			httpStatus || (code === ResponseCodes.SUCCESS ? 200 : code >= 500 ? 500 : code)
-		);
+	static json<T = any>(
+		c: any,
+		data: T,
+		msg: string,
+		code: number = ResponseCodes.SUCCESS,
+		statusCode: number = 200
+	): Response {
+		const responseData = {
+			code,
+			msg,
+			data,
+		};
+
+		return c.json(responseData, statusCode);
 	}
 
 	/**
-	 * 快捷方法：无效参数
+	 * 错误响应快捷方法
 	 */
-	static invalidParams(msg = '请求参数错误', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, msg, data);
+	static jsonError(c: any, code: number, msg: string, data: any = null): Response {
+		return this.json(c, data, msg, code, code >= 400 ? code : 500);
 	}
 
 	/**
-	 * 快捷方法：未授权
+	 * 验证响应是否符合标准格式
+	 * 使用 openapi-schemas.ts 中定义的 BaseResponseSchema
 	 */
-	static unauthorized(msg = '未授权访问', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.UNAUTHORIZED, msg, data);
+	static validateResponse(response: any): boolean {
+		try {
+			BaseResponseSchema.parse(response);
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
 	/**
-	 * 快捷方法：禁止访问
+	 * 类型守卫：检查是否为成功响应
+	 * 基于 openapi-schemas.ts 中的 SuccessResponseSchema
 	 */
-	static forbidden(msg = '禁止访问', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.FORBIDDEN, msg, data);
+	static isSuccessResponse(response: any): response is { code: 0; msg: string; data: any } {
+		return SuccessResponseSchema.safeParse(response).success;
 	}
 
 	/**
-	 * 快捷方法：未找到
+	 * 类型守卫：检查是否为错误响应  
+	 * 基于 openapi-schemas.ts 中的 ErrorResponseSchema
 	 */
-	static notFound(msg = '资源未找到', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.NOT_FOUND, msg, data);
-	}
-
-	/**
-	 * 快捷方法：冲突
-	 */
-	static conflict(msg = '资源冲突', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.CONFLICT, msg, data);
-	}
-
-	/**
-	 * 快捷方法：服务器内部错误
-	 */
-	static internalError(msg = '服务器内部错误', data?: any): Response {
-		return ResponseUtils.error(ResponseCodes.INTERNAL_ERROR, msg, data);
-	}
-
-	/**
-	 * Hono Context 快捷方法：成功响应
-	 */
-	static jsonSuccess<T = any>(c: any, data?: T, msg = '操作成功'): Response {
-		return ResponseUtils.json(c, data, msg, ResponseCodes.SUCCESS);
-	}
-
-	/**
-	 * Hono Context 快捷方法：错误响应
-	 */
-	static jsonError(c: any, code: number, msg: string, data?: any): Response {
-		return ResponseUtils.json(c, data, msg, code);
+	static isErrorResponse(response: any): response is { code: number; msg: string; data: any } {
+		return ErrorResponseSchema.safeParse(response).success;
 	}
 } 

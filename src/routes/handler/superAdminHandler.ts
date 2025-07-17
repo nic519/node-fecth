@@ -1,7 +1,8 @@
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { ConfigTemplate } from '@/module/userManager/types/supper-admin.types';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig, ResponseCodes } from '@/types/openapi-schemas';
 import { RouteHandler } from '@/types/routes.types';
+import { ResponseUtils } from '@/utils/responseUtils';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
@@ -41,8 +42,9 @@ export class SuperAdminHandler implements RouteHandler {
 			if (!authResult.success) {
 				return c.json(
 					{
-						success: false,
-						error: authResult.message,
+						code: ResponseCodes.UNAUTHORIZED,
+						msg: authResult.message,
+						data: null,
 					},
 					401
 				);
@@ -153,7 +155,7 @@ export class SuperAdminHandler implements RouteHandler {
 			const adminManager = new SuperAdminManager(c.env);
 			const stats = await adminManager.getSystemStats();
 			return c.json({
-				code: 0,
+				code: ResponseCodes.SUCCESS,
 				msg: '获取系统统计成功',
 				data: stats,
 			});
@@ -161,7 +163,7 @@ export class SuperAdminHandler implements RouteHandler {
 			console.error('获取系统统计失败:', error);
 			return c.json(
 				{
-					code: 500,
+					code: ResponseCodes.INTERNAL_ERROR,
 					msg: '获取系统统计失败',
 					data: null,
 				},
@@ -180,7 +182,7 @@ export class SuperAdminHandler implements RouteHandler {
 			
 			// 符合 UsersListResponseSchema 的响应格式
 			return c.json({
-				code: 0,
+				code: ResponseCodes.SUCCESS,
 				msg: '获取用户列表成功',
 				data: {
 					users,
@@ -192,7 +194,7 @@ export class SuperAdminHandler implements RouteHandler {
 			console.error('获取用户列表失败:', error);
 			return c.json(
 				{
-					code: 500,
+					code: ResponseCodes.INTERNAL_ERROR,
 					msg: '获取用户列表失败',
 					data: null,
 				},
@@ -211,7 +213,7 @@ export class SuperAdminHandler implements RouteHandler {
 
 			await adminManager.deleteUser(uid, adminId);
 			return c.json({
-				code: 0,
+				code: ResponseCodes.SUCCESS,
 				msg: '用户删除成功',
 				data: {
 					message: '用户删除成功',
@@ -222,7 +224,7 @@ export class SuperAdminHandler implements RouteHandler {
 			console.error('删除用户失败:', error);
 			return c.json(
 				{
-					code: 500,
+					code: ResponseCodes.INTERNAL_ERROR,
 					msg: '删除用户失败',
 					data: null,
 				},
@@ -243,20 +245,20 @@ export class SuperAdminHandler implements RouteHandler {
 			await adminManager.createUser(body.uid, body.config, adminId);
 
 			return c.json({
-				code: 0,
+				code: ResponseCodes.SUCCESS,
 				msg: '用户创建成功',
 				data: {
 					message: '用户创建成功',
 					uid: body.uid,
 				},
-			});
+			}, 201); // 创建成功使用201状态码
 		} catch (error) {
 			console.error('创建用户失败:', error);
 			const errorMessage = error instanceof Error ? error.message : '创建用户失败';
 			return c.json(
 				{
-					code: 500,
-					msg: '创建用户失败',
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: errorMessage,
 					data: null,
 				},
 				500
@@ -274,7 +276,8 @@ export class SuperAdminHandler implements RouteHandler {
 			const trafficInfo = await adminManager.refreshUserTrafficInfo(uid, adminId);
 
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '流量信息刷新成功',
 				data: {
 					message: '流量信息刷新成功',
 					uid,
@@ -286,8 +289,9 @@ export class SuperAdminHandler implements RouteHandler {
 			const errorMessage = error instanceof Error ? error.message : '刷新流量信息失败';
 			return c.json(
 				{
-					success: false,
-					error: errorMessage,
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: errorMessage,
+					data: null,
 				},
 				500
 			);
@@ -302,15 +306,17 @@ export class SuperAdminHandler implements RouteHandler {
 			const adminManager = new SuperAdminManager(c.env);
 			const templates = await adminManager.getConfigTemplates();
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '获取配置模板成功',
 				data: { templates },
 			});
 		} catch (error) {
 			console.error('获取配置模板失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to get config templates',
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: '获取配置模板失败',
+					data: null,
 				},
 				500
 			);
@@ -327,7 +333,8 @@ export class SuperAdminHandler implements RouteHandler {
 			const template = await adminManager.createConfigTemplate(body);
 
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '配置模板创建成功',
 				data: {
 					message: '配置模板创建成功',
 					template,
@@ -337,8 +344,9 @@ export class SuperAdminHandler implements RouteHandler {
 			console.error('创建配置模板失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to create config template',
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: '创建配置模板失败',
+					data: null,
 				},
 				500
 			);
@@ -352,8 +360,9 @@ export class SuperAdminHandler implements RouteHandler {
 		// 简化实现 - 实际需要实现模板更新逻辑
 		return c.json(
 			{
-				success: false,
-				error: 'Template update not implemented yet',
+				code: ResponseCodes.INTERNAL_ERROR,
+				msg: '模板更新功能尚未实现',
+				data: null,
 			},
 			501
 		);
@@ -366,8 +375,9 @@ export class SuperAdminHandler implements RouteHandler {
 		// 简化实现 - 实际需要实现模板删除逻辑
 		return c.json(
 			{
-				success: false,
-				error: 'Template deletion not implemented yet',
+				code: ResponseCodes.INTERNAL_ERROR,
+				msg: '模板删除功能尚未实现',
+				data: null,
 			},
 			501
 		);
@@ -385,7 +395,8 @@ export class SuperAdminHandler implements RouteHandler {
 			await adminManager.applyTemplateToUser(templateId, body.uid, adminId);
 
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '模板应用成功',
 				data: {
 					message: '模板应用成功',
 					templateId,
@@ -397,8 +408,9 @@ export class SuperAdminHandler implements RouteHandler {
 			const errorMessage = error instanceof Error ? error.message : '应用模板失败';
 			return c.json(
 				{
-					success: false,
-					error: errorMessage,
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: errorMessage,
+					data: null,
 				},
 				500
 			);
@@ -417,15 +429,17 @@ export class SuperAdminHandler implements RouteHandler {
 			const logs = await adminManager.getAdminLogs(date, limit);
 
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '获取操作日志成功',
 				data: { logs },
 			});
 		} catch (error) {
 			console.error('获取操作日志失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to get admin logs',
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: '获取操作日志失败',
+					data: null,
 				},
 				500
 			);
@@ -450,15 +464,17 @@ export class SuperAdminHandler implements RouteHandler {
 			};
 
 			return c.json({
-				success: true,
+				code: ResponseCodes.SUCCESS,
+				msg: '系统健康状态正常',
 				data: health,
 			});
 		} catch (error) {
 			console.error('获取健康状态失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to get health status',
+					code: ResponseCodes.INTERNAL_ERROR,
+					msg: '获取健康状态失败',
+					data: null,
 				},
 				500
 			);

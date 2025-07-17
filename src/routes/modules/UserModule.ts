@@ -47,10 +47,10 @@ export class UserModule extends BaseRouteModule {
 					return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 				}
 
-				return ResponseUtils.jsonSuccess(c, {
-					message: 'User config saved successfully',
+				return ResponseUtils.success({
 					uid,
 					timestamp: new Date().toISOString(),
+					message: '用户配置保存成功',
 				}, '用户配置保存成功');
 			} catch (error) {
 				console.error(`❌ UserModule 错误:`, error);

@@ -2,6 +2,7 @@ import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { responseValidatorMiddleware } from './responseValidator';
 
 export class MiddlewareManager {
 	/**
@@ -26,6 +27,12 @@ export class MiddlewareManager {
 				allowHeaders: ['Content-Type', 'Authorization'],
 			})
 		);
+
+		// 响应格式验证中间件（仅开发环境）
+		if (process.env.NODE_ENV === 'development') {
+			app.use('*', responseValidatorMiddleware());
+			console.log('🔍 已启用响应格式验证中间件（开发环境）');
+		}
 
 		// 静态资源忽略中间件
 		app.use('*', async (c, next) => {
