@@ -23,7 +23,8 @@ export class AdminModule extends BaseRouteModule {
 				await superAdminManager.deleteUser(uid, adminId);
 				
 				return c.json({
-					success: true,
+					code: ResponseCodes.SUCCESS,
+					msg: '用户删除成功',
 					data: {
 						message: '用户删除成功',
 						uid: uid,
@@ -47,7 +48,8 @@ export class AdminModule extends BaseRouteModule {
 				await superAdminManager.createUser(body.uid, body.config, adminId);
 
 				return c.json({
-					success: true,
+					code: ResponseCodes.SUCCESS,
+					msg: '用户创建成功',
 					data: {
 						message: '用户创建成功',
 						uid: body.uid,
@@ -55,7 +57,7 @@ export class AdminModule extends BaseRouteModule {
 				});
 			} catch (error) {
 				const errorResponse = this.handleError(error, '创建用户');
-				return c.json(errorResponse, 400) as any;
+				return c.json(errorResponse, 500) as any;
 			}
 		});
 

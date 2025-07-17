@@ -153,15 +153,17 @@ export class SuperAdminHandler implements RouteHandler {
 			const adminManager = new SuperAdminManager(c.env);
 			const stats = await adminManager.getSystemStats();
 			return c.json({
-				success: true,
+				code: 0,
+				msg: '获取系统统计成功',
 				data: stats,
 			});
 		} catch (error) {
 			console.error('获取系统统计失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to get system stats',
+					code: 500,
+					msg: '获取系统统计失败',
+					data: null,
 				},
 				500
 			);
@@ -209,7 +211,8 @@ export class SuperAdminHandler implements RouteHandler {
 
 			await adminManager.deleteUser(uid, adminId);
 			return c.json({
-				success: true,
+				code: 0,
+				msg: '用户删除成功',
 				data: {
 					message: '用户删除成功',
 					uid,
@@ -219,8 +222,9 @@ export class SuperAdminHandler implements RouteHandler {
 			console.error('删除用户失败:', error);
 			return c.json(
 				{
-					success: false,
-					error: 'Failed to delete user',
+					code: 500,
+					msg: '删除用户失败',
+					data: null,
 				},
 				500
 			);
@@ -239,7 +243,8 @@ export class SuperAdminHandler implements RouteHandler {
 			await adminManager.createUser(body.uid, body.config, adminId);
 
 			return c.json({
-				success: true,
+				code: 0,
+				msg: '用户创建成功',
 				data: {
 					message: '用户创建成功',
 					uid: body.uid,
@@ -250,8 +255,9 @@ export class SuperAdminHandler implements RouteHandler {
 			const errorMessage = error instanceof Error ? error.message : '创建用户失败';
 			return c.json(
 				{
-					success: false,
-					error: errorMessage,
+					code: 500,
+					msg: '创建用户失败',
+					data: null,
 				},
 				500
 			);
