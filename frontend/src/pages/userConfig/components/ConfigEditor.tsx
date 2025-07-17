@@ -1,3 +1,4 @@
+import { JSX } from 'preact';
 import { ValidationMessage } from './ValidationMessage';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
 
@@ -20,6 +21,26 @@ export function ConfigEditor({
 	onConfigContentChange,
 	onToggleHelp,
 }: ConfigEditorProps) {
+	const handleKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Tab') {
+			e.preventDefault();
+			const textarea = e.target as HTMLTextAreaElement;
+			const start = textarea.selectionStart;
+			const end = textarea.selectionEnd;
+			
+			// 插入2个空格（YAML标准缩进）
+			const indent = '  ';
+			const newValue = configContent.substring(0, start) + indent + configContent.substring(end);
+			
+			onConfigContentChange(newValue);
+			
+			// 设置光标位置
+			setTimeout(() => {
+				textarea.selectionStart = textarea.selectionEnd = start + indent.length;
+			}, 0);
+		}
+	};
+
 	return (
 		<div className="bg-white shadow rounded-lg w-full flex flex-col">
 			<div className="px-4 py-5 sm:p-6 flex-1 flex flex-col min-h-0">
@@ -58,6 +79,7 @@ export function ConfigEditor({
 					<textarea
 						value={configContent}
 						onChange={(e) => onConfigContentChange((e.target as HTMLTextAreaElement).value)}
+						onKeyDown={handleKeyDown}
 						className="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono resize-none min-h-[300px] px-1 py-2"
 						placeholder="YAML 配置将在这里显示..."
 						spellcheck={false}
