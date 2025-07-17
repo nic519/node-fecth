@@ -1,7 +1,7 @@
 import { AdminDashboard } from '@/pages/admin/Dashboard';
 import { AdminMonitor } from '@/pages/admin/Monitor';
 import { AdminTemplates } from '@/pages/admin/Templates';
-import { AdminUsers } from '@/pages/admin/Users';
+import { AdminUsers } from '@/pages/admin/allUsers/Users';
 import { NotFound } from '@/pages/NotFound';
 import { UserConfigPage } from '@/pages/userConfig/UserConfigPage';
 import { Route, Router } from 'preact-router';
