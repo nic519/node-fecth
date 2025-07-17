@@ -1,143 +1,136 @@
-# API客户端迁移指南
+# 🚀 API 客户端迁移指南
 
-## 🎯 概述
+## 重大变更
+从硬编码API客户端迁移到**完全动态生成**的客户端。新的客户端基于 OpenAPI 规范自动生成所有方法，支持新增接口自动包含。
 
-本指南帮助您从手写的 `@/api/client.ts` 迁移到自动生成的 `@/generated/api-client.ts`。
+## 🎯 核心优势
+- ✅ **完全动态** - 基于 OpenAPI 规范自动生成所有 API 方法
+- ✅ **新增接口自动包含** - 后端添加新接口时自动生成，无需手动维护
+- ✅ **类型安全** - 所有方法都有完整的 TypeScript 类型
+- ✅ **零维护成本** - 不需要手动编写或维护任何 API 方法
 
-## 📋 主要变化
+## 🔄 API 方法映射
 
-### 路径更新
-| 功能 | 原路径 | 新路径 | 说明 |
-|------|--------|--------|------|
-| 获取用户配置 | `config/users/${uid}` | `config/user/detail/${uid}` | 标准化路径 |
-| 更新用户配置 | `config/users/${uid}` | `config/user/update/${uid}` | 分离读写操作 |
-| 管理员获取用户 | `admin/users` | `admin/user/all` | 标准化路径 |
-| 管理员创建用户 | `create/user` | `admin/user/create` | 统一管理员前缀 |
+### 原来的分组API → 新的动态生成方法
 
-### API方法变化
+| 旧方法 | 新方法 | 说明 |
+|--------|--------|------|
+| `userConfigApi.update(uid, config, token)` | `postConfigUserUpdateByUid(uid, token, { config })` | 参数顺序调整 |
+| `userConfigApi.getDetail(uid, token)` | `getConfigUserDetailByUid(uid, token)` | 方法名更明确 |
+| `adminApi.getAllUsers(superToken)` | `getAdminUserAll(superToken)` | 直接映射 |
+| `adminApi.createUser(body)` | `postAdminUserCreate(body)` | 直接映射 |
+| `adminApi.deleteUser(uid, superToken)` | `getAdminUserDeleteByUid(uid, superToken)` | 方法名更明确 |
+| `healthApi.check()` | `getHealth()` | 简化名称 |
+| `storageApi.operation(params)` | `getStorage(params)` | 直接映射 |
+| `kvApi.operation(params)` | `getKv(params)` | 参数结构调整 |
+| `subscriptionApi.getConfig(uid, token, options)` | `getUid(uid, token, options)` | 参数结构调整 |
 
-#### userConfigApi
+## 📝 响应格式变更
+
+### 旧格式（包装过的）
 ```typescript
-// 原方法
-userConfigApi.get(uid, token)           // ❌ 已移除
-userConfigApi.update(uid, config, token) // ✅ 保持不变
-userConfigApi.delete(uid, token)        // ✅ 保持不变
-
-// 新方法
-userConfigApi.getDetail(uid, token)     // ✅ 新增，替代 get
+const response = await userConfigApi.getDetail(uid, token);
+// response 直接是数据: { code: 0, msg: string, data: {...} }
+if (response.code === 0) {
+  // 使用 response.data
+}
 ```
 
-#### adminApi
+### 新格式（oazapfts 原生）
 ```typescript
-// 原方法
-adminApi.getUsers(superToken)                    // ❌ 已重命名
-adminApi.getUserDetail(uid, superToken)          // ❌ 已移除 
-adminApi.updateUser(uid, config, superToken)     // ❌ 已移除
-adminApi.createUser(uid, config, superToken)     // ✅ 保持不变
-adminApi.deleteUser(uid, superToken)             // ✅ 保持不变
-adminApi.getStats(superToken)                    // ✅ 保持不变
-adminApi.refreshUserTraffic(uid, superToken)     // ❌ 已移除
-
-// 新方法
-adminApi.getAllUsers(superToken)                 // ✅ 新增，替代 getUsers
+const response = await getConfigUserDetailByUid(uid, token);
+// response 是包装格式: { status: 200, data: { code: 0, msg: string, data: {...} } }
+if (response.status === 200) {
+  // 使用 response.data 获取实际数据
+  const actualData = response.data; // { code: 0, msg: string, data: {...} }
+}
 ```
 
-## 🔄 迁移步骤
+## 🛠️ 配置方法
 
-### 1. 更新导入语句
+### 设置基础URL
 ```typescript
-// 原导入
-import { userConfigApi, adminApi } from '@/api/client';
+import { defaults } from '@/generated/api-client';
+defaults.baseUrl = 'https://api.example.com';
+```
 
-// 新导入
+### 设置认证
+```typescript
+import { defaults } from '@/generated/api-client';
+defaults.headers.Authorization = 'Bearer your-token';
+```
+
+### 全局配置
+```typescript
+import { defaults } from '@/generated/api-client';
+Object.assign(defaults, {
+  baseUrl: 'https://api.example.com',
+  headers: {
+    Authorization: 'Bearer your-token',
+    'Custom-Header': 'value'
+  }
+});
+```
+
+## 📋 迁移步骤
+
+### 1. 更新导入
+```typescript
+// 旧方式
 import { userConfigApi, adminApi } from '@/generated/api-client';
+
+// 新方式
+import { 
+  getConfigUserDetailByUid, 
+  postConfigUserUpdateByUid,
+  getAdminUserAll,
+  defaults 
+} from '@/generated/api-client';
 ```
 
 ### 2. 更新方法调用
-
-#### 获取用户配置
 ```typescript
-// 原代码
-const config = await userConfigApi.get(uid, token);
+// 旧方式
+const response = await userConfigApi.getDetail(uid, token);
 
-// 新代码
-const config = await userConfigApi.getDetail(uid, token);
+// 新方式  
+const response = await getConfigUserDetailByUid(uid, token);
 ```
 
-#### 获取用户列表
+### 3. 更新响应处理
 ```typescript
-// 原代码
-const users = await adminApi.getUsers(superToken);
+// 旧方式
+if (response.code === 0) {
+  setUsers(response.data.users);
+}
 
-// 新代码
-const users = await adminApi.getAllUsers(superToken);
+// 新方式
+if (response.status === 200) {
+  const { code, data } = response.data;
+  if (code === 0) {
+    setUsers(data.users);
+  }
+}
 ```
 
-## 🛠️ 兼容性层
+## 🎉 迁移完成后的优势
 
-如果需要渐进式迁移，可以创建一个兼容性层：
+1. **自动同步** - 后端新增接口时，重新运行 `yarn generate:api` 即可自动包含
+2. **类型安全** - 所有API调用都有完整的TypeScript类型检查
+3. **方法发现** - IDE可以自动提示所有可用的API方法
+4. **零维护** - 不需要手动维护任何API客户端代码
 
-```typescript
-// compatibility-layer.ts
-import { 
-  userConfigApi as generatedUserApi, 
-  adminApi as generatedAdminApi 
-} from '@/generated/api-client';
+## 🔍 查看可用方法
 
-export const userConfigApi = {
-  // 保持向后兼容
-  get: generatedUserApi.getDetail,
-  getDetail: generatedUserApi.getDetail,
-  update: generatedUserApi.update,
-  delete: generatedUserApi.delete,
-};
+生成的API客户端包含以下动态生成的方法：
+- `getHealth()` - 健康检查
+- `postConfigUserUpdateByUid()` - 更新用户配置
+- `getConfigUserDetailByUid()` - 获取用户详情
+- `getAdminUserDeleteByUid()` - 删除用户（管理员）
+- `postAdminUserCreate()` - 创建用户（管理员）
+- `getAdminUserAll()` - 获取所有用户（管理员）
+- `getStorage()` - 存储操作
+- `getKv()` - KV存储操作
+- `getUid()` - 获取订阅配置
 
-export const adminApi = {
-  // 保持向后兼容
-  getUsers: generatedAdminApi.getAllUsers,
-  getAllUsers: generatedAdminApi.getAllUsers,
-  createUser: generatedAdminApi.createUser,
-  deleteUser: generatedAdminApi.deleteUser,
-  getStats: generatedAdminApi.getStats,
-  
-  // 不再支持的方法，返回错误提示
-  getUserDetail: () => {
-    throw new Error('getUserDetail 已废弃，请使用 userConfigApi.getDetail');
-  },
-  updateUser: () => {
-    throw new Error('updateUser 已废弃，请使用 userConfigApi.update');
-  },
-  refreshUserTraffic: () => {
-    throw new Error('refreshUserTraffic 暂不支持，等待后端实现');
-  },
-};
-```
-
-## ✅ 验证清单
-
-迁移完成后，请检查：
-
-- [ ] 所有导入语句已更新
-- [ ] `userConfigApi.get` 已替换为 `userConfigApi.getDetail`  
-- [ ] `adminApi.getUsers` 已替换为 `adminApi.getAllUsers`
-- [ ] 移除了对 `adminApi.getUserDetail` 的调用
-- [ ] 移除了对 `adminApi.updateUser` 的调用
-- [ ] 移除了对 `adminApi.refreshUserTraffic` 的调用
-- [ ] 类型定义正常工作
-- [ ] 所有API调用正常响应
-
-## 🚀 优势
-
-迁移到自动生成的客户端后，您将获得：
-
-1. **类型安全**: 基于OpenAPI规范的完整类型定义
-2. **自动同步**: 后端API变化时自动更新客户端
-3. **标准化**: 统一的API路径和命名规范
-4. **维护性**: 减少手动维护API客户端的工作
-5. **文档化**: 自动生成的API文档
-
-## 📚 相关文档
-
-- [OpenAPI规范文档](../../src/routes/openapi/)
-- [后端路由模块](../../src/routes/modules/)
-- [类型定义](./api-types.ts) 
+> 💡 **提示**: 当后端添加新的API接口时，这个列表会自动更新！ 

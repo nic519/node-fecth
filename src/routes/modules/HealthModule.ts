@@ -1,6 +1,7 @@
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { healthRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 /**
  * 健康检查路由模块
@@ -13,9 +14,12 @@ export class HealthModule extends BaseRouteModule {
 		app.openapi(healthRoute, (c) => {
 			console.log(`✅ ${this.moduleName}: 健康检查请求`);
 			return c.json({
-				status: 'ok',
-				timestamp: new Date().toISOString(),
-				module: this.moduleName,
+				code: ResponseCodes.SUCCESS,
+				msg: '服务正常',
+				data: {
+					status: 'ok',
+					timestamp: new Date().toISOString(),
+				},
 			});
 		});
 	}

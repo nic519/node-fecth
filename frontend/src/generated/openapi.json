@@ -3,7 +3,7 @@
   "info": {
     "title": "Node-Fetch API",
     "version": "1.0.0",
-    "description": "订阅管理和用户配置 API - 自动生成文档\n\n## 功能特性\n- �� 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-17T17:27:13.642Z\n\n## 已注册模块\n- Health\n- User\n- Admin\n- Storage\n- Subscription"
+    "description": "订阅管理和用户配置 API - 自动生成文档\n\n## 功能特性\n- �� 用户配置管理\n- 📊 流量统计\n- 🔄 订阅转换\n- 👥 用户管理（管理员功能）\n- 🗄️ KV 存储服务\n\n## 认证说明\n大部分 API 需要通过 `token` 查询参数进行认证。管理员接口需要 `superToken` 参数。\n\n## 生成时间\n2025-07-17T17:49:33.852Z\n\n## 已注册模块\n- Health\n- User\n- Admin\n- Storage\n- Subscription"
   },
   "servers": [
     {
@@ -1192,7 +1192,7 @@
         }
       }
     },
-    "/:uid": {
+    "/{uid}": {
       "get": {
         "summary": "获取订阅配置",
         "description": "获取用户的 Clash 订阅配置",

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import { adminApi } from '@/generated/api-client';
+import { adminApi } from '@/generated/api-adapters';
 import type { AdminStats } from '@/types/user-config';
 
 export function AdminDashboard() {

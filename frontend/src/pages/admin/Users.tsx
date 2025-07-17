@@ -1,4 +1,4 @@
-import { adminApi } from '@/generated/api-client';
+import { adminApi } from '@/generated/api-adapters';
 import type { UserConfig, UserSummary } from '@/types/user-config';
 import { useEffect, useState } from 'preact/hooks';
 

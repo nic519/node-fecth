@@ -19,7 +19,7 @@ export const ROUTE_PATHS = {
 	// === 非 OpenAPI 路由（路径常量） ===
 	storage: '/storage',
 	kv: '/kv',
-	subscription: '/:uid',
+	subscription: '/{uid}',
 } as const;
 
 export type RoutePath = keyof typeof ROUTE_PATHS;

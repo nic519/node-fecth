@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { userConfigApi } from '@/generated/api-client';
-import type { ConfigResponse, UserConfig } from '@/types/user-config';
+import { userConfigApi } from '@/generated/api-adapters';
+import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, yamlToConfig, validateConfig } from '../utils/configUtils';
 
 export interface UseUserConfigProps {
