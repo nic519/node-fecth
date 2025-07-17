@@ -4,11 +4,11 @@ import { parse as yamlParse } from 'yaml';
 export class UserManager {
 	private env: Env;
 
-	private kvUserConfigKey(userId: string) {
-		return `user:${userId}:config`;
+	private kvUserConfigKey(uid: string) {
+		return `user:${uid}:config`;
 	}
-	private kvUserMetaKey(userId: string) {
-		return `user:${userId}:meta`;
+	private kvUserMetaKey(uid: string) {
+		return `user:${uid}:meta`;
 	}
 
 	constructor(env: Env) {
@@ -18,26 +18,26 @@ export class UserManager {
 	/**
 	 * 获取用户配置（优先级：KV > 环境变量）
 	 */
-	async getUserConfig(userId: string): Promise<ConfigResponse | null> {
+	async getUserConfig(uid: string): Promise<ConfigResponse | null> {
 		try {
 			// 1. 尝试从KV获取配置
-			const kvConfig = await this.getConfigFromKV(userId);
+			const kvConfig = await this.getConfigFromKV(uid);
 			if (kvConfig) {
 				return kvConfig;
 			}
 
 			// 2. 从环境变量获取配置
-			const envConfig = this.getConfigFromEnv(userId);
+			const envConfig = this.getConfigFromEnv(uid);
 			if (envConfig) {
 				return {
 					config: envConfig,
-					meta: { lastModified: new Date().toISOString(), source: 'env' as const, uid: userId },
+					meta: { lastModified: new Date().toISOString(), source: 'env' as const, uid: uid },
 				};
 			}
 
 			return null;
 		} catch (error) {
-			console.error(`获取用户配置失败: ${userId}`, error);
+			console.error(`获取用户配置失败: ${uid}`, error);
 			return null;
 		}
 	}
@@ -73,15 +73,15 @@ export class UserManager {
 	/**
 	 * 从环境变量获取用户配置
 	 */
-	private getConfigFromEnv(userId: string): UserConfig | null {
+	private getConfigFromEnv(uid: string): UserConfig | null {
 		try {
 			const envUser = this.env.DB_USER;
 			if (!envUser) return null;
 
 			const users = yamlParse(envUser) as Record<string, UserConfig>;
-			return users[userId] || null;
+			return users[uid] || null;
 		} catch (error) {
-			console.error(`从环境变量获取配置失败: ${userId}`, error);
+			console.error(`从环境变量获取配置失败: ${uid}`, error);
 			return null;
 		}
 	}
@@ -209,35 +209,35 @@ export class UserManager {
 
 	/**
 	 * 验证用户token并获取用户配置（支持KV存储）
-	 * @param userId 用户ID
+	 * @param uid 用户ID
 	 * @param accessToken 访问token
 	 * @returns 验证通过返回ConfigResponse，验证失败返回null
 	 */
-	async validateAndGetUser(userId: string, accessToken: string): Promise<ConfigResponse | null> {
-		if (!userId || !accessToken) {
+	async validateAndGetUser(uid: string, accessToken: string): Promise<ConfigResponse | null> {
+		if (!uid || !accessToken) {
 			console.log('🔒 验证失败: 缺少参数 userId 或 accessToken');
 			return null;
 		}
 
 		try {
-			const userConfigResponse = await this.getUserConfig(userId);
+			const userConfigResponse = await this.getUserConfig(uid);
 
 			if (!userConfigResponse) {
-				console.log(`🔒 验证失败: 用户配置不存在 - ${userId}`);
+				console.log(`🔒 验证失败: 用户配置不存在 - ${uid}`);
 				return null;
 			}
 
 			const { config } = userConfigResponse;
 
 			if (accessToken !== config.accessToken) {
-				console.log(`🔒 验证失败: token 无效 - ${userId}`);
+				console.log(`🔒 验证失败: token 无效 - ${uid}`);
 				return null;
 			}
 
-			console.log(`✅ 用户验证成功: ${userId} (来源: ${userConfigResponse.meta.source})`);
+			console.log(`✅ 用户验证成功: ${uid} (来源: ${userConfigResponse.meta.source})`);
 			return userConfigResponse;
 		} catch (error) {
-			console.error(`❌ 验证用户token失败: ${userId}`, error);
+			console.error(`❌ 验证用户token失败: ${uid}`, error);
 			return null;
 		}
 	}

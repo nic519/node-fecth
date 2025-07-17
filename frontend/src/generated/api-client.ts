@@ -183,7 +183,7 @@ export function getAdminUserDeleteByUid(uid: string, superToken: string, opts?: 
 /**
  * 创建新用户
  */
-export function postAdminUserCreate(body?: {
+export function postAdminUserCreate(superToken: string, body?: {
     uid: string;
     config: {
         subscribe: string;
@@ -227,7 +227,9 @@ export function postAdminUserCreate(body?: {
             msg: string;
             data?: any;
         };
-    }>("/admin/user/create", oazapfts.json({
+    }>(`/admin/user/create${QS.query(QS.explode({
+        superToken
+    }))}`, oazapfts.json({
         ...opts,
         method: "POST",
         body

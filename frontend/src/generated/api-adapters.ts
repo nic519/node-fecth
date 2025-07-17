@@ -36,10 +36,10 @@ export const adminApi = {
 
   // 创建用户
   async createUser(uid: string, userConfig: any, _superToken: string) {
-    const response = await postAdminUserCreate({
+    const response = await postAdminUserCreate(_superToken, {
       uid,
       config: userConfig
-    });
+    });  
     return handleResponse(response);
   },
 

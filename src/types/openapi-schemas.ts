@@ -292,7 +292,7 @@ export type ApiError = ErrorResponse;
 
 // 用户详情 Schema
 export const UserDetailsSchema = z.object({
-	userId: z.string().describe('用户ID'),
+	uid: z.string().describe('用户ID'),
 	config: UserConfigSchema.describe('用户配置'),
 	meta: UserConfigMetaSchema.describe('配置元数据'),
 	trafficInfo: TrafficInfoSchema.optional().describe('流量信息'),
@@ -311,7 +311,7 @@ export const BatchOperationResultSchema = z.object({
 	details: z
 		.array(
 			z.object({
-				userId: z.string(),
+				uid: z.string(),
 				success: z.boolean(),
 				error: z.string().optional(),
 			})
@@ -321,7 +321,7 @@ export const BatchOperationResultSchema = z.object({
 
 // 应用模板请求 Schema
 export const ApplyTemplateRequestSchema = z.object({
-	userId: z.string().describe('目标用户ID'),
+	uid: z.string().describe('目标用户ID'),
 });
 
 // 管理员日志 Schema
@@ -350,7 +350,7 @@ export const RefreshTrafficResponseSchema = z.object({
 	msg: z.string(),
 	data: z.object({
 		message: z.string(),
-		userId: z.string(),
+		uid: z.string(),
 		trafficInfo: TrafficInfoSchema,
 	}),
 });

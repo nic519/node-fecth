@@ -57,6 +57,7 @@ export const adminUserCreateRoute = createRoute({
 	description: '创建新用户配置（需要管理员权限）',
 	tags: ['管理员'],
 	request: {
+		query: SuperAdminTokenParamSchema,
 		body: {
 			content: {
 				'application/json': {
@@ -177,13 +178,13 @@ export const getSystemStatsRoute = createRoute({
 // 刷新用户流量信息
 export const refreshUserTrafficRoute = createRoute({
 	method: 'post',
-	path: '/admin/users/{userId}/traffic/refresh',
+	path: '/admin/users/{uid}/traffic/refresh',
 	summary: '刷新用户流量信息',
 	description: '强制刷新指定用户的流量统计信息',
 	tags: ['管理员'],
 	request: {
 		params: z.object({
-			userId: z.string().describe('用户ID'),
+			uid: z.string().describe('用户ID'),
 		}),
 		query: SuperAdminTokenParamSchema,
 	},
@@ -387,7 +388,7 @@ export const applyTemplateRoute = createRoute({
 			content: {
 				'application/json': {
 					schema: z.object({
-						userId: z.string().describe('目标用户ID'),
+						uid: z.string().describe('目标用户ID'),
 					}),
 				},
 			},
@@ -402,7 +403,7 @@ export const applyTemplateRoute = createRoute({
 						data: z.object({
 							message: z.string(),
 							templateId: z.string(),
-							userId: z.string(),
+							uid: z.string(),
 						}),
 					}),
 				},

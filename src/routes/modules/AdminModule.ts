@@ -1,7 +1,8 @@
-import { SuperAdminHandler } from '@/routes/handler/superAdminHandler';
+import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { ROUTE_PATHS, adminDeleteUserRoute, adminGetUsersRoute, adminUserCreateRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { UserConfig } from '@/types/openapi-schemas';
 
 /**
  * 管理员功能路由模块
@@ -16,9 +17,18 @@ export class AdminModule extends BaseRouteModule {
 			console.log(`🔧 ${this.moduleName}: DELETE ${uid}`);
 
 			try {
-				const superAdminHandler = new SuperAdminHandler();
-				const response = await superAdminHandler.handle(c.req.raw, c.env);
-				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
+				const superAdminManager = new SuperAdminManager(c.env);
+				const adminId = 'super_admin'; // 简化实现，使用固定ID
+				
+				await superAdminManager.deleteUser(uid, adminId);
+				
+				return c.json({
+					success: true,
+					data: {
+						message: '用户删除成功',
+						uid: uid,
+					},
+				});
 			} catch (error) {
 				const errorResponse = this.handleError(error, '删除用户配置');
 				return c.json(errorResponse, 500) as any;
@@ -27,13 +37,22 @@ export class AdminModule extends BaseRouteModule {
 
 		// 创建用户路由
 		app.openapi(adminUserCreateRoute, async (c) => {
-			const body = c.req.valid('json');
-			console.log(`🆕 ${this.moduleName}: PUT ${ROUTE_PATHS.adminUserCreate}`);
+			console.log(`🆕 ${this.moduleName}: POST ${ROUTE_PATHS.adminUserCreate}`);
 
 			try {
-				const superAdminHandler = new SuperAdminHandler();
-				const response = await superAdminHandler.handle(c.req.raw, c.env);
-				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
+				const superAdminManager = new SuperAdminManager(c.env);
+				const adminId = 'super_admin'; // 简化实现，使用固定ID
+				const body = (await c.req.json()) as { uid: string; config: UserConfig };
+
+				await superAdminManager.createUser(body.uid, body.config, adminId);
+
+				return c.json({
+					success: true,
+					data: {
+						message: '用户创建成功',
+						uid: body.uid,
+					},
+				});
 			} catch (error) {
 				const errorResponse = this.handleError(error, '创建用户');
 				return c.json(errorResponse, 400) as any;
@@ -45,9 +64,13 @@ export class AdminModule extends BaseRouteModule {
 			console.log(`✅ ${this.moduleName}: 获取所有用户`);
 
 			try {
-				const handler = new SuperAdminHandler();
-				const response = await handler.handle(c.req.raw, c.env);
-				return (response || c.text('Handler returned null', 500)) as any;
+				const superAdminManager = new SuperAdminManager(c.env);
+				const userSummaries = await superAdminManager.getUserSummaryList();
+				
+				return c.json({
+					success: true,
+					data: userSummaries,
+				});
 			} catch (error) {
 				const errorResponse = this.handleError(error, '获取所有用户');
 				return c.json(errorResponse, 500) as any;

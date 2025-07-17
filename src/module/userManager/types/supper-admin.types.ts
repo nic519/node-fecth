@@ -10,7 +10,7 @@ export interface SuperAdminStats {
 }
 
 export interface UserSummary {
-	userId: string;
+	uid: string;
 	token: string;
 	hasConfig: boolean;
 	source: 'kv' | 'env' | 'none';

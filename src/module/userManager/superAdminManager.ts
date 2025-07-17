@@ -129,25 +129,25 @@ export class SuperAdminManager {
 	/**
 	 * 创建新用户
 	 */
-	async createUser(userId: string, config: UserConfig, adminId: string): Promise<void> {
+	async createUser(uid: string, config: UserConfig, adminId: string): Promise<void> {
 		try {
 			// 检查用户是否已存在
-			const existingConfig = await this.userManager.getUserConfig(userId);
+			const existingConfig = await this.userManager.getUserConfig(uid);
 			if (existingConfig) {
-				throw new Error(`用户 ${userId} 已存在`);
+				throw new Error(`用户 ${uid} 已存在`);
 			}
 
 			// 创建用户配置
-			await this.userManager.saveUserConfig(userId, config);
+			await this.userManager.saveUserConfig(uid, config);
 
 			// 记录操作日志
 			await this.logAdminOperation({
 				timestamp: new Date().toISOString(),
 				operation: 'create_user',
-				targetUserId: userId,
+				targetUserId: uid,
 				adminId,
 				result: 'success',
-				details: `创建用户: ${userId}`,
+				details: `创建用户: ${uid}`,
 			});
 		} catch (error) {
 			console.error('创建用户失败:', error);
@@ -156,7 +156,7 @@ export class SuperAdminManager {
 			await this.logAdminOperation({
 				timestamp: new Date().toISOString(),
 				operation: 'create_user',
-				targetUserId: userId,
+				targetUserId: uid,
 				adminId,
 				result: 'error',
 				details: `创建用户失败: ${error instanceof Error ? error.message : String(error)}`,

@@ -92,12 +92,12 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 身份验证中间件
 	 */
-	private async authenticateUser(request: Request, env: Env, userId: string): Promise<{ success: boolean; message: string; data?: any }> {
+	private async authenticateUser(request: Request, env: Env, uid: string): Promise<{ success: boolean; message: string; data?: any }> {
 		try {
-			const authResult = await AuthUtils.authenticate(request, env, userId);
+			const authResult = await AuthUtils.authenticate(request, env, uid);
 			return { success: true, message: '验证成功', data: authResult };
 		} catch (error) {
-			console.error(`❌ 身份验证失败: ${userId}`, error);
+			console.error(`❌ 身份验证失败: ${uid}`, error);
 			return { 
 				success: false, 
 				message: `Authentication failed: ${error instanceof Error ? error.message : String(error)}` 
@@ -108,10 +108,10 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 获取指定用户配置
 	 */
-	private async getUserConfig(c: any, userId: string): Promise<Response> {
+	private async getUserConfig(c: any, uid: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			const authResult = await this.authenticateUser(c.req.raw, c.env, uid);
 			if (!authResult.success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
 			}
@@ -121,7 +121,7 @@ export class UserConfigHandler implements RouteHandler {
 				meta: authResult.data.meta,
 			}, '获取用户配置成功');
 		} catch (error) {
-			console.error(`获取用户配置失败: ${userId}`, error);
+			console.error(`获取用户配置失败: ${uid}`, error);
 			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '获取用户配置失败');
 		}
 	}
@@ -129,13 +129,13 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 更新用户配置
 	 */
-	private async updateUserConfig(c: any, userId: string): Promise<Response> {
+	private async updateUserConfig(c: any, uid: string): Promise<Response> {
 		try {
-			console.log(`🔧 开始更新用户配置: ${userId}`);
+			console.log(`🔧 开始更新用户配置: ${uid}`);
 			
 			// 身份验证
-			console.log(`🔐 开始身份验证: ${userId}`);
-			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			console.log(`🔐 开始身份验证: ${uid}`);
+			const authResult = await this.authenticateUser(c.req.raw, c.env, uid);
 			if (!authResult.success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
 			}
@@ -148,18 +148,18 @@ export class UserConfigHandler implements RouteHandler {
 
 			// 保存用户配置 (此时 config.success 为 true，所以 config.data 一定存在)
 			const userManager = new UserManager(c.env);
-			const success = await userManager.saveUserConfig(userId, (config as { success: true; data: UserConfig }).data);
+			const success = await userManager.saveUserConfig(uid, (config as { success: true; data: UserConfig }).data);
 			if (!success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 			}
 
 			return ResponseUtils.jsonSuccess(c, {
 				message: 'User config saved successfully',
-				userId,
+				uid,
 				timestamp: new Date().toISOString(),
 			}, '用户配置保存成功');
 		} catch (error) {
-			console.error(`❌ 更新用户配置失败: ${userId}`, error);
+			console.error(`❌ 更新用户配置失败: ${uid}`, error);
 			console.error(`❌ 错误堆栈:`, error instanceof Error ? error.stack : error);
 			
 			// 根据错误类型返回不同的响应
@@ -175,7 +175,7 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 创建用户配置
 	 */
-	private async createUserConfig(c: any, userId: string): Promise<Response> {
+	private async createUserConfig(c: any, uid: string): Promise<Response> {
 		try {
 			// 验证超级管理员权限 (创建用户需要管理员权限)
 			const url = new URL(c.req.url);
@@ -186,7 +186,7 @@ export class UserConfigHandler implements RouteHandler {
 
 			// 检查用户是否已存在
 			const userManager = new UserManager(c.env);
-			const existingUser = await userManager.getUserConfig(userId);
+			const existingUser = await userManager.getUserConfig(uid);
 			if (existingUser) {
 				return ResponseUtils.jsonError(c, ResponseCodes.CONFLICT, '用户已存在');
 			}
@@ -198,7 +198,7 @@ export class UserConfigHandler implements RouteHandler {
 			}
 
 			// 创建用户配置 (此时 config.success 为 true，所以 config.data 一定存在)
-			const success = await userManager.saveUserConfig(userId, (config as { success: true; data: UserConfig }).data);
+			const success = await userManager.saveUserConfig(uid, (config as { success: true; data: UserConfig }).data);
 			if (!success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '创建用户配置失败');
 			}
@@ -206,12 +206,12 @@ export class UserConfigHandler implements RouteHandler {
 			// 返回201状态码表示资源已创建
 			return ResponseUtils.json(c, {
 				message: 'User created successfully',
-				userId,
+				uid,
 				config: (config as { success: true; data: UserConfig }).data,
 				timestamp: new Date().toISOString(),
 			}, '用户创建成功', ResponseCodes.SUCCESS, 201);
 		} catch (error) {
-			console.error(`创建用户配置失败: ${userId}`, error);
+			console.error(`创建用户配置失败: ${uid}`, error);
 			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '创建用户配置失败');
 		}
 	}
@@ -219,10 +219,10 @@ export class UserConfigHandler implements RouteHandler {
 	/**
 	 * 删除用户配置
 	 */
-	private async deleteUserConfig(c: any, userId: string): Promise<Response> {
+	private async deleteUserConfig(c: any, uid: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			const authResult = await this.authenticateUser(c.req.raw, c.env, uid);
 			if (!authResult.success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
 			}
@@ -230,18 +230,18 @@ export class UserConfigHandler implements RouteHandler {
 			const userManager = new UserManager(c.env);
 
 			// 删除用户配置
-			const success = await userManager.deleteUserConfig(userId);
+			const success = await userManager.deleteUserConfig(uid);
 			if (!success) {
 				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '删除用户配置失败');
 			}
 
 			return ResponseUtils.jsonSuccess(c, {
 				message: 'User config deleted successfully',
-				userId,
+				uid,
 				timestamp: new Date().toISOString(),
 			}, '用户配置删除成功');
 		} catch (error) {
-			console.error(`删除用户配置失败: ${userId}`, error);
+			console.error(`删除用户配置失败: ${uid}`, error);
 			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '删除用户配置失败');
 		}
 	}

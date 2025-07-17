@@ -234,15 +234,15 @@ export class SuperAdminHandler implements RouteHandler {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const body = (await c.req.json()) as { userId: string; config: UserConfig };
+			const body = (await c.req.json()) as { uid: string; config: UserConfig };
 
-			await adminManager.createUser(body.userId, body.config, adminId);
+			await adminManager.createUser(body.uid, body.config, adminId);
 
 			return c.json({
 				success: true,
 				data: {
 					message: '用户创建成功',
-					userId: body.userId,
+					uid: body.uid,
 				},
 			});
 		} catch (error) {
@@ -261,17 +261,17 @@ export class SuperAdminHandler implements RouteHandler {
 	/**
 	 * 刷新用户流量信息
 	 */
-	private async refreshUserTraffic(c: any, userId: string): Promise<Response> {
+	private async refreshUserTraffic(c: any, uid: string): Promise<Response> {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const trafficInfo = await adminManager.refreshUserTrafficInfo(userId, adminId);
+			const trafficInfo = await adminManager.refreshUserTrafficInfo(uid, adminId);
 
 			return c.json({
 				success: true,
 				data: {
 					message: '流量信息刷新成功',
-					userId,
+					uid,
 					trafficInfo,
 				},
 			});
@@ -374,16 +374,16 @@ export class SuperAdminHandler implements RouteHandler {
 		try {
 			const adminManager = new SuperAdminManager(c.env);
 			const adminId = 'super_admin'; // 简化实现，使用固定ID
-			const body = (await c.req.json()) as { userId: string };
+			const body = (await c.req.json()) as { uid: string };
 
-			await adminManager.applyTemplateToUser(templateId, body.userId, adminId);
+			await adminManager.applyTemplateToUser(templateId, body.uid, adminId);
 
 			return c.json({
 				success: true,
 				data: {
 					message: '模板应用成功',
 					templateId,
-					userId: body.userId,
+					uid: body.uid,
 				},
 			});
 		} catch (error) {
