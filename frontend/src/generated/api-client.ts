@@ -5,7 +5,7 @@
 // ===================================================================
 
 import ky from 'ky';
-import type { paths, components } from './api-types';
+import type { components } from './api-types';
 import type { 
 	UserDetailResponse, 
 	UsersListResponse, 
