@@ -4,14 +4,18 @@
 	"private": true,
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
+		"generate:api": "tsx scripts/generate-api-client.ts",
+		"generate:openapi": "tsx scripts/generate-openapi.ts",
+		"watch:api": "tsx scripts/watch-api-changes.ts",
 		"deploy": "yarn deploy:pages",
 		"deploy:pages": "yarn build:frontend && wrangler pages deploy frontend/dist",
 		"dev:backend": "wrangler dev --config wrangler.dev.toml --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
-		"build:frontend": "cd frontend && yarn build",
+		"dev:with-watch": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\" \"yarn watch:api\"",
+		"build:frontend": "yarn generate:api && cd frontend && yarn build",
 		"cf-typegen": "wrangler types",
-		"predev": "yarn convert-vars && yarn type-check",
+		"predev": "yarn convert-vars && yarn generate:api && yarn type-check",
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {

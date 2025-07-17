@@ -1,4 +1,4 @@
-import { adminApi } from '@/api/client';
+import { adminApi } from '@/generated/api-client';
 import type { UserConfig, UserSummary } from '@/types/user-config';
 import { useEffect, useState } from 'preact/hooks';
 
@@ -32,7 +32,7 @@ export function AdminUsers() {
 			setError(null);
 
 			// 调用真实的管理员 API 获取用户列表
-			const userList = await adminApi.getUsers(superToken);
+			const userList = await adminApi.getAllUsers(superToken);
 			setUsers(userList);
 		} catch (err) {
 			console.error('获取用户列表失败:', err);
@@ -109,14 +109,8 @@ export function AdminUsers() {
 					}
 					break;
 				case 'refresh':
-					// 刷新单个用户的流量信息
-					try {
-						await adminApi.refreshUserTraffic(uid, superToken);
-						await fetchUsers(); // 重新加载所有用户数据
-					} catch (err) {
-						console.error('刷新用户流量失败:', err);
-						alert('刷新用户流量失败: ' + (err instanceof Error ? err.message : '未知错误'));
-					}
+					// 刷新用户流量功能暂不支持
+					alert('刷新用户流量功能暂不支持，等待后端API实现');
 					break;
 				case 'delete':
 					if (confirm(`确定要删除用户 ${uid} 吗？此操作不可撤销！`)) {

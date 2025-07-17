@@ -1,4 +1,4 @@
-import { userConfigApi } from '@/api/client';
+import { userConfigApi } from '@/generated/api-client';
 import type { ConfigResponse, UserConfig } from '@/types/user-config';
 import { useEffect, useState } from 'preact/hooks';
 
@@ -53,7 +53,7 @@ export function UserConfigPage({ uid }: UserConfigPageProps) {
 	const loadConfig = async () => {
 		try {
 			setLoading(true);
-			const response = await userConfigApi.get(uid, token);
+			const response = await userConfigApi.getDetail(uid, token);
 			setConfig(response);
 			setConfigSource((response as any).source || '环境变量');
 
