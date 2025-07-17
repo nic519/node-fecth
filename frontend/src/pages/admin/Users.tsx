@@ -32,8 +32,17 @@ export function AdminUsers() {
 			setError(null);
 
 			// 调用真实的管理员 API 获取用户列表
-			const userList = await adminApi.getAllUsers(superToken);
-			setUsers(userList);
+			const response = await adminApi.getAllUsers(superToken);
+			
+			// 检查响应状态
+			if (response.code !== 0) {
+				setError(response.msg || '获取用户列表失败');
+				setUsers([]);
+				return;
+			}
+			
+			// 从新的响应结构中提取用户列表数据
+			setUsers(response.data.users);
 		} catch (err) {
 			console.error('获取用户列表失败:', err);
 			setError(err instanceof Error ? err.message : '加载用户数据失败');
@@ -115,9 +124,13 @@ export function AdminUsers() {
 				case 'delete':
 					if (confirm(`确定要删除用户 ${uid} 吗？此操作不可撤销！`)) {
 						try {
-							await adminApi.deleteUser(uid, superToken);
-							await fetchUsers(); // 重新加载用户列表
-							alert(`用户 ${uid} 删除成功`);
+							const response = await adminApi.deleteUser(uid, superToken);
+							if (response.code === 0) {
+								await fetchUsers(); // 重新加载用户列表
+								alert(`用户 ${uid} 删除成功`);
+							} else {
+								alert('删除用户失败: ' + (response.msg || '未知错误'));
+							}
 						} catch (err) {
 							console.error('删除用户失败:', err);
 							alert('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'));
@@ -153,9 +166,13 @@ export function AdminUsers() {
 				accessToken: accessToken.trim(),
 			};
 
-			await adminApi.createUser(uid.trim(), userConfig, superToken);
-			await fetchUsers(); // 重新加载用户列表
-			alert(`用户 ${uid} 创建成功`);
+			const response = await adminApi.createUser(uid.trim(), userConfig, superToken);
+			if (response.code === 0) {
+				await fetchUsers(); // 重新加载用户列表
+				alert(`用户 ${uid} 创建成功`);
+			} else {
+				alert('创建用户失败: ' + (response.msg || '未知错误'));
+			}
 		} catch (error) {
 			console.error('创建用户失败:', error);
 			alert('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'));

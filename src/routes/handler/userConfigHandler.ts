@@ -1,136 +1,288 @@
 import { UserManager } from '@/module/userManager/userManager';
-import { UserConfig, UserConfigSchema } from '@/types/openapi-schemas';
+import { UserConfig, UserConfigSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { RouteHandler } from '@/types/routes.types';
 import { AuthUtils } from '@/utils/authUtils';
+import { ResponseUtils } from '@/utils/responseUtils';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 
 export class UserConfigHandler implements RouteHandler {
+	private app: Hono<{ Bindings: Env }>;
+
+	constructor() {
+		this.app = new Hono<{ Bindings: Env }>();
+		this.setupMiddleware();
+		this.setupRoutes();
+	}
+
 	canHandle(request: Request): boolean {
 		const url = new URL(request.url);
-		return url.pathname.startsWith('/api/config/user/');
+		console.log(`🔍 UserConfigHandler.canHandle 检查:`, {
+			requestUrl: request.url,
+			pathname: url.pathname,
+			startsWith: url.pathname.startsWith('/config/user/'),
+		});
+		return url.pathname.startsWith('/config/user/');
 	}
 
 	async handle(request: Request, env: Env): Promise<Response> {
-		const url = new URL(request.url);
-		const pathname = url.pathname;
-		const method = request.method;
+		// 创建一个新的 Hono 上下文并处理请求
+		return this.app.fetch(request, env);
+	}
 
-		console.log(`🔧 用户配置管理请求: ${method} ${pathname}`);
+	private setupMiddleware() {
+		// CORS 中间件
+		this.app.use(
+			'*',
+			cors({
+				origin: '*',
+				allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+				allowHeaders: ['Content-Type', 'Authorization'],
+			})
+		);
 
+		// 全局错误处理中间件
+		this.app.onError((err, c) => {
+			console.error('UserConfigHandler 错误:', err);
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '服务器内部错误', {
+				error: err.message,
+			});
+		});
+	}
+
+	private setupRoutes() {
+		// 用户配置管理路由组
+		const configRoute = this.app.basePath('/config/user');
+
+		// 获取用户配置详情 - GET /config/user/detail/:userId
+		configRoute.get('/detail/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`📖 处理获取用户详情: ${userId}`);
+			return await this.getUserConfig(c, userId);
+		});
+
+		// 更新用户配置 - POST /config/user/update/:userId
+		configRoute.post('/update/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`📝 处理更新用户配置: ${userId}`);
+			return await this.updateUserConfig(c, userId);
+		});
+
+		// 创建用户配置 - POST /config/user/create/:userId
+		configRoute.post('/create/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`➕ 处理创建用户配置: ${userId}`);
+			return await this.createUserConfig(c, userId);
+		});
+
+		// 删除用户配置 - DELETE /config/user/delete/:userId
+		configRoute.delete('/delete/:userId', async (c) => {
+			const userId = c.req.param('userId');
+			console.log(`🗑️ 处理删除用户配置: ${userId}`);
+			return await this.deleteUserConfig(c, userId);
+		});
+
+		// 获取所有用户列表 - GET /config/user/all
+		configRoute.get('/all', async (c) => {
+			console.log(`📋 处理获取所有用户列表`);
+			return await this.getAllUsers(c);
+		});
+	}
+
+	/**
+	 * 身份验证中间件
+	 */
+	private async authenticateUser(request: Request, env: Env, userId: string): Promise<{ success: boolean; message: string; data?: any }> {
 		try {
-			// 解析路径参数
-			const pathParts = pathname.split('/').filter(Boolean);
-
-			// 路由匹配: /api/config/users/:userId
-			if (pathParts[0] === 'api' && pathParts[1] === 'config' && pathParts[2] === 'users') {
-				const userId = pathParts[3]; // 可选的用户ID
-				if (method === 'POST' && userId) {
-					// POST /api/config/users/:userId - 更新用户配置
-					return await this.updateUserConfig(request, env, userId);
-				} else if (method === 'DELETE' && userId) {
-					// DELETE /api/config/users/:userId - 删除用户配置
-					return await this.deleteUserConfig(request, env, userId);
-				}
-			}
-
-			return new Response('Not Found', { status: 404 });
+			const authResult = await AuthUtils.authenticate(request, env, userId);
+			return { success: true, message: '验证成功', data: authResult };
 		} catch (error) {
-			console.error('用户配置管理处理错误:', error);
-			return new Response('Internal Server Error', { status: 500 });
+			console.error(`❌ 身份验证失败: ${userId}`, error);
+			return { 
+				success: false, 
+				message: `Authentication failed: ${error instanceof Error ? error.message : String(error)}` 
+			};
 		}
 	}
 
 	/**
 	 * 获取指定用户配置
 	 */
-	async getUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+	private async getUserConfig(c: any, userId: string): Promise<Response> {
 		try {
 			// 身份验证
-			const authResult = await AuthUtils.authenticate(request, env, userId);
-			return AuthUtils.createSuccessResponse(authResult);
+			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			if (!authResult.success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
+			}
+
+			return ResponseUtils.jsonSuccess(c, {
+				config: authResult.data.config,
+				meta: authResult.data.meta,
+			}, '获取用户配置成功');
 		} catch (error) {
 			console.error(`获取用户配置失败: ${userId}`, error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '获取用户配置失败');
 		}
 	}
 
 	/**
 	 * 更新用户配置
 	 */
-	async updateUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+	private async updateUserConfig(c: any, userId: string): Promise<Response> {
 		try {
+			console.log(`🔧 开始更新用户配置: ${userId}`);
+			
 			// 身份验证
-			const authResult = await AuthUtils.authenticate(request, env, userId);
-
-			// 解析请求体
-			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
-			let config: UserConfig;
-
-			if (body.config) {
-				// 处理前端发送的JSON格式配置
-				config = body.config;
-			} else if (body.yaml) {
-				// 处理YAML格式的请求
-				try {
-					const { parse } = await import('yaml');
-					config = parse(body.yaml) as UserConfig;
-				} catch (error) {
-					return AuthUtils.createErrorResponse('Bad Request: Invalid YAML format', 400);
-				}
-			} else {
-				return AuthUtils.createErrorResponse('Bad Request: Missing config or yaml data', 400);
+			console.log(`🔐 开始身份验证: ${userId}`);
+			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			if (!authResult.success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
 			}
 
-			if (!config) {
-				return AuthUtils.createErrorResponse('Bad Request: Invalid config data', 400);
+			// 解析和验证配置
+			const config = await this.parseAndValidateConfig(c);
+			if (!config.success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.INVALID_PARAMS, config.message);
 			}
 
-			// 使用Zod验证配置
-			try {
-				UserConfigSchema.parse(config);
-			} catch (error: any) {
-				const errorMessage = error.errors?.map((e: any) => e.message).join('\n') || 'Invalid config format';
-				return AuthUtils.createErrorResponse(errorMessage, 400);
-			}
-
-			// 保存用户配置
-			const userManager = new UserManager(env);
-			const success = await userManager.saveUserConfig(userId, config);
+			// 保存用户配置 (此时 config.success 为 true，所以 config.data 一定存在)
+			const userManager = new UserManager(c.env);
+			const success = await userManager.saveUserConfig(userId, (config as { success: true; data: UserConfig }).data);
 			if (!success) {
-				return AuthUtils.createErrorResponse('Failed to save user config', 500);
+				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 			}
 
-			return AuthUtils.createSuccessResponse({
+			return ResponseUtils.jsonSuccess(c, {
 				message: 'User config saved successfully',
 				userId,
 				timestamp: new Date().toISOString(),
-			});
+			}, '用户配置保存成功');
 		} catch (error) {
-			console.error(`更新用户配置失败: ${userId}`, error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
+			console.error(`❌ 更新用户配置失败: ${userId}`, error);
+			console.error(`❌ 错误堆栈:`, error instanceof Error ? error.stack : error);
+			
+			// 根据错误类型返回不同的响应
+			if (error instanceof SyntaxError) {
+				console.error(`❌ JSON 解析错误:`, error.message);
+				return ResponseUtils.jsonError(c, ResponseCodes.INVALID_PARAMS, 'JSON格式错误');
+			}
+			
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '更新用户配置失败');
 		}
 	}
 
 	/**
 	 * 创建用户配置
 	 */
-	private async createUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
+	private async createUserConfig(c: any, userId: string): Promise<Response> {
 		try {
 			// 验证超级管理员权限 (创建用户需要管理员权限)
-			const url = new URL(request.url);
+			const url = new URL(c.req.url);
 			const superToken = url.searchParams.get('superToken');
-			if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-				return AuthUtils.createErrorResponse('Unauthorized: Super admin token required for user creation', 401);
+			if (!superToken || superToken !== c.env.SUPER_ADMIN_TOKEN) {
+				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, '需要超级管理员权限');
 			}
 
 			// 检查用户是否已存在
-			const userManager = new UserManager(env);
+			const userManager = new UserManager(c.env);
 			const existingUser = await userManager.getUserConfig(userId);
 			if (existingUser) {
-				return AuthUtils.createErrorResponse('Conflict: User already exists', 409);
+				return ResponseUtils.jsonError(c, ResponseCodes.CONFLICT, '用户已存在');
 			}
 
-			// 解析请求体
-			const body = (await request.json()) as { config?: UserConfig; yaml?: string };
+			// 解析和验证配置
+			const config = await this.parseAndValidateConfig(c);
+			if (!config.success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.INVALID_PARAMS, config.message);
+			}
+
+			// 创建用户配置 (此时 config.success 为 true，所以 config.data 一定存在)
+			const success = await userManager.saveUserConfig(userId, (config as { success: true; data: UserConfig }).data);
+			if (!success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '创建用户配置失败');
+			}
+
+			// 返回201状态码表示资源已创建
+			return ResponseUtils.json(c, {
+				message: 'User created successfully',
+				userId,
+				config: (config as { success: true; data: UserConfig }).data,
+				timestamp: new Date().toISOString(),
+			}, '用户创建成功', ResponseCodes.SUCCESS, 201);
+		} catch (error) {
+			console.error(`创建用户配置失败: ${userId}`, error);
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '创建用户配置失败');
+		}
+	}
+
+	/**
+	 * 删除用户配置
+	 */
+	private async deleteUserConfig(c: any, userId: string): Promise<Response> {
+		try {
+			// 身份验证
+			const authResult = await this.authenticateUser(c.req.raw, c.env, userId);
+			if (!authResult.success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, authResult.message);
+			}
+
+			const userManager = new UserManager(c.env);
+
+			// 删除用户配置
+			const success = await userManager.deleteUserConfig(userId);
+			if (!success) {
+				return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '删除用户配置失败');
+			}
+
+			return ResponseUtils.jsonSuccess(c, {
+				message: 'User config deleted successfully',
+				userId,
+				timestamp: new Date().toISOString(),
+			}, '用户配置删除成功');
+		} catch (error) {
+			console.error(`删除用户配置失败: ${userId}`, error);
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '删除用户配置失败');
+		}
+	}
+
+	/**
+	 * 获取所有用户列表
+	 */
+	private async getAllUsers(c: any): Promise<Response> {
+		try {
+			// 验证超级管理员权限
+			const url = new URL(c.req.url);
+			const superToken = url.searchParams.get('superToken');
+			if (!superToken || superToken !== c.env.SUPER_ADMIN_TOKEN) {
+				return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, '无效的超级管理员令牌');
+			}
+
+			const userManager = new UserManager(c.env);
+			const userList = await userManager.getAllUsers();
+
+			return ResponseUtils.jsonSuccess(c, {
+				users: userList,
+				count: userList.length,
+				timestamp: new Date().toISOString(),
+			}, '获取用户列表成功');
+		} catch (error) {
+			console.error('获取所有用户列表失败:', error);
+			return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '获取用户列表失败');
+		}
+	}
+
+	/**
+	 * 解析和验证配置数据
+	 */
+	private async parseAndValidateConfig(c: any): Promise<{ success: true; data: UserConfig } | { success: false; message: string }> {
+		try {
+			console.log(`📦 开始解析请求体...`);
+			const contentType = c.req.header('content-type');
+			console.log(`📋 Content-Type: ${contentType}`);
+			
+			const body = (await c.req.json()) as { config?: UserConfig; yaml?: string };
+			console.log(`📄 请求体内容:`, JSON.stringify(body, null, 2));
 			let config: UserConfig;
 
 			if (body.config) {
@@ -142,14 +294,14 @@ export class UserConfigHandler implements RouteHandler {
 					const { parse } = await import('yaml');
 					config = parse(body.yaml) as UserConfig;
 				} catch (error) {
-					return AuthUtils.createErrorResponse('Bad Request: Invalid YAML format', 400);
+					return { success: false, message: 'Bad Request: Invalid YAML format' };
 				}
 			} else {
-				return AuthUtils.createErrorResponse('Bad Request: Missing config or yaml data', 400);
+				return { success: false, message: 'Bad Request: Missing config or yaml data' };
 			}
 
 			if (!config) {
-				return AuthUtils.createErrorResponse('Bad Request: Invalid config data', 400);
+				return { success: false, message: 'Bad Request: Invalid config data' };
 			}
 
 			// 使用Zod验证配置
@@ -157,90 +309,13 @@ export class UserConfigHandler implements RouteHandler {
 				UserConfigSchema.parse(config);
 			} catch (error: any) {
 				const errorMessage = error.errors?.map((e: any) => e.message).join('\n') || 'Invalid config format';
-				return AuthUtils.createErrorResponse(errorMessage, 400);
+				return { success: false, message: errorMessage };
 			}
 
-			// 创建用户配置
-			const success = await userManager.saveUserConfig(userId, config);
-			if (!success) {
-				return AuthUtils.createErrorResponse('Failed to create user config', 500);
-			}
-
-			// 返回201状态码表示资源已创建
-			return new Response(
-				JSON.stringify({
-					message: 'User created successfully',
-					userId,
-					config,
-					timestamp: new Date().toISOString(),
-				}),
-				{
-					status: 201,
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-						'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-					},
-				}
-			);
+			return { success: true, data: config };
 		} catch (error) {
-			console.error(`创建用户配置失败: ${userId}`, error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
-		}
-	}
-
-	/**
-	 * 删除用户配置
-	 */
-	private async deleteUserConfig(request: Request, env: Env, userId: string): Promise<Response> {
-		try {
-			// 身份验证
-			const authResult = await AuthUtils.authenticate(request, env, userId);
-
-			const userManager = new UserManager(env);
-
-			// 删除用户配置
-			const success = await userManager.deleteUserConfig(userId);
-			if (!success) {
-				return AuthUtils.createErrorResponse('Failed to delete user config', 500);
-			}
-
-			return AuthUtils.createSuccessResponse({
-				success: true,
-				message: 'User config deleted successfully',
-				userId,
-				timestamp: new Date().toISOString(),
-			});
-		} catch (error) {
-			console.error(`删除用户配置失败: ${userId}`, error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
-		}
-	}
-
-	/**
-	 * 获取所有用户列表
-	 */
-	private async getAllUsers(request: Request, env: Env): Promise<Response> {
-		try {
-			// 验证超级管理员权限
-			const url = new URL(request.url);
-			const superToken = url.searchParams.get('superToken');
-			if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-				return AuthUtils.createErrorResponse('Unauthorized: Invalid super admin token', 401);
-			}
-
-			const userManager = new UserManager(env);
-			const userList = await userManager.getAllUsers();
-
-			return AuthUtils.createSuccessResponse({
-				users: userList,
-				count: userList.length,
-				timestamp: new Date().toISOString(),
-			});
-		} catch (error) {
-			console.error('获取所有用户列表失败:', error);
-			return AuthUtils.createErrorResponse('Internal Server Error', 500);
+			console.error('解析配置失败:', error);
+			return { success: false, message: 'Failed to parse config data' };
 		}
 	}
 }

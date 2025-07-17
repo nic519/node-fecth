@@ -125,29 +125,79 @@ export const ConfigTemplateSchema = z.object({
 });
 
 // =============================================================================
-// 响应 Schemas
+// 响应 Schemas - 统一格式 {code, data, msg}
 // =============================================================================
 
-// 错误响应 Schema
-export const ErrorResponseSchema = z.object({
-	error: z.string(),
-	message: z.string().optional(),
-	code: z.number().optional(),
+// 响应代码常量
+export const ResponseCodes = {
+	SUCCESS: 0,
+	INVALID_PARAMS: 400,
+	UNAUTHORIZED: 401,
+	FORBIDDEN: 403,
+	NOT_FOUND: 404,
+	CONFLICT: 409,
+	INTERNAL_ERROR: 500,
+} as const;
+
+// 基础响应 Schema
+export const BaseResponseSchema = z.object({
+	code: z.number().describe('响应代码：0=成功，其他=错误码'),
+	msg: z.string().describe('响应消息'),
+	data: z.any().optional().describe('响应数据'),
 });
 
 // 成功响应 Schema
 export const SuccessResponseSchema = z.object({
-	success: z.boolean(),
-	message: z.string().optional(),
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
 	data: z.any().optional(),
+});
+
+// 错误响应 Schema  
+export const ErrorResponseSchema = z.object({
+	code: z.number().min(400),
+	msg: z.string(),
+	data: z.any().optional(),
+});
+
+// 用户详情响应 Schema - 统一格式
+export const UserDetailResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		config: UserConfigSchema,
+		meta: UserConfigMetaSchema,
+	}),
 });
 
 // 用户列表响应 Schema
 export const UsersListResponseSchema = z.object({
-	users: z.array(UserSummarySchema),
-	count: z.number(),
-	timestamp: z.string(),
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		users: z.array(UserSummarySchema),
+		count: z.number(),
+		timestamp: z.string(),
+	}),
 });
+
+// 管理员统计响应 Schema
+export const AdminStatsResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: AdminStatsSchema,
+});
+
+// 配置模板列表响应 Schema
+export const ConfigTemplatesResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		templates: z.array(ConfigTemplateSchema),
+	}),
+});
+
+
 
 // =============================================================================
 // 请求参数 Schemas
@@ -212,9 +262,20 @@ export type SystemInfo = z.infer<typeof SystemInfoSchema>;
 export type ServiceStatus = z.infer<typeof ServiceStatusSchema>;
 export type SystemLog = z.infer<typeof SystemLogSchema>;
 export type ConfigTemplate = z.infer<typeof ConfigTemplateSchema>;
+// 导出响应代码类型
+export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
+
+// 导出响应类型
+export type BaseResponse = z.infer<typeof BaseResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 export type SuccessResponse = z.infer<typeof SuccessResponseSchema>;
+export type UserDetailResponse = z.infer<typeof UserDetailResponseSchema>;
 export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
+export type AdminStatsResponse = z.infer<typeof AdminStatsResponseSchema>;
+export type ConfigTemplatesResponse = z.infer<typeof ConfigTemplatesResponseSchema>;
+export type AdminLogsResponse = z.infer<typeof AdminLogsResponseSchema>;
+export type RefreshTrafficResponse = z.infer<typeof RefreshTrafficResponseSchema>;
+export type CreateTemplateResponse = z.infer<typeof CreateTemplateResponseSchema>;
 export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
 export type UpdateUserConfigRequest = z.infer<typeof UpdateUserConfigRequestSchema>;
 export type CreateConfigTemplateRequest = z.infer<typeof CreateConfigTemplateRequestSchema>;
@@ -272,6 +333,36 @@ export const AdminLogSchema = z.object({
 	details: z.string().optional().describe('操作详情'),
 	timestamp: z.string().describe('操作时间'),
 	ip: z.string().optional().describe('操作IP'),
+});
+
+// 操作日志响应 Schema
+export const AdminLogsResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		logs: z.array(AdminLogSchema),
+	}),
+});
+
+// 刷新用户流量响应 Schema
+export const RefreshTrafficResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		message: z.string(),
+		userId: z.string(),
+		trafficInfo: TrafficInfoSchema,
+	}),
+});
+
+// 创建配置模板响应 Schema
+export const CreateTemplateResponseSchema = z.object({
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		message: z.string(),
+		template: ConfigTemplateSchema,
+	}),
 });
 
 // 管理员健康状态 Schema - 重命名避免冲突

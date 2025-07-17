@@ -31,10 +31,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @description 服务状态 */
-                            status: string;
-                            /** @description 检查时间 */
-                            timestamp: string;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
+                            data: {
+                                /** @description 服务状态 */
+                                status: string;
+                                /** @description 检查时间 */
+                                timestamp: string;
+                            };
                         };
                     };
                 };
@@ -102,8 +107,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            success: boolean;
-                            message?: string;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
                             data?: unknown;
                         };
                     };
@@ -115,9 +121,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -128,9 +134,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -175,20 +181,33 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** Format: uri */
-                            subscribe: string;
-                            accessToken: string;
-                            /** Format: uri */
-                            ruleUrl?: string;
-                            fileName?: string;
-                            multiPortMode?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
-                            appendSubList?: {
-                                /** Format: uri */
-                                subscribe: string;
-                                flag: string;
-                                includeArea?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
-                            }[];
-                            excludeRegex?: string;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
+                            data: {
+                                config: {
+                                    /** Format: uri */
+                                    subscribe: string;
+                                    accessToken: string;
+                                    /** Format: uri */
+                                    ruleUrl?: string;
+                                    fileName?: string;
+                                    multiPortMode?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
+                                    appendSubList?: {
+                                        /** Format: uri */
+                                        subscribe: string;
+                                        flag: string;
+                                        includeArea?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
+                                    }[];
+                                    excludeRegex?: string;
+                                };
+                                meta: {
+                                    lastModified: string;
+                                    /** @enum {string} */
+                                    source: "kv" | "env";
+                                    uid: string;
+                                };
+                            };
                         };
                     };
                 };
@@ -199,9 +218,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -212,9 +231,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -261,8 +280,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            success: boolean;
-                            message?: string;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
                             data?: unknown;
                         };
                     };
@@ -274,9 +294,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -287,9 +307,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -354,8 +374,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            success: boolean;
-                            message?: string;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
                             data?: unknown;
                         };
                     };
@@ -367,9 +388,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -380,9 +401,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -393,9 +414,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -437,27 +458,36 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            uid: string;
-                            token: string;
-                            hasConfig: boolean;
-                            /** @enum {string} */
-                            source: "kv" | "env" | "none";
-                            lastModified: string | null;
-                            isActive: boolean;
-                            subscribeUrl?: string;
-                            /** @enum {string} */
-                            status: "active" | "inactive" | "disabled";
-                            trafficInfo?: {
-                                upload: number;
-                                download: number;
-                                total: number;
-                                used: number;
-                                remaining: number;
-                                expire?: number;
-                                isExpired: boolean;
-                                usagePercent: number;
+                            /** @enum {number} */
+                            code: 0;
+                            msg: string;
+                            data: {
+                                users: {
+                                    uid: string;
+                                    token: string;
+                                    hasConfig: boolean;
+                                    /** @enum {string} */
+                                    source: "kv" | "env" | "none";
+                                    lastModified: string | null;
+                                    isActive: boolean;
+                                    subscribeUrl?: string;
+                                    /** @enum {string} */
+                                    status: "active" | "inactive" | "disabled";
+                                    trafficInfo?: {
+                                        upload: number;
+                                        download: number;
+                                        total: number;
+                                        used: number;
+                                        remaining: number;
+                                        expire?: number;
+                                        isExpired: boolean;
+                                        usagePercent: number;
+                                    };
+                                }[];
+                                count: number;
+                                timestamp: string;
                             };
-                        }[];
+                        };
                     };
                 };
                 /** @description 未授权访问 */
@@ -467,9 +497,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -527,9 +557,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -540,9 +570,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -606,9 +636,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -619,9 +649,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -684,9 +714,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };
@@ -697,9 +727,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            error: string;
-                            message?: string;
-                            code?: number;
+                            code: number;
+                            msg: string;
+                            data?: unknown;
                         };
                     };
                 };

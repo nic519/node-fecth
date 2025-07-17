@@ -54,11 +54,20 @@ export function UserConfigPage({ uid }: UserConfigPageProps) {
 		try {
 			setLoading(true);
 			const response = await userConfigApi.getDetail(uid, token);
-			setConfig(response);
-			setConfigSource((response as any).source || '环境变量');
+			
+			// 检查响应状态
+			if (response.code !== 0) {
+				setError(response.msg || '获取配置失败');
+				return;
+			}
+			
+			// 从新的响应结构中提取配置数据
+			const configData = response.data;
+			setConfig(configData);
+			setConfigSource((configData.meta as any).source || '环境变量');
 
 			// 将配置转换为 YAML 格式显示
-			const yamlContent = configToYaml(response.config);
+			const yamlContent = configToYaml(configData.config);
 			setConfigContent(yamlContent);
 			validateConfig(yamlContent);
 			setError(null);
@@ -81,11 +90,16 @@ export function UserConfigPage({ uid }: UserConfigPageProps) {
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-			await userConfigApi.update(uid, newConfig, token);
-
-			setSaveSuccess(true);
-			setLastSaved(new Date());
-			setTimeout(() => setSaveSuccess(false), 3000);
+			const response = await userConfigApi.update(uid, newConfig, token);
+			
+			// 检查响应是否成功
+			if (response.code === 0) {
+				setSaveSuccess(true);
+				setLastSaved(new Date());
+				setTimeout(() => setSaveSuccess(false), 3000);
+			} else {
+				setError(response.msg || '保存配置失败');
+			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : '保存配置失败');
 		} finally {

@@ -26,9 +26,17 @@ export type {
   ConfigTemplate,
   
   // API响应类型
+  BaseResponse,
   ErrorResponse as ApiError,
   SuccessResponse,
+  UserDetailResponse,
   UsersListResponse,
+  AdminStatsResponse,
+  ConfigTemplatesResponse,
+  AdminLogsResponse,
+  RefreshTrafficResponse,
+  CreateTemplateResponse,
+  ResponseCodes,
   
   // 请求类型
   CreateUserRequest,

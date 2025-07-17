@@ -22,7 +22,15 @@ export function AdminDashboard() {
     try {
       setLoading(true);
       const response = await adminApi.getStats(superToken);
-      setStats(response);
+      
+      // 检查响应状态
+      if (response.code !== 0) {
+        setError(response.msg || '获取统计数据失败');
+        return;
+      }
+      
+      // 从新的响应结构中提取统计数据
+      setStats(response.data);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载统计数据失败');

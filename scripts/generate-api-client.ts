@@ -111,14 +111,19 @@ class ApiClientGenerator {
 
 import ky from 'ky';
 import type { paths, components } from './api-types';
+import type { 
+	UserDetailResponse, 
+	UsersListResponse, 
+	AdminStatsResponse, 
+	SuccessResponse,
+	UserConfig 
+} from '@/types/user-config';
 
 // 类型别名，方便使用
-export type UserConfig = components['schemas']['UserConfigSchema'];
 export type UserSummary = components['schemas']['UserSummarySchema'];
 export type AdminStats = components['schemas']['AdminStatsSchema'];
 export type ConfigResponse = components['schemas']['ConfigResponseSchema'];
 export type ErrorResponse = components['schemas']['ErrorResponseSchema'];
-export type SuccessResponse = components['schemas']['SuccessResponseSchema'];
 
 // API配置
 const config = {
@@ -156,31 +161,31 @@ export const userConfigApi = {
 	/**
 	 * 获取用户详情
 	 */
-	async getDetail(uid: string, token: string): Promise<ConfigResponse> {
+	async getDetail(uid: string, token: string): Promise<UserDetailResponse> {
 		return apiClient
 			.get(\`config/user/detail/\${uid}\`, {
 				searchParams: { token },
 			})
-			.json<ConfigResponse>();
+			.json<UserDetailResponse>();
 	},
 
 	/**
 	 * 更新用户配置
 	 */
-	async update(uid: string, config: UserConfig, token: string): Promise<void> {
-		await apiClient.post(\`config/user/update/\${uid}\`, {
+	async update(uid: string, config: UserConfig, token: string): Promise<SuccessResponse> {
+		return apiClient.post(\`config/user/update/\${uid}\`, {
 			json: { config },
 			searchParams: { token },
-		});
+		}).json<SuccessResponse>();
 	},
 
 	/**
 	 * 删除用户配置
 	 */
-	async delete(uid: string, token: string): Promise<void> {
-		await apiClient.delete(\`config/user/detail/\${uid}\`, {
+	async delete(uid: string, token: string): Promise<SuccessResponse> {
+		return apiClient.delete(\`config/user/delete/\${uid}\`, {
 			searchParams: { token },
-		});
+		}).json<SuccessResponse>();
 	},
 };
 
@@ -192,12 +197,12 @@ export const adminApi = {
 	/**
 	 * 获取所有用户列表
 	 */
-	async getAllUsers(superToken: string): Promise<UserSummary[]> {
+	async getAllUsers(superToken: string): Promise<UsersListResponse> {
 		return apiClient
-			.get('admin/user/all', {
+			.get('config/user/all', {
 				searchParams: { superToken },
 			})
-			.json<UserSummary[]>();
+			.json<UsersListResponse>();
 	},
 
 	/**
@@ -205,8 +210,8 @@ export const adminApi = {
 	 */
 	async createUser(uid: string, config: UserConfig, superToken: string): Promise<SuccessResponse> {
 		return apiClient
-			.post('admin/user/create', {
-				json: { uid, config },
+			.post(\`config/user/create/\${uid}\`, {
+				json: { config },
 				searchParams: { superToken },
 			})
 			.json<SuccessResponse>();
@@ -217,7 +222,7 @@ export const adminApi = {
 	 */
 	async deleteUser(uid: string, superToken: string): Promise<SuccessResponse> {
 		return apiClient
-			.get(\`admin/user/delete/\${uid}\`, {
+			.delete(\`config/user/delete/\${uid}\`, {
 				searchParams: { superToken },
 			})
 			.json<SuccessResponse>();
@@ -226,12 +231,12 @@ export const adminApi = {
 	/**
 	 * 获取系统统计数据
 	 */
-	async getStats(superToken: string): Promise<AdminStats> {
+	async getStats(superToken: string): Promise<AdminStatsResponse> {
 		return apiClient
 			.get('admin/stats', {
 				searchParams: { superToken },
 			})
-			.json<AdminStats>();
+			.json<AdminStatsResponse>();
 	},
 };
 
@@ -309,7 +314,7 @@ export const healthApi = {
 	/**
 	 * 健康检查
 	 */
-	async check(): Promise<{ status: string; timestamp: string; module: string }> {
+	async check(): Promise<{ code: number; msg: string; data: { status: string; timestamp: string } }> {
 		return apiClient
 			.get('health')
 			.json();

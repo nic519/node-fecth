@@ -1,4 +1,4 @@
-import { ErrorResponseSchema, SuccessResponseSchema, UserConfigSchema } from '@/types/openapi-schemas';
+import { ErrorResponseSchema, SuccessResponseSchema, UserConfigSchema, UserDetailResponseSchema } from '@/types/openapi-schemas';
 import { createRoute } from '@hono/zod-openapi';
 import { ROUTE_PATHS, UserIdParamSchema, UserTokenParamSchema } from './common';
 
@@ -65,7 +65,7 @@ export const getUserDetailRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: UserConfigSchema,
+					schema: UserDetailResponseSchema,
 				},
 			},
 			description: '用户详情',

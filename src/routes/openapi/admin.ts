@@ -1,12 +1,18 @@
 import {
 	AdminLogSchema,
+	AdminLogsResponseSchema,
+	AdminStatsResponseSchema,
 	ConfigTemplateSchema,
+	ConfigTemplatesResponseSchema,
 	CreateConfigTemplateRequestSchema,
+	CreateTemplateResponseSchema,
 	CreateUserRequestSchema,
 	ErrorResponseSchema,
+	RefreshTrafficResponseSchema,
 	SuccessResponseSchema,
 	TrafficInfoSchema,
 	UserSummarySchema,
+	UsersListResponseSchema,
 } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
 import { ROUTE_PATHS, SuperAdminTokenParamSchema, UserIdParamSchema } from './common';
@@ -28,7 +34,7 @@ export const adminGetUsersRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.array(UserSummarySchema),
+					schema: UsersListResponseSchema,
 				},
 			},
 			description: '用户列表',
@@ -152,17 +158,7 @@ export const getSystemStatsRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							totalUsers: z.number(),
-							activeUsers: z.number(),
-							configCompleteRate: z.number(),
-							totalTraffic: z.number(),
-							usedTraffic: z.number(),
-							timestamp: z.string(),
-						}),
-					}),
+					schema: AdminStatsResponseSchema,
 				},
 			},
 			description: '系统统计信息',
@@ -195,14 +191,7 @@ export const refreshUserTrafficRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							message: z.string(),
-							userId: z.string(),
-							trafficInfo: TrafficInfoSchema,
-						}),
-					}),
+					schema: RefreshTrafficResponseSchema,
 				},
 			},
 			description: '刷新成功',
@@ -240,12 +229,7 @@ export const getConfigTemplatesRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							templates: z.array(ConfigTemplateSchema),
-						}),
-					}),
+					schema: ConfigTemplatesResponseSchema,
 				},
 			},
 			description: '配置模板列表',
@@ -282,13 +266,7 @@ export const createConfigTemplateRoute = createRoute({
 		201: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							message: z.string(),
-							template: ConfigTemplateSchema,
-						}),
-					}),
+					schema: CreateTemplateResponseSchema,
 				},
 			},
 			description: '模板创建成功',
@@ -468,12 +446,7 @@ export const getAdminLogsRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							logs: z.array(AdminLogSchema),
-						}),
-					}),
+					schema: AdminLogsResponseSchema,
 				},
 			},
 			description: '操作日志',

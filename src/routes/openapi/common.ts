@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 // =============================================================================
 // 路由路径常量定义
@@ -29,8 +30,12 @@ export type RoutePath = keyof typeof ROUTE_PATHS;
 
 // 健康状态 Schema
 export const HealthStatusSchema = z.object({
-	status: z.string().describe('服务状态'),
-	timestamp: z.string().describe('检查时间'),
+	code: z.literal(ResponseCodes.SUCCESS),
+	msg: z.string(),
+	data: z.object({
+		status: z.string().describe('服务状态'),
+		timestamp: z.string().describe('检查时间'),
+	}),
 });
 
 // =============================================================================
