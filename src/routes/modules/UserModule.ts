@@ -2,6 +2,10 @@ import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { ROUTE_PATHS, getUserDetailRoute, userUpdateRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { UserManager } from '@/module/userManager/userManager';
+import { AuthUtils } from '@/utils/authUtils';
+import { ResponseUtils } from '@/utils/responseUtils';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 /**
  * 用户管理路由模块
@@ -11,21 +15,6 @@ export class UserModule extends BaseRouteModule {
 
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		console.log(`🔧 ${this.moduleName}: 开始注册路由...`);
-		
-		// 简单的测试路由（不使用 OpenAPI 验证）
-		// app.post('/config/user/update/:uid', async (c) => {
-		// 	console.log(`🚀 简单测试路由被调用: ${c.req.param('uid')}`);
-		// 	console.log(`🚀 请求方法: ${c.req.method}`);
-		// 	console.log(`🚀 请求路径: ${c.req.path}`);
-		// 	console.log(`🚀 请求URL: ${c.req.url}`);
-			
-		// 	return c.json({ 
-		// 		message: '测试路由工作正常',
-		// 		uid: c.req.param('uid'),
-		// 		method: c.req.method,
-		// 		path: c.req.path 
-		// 	});
-		// });
 		
 		// 更新用户配置路由
 		console.log(`🔧 ${this.moduleName}: 注册 userUpdateRoute:`, {
@@ -39,22 +28,39 @@ export class UserModule extends BaseRouteModule {
 			console.log(`🔗 原始请求URL: ${c.req.raw.url}`);
 
 			try {
-				const userConfigHandler = new UserConfigHandler();
-				console.log(`📞 调用 UserConfigHandler.canHandle...`);
-				const canHandle = userConfigHandler.canHandle(c.req.raw);
-				console.log(`📞 UserConfigHandler.canHandle 结果: ${canHandle}`);
+				// 身份验证
+				console.log(`🔐 开始身份验证: ${uid}`);
+				const authResult = await AuthUtils.authenticate(c.req.raw, c.env, uid);
+				console.log(`✅ 用户验证成功: ${uid} (来源: ${authResult.meta.source})`);
+
+				// 从已验证的请求体中获取配置数据
+				const requestBody = c.req.valid('json'); // OpenAPI 已验证的数据
+				console.log(`📦 获取已验证的请求体:`, JSON.stringify(requestBody, null, 2));
 				
-				if (!canHandle) {
-					console.log(`❌ UserConfigHandler 拒绝处理此请求`);
-					return c.json({ error: 'Handler cannot handle this request' }, 400);
+				const userConfig = requestBody.config;
+				console.log(`📝 提取用户配置:`, JSON.stringify(userConfig, null, 2));
+
+				// 保存用户配置
+				const userManager = new UserManager(c.env);
+				const success = await userManager.saveUserConfig(uid, userConfig);
+				if (!success) {
+					return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 				}
-				
-				console.log(`📞 调用 UserConfigHandler.handle...`);
-				const response = await userConfigHandler.handle(c.req.raw, c.env);
-				console.log(`📞 UserConfigHandler.handle 返回结果:`, response?.status);
-				return (response || c.json({ error: 'Handler returned null' }, 500)) as any;
+
+				return ResponseUtils.jsonSuccess(c, {
+					message: 'User config saved successfully',
+					uid,
+					timestamp: new Date().toISOString(),
+				}, '用户配置保存成功');
 			} catch (error) {
 				console.error(`❌ UserModule 错误:`, error);
+				console.error(`❌ 错误堆栈:`, error instanceof Error ? error.stack : error);
+				
+				// 根据错误类型返回不同的响应
+				if (error instanceof Error && error.message.includes('Authentication failed')) {
+					return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, error.message);
+				}
+				
 				const errorResponse = this.handleError(error, '更新用户配置');
 				return c.json(errorResponse, 500) as any;
 			}

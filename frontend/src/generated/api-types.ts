@@ -82,20 +82,22 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        /** Format: uri */
-                        subscribe: string;
-                        accessToken: string;
-                        /** Format: uri */
-                        ruleUrl?: string;
-                        fileName?: string;
-                        multiPortMode?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
-                        appendSubList?: {
+                        config: {
                             /** Format: uri */
                             subscribe: string;
-                            flag: string;
-                            includeArea?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
-                        }[];
-                        excludeRegex?: string;
+                            accessToken: string;
+                            /** Format: uri */
+                            ruleUrl?: string;
+                            fileName?: string;
+                            multiPortMode?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
+                            appendSubList?: {
+                                /** Format: uri */
+                                subscribe: string;
+                                flag: string;
+                                includeArea?: ("TW" | "SG" | "JP" | "VN" | "HK" | "US")[];
+                            }[];
+                            excludeRegex?: string;
+                        };
                     };
                 };
             };

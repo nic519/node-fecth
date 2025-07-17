@@ -1,11 +1,11 @@
 // ===================================================================
 // 🤖 自动生成的API客户端 - 请勿手动修改
-// 生成时间: 2025-07-17T16:21:03.792Z
+// 生成时间: 2025-07-17T16:47:50.982Z
 // 基于: OpenAPI 3.1.0 规范
 // ===================================================================
 
 import ky from 'ky';
-import type { components } from './api-types';
+import type { paths, components } from './api-types';
 import type { 
 	UserDetailResponse, 
 	UsersListResponse, 

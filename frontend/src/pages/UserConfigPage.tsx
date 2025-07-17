@@ -24,7 +24,7 @@ export function UserConfigPage({ uid }: UserConfigPageProps) {
 
 	// 从 URL 获取 token
 	const token = new URLSearchParams(window.location.search).get('token') || '';
-	const subscribeURL = `/${uid}?token=${token}`;
+	const subscribeURL = `${window.location.origin}/${uid}?token=${token}`;
 
 	// 响应式控制：大屏幕默认显示帮助，小屏幕默认隐藏
 	useEffect(() => {
@@ -147,7 +147,7 @@ export function UserConfigPage({ uid }: UserConfigPageProps) {
 
 	const copySubscribeURL = async () => {
 		try {
-			await navigator.clipboard.writeText(window.location.origin + subscribeURL);
+			await navigator.clipboard.writeText(subscribeURL);
 			setCopySuccess(true);
 			setTimeout(() => setCopySuccess(false), 2000);
 		} catch (err) {
