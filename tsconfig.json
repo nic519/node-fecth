@@ -2,16 +2,16 @@
 	"compilerOptions": {
 		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
-    /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+		/* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
 		"target": "ES2020",
-    /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+		/* Specify a set of bundled library declaration files that describe the target runtime environment. */
 		"lib": ["ES2021", "DOM"],
-    /* Specify what JSX code is generated. */
+		/* Specify what JSX code is generated. */
 		"jsx": "react-jsx",
 
-    /* Specify what module code is generated. */
+		/* Specify what module code is generated. */
 		"module": "ESNext",
-    /* Specify how TypeScript looks up a file from a given module specifier. */
+		/* Specify how TypeScript looks up a file from a given module specifier. */
 		"moduleResolution": "bundler",
 		/* Base directory to resolve non-relative module names. */
 		"baseUrl": ".",
@@ -19,36 +19,36 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		},
-    /* Specify type package names to be included without being referenced in a source file. */
-		"types": ["@cloudflare/workers-types", "jest", "node"],
-    /* Enable importing .json files */
+		/* Specify type package names to be included without being referenced in a source file. */
+		"types": ["jest", "node"],
+		/* Enable importing .json files */
 		"resolveJsonModule": true,
 
-    /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
+		/* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
 		"allowJs": true,
-    /* Enable error reporting in type-checked JavaScript files. */
+		/* Enable error reporting in type-checked JavaScript files. */
 		"checkJs": false,
 
-    /* Disable emitting files from a compilation. */
+		/* Disable emitting files from a compilation. */
 		"noEmit": true,
 
-    /* Ensure that each file can be safely transpiled without relying on other imports. */
+		/* Ensure that each file can be safely transpiled without relying on other imports. */
 		"isolatedModules": true,
-    /* Allow 'import x from y' when a module doesn't have a default export. */
+		/* Allow 'import x from y' when a module doesn't have a default export. */
 		"allowSyntheticDefaultImports": true,
-    /* Ensure that casing is correct in imports. */
+		/* Ensure that casing is correct in imports. */
 		"forceConsistentCasingInFileNames": true,
 
-    /* Enable all strict type-checking options. */
+		/* Enable all strict type-checking options. */
 		"strict": true,
 
-    /* Skip type checking all .d.ts files. */
+		/* Skip type checking all .d.ts files. */
 		"skipLibCheck": true,
 
-    /* Enable interoperability between CommonJS and ES modules. */
+		/* Enable interoperability between CommonJS and ES modules. */
 		"esModuleInterop": true,
 
-    /* Enable JSX import source. */
+		/* Enable JSX import source. */
 		"jsxImportSource": "hono/jsx"
 	},
 	"include": ["src/**/*", "scripts/**/*", "functions/**/*", "worker-configuration.d.ts"],

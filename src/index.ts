@@ -1,6 +1,5 @@
-import { ExecutionContext } from '@cloudflare/workers-types';
-import { Router } from '@/routes/routesHandler';
 import { initGlobalConfig } from '@/config/global-config';
+import { Router } from '@/routes/routesHandler';
 
 class SubscriptionService {
 	private router = new Router();
@@ -21,4 +20,4 @@ export default {
 		const service = new SubscriptionService(env);
 		return service.handleRequest(request);
 	},
-}; 
+};
