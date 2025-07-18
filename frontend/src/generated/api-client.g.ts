@@ -32,7 +32,7 @@ import * as Oazapfts from "@oazapfts/runtime";
 import * as QS from "@oazapfts/runtime/query";
 export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
     headers: {},
-    baseUrl: (globalThis as any)?.import?.meta?.env?.VITE_API_BASE_URL || "http://localhost:8787",
+    baseUrl: "http://localhost:3000/api",
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {

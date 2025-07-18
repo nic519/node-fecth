@@ -14,8 +14,7 @@
 		"build:frontend": "yarn build:api && cd frontend && yarn build",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
-		"predev": "yarn convert-vars && yarn build:api && yarn type-check",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit && cd frontend && yarn type-check"
 	},
 	"devDependencies": {
 		"@types/jest": "^30.0.0",

@@ -16,9 +16,9 @@
  * ✅ 向后兼容 - 支持现有的导入方式
  *
  * 📋 **生成的文件**
- * - api-client.ts: oazapfts 生成的原始客户端
- * - api-adapters.ts: 基于函数名模式的重新导出文件
- * - openapi.json: OpenAPI 规范文档
+ * - api-client.g.ts: oazapfts 生成的原始客户端（新生成）
+ * - api-adapters.g.ts: 基于函数名模式的重新导出文件
+ * - 使用 scripts/openapi.json 作为 OpenAPI 规范源
  *
  * 🔄 **工作流程**
  * 1. 获取 OpenAPI 规范
@@ -42,6 +42,7 @@
  * ===================================================================
  */
 
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -62,12 +63,14 @@ class ZeroHardcodeApiGenerator {
 	private outputDir: string;
 	private clientPath: string;
 	private adaptersPath: string;
+	private openapiPath: string;
 	private apiBaseUrl: string;
 
 	constructor() {
 		this.outputDir = path.join(process.cwd(), 'frontend', 'src', 'generated');
-		this.clientPath = path.join(this.outputDir, 'api-client.ts');
+		this.clientPath = path.join(this.outputDir, 'api-client.g.ts');
 		this.adaptersPath = path.join(this.outputDir, 'api-adapters.g.ts');
+		this.openapiPath = path.join(process.cwd(), 'scripts', 'openapi.json');
 		this.apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000/api';
 	}
 
@@ -77,7 +80,10 @@ class ZeroHardcodeApiGenerator {
 	async generate(): Promise<void> {
 		console.log('🚀 开始生成零硬编码API客户端...');
 
-		// 3. 分析函数并生成模块化重新导出
+		// 1. 使用 oazapfts 生成原始客户端
+		await this.generateOazapftsClient();
+
+		// 2. 分析函数并生成模块化重新导出
 		await this.generateModularExports();
 
 		console.log('✅ 零硬编码API客户端生成完成!');
@@ -85,6 +91,51 @@ class ZeroHardcodeApiGenerator {
 		console.log(`  - ${this.clientPath}`);
 		console.log(`  - ${this.adaptersPath}`);
 		console.log('🎯 完全遵循Hono最佳实践，零硬编码，直接使用类型安全的原始函数');
+	}
+
+	/**
+	 * 使用 oazapfts 生成原始客户端
+	 */
+	private async generateOazapftsClient(): Promise<void> {
+		console.log('🔧 使用 oazapfts 生成原始客户端...');
+
+		try {
+			// 检查 OpenAPI 规范文件是否存在
+			if (!fs.existsSync(this.openapiPath)) {
+				throw new Error(`OpenAPI 规范文件不存在: ${this.openapiPath}`);
+			}
+
+			// 确保输出目录存在
+			if (!fs.existsSync(this.outputDir)) {
+				fs.mkdirSync(this.outputDir, { recursive: true });
+				console.log(`📁 创建输出目录: ${this.outputDir}`);
+			}
+
+			console.log(`📄 使用 OpenAPI 规范: ${this.openapiPath}`);
+			console.log(`📂 输出到: ${this.clientPath}`);
+
+			// 使用 oazapfts 生成客户端
+			const command = `npx oazapfts ${this.openapiPath} ${this.clientPath}`;
+			console.log(`🚀 执行命令: ${command}`);
+
+			execSync(command, {
+				stdio: 'inherit',
+				cwd: process.cwd(),
+			});
+
+			// 检查文件是否成功生成
+			if (!fs.existsSync(this.clientPath)) {
+				throw new Error(`oazapfts 生成失败，文件不存在: ${this.clientPath}`);
+			}
+
+			// 添加自定义配置和注释
+			this.addBasicConfiguration();
+
+			console.log('✅ oazapfts 客户端生成成功');
+		} catch (error) {
+			console.error('❌ oazapfts 客户端生成失败:', error);
+			throw error;
+		}
 	}
 
 	/**
@@ -239,7 +290,7 @@ export const ${f.name} = async (...args: Parameters<typeof _${f.name}>) => {
 // 导入原始函数（带下划线前缀）
 import {
   ${importNames}
-} from './api-client';
+} from './api-client.g';
 
 ${wrappedFunctions}
 
@@ -272,6 +323,10 @@ export default modules;
 // import { adminApi } from '@/generated/api-adapters.g';
 // const users = await adminApi.adminGetUsers(token);
 //
+// 方式4：直接使用原始客户端（如果需要）
+// import { getHealth, defaults } from '@/generated/api-client.g';
+// const result = await getHealth(); // 得到 { status: 200, data: { code: 0, msg: "", data: {...} } }
+//
 // ===================================================================
 `;
 	}
@@ -283,10 +338,7 @@ export default modules;
 		let content = fs.readFileSync(this.clientPath, 'utf-8');
 
 		// 修改默认配置
-		// content = content.replace(
-		// 	'baseUrl: "http://localhost:8787"',
-		// 	'baseUrl: (globalThis as any)?.import?.meta?.env?.VITE_API_BASE_URL || "http://localhost:8787"'
-		// );
+		content = content.replace(':8787', ':3000/api');
 
 		const configComment = `
 // ===================================================================
