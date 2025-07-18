@@ -1,11 +1,11 @@
+import { UserManager } from '@/module/userManager/userManager';
 import { UserConfigHandler } from '@/routes/handler/userConfigHandler';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { ROUTE_PATHS, getUserDetailRoute, userUpdateRoute } from '@/routes/openapi';
-import { OpenAPIHono } from '@hono/zod-openapi';
-import { UserManager } from '@/module/userManager/userManager';
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { AuthUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
  * 用户管理路由模块
@@ -15,11 +15,11 @@ export class UserModule extends BaseRouteModule {
 
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		console.log(`🔧 ${this.moduleName}: 开始注册路由...`);
-		
+
 		// 更新用户配置路由
 		console.log(`🔧 ${this.moduleName}: 注册 userUpdateRoute:`, {
 			method: userUpdateRoute.method,
-			path: userUpdateRoute.path
+			path: userUpdateRoute.path,
 		});
 		app.openapi(userUpdateRoute, async (c) => {
 			const uid = c.req.param('uid');
@@ -35,10 +35,7 @@ export class UserModule extends BaseRouteModule {
 
 				// 从已验证的请求体中获取配置数据
 				const requestBody = c.req.valid('json'); // OpenAPI 已验证的数据
-				console.log(`📦 获取已验证的请求体:`, JSON.stringify(requestBody, null, 2));
-				
 				const userConfig = requestBody.config;
-				console.log(`📝 提取用户配置:`, JSON.stringify(userConfig, null, 2));
 
 				// 保存用户配置
 				const userManager = new UserManager(c.env);
@@ -47,20 +44,23 @@ export class UserModule extends BaseRouteModule {
 					return ResponseUtils.jsonError(c, ResponseCodes.INTERNAL_ERROR, '保存用户配置失败');
 				}
 
-				return ResponseUtils.success({
-					uid,
-					timestamp: new Date().toISOString(),
-					message: '用户配置保存成功',
-				}, '用户配置保存成功');
+				return ResponseUtils.success(
+					{
+						uid,
+						timestamp: new Date().toISOString(),
+						message: '用户配置保存成功',
+					},
+					'用户配置保存成功'
+				);
 			} catch (error) {
 				console.error(`❌ UserModule 错误:`, error);
 				console.error(`❌ 错误堆栈:`, error instanceof Error ? error.stack : error);
-				
+
 				// 根据错误类型返回不同的响应
 				if (error instanceof Error && error.message.includes('Authentication failed')) {
 					return ResponseUtils.jsonError(c, ResponseCodes.UNAUTHORIZED, error.message);
 				}
-				
+
 				const errorResponse = this.handleError(error, '更新用户配置');
 				return c.json(errorResponse, 500) as any;
 			}

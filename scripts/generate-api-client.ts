@@ -42,12 +42,8 @@
  * ===================================================================
  */
 
-import { exec } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 /**
  * 函数信息接口
@@ -64,17 +60,15 @@ interface FunctionInfo {
  */
 class ZeroHardcodeApiGenerator {
 	private outputDir: string;
-	private openApiPath: string;
 	private clientPath: string;
 	private adaptersPath: string;
 	private apiBaseUrl: string;
 
 	constructor() {
 		this.outputDir = path.join(process.cwd(), 'frontend', 'src', 'generated');
-		this.openApiPath = path.join(this.outputDir, 'openapi.json');
 		this.clientPath = path.join(this.outputDir, 'api-client.ts');
 		this.adaptersPath = path.join(this.outputDir, 'api-adapters.ts');
-		this.apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:8787';
+		this.apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000/api';
 	}
 
 	/**
@@ -83,86 +77,14 @@ class ZeroHardcodeApiGenerator {
 	async generate(): Promise<void> {
 		console.log('🚀 开始生成零硬编码API客户端...');
 
-		// 1. 获取 OpenAPI 文档
-		await this.fetchOpenApiDoc();
-
-		// 2. 使用 oazapfts 生成原始客户端
-		await this.generateWithOazapfts();
-
 		// 3. 分析函数并生成模块化重新导出
 		await this.generateModularExports();
 
 		console.log('✅ 零硬编码API客户端生成完成!');
 		console.log(`📂 生成的文件:`);
-		console.log(`  - ${this.openApiPath}`);
 		console.log(`  - ${this.clientPath}`);
 		console.log(`  - ${this.adaptersPath}`);
 		console.log('🎯 完全遵循Hono最佳实践，零硬编码，直接使用类型安全的原始函数');
-	}
-
-	/**
-	 * 获取 OpenAPI 文档
-	 */
-	private async fetchOpenApiDoc(): Promise<void> {
-		console.log('📄 获取 OpenAPI 文档...');
-
-		if (!fs.existsSync(this.outputDir)) {
-			fs.mkdirSync(this.outputDir, { recursive: true });
-		}
-
-		const openApiUrl = `${this.apiBaseUrl}/openapi.json`;
-		try {
-			const response = await fetch(openApiUrl);
-
-			if (!response.ok) {
-				throw new Error(`无法获取 OpenAPI 文档: ${response.status} ${response.statusText}`);
-			}
-
-			const openApiDoc: any = await response.json();
-			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
-			console.log('✅ OpenAPI 文档获取成功');
-		} catch (error) {
-			console.error('❌ 获取 OpenAPI 文档失败:', error, openApiUrl);
-			console.log('💡 回退到本地生成...');
-			await this.generateOpenApiDocLocally();
-		}
-	}
-
-	/**
-	 * 本地生成 OpenAPI 文档
-	 */
-	private async generateOpenApiDocLocally(): Promise<void> {
-		try {
-			const { Router } = await import('@/routes/routesHandler');
-			const router = new Router();
-			const openApiDoc = router.getOpenAPIDocument();
-			fs.writeFileSync(this.openApiPath, JSON.stringify(openApiDoc, null, 2), 'utf-8');
-			console.log('✅ OpenAPI 文档本地生成成功');
-		} catch (error) {
-			console.error('❌ 本地生成失败:', error);
-			throw error;
-		}
-	}
-
-	/**
-	 * 使用 oazapfts 生成原始客户端
-	 */
-	private async generateWithOazapfts(): Promise<void> {
-		console.log('🔧 使用 oazapfts 生成原始客户端...');
-
-		try {
-			const { stdout, stderr } = await execAsync(`npx oazapfts "${this.openApiPath}" "${this.clientPath}"`);
-
-			if (stderr) {
-				console.warn('⚠️ oazapfts 警告:', stderr);
-			}
-
-			this.addBasicConfiguration();
-			console.log('✅ 原始客户端生成成功');
-		} catch (error) {
-			console.error('❌ oazapfts 生成失败:', error);
-			throw error;
-		}
 	}
 
 	/**
@@ -361,10 +283,10 @@ export default modules;
 		let content = fs.readFileSync(this.clientPath, 'utf-8');
 
 		// 修改默认配置
-		content = content.replace(
-			'baseUrl: "http://localhost:8787"',
-			'baseUrl: (globalThis as any)?.import?.meta?.env?.VITE_API_BASE_URL || "http://localhost:8787"'
-		);
+		// content = content.replace(
+		// 	'baseUrl: "http://localhost:8787"',
+		// 	'baseUrl: (globalThis as any)?.import?.meta?.env?.VITE_API_BASE_URL || "http://localhost:8787"'
+		// );
 
 		const configComment = `
 // ===================================================================
