@@ -22,6 +22,7 @@
 // // 直接调用函数，自动解包装响应
 // const result = await getHealth(); // 直接得到业务数据
 //
+
 /**
  * Node-Fetch API
  * 1.0.0
