@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-import { getConfigUserDetailByUid, postConfigUserUpdateByUid } from '@/generated/api-adapters';
+import { getConfigUserDetailByUid, postConfigUserUpdateByUid } from '@/generated/api-adapters.g';
 import type { ConfigResponse } from '@/types/user-config';
-import { configToYaml, yamlToConfig, validateConfig } from '../utils/configUtils';
+import { configToYaml, validateConfig, yamlToConfig } from '../utils/configUtils';
 
 export interface UseUserConfigProps {
 	uid: string;
@@ -46,28 +46,28 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const loadConfig = async () => {
 		try {
 			setLoading(true);
-					const response = await getConfigUserDetailByUid(uid, token);
-		
-		// 检查业务响应码
-		if (response.code !== 0) {
-			setError(response.msg || '获取配置失败');
-			return;
-		}
-		
-		// 从响应结构中提取配置数据
-		const configData = response.data;
+			const response = await getConfigUserDetailByUid(uid, token);
+
+			// 检查业务响应码
+			if (response.code !== 0) {
+				setError(response.msg || '获取配置失败');
+				return;
+			}
+
+			// 从响应结构中提取配置数据
+			const configData = response.data;
 			setConfig(configData);
 			setConfigSource((configData.meta as any).source || '环境变量');
 
 			// 将配置转换为 YAML 格式显示
 			const yamlContent = configToYaml(configData.config);
 			setConfigContent(yamlContent);
-			
+
 			// 验证配置
 			const validation = validateConfig(yamlContent);
 			setValidationErrors(validation.errors);
 			setConfigPreview(validation.configPreview);
-			
+
 			setError(null);
 			setConnectionStatus('connected');
 		} catch (err) {
@@ -89,16 +89,16 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-					const response = await postConfigUserUpdateByUid(uid, token, { config: newConfig });
-		
-		// 检查响应是否成功
-		if (response.code === 0) {
-			setSaveSuccess(true);
-			setLastSaved(new Date());
-			setTimeout(() => setSaveSuccess(false), 3000);
-		} else {
-			setError(response.msg || '保存配置失败');
-		}
+			const response = await postConfigUserUpdateByUid(uid, token, { config: newConfig });
+
+			// 检查响应是否成功
+			if (response.code === 0) {
+				setSaveSuccess(true);
+				setLastSaved(new Date());
+				setTimeout(() => setSaveSuccess(false), 3000);
+			} else {
+				setError(response.msg || '保存配置失败');
+			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : '保存配置失败');
 		} finally {
@@ -144,4 +144,4 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		saveConfig,
 		loadConfig,
 	};
-} 
+}

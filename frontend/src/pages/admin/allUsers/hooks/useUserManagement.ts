@@ -1,5 +1,5 @@
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-import { adminGetUsers, adminDeleteUser, adminUserCreate } from '@/generated/api-adapters';
+import { adminDeleteUser, adminGetUsers, adminUserCreate } from '@/generated/api-adapters.g';
 import type { UserConfig, UserSummary } from '@/types/user-config';
 import { useEffect, useState } from 'preact/hooks';
 
@@ -45,14 +45,14 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 			// 调用原始 API 函数（完全类型安全）
 			const response = await adminGetUsers(superToken);
 			console.log('users=-=', response);
-			
+
 			// 检查业务响应码
 			if (response.code !== 0) {
 				setError(response.msg || '获取用户列表失败');
 				setUsers([]);
 				return;
 			}
-			
+
 			// 从响应结构中提取用户列表数据
 			setUsers(response.data.users);
 		} catch (err) {
@@ -148,4 +148,4 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 		handleUserAction,
 		handleAddUser,
 	};
-}; 
+};

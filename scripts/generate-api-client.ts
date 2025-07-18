@@ -33,7 +33,7 @@
  * import { getHealth, getAdminUserAll } from '@/generated/api-client';
  *
  * // 或使用模块化接口
- * import { health, admin } from '@/generated/api-adapters';
+ * import { health, admin } from '@/generated/api-adapters.g';
  *
  * const healthStatus = await getHealth();
  * const users = await admin.getAdminUserAll(token);
@@ -67,7 +67,7 @@ class ZeroHardcodeApiGenerator {
 	constructor() {
 		this.outputDir = path.join(process.cwd(), 'frontend', 'src', 'generated');
 		this.clientPath = path.join(this.outputDir, 'api-client.ts');
-		this.adaptersPath = path.join(this.outputDir, 'api-adapters.ts');
+		this.adaptersPath = path.join(this.outputDir, 'api-adapters.g.ts');
 		this.apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000/api';
 	}
 
@@ -230,9 +230,9 @@ export const ${f.name} = async (...args: Parameters<typeof _${f.name}>) => {
 // - 支持直接导入和模块化导入两种方式
 // - 完全遵循 Hono 轻量级设计理念
 //
-// ⚠️  此文件自动生成，请勿手动编辑
+// ⚠️ 此文件自动生成，请勿手动编辑
 //
-// 🔄 要更新此文件，请运行：yarn generate:api
+// 🔄 不要更新此文件，请运行：yarn build:api
 //
 // ===================================================================
 
@@ -259,17 +259,17 @@ export default modules;
 // ===================================================================
 //
 // 方式1：直接使用解包装函数（推荐，直接得到业务数据）
-// import { getHealth, adminGetUsers } from '@/generated/api-adapters';
+// import { getHealth, adminGetUsers } from '@/generated/api-adapters.g';
 // const health = await getHealth(); // 直接得到 { code: 0, msg: "", data: {...} }
 // const users = await adminGetUsers(token); // 直接得到 { code: 0, msg: "", data: { users: [...], count: 10, timestamp: "..." } }
 //
 // 方式2：使用模块化接口
-// import { modules } from '@/generated/api-adapters';
+// import { modules } from '@/generated/api-adapters.g';
 // const health = await modules.health.getHealth();
 // const users = await modules.admin.adminGetUsers(token);
 //
 // 方式3：向后兼容
-// import { adminApi } from '@/generated/api-adapters';
+// import { adminApi } from '@/generated/api-adapters.g';
 // const users = await adminApi.adminGetUsers(token);
 //
 // ===================================================================
