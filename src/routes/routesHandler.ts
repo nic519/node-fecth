@@ -35,25 +35,10 @@ export class Router {
 	 * 设置 API 文档
 	 */
 	private setupDocumentation(): void {
-		// OpenAPI 文档路由
-		this.app.doc('/openapi.json', {
-			openapi: '3.0.0',
-			info: {
-				title: 'Node-Fetch API',
-				version: '1.0.0',
-				description: `订阅管理和用户配置 API
-
-## 功能特性
-- 🔐 用户配置管理
-- 📊 流量统计
-- 🔄 订阅转换
-- 👥 用户管理（管理员功能）
-- 🗄️ KV 存储服务
-
-## 认证说明
-大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。`,
-			},
-			servers: [{ url: 'http://localhost:8787', description: '开发服务器' }],
+		// 手动添加 OpenAPI 文档路由（确保可用）
+		this.app.get('/openapi.json', (c) => {
+			const openApiDoc = this.getOpenAPIDocument();
+			return c.json(openApiDoc);
 		});
 
 		// Swagger UI 文档路由（在开发环境才能访问）

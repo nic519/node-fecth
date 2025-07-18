@@ -7,7 +7,7 @@
 		"watch:api": "tsx scripts/watch-api-changes.ts",
 		"deploy": "yarn deploy:pages",
 		"deploy:pages": "yarn build:frontend && wrangler pages deploy frontend/dist",
-		"dev:backend": "wrangler dev --config wrangler.toml --port 8787",
+		"dev:backend": "wrangler pages dev --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"dev:with-watch": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\" \"yarn watch:api\"",
