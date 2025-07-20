@@ -11,15 +11,28 @@ export class AdminModule extends BaseRouteModule {
 	readonly moduleName = 'Admin';
 
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
+		
+		// 先校验superToken
+		app.use('/api/admin/*', async (c, next) => {
+			const superAdminManager = new SuperAdminManager(c.env);
+			const authResult = await superAdminManager.validateSuperAdmin(c.req.query('superToken') || '');
+			if (!authResult) {
+				return c.json({
+					code: ResponseCodes.UNAUTHORIZED,
+					msg: '超级管理员令牌无效',
+				}, 401);
+			}
+			await next();
+		});
+
 		// 删除用户配置路由
 		app.openapi(adminDeleteUserRoute, async (c) => {
 			const uid = c.req.param('uid');
 			console.log(`🔧 ${this.moduleName}: DELETE ${uid}`);
 
 			try {
-				const superAdminManager = new SuperAdminManager(c.env);
 				const adminId = 'super_admin'; // 简化实现，使用固定ID
-				
+				const superAdminManager = new SuperAdminManager(c.env);
 				await superAdminManager.deleteUser(uid, adminId);
 				
 				return c.json({

@@ -19,8 +19,8 @@ export const getSubscriptionRoute = createRoute({
 		query: z.object({
 			token: z.string().describe('用户访问令牌'),
 			type: z.enum(['clash', 'v2ray', 'ss']).optional().describe('配置文件类型'),
-			udp: z.boolean().optional().describe('是否启用UDP'),
-			download: z.boolean().optional().describe('是否作为下载文件'),
+			udp: z.coerce.boolean().optional().describe('是否启用UDP'),
+			download: z.coerce.boolean().optional().describe('是否作为下载文件'),
 		}),
 	},
 	responses: {

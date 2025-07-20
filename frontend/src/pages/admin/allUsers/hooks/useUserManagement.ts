@@ -43,8 +43,7 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 			setError(null);
 
 			// 调用原始 API 函数（完全类型安全）
-			const response = await adminGetUsers(superToken);
-			console.log('users=-=', response);
+			const response = await adminGetUsers(superToken); 
 
 			// 检查业务响应码
 			if (response.code !== 0) {

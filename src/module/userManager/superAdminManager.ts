@@ -17,6 +17,7 @@ export class SuperAdminManager {
 	 */
 	async validateSuperAdmin(token: string): Promise<boolean> {
 		const superAdminToken = this.env.SUPER_ADMIN_TOKEN;
+		console.log('superAdminToken', superAdminToken, token);
 		if (!superAdminToken) {
 			console.warn('SUPER_ADMIN_TOKEN 未配置');
 			return false;
