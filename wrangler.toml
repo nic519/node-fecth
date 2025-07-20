@@ -6,13 +6,6 @@ compatibility_flags = ["nodejs_compat"]
 # Pages 构建输出目录
 pages_build_output_dir = "frontend/dist"
 
-# 路由规则 - API 路由优先
-[[redirects]]
-from = "/api/*"
-to = "/api/:splat"
-status = 200
-
-
 
 # KV 绑定
 [[kv_namespaces]]
