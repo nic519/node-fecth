@@ -23,7 +23,7 @@
  * - 动态从服务器获取 OpenAPI 规范，使用临时文件处理，不保存实体文件
  *
  * 🔄 **工作流程**
- * 1. 动态获取 OpenAPI 规范（从服务器或本地缓存）
+ * 1. 动态获取 OpenAPI 规范（从本地开发服务器）
  * 2. 使用 oazapfts 生成原始客户端
  * 3. 分析生成的函数名模式
  * 4. 基于模式自动分组并重新导出
@@ -50,16 +50,11 @@
  *
  * 🚀 **命令行使用**
  * ```bash
- * # 使用默认服务器 (http://localhost:8787)
+ * # 生成API客户端（使用本地开发服务器）
  * yarn build:api
- *
- * # 指定自定义服务器地址
- * yarn build:api http://localhost:3000
- * yarn build:api https://api.example.com
  *
  * # 直接运行脚本
  * npx tsx scripts/generate-api-client.ts
- * npx tsx scripts/generate-api-client.ts http://localhost:3000
  * ```
  *
  * ===================================================================
@@ -72,9 +67,8 @@ import { ApiGenerator } from './api-generator';
  */
 async function main() {
 	try {
-		// 从命令行参数获取服务器URL
-		const args = process.argv.slice(2);
-		const serverUrl = args[0] || 'http://localhost:8787';
+		// 固定使用本地开发服务器
+		const serverUrl = 'http://localhost:8787';
 
 		console.log('🚀 零硬编码API客户端生成器启动');
 		console.log(`🔗 目标服务器: ${serverUrl}`);
@@ -85,9 +79,8 @@ async function main() {
 	} catch (error) {
 		console.error('❌ 零硬编码API客户端生成失败:', error);
 		console.log('\n💡 使用说明:');
-		console.log('  yarn build:api                    # 使用默认服务器 http://localhost:8787');
-		console.log('  yarn build:api http://localhost:3000  # 指定自定义服务器地址');
-		console.log('\n🔧 确保服务器已启动并运行在指定端口');
+		console.log('  yarn build:api                    # 生成API客户端');
+		console.log('\n🔧 确保本地开发服务器已启动在 http://localhost:8787');
 		process.exit(1);
 	}
 }

@@ -34,7 +34,6 @@ import * as QS from "@oazapfts/runtime/query";
 export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
     headers: {},
     baseUrl: "https://node-fetch-pages.pages.dev",
-    // baseUrl: "http://localhost:8787",
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {
