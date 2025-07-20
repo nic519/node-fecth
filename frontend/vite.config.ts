@@ -4,14 +4,6 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // 加载环境变量
-  const env = loadEnv(mode, process.cwd(), '')
-  
-  // 调试环境变量
-  console.log('🔍 Vite 配置调试信息:')
-  console.log('  Mode:', mode)
-  console.log('  VITE_API_BASE_URL from env:', env.VITE_API_BASE_URL)
-  console.log('  VITE_API_BASE_URL from process.env:', process.env.VITE_API_BASE_URL)
   
   return {
     plugins: [preact()],
@@ -35,12 +27,8 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
-    },
-    define: {
-      // 确保环境变量在构建时可用，包含默认值
-      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
-        env.VITE_API_BASE_URL || 'https://node-fetch-pages1.pages.dev'
-      ) 
     }
+    // 移除 define 配置，让 Vite 自动处理环境变量
+    // 这样 Pages 后台设置的环境变量就能正常工作了
   }
 }) 

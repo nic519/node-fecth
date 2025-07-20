@@ -43,7 +43,7 @@ export class Router {
 
 		// Swagger UI 文档路由（在开发环境才能访问）
 		if (GlobalConfig.isDev) {
-			this.app.get('/docs', swaggerUI({ url: '/api/openapi.json' }));
+			this.app.get('/api/docs', swaggerUI({ url: '/api/openapi.json' }));
 		}
 	}
 

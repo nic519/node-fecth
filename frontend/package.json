@@ -6,9 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "generate:api": "cd .. && yarn generate:api"
+    "preview": "vite preview"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",

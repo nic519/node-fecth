@@ -8,7 +8,7 @@ import { HealthStatusSchema, SuperAdminTokenParamSchema } from './common';
 
 export const healthRoute = createRoute({
 	method: 'get',
-	path: '/health',
+	path: '/api/health',
 	summary: '健康检查',
 	description: '检查服务状态',
 	tags: ['系统'],

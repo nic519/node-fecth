@@ -548,6 +548,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iarna/toml@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@iarna/toml@npm:2.2.5"
+  checksum: b63b2b2c4fd67969a6291543ada0303d45593801ee744b60f5390f183c03d9192bc67a217abb24be945158f1935f02840d9ffff40c0142aa171b5d3b6b6a3ea5
+  languageName: node
+  linkType: hard
+
 "@img/sharp-darwin-arm64@npm:0.33.5":
   version: 0.33.5
   resolution: "@img/sharp-darwin-arm64@npm:0.33.5"
@@ -1298,6 +1305,13 @@ __metadata:
   version: 2.0.4
   resolution: "detect-libc@npm:2.0.4"
   checksum: 3d186b7d4e16965e10e21db596c78a4e131f9eee69c0081d13b85e6a61d7448d3ba23fe7997648022bdfa3b0eb4cc3c289a44c8188df949445a20852689abef6
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^17.2.0":
+  version: 17.2.0
+  resolution: "dotenv@npm:17.2.0"
+  checksum: 389d25dac7afeb1890bcd113c84d8d8175e95967559e90b8a6c8dc19bfc81ad3ede0036873c459cd8de1f90055a88232ddf74c550bcd2ea7a94b8d570f116470
   languageName: node
   linkType: hard
 
@@ -2185,11 +2199,13 @@ __metadata:
   dependencies:
     "@hono/swagger-ui": ^0.5.2
     "@hono/zod-openapi": ^0.19.10
+    "@iarna/toml": ^2.2.5
     "@oazapfts/runtime": ^1.0.4
     "@types/fs-extra": ^11.0.4
     "@types/jest": ^30.0.0
     "@types/node": ^24.0.3
     concurrently: ^9.2.0
+    dotenv: ^17.2.0
     fs-extra: ^11.3.0
     hono: ^4.8.0
     oazapfts: ^6.3.0

@@ -18,7 +18,11 @@ NODE_ENV = "development"
 SUPER_ADMIN_TOKEN = "123"
 DB_USER = "your-db-user-config"
 VITE_API_BASE_URL="http://localhost:8787"
- 
+
+# 生产环境变量
+[env.production.vars]
+VITE_API_BASE_URL="https://world.1024.dev"
+
 # 静态资源目录配置
 pages_build_output_dir = "public"
 

@@ -5,15 +5,14 @@
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
 		"deploy": "yarn deploy:pages",
-		"deploy:pages": "VITE_API_BASE_URL=https://world.1024.hair yarn build:frontend && wrangler pages deploy public",
+		"deploy:pages": "yarn build:frontend && wrangler pages deploy public",
 		"dev:backend": "wrangler pages dev public --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
-		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"", 
+		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"build:frontend": "tsx scripts/build-frontend.ts",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
-		"type-check": "tsc --noEmit && cd frontend && yarn type-check",
-		"clean:build": "tsx scripts/clean-build.ts"
+		"type-check": "tsc --noEmit && cd frontend && yarn type-check"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",
@@ -29,7 +28,9 @@
 	"dependencies": {
 		"@hono/swagger-ui": "^0.5.2",
 		"@hono/zod-openapi": "^0.19.10",
+		"@iarna/toml": "^2.2.5",
 		"@oazapfts/runtime": "^1.0.4",
+		"dotenv": "^17.2.0",
 		"hono": "^4.8.0",
 		"yaml": "^2.7.0",
 		"zod": "^3.25.67"
