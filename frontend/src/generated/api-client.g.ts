@@ -33,7 +33,7 @@ import * as Oazapfts from "@oazapfts/runtime";
 import * as QS from "@oazapfts/runtime/query";
 export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
     headers: {},
-    baseUrl: "/",
+    baseUrl: "http://localhost:3000/api",
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {
@@ -42,7 +42,7 @@ export const servers = {
 /**
  * 健康检查
  */
-export function getHealth(opts?: Oazapfts.RequestOpts) {
+export function getApiHealth(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {
@@ -55,7 +55,7 @@ export function getHealth(opts?: Oazapfts.RequestOpts) {
                 timestamp: string;
             };
         };
-    }>("/health", {
+    }>("/api/health", {
         ...opts
     });
 }

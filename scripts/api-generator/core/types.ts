@@ -25,9 +25,7 @@ export interface ApiGeneratorConfig {
 	/** 服务器URL */
 	serverUrl: string;
 	/** 输出目录 */
-	outputDir: string;
-	/** API 基础URL */
-	apiBaseUrl: string;
+	outputDir: string; 
 	/** 客户端文件路径 */
 	clientPath: string;
 	/** 适配器文件路径 */

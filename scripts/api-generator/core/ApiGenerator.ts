@@ -100,7 +100,7 @@ export class ApiGenerator {
 		await this.oazapftsGenerator.generateClient(this.config.tempOpenapiPath, this.config.clientPath);
 
 		// 添加自定义配置和注释
-		this.fileManager.addBasicConfiguration(this.config.clientPath, this.config.apiBaseUrl);
+		this.fileManager.addBasicConfiguration(this.config.clientPath, this.config.serverUrl);
 	}
 
 	/**

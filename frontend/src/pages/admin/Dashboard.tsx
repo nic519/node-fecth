@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-import { getHealth } from '@/generated/api-adapters.g';
+import { getApiHealth } from '@/generated/api-adapters.g';
 import type { AdminStats } from '@/types/user-config';
 
 export function AdminDashboard() {
@@ -23,7 +23,7 @@ export function AdminDashboard() {
 		try {
 			setLoading(true);
 			// 使用健康检查API作为基础状态信息
-			const healthResponse = await getHealth();
+			const healthResponse = await getApiHealth();
 
 			// 检查业务响应码
 			if (healthResponse.code !== 0) {

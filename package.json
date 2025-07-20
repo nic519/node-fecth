@@ -12,7 +12,7 @@
 		"build:frontend": "tsx scripts/build-frontend.ts",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
-		"type-check": "tsc --noEmit && cd frontend && yarn type-check"
+		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",

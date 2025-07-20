@@ -18,7 +18,7 @@
 
 // 导入原始函数（带下划线前缀）
 import {
-  getHealth as _getHealth,
+  getApiHealth as _getApiHealth,
   postApiConfigUserUpdateByUid as _postApiConfigUserUpdateByUid,
   getApiConfigUserDetailByUid as _getApiConfigUserDetailByUid,
   adminDeleteUser as _adminDeleteUser,
@@ -29,9 +29,9 @@ import {
   getApiXByUid as _getApiXByUid
 } from './api-client.g';
 
-// 解包装的 getHealth 函数
-export const getHealth = async (...args: Parameters<typeof _getHealth>) => {
-  const response = await _getHealth(...args);
+// 解包装的 getApiHealth 函数
+export const getApiHealth = async (...args: Parameters<typeof _getApiHealth>) => {
+  const response = await _getApiHealth(...args);
   return response.data;
 };
 
@@ -87,7 +87,7 @@ export const getApiXByUid = async (...args: Parameters<typeof _getApiXByUid>) =>
 export const modules = {
   // health 模块 (1 个函数)
   health: {
-    getHealth
+    getApiHealth
   },
 
   // userConfig 模块 (2 个函数)

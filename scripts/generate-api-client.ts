@@ -68,7 +68,7 @@ import { ApiGenerator } from './api-generator';
 async function main() {
 	try {
 		// 固定使用本地开发服务器
-		const serverUrl = '/';
+		const serverUrl = 'http://localhost:8787';
 
 		console.log('🚀 零硬编码API客户端生成器启动');
 		console.log(`🔗 目标服务器: ${serverUrl}`);
