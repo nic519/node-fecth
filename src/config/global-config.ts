@@ -9,7 +9,7 @@ export interface GlobalConfigType {
 
 export const GlobalConfig: GlobalConfigType = {
 	isDev: false,
-	workerUrl: 'https://node.1024.hair',
+	workerUrl: 'https://world.1024.hair',
 	ruleUrl: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml',
 };
 

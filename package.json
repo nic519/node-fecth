@@ -5,7 +5,7 @@
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
 		"deploy": "yarn deploy:pages",
-		"deploy:pages": "yarn build:frontend && wrangler pages deploy public",
+		"deploy:pages": "VITE_API_BASE_URL=https://world.1024.hair yarn build:frontend && wrangler pages deploy public",
 		"dev:backend": "wrangler pages dev public --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"", 
