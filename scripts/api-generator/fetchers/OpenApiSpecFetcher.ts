@@ -21,7 +21,7 @@ export class OpenApiSpecFetcher implements IOpenApiSpecFetcher {
 		console.log(`🔗 服务器地址: ${serverUrl}`);
 
 		try {
-			const response = await fetch(`${serverUrl}/openapi.json`);
+			const response = await fetch(`${serverUrl}/api/openapi.json`);
 
 			if (!response.ok) {
 				throw new Error(`HTTP ${response.status}: ${response.statusText}`);

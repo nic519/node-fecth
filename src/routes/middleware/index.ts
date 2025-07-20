@@ -1,4 +1,3 @@
-import { IgnoreHandler } from '@/routes/handler/ignoreHandler';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -33,16 +32,6 @@ export class MiddlewareManager {
 			app.use('*', responseValidatorMiddleware());
 			console.log('🔍 已启用响应格式验证中间件（开发环境）');
 		}
-
-		// 静态资源忽略中间件
-		app.use('*', async (c, next) => {
-			const ignoreHandler = new IgnoreHandler();
-			const ignoreResponse = await ignoreHandler.handle(c.req.raw, c.env);
-			if (ignoreResponse) {
-				return ignoreResponse;
-			}
-			await next();
-		});
 
 		// 全局调试中间件
 		app.use('*', (c, next) => {

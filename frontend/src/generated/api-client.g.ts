@@ -33,7 +33,8 @@ import * as Oazapfts from "@oazapfts/runtime";
 import * as QS from "@oazapfts/runtime/query";
 export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
     headers: {},
-    baseUrl: "http://localhost:3000/api",
+    baseUrl: "https://node-fetch-pages.pages.dev",
+    // baseUrl: "http://localhost:8787",
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {
@@ -62,7 +63,7 @@ export function getHealth(opts?: Oazapfts.RequestOpts) {
 /**
  * 更新用户配置
  */
-export function postConfigUserUpdateByUid(uid: string, token: string, body?: {
+export function postApiConfigUserUpdateByUid(uid: string, token: string, body?: {
     config: {
         subscribe: string;
         accessToken: string;
@@ -98,7 +99,7 @@ export function postConfigUserUpdateByUid(uid: string, token: string, body?: {
             msg: string;
             data?: any;
         };
-    }>(`/config/user/update/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/config/user/update/${encodeURIComponent(uid)}${QS.query(QS.explode({
         token
     }))}`, oazapfts.json({
         ...opts,
@@ -109,7 +110,7 @@ export function postConfigUserUpdateByUid(uid: string, token: string, body?: {
 /**
  * 用户详情
  */
-export function getConfigUserDetailByUid(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
+export function getApiConfigUserDetailByUid(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {
@@ -150,7 +151,7 @@ export function getConfigUserDetailByUid(uid: string, token: string, opts?: Oaza
             msg: string;
             data?: any;
         };
-    }>(`/config/user/detail/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/config/user/detail/${encodeURIComponent(uid)}${QS.query(QS.explode({
         token
     }))}`, {
         ...opts
@@ -181,7 +182,7 @@ export function adminDeleteUser(uid: string, superToken: string, opts?: Oazapfts
             msg: string;
             data?: any;
         };
-    }>(`/admin/user/delete/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/admin/user/delete/${encodeURIComponent(uid)}${QS.query(QS.explode({
         superToken
     }))}`, {
         ...opts
@@ -234,7 +235,7 @@ export function adminUserCreate(superToken: string, body?: {
             msg: string;
             data?: any;
         };
-    }>(`/admin/user/create${QS.query(QS.explode({
+    }>(`/api/admin/user/create${QS.query(QS.explode({
         superToken
     }))}`, oazapfts.json({
         ...opts,
@@ -283,7 +284,7 @@ export function adminGetUsers(superToken: string, opts?: Oazapfts.RequestOpts) {
             msg: string;
             data?: any;
         };
-    }>(`/admin/user/all${QS.query(QS.explode({
+    }>(`/api/admin/user/all${QS.query(QS.explode({
         superToken
     }))}`, {
         ...opts
@@ -292,7 +293,7 @@ export function adminGetUsers(superToken: string, opts?: Oazapfts.RequestOpts) {
 /**
  * 存储内容获取操作
  */
-export function getStorage({ action, key, token }: {
+export function getApiStorage({ action, key, token }: {
     action?: string;
     key?: string;
     token?: string;
@@ -314,7 +315,7 @@ export function getStorage({ action, key, token }: {
             msg: string;
             data?: any;
         };
-    }>(`/storage${QS.query(QS.explode({
+    }>(`/api/storage${QS.query(QS.explode({
         action,
         key,
         token
@@ -325,7 +326,7 @@ export function getStorage({ action, key, token }: {
 /**
  * KV 存储操作
  */
-export function getKv({ key, $namespace, token }: {
+export function getApiKv({ key, $namespace, token }: {
     key?: string;
     $namespace?: string;
     token?: string;
@@ -354,7 +355,7 @@ export function getKv({ key, $namespace, token }: {
             msg: string;
             data?: any;
         };
-    }>(`/kv${QS.query(QS.explode({
+    }>(`/api/kv${QS.query(QS.explode({
         key,
         "namespace": $namespace,
         token
@@ -365,7 +366,7 @@ export function getKv({ key, $namespace, token }: {
 /**
  * 获取订阅配置
  */
-export function getByUid(uid: string, token: string, { $type, udp, download }: {
+export function getApiXByUid(uid: string, token: string, { $type, udp, download }: {
     $type?: "clash" | "v2ray" | "ss";
     udp?: boolean;
     download?: boolean;
@@ -387,7 +388,7 @@ export function getByUid(uid: string, token: string, { $type, udp, download }: {
             msg: string;
             data?: any;
         };
-    }>(`/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/x/${encodeURIComponent(uid)}${QS.query(QS.explode({
         token,
         "type": $type,
         udp,

@@ -55,12 +55,12 @@ export class SuperAdminHandler implements RouteHandler {
 
 	private setupRoutes() {
 		// 系统统计
-		this.app.get('/admin/stats', async (c) => {
+		this.app.get('/api/admin/stats', async (c) => {
 			return await this.getSystemStats(c);
 		});
 
 		// 用户管理路由组
-		const usersRoute = this.app.basePath('/admin/user');
+		const usersRoute = this.app.basePath('/api/admin/user');
 
 		// 获取用户列表
 		usersRoute.get('/all', async (c) => {
@@ -85,7 +85,7 @@ export class SuperAdminHandler implements RouteHandler {
 		});
 
 		// 配置模板管理路由组
-		const templatesRoute = this.app.basePath('/admin/templates');
+		const templatesRoute = this.app.basePath('/api/admin/templates');
 
 		// 获取配置模板列表
 		templatesRoute.get('/', async (c) => {

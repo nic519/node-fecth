@@ -3,10 +3,6 @@ name = "node-fetch-pages"
 compatibility_date = "2025-02-14"
 compatibility_flags = ["nodejs_compat"]
 
-# Pages 构建输出目录
-pages_build_output_dir = "frontend/dist"
-
-
 # KV 绑定
 [[kv_namespaces]]
 binding = "KV_BINDING"
@@ -21,6 +17,9 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 NODE_ENV = "production"
 SUPER_ADMIN_TOKEN = "your-secret-token"
 DB_USER = "your-db-user-config"
+
+# 静态资源目录配置
+pages_build_output_dir = "public"
 
 # 开发模式配置
 [dev]

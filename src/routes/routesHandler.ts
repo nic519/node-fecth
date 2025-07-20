@@ -36,14 +36,14 @@ export class Router {
 	 */
 	private setupDocumentation(): void {
 		// 手动添加 OpenAPI 文档路由（确保可用）
-		this.app.get('/openapi.json', (c) => {
+		this.app.get('/api/openapi.json', (c) => {
 			const openApiDoc = this.getOpenAPIDocument();
 			return c.json(openApiDoc);
 		});
 
 		// Swagger UI 文档路由（在开发环境才能访问）
 		if (GlobalConfig.isDev) {
-			this.app.get('/docs', swaggerUI({ url: '/openapi.json' }));
+			this.app.get('/docs', swaggerUI({ url: '/api/openapi.json' }));
 		}
 	}
 
@@ -68,8 +68,7 @@ export class Router {
 				{
 					error: 'Not Found',
 					path: c.req.path,
-					method: c.req.method,
-					availableRoutes: ['/health', '/api/config/users/:uid', '/create/user', '/:uid?token=<token>'],
+					method: c.req.method, 
 					registeredModules: this.routeRegistry.getRegisteredModules(),
 				},
 				404

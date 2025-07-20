@@ -7,19 +7,19 @@ import { ResponseCodes } from '@/types/openapi-schemas';
 
 export const ROUTE_PATHS = {
 	// === OpenAPI 标准路由 ===
-	health: '/health',
+	health: '/api/health',
 	// 用户配置路由
-	userUpdate: '/config/user/update/{uid}',
-	userDetail: '/config/user/detail/{uid}',
+	userUpdate: '/api/config/user/update/{uid}',
+	userDetail: '/api/config/user/detail/{uid}',
 	// 管理员路由
-	adminUserCreate: '/admin/user/create',
-	adminUserDelete: '/admin/user/delete/{uid}',
-	allUsers: '/admin/user/all',
+	adminUserCreate: '/api/admin/user/create',
+	adminUserDelete: '/api/admin/user/delete/{uid}',
+	allUsers: '/api/admin/user/all',
 
 	// === 非 OpenAPI 路由（路径常量） ===
-	storage: '/storage',
-	kv: '/kv',
-	subscription: '/{uid}',
+	storage: '/api/storage',
+	kv: '/api/kv',
+	subscription: 'api/x/{uid}',
 } as const;
 
 export type RoutePath = keyof typeof ROUTE_PATHS;

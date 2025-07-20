@@ -123,7 +123,8 @@ dist
 
 # https://nextjs.org/blog/next-9-1#public-directory-support
 
-# public
+# 构建产物目录
+/public/
 
 # vuepress build output
 

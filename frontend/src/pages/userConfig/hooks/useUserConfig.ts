@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-import { getConfigUserDetailByUid, postConfigUserUpdateByUid } from '@/generated/api-adapters.g';
-import type { ConfigResponse } from '@/types/user-config';
+	import { getApiConfigUserDetailByUid, postApiConfigUserUpdateByUid } from '@/generated/api-adapters.g';
+	import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, validateConfig, yamlToConfig } from '../utils/configUtils';
 
 export interface UseUserConfigProps {
@@ -46,7 +46,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const loadConfig = async () => {
 		try {
 			setLoading(true);
-			const response = await getConfigUserDetailByUid(uid, token);
+			const response = await getApiConfigUserDetailByUid(uid, token);
 
 			// 检查业务响应码
 			if (response.code !== 0) {
@@ -89,7 +89,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-			const response = await postConfigUserUpdateByUid(uid, token, { config: newConfig });
+			const response = await postApiConfigUserUpdateByUid(uid, token, { config: newConfig });
 
 			// 检查响应是否成功
 			if (response.code === 0) {

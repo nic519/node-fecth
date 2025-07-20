@@ -19,14 +19,14 @@
 // 导入原始函数（带下划线前缀）
 import {
   getHealth as _getHealth,
-  postConfigUserUpdateByUid as _postConfigUserUpdateByUid,
-  getConfigUserDetailByUid as _getConfigUserDetailByUid,
+  postApiConfigUserUpdateByUid as _postApiConfigUserUpdateByUid,
+  getApiConfigUserDetailByUid as _getApiConfigUserDetailByUid,
   adminDeleteUser as _adminDeleteUser,
   adminUserCreate as _adminUserCreate,
   adminGetUsers as _adminGetUsers,
-  getStorage as _getStorage,
-  getKv as _getKv,
-  getByUid as _getByUid
+  getApiStorage as _getApiStorage,
+  getApiKv as _getApiKv,
+  getApiXByUid as _getApiXByUid
 } from './api-client.g';
 
 // 解包装的 getHealth 函数
@@ -35,15 +35,15 @@ export const getHealth = async (...args: Parameters<typeof _getHealth>) => {
   return response.data;
 };
 
-// 解包装的 postConfigUserUpdateByUid 函数
-export const postConfigUserUpdateByUid = async (...args: Parameters<typeof _postConfigUserUpdateByUid>) => {
-  const response = await _postConfigUserUpdateByUid(...args);
+// 解包装的 postApiConfigUserUpdateByUid 函数
+export const postApiConfigUserUpdateByUid = async (...args: Parameters<typeof _postApiConfigUserUpdateByUid>) => {
+  const response = await _postApiConfigUserUpdateByUid(...args);
   return response.data;
 };
 
-// 解包装的 getConfigUserDetailByUid 函数
-export const getConfigUserDetailByUid = async (...args: Parameters<typeof _getConfigUserDetailByUid>) => {
-  const response = await _getConfigUserDetailByUid(...args);
+// 解包装的 getApiConfigUserDetailByUid 函数
+export const getApiConfigUserDetailByUid = async (...args: Parameters<typeof _getApiConfigUserDetailByUid>) => {
+  const response = await _getApiConfigUserDetailByUid(...args);
   return response.data;
 };
 
@@ -65,21 +65,21 @@ export const adminGetUsers = async (...args: Parameters<typeof _adminGetUsers>) 
   return response.data;
 };
 
-// 解包装的 getStorage 函数
-export const getStorage = async (...args: Parameters<typeof _getStorage>) => {
-  const response = await _getStorage(...args);
+// 解包装的 getApiStorage 函数
+export const getApiStorage = async (...args: Parameters<typeof _getApiStorage>) => {
+  const response = await _getApiStorage(...args);
   return response.data;
 };
 
-// 解包装的 getKv 函数
-export const getKv = async (...args: Parameters<typeof _getKv>) => {
-  const response = await _getKv(...args);
+// 解包装的 getApiKv 函数
+export const getApiKv = async (...args: Parameters<typeof _getApiKv>) => {
+  const response = await _getApiKv(...args);
   return response.data;
 };
 
-// 解包装的 getByUid 函数
-export const getByUid = async (...args: Parameters<typeof _getByUid>) => {
-  const response = await _getByUid(...args);
+// 解包装的 getApiXByUid 函数
+export const getApiXByUid = async (...args: Parameters<typeof _getApiXByUid>) => {
+  const response = await _getApiXByUid(...args);
   return response.data;
 };
 
@@ -92,8 +92,8 @@ export const modules = {
 
   // userConfig 模块 (2 个函数)
   userConfig: {
-    postConfigUserUpdateByUid,
-    getConfigUserDetailByUid
+    postApiConfigUserUpdateByUid,
+    getApiConfigUserDetailByUid
   },
 
   // admin 模块 (3 个函数)
@@ -105,13 +105,13 @@ export const modules = {
 
   // storage 模块 (2 个函数)
   storage: {
-    getStorage,
-    getKv
+    getApiStorage,
+    getApiKv
   },
 
   // subscription 模块 (1 个函数)
   subscription: {
-    getByUid
+    getApiXByUid
   }
 };
 

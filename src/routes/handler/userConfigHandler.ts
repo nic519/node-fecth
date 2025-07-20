@@ -52,7 +52,7 @@ export class UserConfigHandler implements RouteHandler {
 
 	private setupRoutes() {
 		// 用户配置管理路由组
-		const configRoute = this.app.basePath('/config/user');
+		const configRoute = this.app.basePath('/api/config/user');
 
 		// 获取用户配置详情 - GET /config/user/detail/:uid
 		configRoute.get('/detail/:uid', async (c) => {
