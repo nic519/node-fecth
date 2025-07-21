@@ -16,10 +16,8 @@ npm install
 创建 `.env` 文件：
 
 ```bash
-# API 服务地址
-VITE_API_BASE_URL=http://localhost:8787
 
-# 开发环境配置  
+# 开发环境配置
 NODE_ENV=development
 ```
 
@@ -103,8 +101,8 @@ const stats = await adminApi.getStats(superToken);
 
 ```tsx
 <div className="bg-white rounded-lg shadow-md p-6">
-  <h1 className="text-2xl font-bold text-gray-900 mb-4">标题</h1>
-  <p className="text-gray-600">内容</p>
+	<h1 className="text-2xl font-bold text-gray-900 mb-4">标题</h1>
+	<p className="text-gray-600">内容</p>
 </div>
 ```
 
@@ -115,7 +113,6 @@ const stats = await adminApi.getStats(superToken);
 1. 连接 Git 仓库
 2. 设置构建命令：`npm run build`
 3. 设置输出目录：`dist`
-4. 配置环境变量：`VITE_API_BASE_URL`
 
 ### 路由配置
 
@@ -123,13 +120,14 @@ const stats = await adminApi.getStats(superToken);
 
 ```json
 {
-  "version": 1,
-  "include": ["/api/*"],
-  "exclude": ["/*"]
+	"version": 1,
+	"include": ["/api/*"],
+	"exclude": ["/*"]
 }
 ```
 
 这样配置后：
+
 - 前端页面由 Cloudflare Pages 处理
 - API 请求转发到 Workers 后端
 
@@ -178,4 +176,4 @@ npm run preview
 2. 文件名使用 camelCase
 3. 样式使用 TailwindCSS 类名
 4. API 调用统一错误处理
-5. 所有异步操作添加 loading 状态 
+5. 所有异步操作添加 loading 状态
