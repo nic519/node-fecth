@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 
 export function useHelpDisplay() {
 	const [showHelp, setShowHelp] = useState(false);
@@ -26,4 +26,4 @@ export function useHelpDisplay() {
 		showHelp,
 		toggleHelp,
 	};
-} 
+}

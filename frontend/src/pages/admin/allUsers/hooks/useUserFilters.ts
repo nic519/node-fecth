@@ -1,5 +1,5 @@
 import type { UserSummary } from '@/types/user-config';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 
 export interface UseUserFiltersProps {
 	users: UserSummary[];
@@ -37,9 +37,7 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 
 		// 根据搜索词过滤
 		if (searchTerm) {
-			filtered = filtered.filter((user) => 
-				user.uid.toLowerCase().includes(searchTerm.toLowerCase())
-			);
+			filtered = filtered.filter((user) => user.uid.toLowerCase().includes(searchTerm.toLowerCase()));
 		}
 
 		// 根据配置状态过滤
@@ -68,4 +66,4 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 		setStatusFilter,
 		setSourceFilter,
 	};
-}; 
+};

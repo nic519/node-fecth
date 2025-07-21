@@ -1,17 +1,29 @@
-import { useUserConfig } from './hooks/useUserConfig';
-import { useHelpDisplay } from './hooks/useHelpDisplay';
-import { Header } from './components/Header';
+import { useParams } from 'react-router-dom';
 import { ConfigEditor } from './components/ConfigEditor';
+import { Header } from './components/Header';
 import { HelpSidebar } from './components/HelpSidebar';
+import { useHelpDisplay } from './hooks/useHelpDisplay';
+import { useUserConfig } from './hooks/useUserConfig';
 
-interface UserConfigPageProps {
-	uid: string;
-}
+export function UserConfigPage() {
+	// 从 React Router 获取路由参数
+	const { uid } = useParams<{ uid: string }>();
 
-export function UserConfigPage({ uid }: UserConfigPageProps) {
 	// 从 URL 获取 token
 	const token = new URLSearchParams(window.location.search).get('token') || '';
-	
+
+	// 确保 uid 存在
+	if (!uid) {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+					<h1 className="text-2xl font-bold text-red-600 mb-4">错误</h1>
+					<p className="text-gray-600 mb-4">缺少用户ID参数</p>
+				</div>
+			</div>
+		);
+	}
+
 	// 使用自定义 Hook 管理状态
 	const userConfigState = useUserConfig({ uid, token });
 	const { showHelp, toggleHelp } = useHelpDisplay();

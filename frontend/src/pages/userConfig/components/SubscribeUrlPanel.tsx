@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { copyToClipboard } from '../utils/configUtils';
 
 interface SubscribeUrlPanelProps {
@@ -8,7 +8,7 @@ interface SubscribeUrlPanelProps {
 
 export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 	const [copySuccess, setCopySuccess] = useState(false);
-	
+
 	const subscribeURL = `${window.location.origin}/api/x/${uid}?token=${token}`;
 
 	const handleCopySubscribeURL = async () => {
@@ -20,19 +20,13 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 	};
 
 	const handlePreviewSubscribeURL = async () => {
-		window.open(subscribeURL+'&download=false', '_blank');
+		window.open(subscribeURL + '&download=false', '_blank');
 	};
 
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
 			<div className="flex items-center space-x-2 flex-shrink-0">
-				<svg
-					className="h-5 w-5 text-gray-500"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
+				<svg className="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -91,19 +85,8 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 				onClick={handlePreviewSubscribeURL}
 				className="inline-flex items-center justify-center px-4 py-2 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 w-full sm:w-auto flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 shadow-sm hover:shadow-md"
 			>
-				<svg
-					className="h-4 w-4 mr-2"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-					/>
+				<svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -115,4 +98,4 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 			</button>
 		</div>
 	);
-} 
+}

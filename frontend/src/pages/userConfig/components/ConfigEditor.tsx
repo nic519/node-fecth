@@ -1,6 +1,6 @@
-import { JSX } from 'preact';
-import { ValidationMessage } from './ValidationMessage';
+import { KeyboardEvent } from 'react';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
+import { ValidationMessage } from './ValidationMessage';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -21,19 +21,19 @@ export function ConfigEditor({
 	onConfigContentChange,
 	onToggleHelp,
 }: ConfigEditorProps) {
-	const handleKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLTextAreaElement>) => {
+	const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Tab') {
 			e.preventDefault();
 			const textarea = e.target as HTMLTextAreaElement;
 			const start = textarea.selectionStart;
 			const end = textarea.selectionEnd;
-			
+
 			// 插入2个空格（YAML标准缩进）
 			const indent = '  ';
 			const newValue = configContent.substring(0, start) + indent + configContent.substring(end);
-			
+
 			onConfigContentChange(newValue);
-			
+
 			// 设置光标位置
 			setTimeout(() => {
 				textarea.selectionStart = textarea.selectionEnd = start + indent.length;
@@ -53,13 +53,7 @@ export function ConfigEditor({
 						onClick={onToggleHelp}
 						className="lg:hidden inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 					>
-						<svg
-							className="h-4 w-4 mr-2"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
+						<svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -82,7 +76,7 @@ export function ConfigEditor({
 						onKeyDown={handleKeyDown}
 						className="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono resize-none min-h-[300px] px-1 py-2"
 						placeholder="YAML 配置将在这里显示..."
-						spellcheck={false}
+						spellCheck={false}
 					/>
 				</div>
 
@@ -90,13 +84,7 @@ export function ConfigEditor({
 				<div className="flex-shrink-0">
 					<div className="flex items-center justify-between mb-4">
 						<div className="flex items-center text-sm text-gray-500">
-							<svg
-								className="mr-1.5 h-4 w-4"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
+							<svg className="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -112,4 +100,4 @@ export function ConfigEditor({
 			</div>
 		</div>
 	);
-} 
+}

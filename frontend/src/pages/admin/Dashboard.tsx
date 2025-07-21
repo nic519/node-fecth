@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
 import { getApiHealth } from '@/generated/api-adapters.g';
 import type { AdminStats } from '@/types/user-config';

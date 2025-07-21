@@ -8,7 +8,7 @@
 		"dev:backend": "wrangler dev --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
-		"build:frontend": "tsx scripts/build-frontend.ts",
+		"build:frontend": "cd frontend && yarn build",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
 		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit",

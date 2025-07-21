@@ -1,7 +1,7 @@
 // 直接使用类型安全的原始函数（Hono 最佳实践）
 import { adminDeleteUser, adminGetUsers, adminUserCreate } from '@/generated/api-adapters.g';
 import type { UserConfig, UserSummary } from '@/types/user-config';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 
 export interface UseUserManagementProps {
 	superToken: string;
@@ -43,7 +43,7 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 			setError(null);
 
 			// 调用原始 API 函数（完全类型安全）
-			const response = await adminGetUsers(superToken); 
+			const response = await adminGetUsers(superToken);
 
 			// 检查业务响应码
 			if (response.code !== 0) {

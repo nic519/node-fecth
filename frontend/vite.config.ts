@@ -1,11 +1,11 @@
-import preact from '@preact/preset-vite';
+import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
 	return {
-		plugins: [preact()],
+		plugins: [react()],
 		resolve: {
 			alias: {
 				'@': path.resolve(__dirname, './src'),
@@ -31,7 +31,10 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		build: {
-			outDir: 'dist',
+			// 🎯 直接输出到 Workers Static Assets 目录
+			outDir: '../public',
+			// 构建前清空输出目录
+			emptyOutDir: true,
 			sourcemap: true,
 			// 为 Workers Static Assets 优化构建
 			rollupOptions: {
@@ -45,7 +48,7 @@ export default defineConfig(({ mode }) => {
 		},
 		// 优化开发体验
 		optimizeDeps: {
-			include: ['preact', 'preact/hooks'],
+			include: ['react', 'react-dom'],
 		},
 	};
 });

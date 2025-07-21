@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-	import { getApiConfigUserDetailByUid, postApiConfigUserUpdateByUid } from '@/generated/api-adapters.g';
-	import type { ConfigResponse } from '@/types/user-config';
+import { getApiConfigUserDetailByUid, postApiConfigUserUpdateByUid } from '@/generated/api-adapters.g';
+import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, validateConfig, yamlToConfig } from '../utils/configUtils';
 
 export interface UseUserConfigProps {
