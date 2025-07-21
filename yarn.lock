@@ -47,7 +47,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@asteasolutions/zod-to-openapi@npm:^7.3.0":
+"@asteasolutions/zod-to-openapi@npm:^7.1.0":
   version: 7.3.4
   resolution: "@asteasolutions/zod-to-openapi@npm:7.3.4"
   dependencies:
@@ -524,27 +524,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hono/zod-openapi@npm:^0.19.10":
-  version: 0.19.10
-  resolution: "@hono/zod-openapi@npm:0.19.10"
+"@hono/zod-openapi@npm:^0.18.3":
+  version: 0.18.4
+  resolution: "@hono/zod-openapi@npm:0.18.4"
   dependencies:
-    "@asteasolutions/zod-to-openapi": ^7.3.0
-    "@hono/zod-validator": ^0.7.1
-    openapi3-ts: ^4.5.0
+    "@asteasolutions/zod-to-openapi": ^7.1.0
+    "@hono/zod-validator": ^0.4.1
   peerDependencies:
     hono: ">=4.3.6"
-    zod: ">=3.0.0"
-  checksum: 1ca2b1cc5f2df007c8abbc87dd9014e3ca81a2e894b6015a129299a370c734b47e203a21eb7c10157f6c5396859ebda11758115b070c784f40a6da9a7b3584a7
+    zod: 3.*
+  checksum: b841d61a8fa41e03938af3618182288e4e90aed6fae463552d118ea2414ca6bef89faf1c6771e842584cd33e8e8332ceaa19fc42ade727feb980cf1166ac067e
   languageName: node
   linkType: hard
 
-"@hono/zod-validator@npm:^0.7.1":
-  version: 0.7.2
-  resolution: "@hono/zod-validator@npm:0.7.2"
+"@hono/zod-validator@npm:^0.4.1":
+  version: 0.4.3
+  resolution: "@hono/zod-validator@npm:0.4.3"
   peerDependencies:
     hono: ">=3.9.0"
-    zod: ^3.25.0 || ^4.0.0
-  checksum: d596c08970efb2660bf293650a2be7de31683bb10d1ed11c6c9538055c33be8369b898dd7d018a53ff166132c9976baefdeda6bd006804a6386c6bfbfee90b09
+    zod: ^3.19.1
+  checksum: 68a1fd6c0677adc9a5a8ccd5dc24fdd3f8a8c28eabac1c8a6179b8e3f0fa8d0bebe76e9ddc1a1b6b0d311ee2c27df3c7f02248bb2d5d10bdc0a6690fb6f1b68c
   languageName: node
   linkType: hard
 
@@ -2198,7 +2197,7 @@ __metadata:
   resolution: "node-fetch@workspace:."
   dependencies:
     "@hono/swagger-ui": ^0.5.2
-    "@hono/zod-openapi": ^0.19.10
+    "@hono/zod-openapi": ^0.18.3
     "@iarna/toml": ^2.2.5
     "@oazapfts/runtime": ^1.0.4
     "@types/fs-extra": ^11.0.4
@@ -2340,7 +2339,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openapi3-ts@npm:^4.1.2, openapi3-ts@npm:^4.5.0":
+"openapi3-ts@npm:^4.1.2":
   version: 4.5.0
   resolution: "openapi3-ts@npm:4.5.0"
   dependencies:
