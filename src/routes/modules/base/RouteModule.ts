@@ -1,3 +1,4 @@
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
@@ -30,8 +31,8 @@ export abstract class BaseRouteModule implements IRouteModule {
 	protected handleError(error: unknown, context: string) {
 		console.error(`❌ ${this.moduleName} - ${context}:`, error);
 		return {
-			error: 'Internal Server Error',
-			message: error instanceof Error ? error.message : 'Unknown error',
+			code: ResponseCodes.INTERNAL_ERROR,
+			msg: error instanceof Error ? error.message : 'Unknown error',
 		};
 	}
 }

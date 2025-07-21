@@ -3,6 +3,7 @@ import { MiddlewareManager } from '@/routes/middleware';
 import { RouteRegistry } from '@/routes/modules';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 export class Router {
 	private app: OpenAPIHono<{ Bindings: Env }>;
@@ -72,10 +73,13 @@ export class Router {
 			if (path.startsWith('/api/') || path.startsWith('/kv') || path.startsWith('/storage') || path.includes('openapi.json')) {
 				return c.json(
 					{
-						error: 'Not Found',
-						path: path,
-						method: c.req.method,
-						registeredModules: this.routeRegistry.getRegisteredModules(),
+						code: 404, // ResponseCodes.NOT_FOUND
+						msg: 'Not Found',
+						data: {
+							path: path,
+							method: c.req.method,
+							registeredModules: this.routeRegistry.getRegisteredModules(),
+						},
 					},
 					404
 				);
@@ -126,10 +130,24 @@ export class Router {
 		// 全局错误处理
 		this.app.onError((err, c) => {
 			console.error('❌ 全局错误:', err);
+			
+			// 处理 OpenAPI 验证错误（ZodError）
+			if (err.name === 'ZodError' || (err as any).issues) {
+				console.warn(`🚨 [OpenAPI验证错误] ${c.req.method} ${c.req.path}`, {
+					error: err,
+				});
+				return c.json({
+					code: ResponseCodes.INVALID_PARAMS,
+					msg: '请求参数验证失败',
+					data: (err as any).issues || err.message,
+				}, 400);
+			}
+			
 			return c.json(
 				{
-					error: 'Internal Server Error',
-					message: err.message,
+					code: 500, // ResponseCodes.INTERNAL_ERROR
+					msg: 'Internal Server Error',
+					data: err.message,
 				},
 				500
 			);
@@ -157,7 +175,6 @@ export class Router {
 				description: `订阅管理和用户配置 API - 自动生成文档
 
 ## 功能特性
-- �� 用户配置管理
 - 📊 流量统计
 - 🔄 订阅转换
 - 👥 用户管理（管理员功能）

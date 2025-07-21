@@ -1,4 +1,4 @@
-import { ErrorResponseSchema } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
 import { MyRouter } from './common';
 
@@ -26,26 +26,10 @@ export const getSubscriptionRoute = createRoute({
 					schema: z.string(),
 				},
 				'application/json': {
-					schema: z.object({}),
+					schema: BaseResponseSchema,
 				},
 			},
-			description: 'Clash配置文件',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });

@@ -28,16 +28,14 @@ export class MiddlewareManager {
 			})
 		);
 
-		// 响应格式验证中间件（仅开发环境）
-		if (GlobalConfig.isDev) {
-			app.use('*', responseValidatorMiddleware());
-			console.log('🔍 已启用响应格式验证中间件（开发环境）');
-		}
-
 		// 全局调试中间件
 		app.use('*', (c, next) => {
 			console.log(`🌍 全局请求: ${c.req.method} ${c.req.path} (完整URL: ${c.req.url})`);
 			return next();
 		});
+
+		// 响应格式验证中间件 - 放在最后执行
+		app.use('*', responseValidatorMiddleware());
+		console.log('🔍 已启用响应格式验证中间件（开发环境）');
 	}
 }

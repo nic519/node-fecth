@@ -1,4 +1,4 @@
-import { ErrorResponseSchema, SuccessResponseSchema, UserConfigSchema, UserDetailResponseSchema } from '@/types/openapi-schemas';
+import { BaseResponseSchema, UserConfigSchema } from '@/types/openapi-schemas';
 import { createRoute } from '@hono/zod-openapi';
 import { MyRouter, UserTokenParamSchema } from './common';
 import { z } from 'zod';
@@ -29,26 +29,10 @@ export const userUpdateRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '更新成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -66,26 +50,12 @@ export const getUserDetailRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: UserDetailResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '用户详情',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
+
+

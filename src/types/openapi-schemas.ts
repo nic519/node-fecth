@@ -136,6 +136,7 @@ export const ResponseCodes = {
 	FORBIDDEN: 403,
 	NOT_FOUND: 404,
 	CONFLICT: 409,
+	FORMAT_ERROR: 422,
 	INTERNAL_ERROR: 500,
 } as const;
 

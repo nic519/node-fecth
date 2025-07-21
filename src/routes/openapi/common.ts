@@ -16,9 +16,10 @@ export const MyRouter = {
 	adminUserDelete: '/api/admin/user/delete',
 	allUsers: '/api/admin/user/all',
 
-	// === 非 OpenAPI 路由（路径常量） ===
+	// 存储路由
 	storage: '/api/storage',
 	kv: '/api/kv',
+	// 订阅路由
 	subscription: '/api/x',
 } as const;
 

@@ -1,4 +1,4 @@
-import { ErrorResponseSchema, SuccessResponseSchema } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
 import { MyRouter } from './common';
 
@@ -23,29 +23,13 @@ export const storageRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({}),
+					schema: BaseResponseSchema,
 				},
 				'text/plain': {
 					schema: z.string(),
 				},
 			},
-			description: '操作成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -75,26 +59,10 @@ export const storagePostRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '写入成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -124,26 +92,10 @@ export const storagePutRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '更新成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -164,26 +116,10 @@ export const storageDeleteRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '删除成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -205,30 +141,10 @@ export const kvRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						data: z.any().optional().describe('存储的数据'),
-						key: z.string().optional().describe('存储键'),
-						namespace: z.string().optional().describe('命名空间'),
-					}),
+					schema: BaseResponseSchema,
 				},
 			},
-			description: 'KV 操作成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -260,26 +176,10 @@ export const kvPostRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: 'KV 写入成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -310,26 +210,10 @@ export const kvPutRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: 'KV 更新成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -351,26 +235,11 @@ export const kvDeleteRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: 'KV 删除成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
+

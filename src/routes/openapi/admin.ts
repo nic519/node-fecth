@@ -2,14 +2,13 @@ import {
 	AdminLogSchema,
 	AdminLogsResponseSchema,
 	AdminStatsResponseSchema,
+	BaseResponseSchema,
 	ConfigTemplateSchema,
 	ConfigTemplatesResponseSchema,
 	CreateConfigTemplateRequestSchema,
 	CreateTemplateResponseSchema,
 	CreateUserRequestSchema,
-	ErrorResponseSchema,
 	RefreshTrafficResponseSchema,
-	SuccessResponseSchema,
 	TrafficInfoSchema,
 	UserSummarySchema,
 	UsersListResponseSchema,
@@ -35,18 +34,10 @@ export const adminGetUsersRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: UsersListResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '用户列表',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -69,37 +60,13 @@ export const adminUserCreateRoute = createRoute({
 		},
 	},
 	responses: {
-		201: {
+		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '用户创建成功',
-		},
-		400: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '请求参数错误',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
-		},
-		409: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户已存在',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -128,26 +95,10 @@ export const adminDeleteUserRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '删除成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -170,18 +121,10 @@ export const getSystemStatsRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: AdminStatsResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '系统统计信息',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -203,26 +146,10 @@ export const refreshUserTrafficRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: RefreshTrafficResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '刷新成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '用户不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -241,18 +168,10 @@ export const getConfigTemplatesRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: ConfigTemplatesResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '配置模板列表',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -275,21 +194,13 @@ export const createConfigTemplateRoute = createRoute({
 		},
 	},
 	responses: {
-		201: {
+		200: {
 			content: {
 				'application/json': {
-					schema: CreateTemplateResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '模板创建成功',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -318,26 +229,10 @@ export const updateConfigTemplateRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '更新成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '模板不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -359,26 +254,10 @@ export const deleteConfigTemplateRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: SuccessResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '删除成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '模板不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -409,33 +288,10 @@ export const applyTemplateRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: z.object({
-							message: z.string(),
-							templateId: z.string(),
-							uid: z.string(),
-						}),
-					}),
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '应用成功',
-		},
-		404: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '模板或用户不存在',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
@@ -458,18 +314,11 @@ export const getAdminLogsRoute = createRoute({
 		200: {
 			content: {
 				'application/json': {
-					schema: AdminLogsResponseSchema,
+					schema: BaseResponseSchema,
 				},
 			},
-			description: '操作日志',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: ErrorResponseSchema,
-				},
-			},
-			description: '未授权访问',
+			description: '操作结果：code=0表示成功，其他值表示具体错误',
 		},
 	},
 });
+

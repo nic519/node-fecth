@@ -23,39 +23,3 @@ export const healthRoute = createRoute({
 		},
 	},
 });
-
-// 管理员健康检查
-export const adminHealthRoute = createRoute({
-	method: 'get',
-	path: '/api/admin/health',
-	summary: '管理员健康检查',
-	description: '获取系统健康状态信息',
-	tags: ['管理员'],
-	request: {
-		query: SuperAdminTokenParamSchema,
-	},
-	responses: {
-		200: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						success: z.boolean(),
-						data: AdminHealthCheckSchema,
-					}),
-				},
-			},
-			description: '健康状态',
-		},
-		401: {
-			content: {
-				'application/json': {
-					schema: z.object({
-						error: z.string(),
-						message: z.string().optional(),
-					}),
-				},
-			},
-			description: '未授权访问',
-		},
-	},
-});
