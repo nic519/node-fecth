@@ -17,23 +17,44 @@ export class TrafficUtils {
 
 	// 从原始地址获取clash的剩余流量信息
 	async fetchClashContent(): Promise<{ subInfo: string; content: string }> {
+		// 添加调试日志：打印订阅URL
+		console.log(`🔗 准备获取clash内容，订阅URL: ${this.clashSubUrl}`);
+
 		const clashContent: ClashContent | null = await this.fetchFromKV();
 		if (clashContent) {
+			console.log('✅ 从KV缓存中获取到clash内容');
 			return { subInfo: clashContent.subInfo, content: clashContent.content };
 		}
 
-		const responseClash = await fetch(this.clashSubUrl, {
-			headers: {
-				'User-Agent': 'clash.meta',
-			},
-		});
-		if (!responseClash.ok) {
-			throw Error(`Failed to fetch subscription content ${this.clashSubUrl}`);
+		console.log('📡 KV缓存为空，开始从原始地址获取clash内容');
+
+		try {
+			const responseClash = await fetch(this.clashSubUrl, {
+				headers: {
+					'User-Agent': 'clash.meta',
+				},
+			});
+
+			console.log(`📈 Fetch响应状态: ${responseClash.status} ${responseClash.statusText}`);
+
+			if (!responseClash.ok) {
+				const errorText = await responseClash.text().catch(() => '无法读取错误响应');
+				console.error(`❌ Fetch失败: ${responseClash.status} ${responseClash.statusText}, 响应内容: ${errorText}`);
+				throw Error(`Failed to fetch subscription content ${this.clashSubUrl}, status: ${responseClash.status}, text: ${errorText}`);
+			}
+
+			const subInfo = responseClash.headers.get('subscription-userinfo') || '';
+			const content = await responseClash.text();
+
+			console.log(`✅ 成功获取clash内容，subInfo: ${subInfo}, 内容长度: ${content.length}`);
+
+			this.saveToKV({ subInfo, content });
+			return { subInfo, content };
+		} catch (error) {
+			console.error(`❌ 获取clash内容时发生错误:`, error);
+			console.error(`❌ 错误详情: ${error instanceof Error ? error.message : String(error)}`);
+			throw error;
 		}
-		const subInfo = responseClash.headers.get('subscription-userinfo') || '';
-		const content = await responseClash.text();
-		this.saveToKV({ subInfo, content });
-		return { subInfo, content };
 	}
 
 	async saveToKV({ subInfo, content }: { subInfo: string; content: string }) {
