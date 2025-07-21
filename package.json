@@ -4,15 +4,15 @@
 	"private": true,
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
-		"deploy": "yarn deploy:pages",
-		"deploy:pages": "yarn build:frontend && wrangler pages deploy public",
-		"dev:backend": "wrangler pages dev public --port 8787",
+		"deploy": "yarn build:frontend && wrangler deploy",
+		"dev:backend": "wrangler dev --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
 		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"build:frontend": "tsx scripts/build-frontend.ts",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
-		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit"
+		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit",
+		"preview": "yarn build:frontend && wrangler dev --local"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",

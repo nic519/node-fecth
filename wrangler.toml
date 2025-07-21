@@ -1,7 +1,14 @@
-# Cloudflare Pages + Functions 配置
-name = "node-fetch-pages"
+# Cloudflare Workers 全栈配置
+name = "node-fetch-worker"
+main = "src/index.ts"
 compatibility_date = "2025-02-14"
 compatibility_flags = ["nodejs_compat"]
+
+# 静态资源配置 (Workers Static Assets)
+[assets]
+directory = "public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 # KV 绑定
 [[kv_namespaces]]
@@ -16,12 +23,12 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 [vars]
 NODE_ENV = "development"
 SUPER_ADMIN_TOKEN = "123"
-DB_USER = "your-db-user-config" 
-# 静态资源目录配置
-pages_build_output_dir = "public"
+DB_USER = "your-db-user-config"
 
 # 开发模式配置
 [dev]
 port = 8787
 local_protocol = "http"
-upstream_protocol = "https" 
+
+# 启用 workers.dev 子域名 (用于生产部署)
+workers_dev = true 

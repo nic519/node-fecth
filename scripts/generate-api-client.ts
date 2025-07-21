@@ -67,11 +67,11 @@ import { ApiGenerator } from './api-generator';
  */
 async function main() {
 	try {
-		// 固定使用本地开发服务器
+		// 固定使用本地 Workers 开发服务器
 		const serverUrl = 'http://localhost:8787';
 
-		console.log('🚀 零硬编码API客户端生成器启动');
-		console.log(`🔗 目标服务器: ${serverUrl}`);
+		console.log('🚀 零硬编码API客户端生成器启动 (Workers 模式)');
+		console.log(`🔗 目标服务器: ${serverUrl} (Workers Dev Server)`);
 		console.log('🏗️ 使用模块化架构，易于扩展和维护');
 
 		const generator = new ApiGenerator(serverUrl);
@@ -80,7 +80,9 @@ async function main() {
 		console.error('❌ 零硬编码API客户端生成失败:', error);
 		console.log('\n💡 使用说明:');
 		console.log('  yarn build:api                    # 生成API客户端');
-		console.log('\n🔧 确保本地开发服务器已启动在 http://localhost:8787');
+		console.log('\n🔧 确保 Workers 开发服务器已启动:');
+		console.log('    yarn dev:backend              # 启动 Workers 开发服务器');
+		console.log('    或 wrangler dev --port 8787    # 直接启动');
 		process.exit(1);
 	}
 }
