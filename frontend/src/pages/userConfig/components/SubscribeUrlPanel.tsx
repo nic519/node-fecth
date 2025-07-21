@@ -9,7 +9,7 @@ interface SubscribeUrlPanelProps {
 export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 	const [copySuccess, setCopySuccess] = useState(false);
 
-	const subscribeURL = `${window.location.origin}/api/x/${uid}?token=${token}`;
+	const subscribeURL = `${window.location.origin}/api/x?uid=${uid}&token=${token}`;
 
 	const handleCopySubscribeURL = async () => {
 		const success = await copyToClipboard(subscribeURL);

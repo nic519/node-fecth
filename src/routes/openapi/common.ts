@@ -5,24 +5,23 @@ import { ResponseCodes } from '@/types/openapi-schemas';
 // 路由路径常量定义
 // =============================================================================
 
-export const ROUTE_PATHS = {
+export const MyRouter = {
 	// === OpenAPI 标准路由 ===
 	health: '/api/health',
 	// 用户配置路由
-	userUpdate: '/api/config/user/update/{uid}',
-	userDetail: '/api/config/user/detail/{uid}',
+	userUpdate: '/api/config/user/update',
+	userDetail: '/api/config/user/detail',
 	// 管理员路由
 	adminUserCreate: '/api/admin/user/create',
-	adminUserDelete: '/api/admin/user/delete/{uid}',
+	adminUserDelete: '/api/admin/user/delete',
 	allUsers: '/api/admin/user/all',
 
 	// === 非 OpenAPI 路由（路径常量） ===
 	storage: '/api/storage',
 	kv: '/api/kv',
-	subscription: '/api/x/{uid}',
+	subscription: '/api/x',
 } as const;
 
-export type RoutePath = keyof typeof ROUTE_PATHS;
 
 // =============================================================================
 // 公共 Schema 定义
@@ -43,13 +42,10 @@ export const HealthStatusSchema = z.object({
 // =============================================================================
 
 export const UserTokenParamSchema = z.object({
+	uid: z.string().describe('用户唯一标识符'),
 	token: z.string().describe('用户访问令牌'),
 });
 
 export const SuperAdminTokenParamSchema = z.object({
 	superToken: z.string().describe('超级管理员访问令牌'),
-});
-
-export const UserIdParamSchema = z.object({
-	uid: z.string().describe('用户唯一标识符'),
 });

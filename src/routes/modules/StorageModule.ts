@@ -1,7 +1,7 @@
 import { KvHandler } from '@/module/kv/kvHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
-import { kvRoute, ROUTE_PATHS, storageRoute } from '@/routes/openapi';
+import { kvRoute, MyRouter, storageRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
@@ -13,7 +13,7 @@ export class StorageModule extends BaseRouteModule {
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		// 存储相关路由
 		app.openapi(storageRoute, async (c) => {
-			console.log(`✅ ${this.moduleName}: 存储API路由匹配 GET ${ROUTE_PATHS.storage}`);
+			console.log(`✅ ${this.moduleName}: 存储API路由匹配 GET ${MyRouter.storage}`);
 
 			try {
 				const handler = new StorageHandler();
@@ -27,7 +27,7 @@ export class StorageModule extends BaseRouteModule {
 
 		// KV存储相关路由
 		app.openapi(kvRoute, async (c) => {
-			console.log(`✅ ${this.moduleName}: KV存储API路由匹配 GET ${ROUTE_PATHS.kv}`);
+			console.log(`✅ ${this.moduleName}: KV存储API路由匹配 GET ${MyRouter.kv}`);
 
 			try {
 				const handler = new KvHandler();

@@ -203,10 +203,6 @@ export const ConfigTemplatesResponseSchema = z.object({
 // 请求参数 Schemas
 // =============================================================================
 
-export const UserIdParamSchema = z.object({
-	uid: z.string().min(1, '用户ID不能为空'),
-});
-
 export const TokenQuerySchema = z.object({
 	token: z.string().min(1, '令牌不能为空'),
 });

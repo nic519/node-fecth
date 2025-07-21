@@ -62,7 +62,7 @@ export function getApiHealth(opts?: Oazapfts.RequestOpts) {
 /**
  * 更新用户配置
  */
-export function postApiConfigUserUpdateByUid(uid: string, token: string, body?: {
+export function postApiConfigUserUpdate(uid: string, token: string, body?: {
     config: {
         subscribe: string;
         accessToken: string;
@@ -98,7 +98,8 @@ export function postApiConfigUserUpdateByUid(uid: string, token: string, body?: 
             msg: string;
             data?: any;
         };
-    }>(`/api/config/user/update/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/config/user/update${QS.query(QS.explode({
+        uid,
         token
     }))}`, oazapfts.json({
         ...opts,
@@ -109,7 +110,7 @@ export function postApiConfigUserUpdateByUid(uid: string, token: string, body?: 
 /**
  * 用户详情
  */
-export function getApiConfigUserDetailByUid(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
+export function getApiConfigUserDetail(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {
@@ -150,7 +151,8 @@ export function getApiConfigUserDetailByUid(uid: string, token: string, opts?: O
             msg: string;
             data?: any;
         };
-    }>(`/api/config/user/detail/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/config/user/detail${QS.query(QS.explode({
+        uid,
         token
     }))}`, {
         ...opts
@@ -159,7 +161,10 @@ export function getApiConfigUserDetailByUid(uid: string, token: string, opts?: O
 /**
  * 管理员删除用户
  */
-export function adminDeleteUser(uid: string, superToken: string, opts?: Oazapfts.RequestOpts) {
+export function adminDeleteUser(superToken: string, body?: {
+    /** 用户ID */
+    uid: string;
+}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: {
@@ -181,11 +186,13 @@ export function adminDeleteUser(uid: string, superToken: string, opts?: Oazapfts
             msg: string;
             data?: any;
         };
-    }>(`/api/admin/user/delete/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/admin/user/delete${QS.query(QS.explode({
         superToken
-    }))}`, {
-        ...opts
-    });
+    }))}`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 /**
  * 创建新用户
@@ -365,10 +372,8 @@ export function getApiKv({ key, $namespace, token }: {
 /**
  * 获取订阅配置
  */
-export function getApiXByUid(uid: string, token: string, { $type, udp, download }: {
-    $type?: "clash" | "v2ray" | "ss";
-    udp?: boolean;
-    download?: boolean;
+export function getApiX(uid: string, token: string, { download }: {
+    download?: boolean | null;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
@@ -387,10 +392,9 @@ export function getApiXByUid(uid: string, token: string, { $type, udp, download 
             msg: string;
             data?: any;
         };
-    }>(`/api/x/${encodeURIComponent(uid)}${QS.query(QS.explode({
+    }>(`/api/x${QS.query(QS.explode({
+        uid,
         token,
-        "type": $type,
-        udp,
         download
     }))}`, {
         ...opts

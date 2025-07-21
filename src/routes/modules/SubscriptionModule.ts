@@ -14,21 +14,20 @@ export class SubscriptionModule extends BaseRouteModule {
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		// 订阅路由
 		app.openapi(getSubscriptionRoute, async (c) => {
-			const uid = c.req.param('uid');
 			const query = c.req.valid('query');
 
-			console.log(`📡 ${this.moduleName}: ${uid}`, query);
+			console.log(`📡 ${this.moduleName}: ${query.uid}`, query);
 
 			try {
 				const userManager = new UserManager(c.env);
-				const authConfig = await userManager.validateAndGetUser(uid, query.token);
+				const authConfig = await userManager.validateAndGetUser(query.uid, query.token);
 
 				if (!authConfig) {
 					return c.json({ error: 'Unauthorized' }, 401);
 				}
 
 				const innerUser = new InnerUser(authConfig.config);
-				console.log(`👤 ${this.moduleName}: 用户认证成功 ${uid}`);
+				console.log(`👤 ${this.moduleName}: 用户认证成功 ${query.uid}`);
 
 				const clashHandler = new ClashHandler();
 				const response = await clashHandler.handle(c.req.raw, c.env, { innerUser: innerUser });

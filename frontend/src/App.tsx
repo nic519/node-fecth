@@ -15,7 +15,7 @@ export function App() {
 				<Route path="/" element={<Home />} />
 
 				{/* 用户配置页面 */}
-				<Route path="/config/:uid" element={<UserConfigPage />} />
+				<Route path="/config" element={<UserConfigPage />} />
 
 				{/* 管理员页面 */}
 				<Route path="/admin/dashboard" element={<AdminDashboard />} />

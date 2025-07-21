@@ -1,16 +1,13 @@
-import { useParams } from 'react-router-dom';
 import { ConfigEditor } from './components/ConfigEditor';
 import { Header } from './components/Header';
 import { HelpSidebar } from './components/HelpSidebar';
 import { useHelpDisplay } from './hooks/useHelpDisplay';
 import { useUserConfig } from './hooks/useUserConfig';
 
-export function UserConfigPage() {
-	// 从 React Router 获取路由参数
-	const { uid } = useParams<{ uid: string }>();
-
+export function UserConfigPage() { 
 	// 从 URL 获取 token
 	const token = new URLSearchParams(window.location.search).get('token') || '';
+	const uid = new URLSearchParams(window.location.search).get('uid') || '';
 
 	// 确保 uid 存在
 	if (!uid) {

@@ -1,6 +1,6 @@
 import { ErrorResponseSchema } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
-import { ROUTE_PATHS } from './common';
+import { MyRouter } from './common';
 
 // =============================================================================
 // 订阅路由
@@ -8,18 +8,14 @@ import { ROUTE_PATHS } from './common';
 
 export const getSubscriptionRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.subscription,
+	path: MyRouter.subscription,
 	summary: '获取订阅配置',
 	description: '获取用户的 Clash 订阅配置',
 	tags: ['订阅'],
 	request: {
-		params: z.object({
-			uid: z.string().describe('用户标识符'),
-		}),
 		query: z.object({
+			uid: z.string().describe('用户标识符'),
 			token: z.string().describe('用户访问令牌'),
-			type: z.enum(['clash', 'v2ray', 'ss']).optional().describe('配置文件类型'),
-			udp: z.coerce.boolean().optional().describe('是否启用UDP'),
 			download: z.coerce.boolean().optional().describe('是否作为下载文件'),
 		}),
 	},

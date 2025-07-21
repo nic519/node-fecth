@@ -71,7 +71,7 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 			switch (action) {
 				case 'view':
 					if (token) {
-						window.open(`/config/${uid}?token=${token}`, '_blank');
+						window.open(`/config?uid=${uid}&token=${token}`, '_blank');
 					}
 					break;
 				case 'refresh':
@@ -81,7 +81,7 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 				case 'delete':
 					if (confirm(`确定要删除用户 ${uid} 吗？此操作不可撤销！`)) {
 						try {
-							const response = await adminDeleteUser(uid, superToken);
+							const response = await adminDeleteUser(superToken, { uid: uid });
 							if (response.code === 0) {
 								await fetchUsers(); // 重新加载用户列表
 								alert(`用户 ${uid} 删除成功`);

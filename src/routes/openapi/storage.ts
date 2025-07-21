@@ -1,6 +1,6 @@
 import { ErrorResponseSchema, SuccessResponseSchema } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
-import { ROUTE_PATHS } from './common';
+import { MyRouter } from './common';
 
 // =============================================================================
 // 存储和 KV 管理路由
@@ -8,7 +8,7 @@ import { ROUTE_PATHS } from './common';
 
 export const storageRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.storage,
+	path: MyRouter.storage,
 	summary: '存储内容获取操作',
 	description: '获取存储内容',
 	tags: ['存储'],
@@ -52,7 +52,7 @@ export const storageRoute = createRoute({
 
 export const storagePostRoute = createRoute({
 	method: 'post',
-	path: ROUTE_PATHS.storage,
+	path: MyRouter.storage,
 	summary: '存储内容写入操作',
 	description: '写入存储内容',
 	tags: ['存储'],
@@ -101,7 +101,7 @@ export const storagePostRoute = createRoute({
 
 export const storagePutRoute = createRoute({
 	method: 'put',
-	path: ROUTE_PATHS.storage,
+	path: MyRouter.storage,
 	summary: '存储内容更新操作',
 	description: '更新存储内容',
 	tags: ['存储'],
@@ -150,7 +150,7 @@ export const storagePutRoute = createRoute({
 
 export const storageDeleteRoute = createRoute({
 	method: 'delete',
-	path: ROUTE_PATHS.storage,
+	path: MyRouter.storage,
 	summary: '存储内容删除操作',
 	description: '删除存储内容',
 	tags: ['存储'],
@@ -190,7 +190,7 @@ export const storageDeleteRoute = createRoute({
 
 export const kvRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.kv,
+	path: MyRouter.kv,
 	summary: 'KV 存储操作',
 	description: 'Key-Value 存储的获取和管理操作',
 	tags: ['KV存储'],
@@ -236,7 +236,7 @@ export const kvRoute = createRoute({
 // 为了支持不同 HTTP 方法，添加 POST 版本
 export const kvPostRoute = createRoute({
 	method: 'post',
-	path: ROUTE_PATHS.kv,
+	path: MyRouter.kv,
 	summary: 'KV 存储写入操作',
 	description: 'Key-Value 存储的写入操作',
 	tags: ['KV存储'],
@@ -286,7 +286,7 @@ export const kvPostRoute = createRoute({
 
 export const kvPutRoute = createRoute({
 	method: 'put',
-	path: ROUTE_PATHS.kv,
+	path: MyRouter.kv,
 	summary: 'KV 存储更新操作',
 	description: 'Key-Value 存储的更新操作',
 	tags: ['KV存储'],
@@ -336,7 +336,7 @@ export const kvPutRoute = createRoute({
 
 export const kvDeleteRoute = createRoute({
 	method: 'delete',
-	path: ROUTE_PATHS.kv,
+	path: MyRouter.kv,
 	summary: 'KV 存储删除操作',
 	description: 'Key-Value 存储的删除操作',
 	tags: ['KV存储'],

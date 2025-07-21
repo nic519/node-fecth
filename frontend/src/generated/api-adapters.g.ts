@@ -19,14 +19,14 @@
 // 导入原始函数（带下划线前缀）
 import {
   getApiHealth as _getApiHealth,
-  postApiConfigUserUpdateByUid as _postApiConfigUserUpdateByUid,
-  getApiConfigUserDetailByUid as _getApiConfigUserDetailByUid,
+  postApiConfigUserUpdate as _postApiConfigUserUpdate,
+  getApiConfigUserDetail as _getApiConfigUserDetail,
   adminDeleteUser as _adminDeleteUser,
   adminUserCreate as _adminUserCreate,
   adminGetUsers as _adminGetUsers,
   getApiStorage as _getApiStorage,
   getApiKv as _getApiKv,
-  getApiXByUid as _getApiXByUid
+  getApiX as _getApiX
 } from './api-client.g';
 
 // 解包装的 getApiHealth 函数
@@ -35,15 +35,15 @@ export const getApiHealth = async (...args: Parameters<typeof _getApiHealth>) =>
   return response.data;
 };
 
-// 解包装的 postApiConfigUserUpdateByUid 函数
-export const postApiConfigUserUpdateByUid = async (...args: Parameters<typeof _postApiConfigUserUpdateByUid>) => {
-  const response = await _postApiConfigUserUpdateByUid(...args);
+// 解包装的 postApiConfigUserUpdate 函数
+export const postApiConfigUserUpdate = async (...args: Parameters<typeof _postApiConfigUserUpdate>) => {
+  const response = await _postApiConfigUserUpdate(...args);
   return response.data;
 };
 
-// 解包装的 getApiConfigUserDetailByUid 函数
-export const getApiConfigUserDetailByUid = async (...args: Parameters<typeof _getApiConfigUserDetailByUid>) => {
-  const response = await _getApiConfigUserDetailByUid(...args);
+// 解包装的 getApiConfigUserDetail 函数
+export const getApiConfigUserDetail = async (...args: Parameters<typeof _getApiConfigUserDetail>) => {
+  const response = await _getApiConfigUserDetail(...args);
   return response.data;
 };
 
@@ -77,9 +77,9 @@ export const getApiKv = async (...args: Parameters<typeof _getApiKv>) => {
   return response.data;
 };
 
-// 解包装的 getApiXByUid 函数
-export const getApiXByUid = async (...args: Parameters<typeof _getApiXByUid>) => {
-  const response = await _getApiXByUid(...args);
+// 解包装的 getApiX 函数
+export const getApiX = async (...args: Parameters<typeof _getApiX>) => {
+  const response = await _getApiX(...args);
   return response.data;
 };
 
@@ -92,8 +92,8 @@ export const modules = {
 
   // userConfig 模块 (2 个函数)
   userConfig: {
-    postApiConfigUserUpdateByUid,
-    getApiConfigUserDetailByUid
+    postApiConfigUserUpdate,
+    getApiConfigUserDetail
   },
 
   // admin 模块 (3 个函数)
@@ -109,9 +109,9 @@ export const modules = {
     getApiKv
   },
 
-  // subscription 模块 (1 个函数)
-  subscription: {
-    getApiXByUid
+  // general 模块 (1 个函数)
+  general: {
+    getApiX
   }
 };
 
@@ -120,7 +120,7 @@ export const healthApi = modules.health;
 export const userConfigApi = modules.userConfig;
 export const adminApi = modules.admin;
 export const storageApi = modules.storage;
-export const subscriptionApi = modules.subscription;
+export const generalApi = modules.general;
 
 // 默认导出模块集合
 export default modules;

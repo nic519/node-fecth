@@ -15,7 +15,7 @@ import {
 	UsersListResponseSchema,
 } from '@/types/openapi-schemas';
 import { createRoute, z } from '@hono/zod-openapi';
-import { ROUTE_PATHS, SuperAdminTokenParamSchema, UserIdParamSchema } from './common';
+import { MyRouter, SuperAdminTokenParamSchema } from './common';
 
 // =============================================================================
 // 管理员路由
@@ -23,7 +23,7 @@ import { ROUTE_PATHS, SuperAdminTokenParamSchema, UserIdParamSchema } from './co
 
 export const adminGetUsersRoute = createRoute({
 	method: 'get',
-	path: ROUTE_PATHS.allUsers,
+	path: MyRouter.allUsers,
 	operationId: 'adminGetUsers',
 	summary: '获取所有用户列表',
 	description: '获取系统中所有用户的摘要信息（需要管理员权限）',
@@ -53,7 +53,7 @@ export const adminGetUsersRoute = createRoute({
 
 export const adminUserCreateRoute = createRoute({
 	method: 'post',
-	path: ROUTE_PATHS.adminUserCreate,
+	path: MyRouter.adminUserCreate,
 	operationId: 'adminUserCreate',
 	summary: '创建新用户',
 	description: '创建新用户配置（需要管理员权限）',
@@ -106,15 +106,23 @@ export const adminUserCreateRoute = createRoute({
 
 // 管理员删除用户
 export const adminDeleteUserRoute = createRoute({
-	method: 'get',
-	path: ROUTE_PATHS.adminUserDelete,
+	method: 'post',
+	path: MyRouter.adminUserDelete,
 	operationId: 'adminDeleteUser',
 	summary: '管理员删除用户',
 	description: '管理员删除指定用户及其所有数据',
 	tags: ['管理员'],
-	request: {
-		params: UserIdParamSchema,
+	request: { 
 		query: SuperAdminTokenParamSchema,
+		body: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						uid: z.string().describe('用户ID'),
+					}),
+				},
+			},
+		},
 	},
 	responses: {
 		200: {

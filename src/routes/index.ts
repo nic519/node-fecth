@@ -23,7 +23,7 @@ export { AdminModule, BaseRouteModule, HealthModule, StorageModule, Subscription
 export type { IRouteModule } from '@/routes/modules';
 
 // === OpenAPI 规范 ===
-export { HealthStatusSchema, ROUTE_PATHS, SuperAdminTokenParamSchema, UserIdParamSchema, UserTokenParamSchema } from '@/routes/openapi';
+export { HealthStatusSchema, MyRouter as ROUTE_PATHS, SuperAdminTokenParamSchema, UserTokenParamSchema } from '@/routes/openapi';
 
 // === 使用示例 ===
 /**

@@ -1,6 +1,6 @@
 // 节点转换器类
 import { InnerUser } from '@/module/userManager/innerUserConfig';
-import { ROUTE_PATHS } from '@/routes/openapi';
+import { MyRouter } from '@/routes/openapi';
 import { CommonUtils } from '@/utils/commonUtils';
 
 export class NodeConverter {
@@ -93,7 +93,7 @@ export class NodeConverter {
 	private parseShadowsocks(ssUrl: string): any | null {
 		try {
 			// 移除 ss:// 前缀
-			var fakeURL = new URL(ROUTE_PATHS.storage, CommonUtils.getProdURI());
+			var fakeURL = new URL(MyRouter.storage, CommonUtils.getProdURI());
 			const url = new URL(ssUrl.replace('ss://', 'http://'));
 
 			// 解析用户信息部分

@@ -1,6 +1,6 @@
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
-import { ROUTE_PATHS, adminDeleteUserRoute, adminGetUsersRoute, adminUserCreateRoute } from '@/routes/openapi';
+import { MyRouter, adminDeleteUserRoute, adminGetUsersRoute, adminUserCreateRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { ResponseCodes, UserConfig } from '@/types/openapi-schemas';
 
@@ -27,20 +27,22 @@ export class AdminModule extends BaseRouteModule {
 
 		// 删除用户配置路由
 		app.openapi(adminDeleteUserRoute, async (c) => {
-			const uid = c.req.param('uid');
-			console.log(`🔧 ${this.moduleName}: DELETE ${uid}`);
+			// 从已验证的请求体中获取uid
+			const body = c.req.valid('json');
+
+			console.log(`🔧 ${this.moduleName}: DELETE ${body.uid}`);
 
 			try {
 				const adminId = 'super_admin'; // 简化实现，使用固定ID
 				const superAdminManager = new SuperAdminManager(c.env);
-				await superAdminManager.deleteUser(uid, adminId);
+				await superAdminManager.deleteUser(body.uid, adminId);
 				
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '用户删除成功',
 					data: {
 						message: '用户删除成功',
-						uid: uid,
+						uid: body.uid,
 					},
 				});
 			} catch (error) {
@@ -51,12 +53,12 @@ export class AdminModule extends BaseRouteModule {
 
 		// 创建用户路由
 		app.openapi(adminUserCreateRoute, async (c) => {
-			console.log(`🆕 ${this.moduleName}: POST ${ROUTE_PATHS.adminUserCreate}`);
+			console.log(`🆕 ${this.moduleName}: POST ${MyRouter.adminUserCreate}`);
 
 			try {
 				const superAdminManager = new SuperAdminManager(c.env);
 				const adminId = 'super_admin'; // 简化实现，使用固定ID
-				const body = (await c.req.json()) as { uid: string; config: UserConfig };
+				const body = c.req.valid('json');
 
 				await superAdminManager.createUser(body.uid, body.config, adminId);
 
