@@ -1,4 +1,4 @@
-import { initGlobalConfig } from '@/config/global-config';
+import { GlobalConfig, initGlobalConfig } from '@/config/global-config';
 import { Router } from '@/routes/routesHandler';
 
 /**
@@ -22,7 +22,7 @@ class ApplicationService {
 		const url = new URL(request.url);
 
 		// 记录请求信息 (开发阶段)
-		if (this.env.NODE_ENV === 'development') {
+		if (GlobalConfig.isDev) {
 			console.log(`🚀 Workers 处理请求: ${request.method} ${url.pathname}`);
 		}
 
@@ -48,7 +48,7 @@ export default {
 			console.error('❌ 应用错误:', error);
 
 			// 开发环境返回详细错误信息
-			if (env.NODE_ENV === 'development') {
+			if (GlobalConfig.isDev) {
 				return new Response(
 					JSON.stringify({
 						error: 'Internal Server Error',

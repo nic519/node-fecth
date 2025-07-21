@@ -17,8 +17,6 @@ npm install
 
 ```bash
 
-# 开发环境配置
-NODE_ENV=development
 ```
 
 ### 3. 启动开发服务器

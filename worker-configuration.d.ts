@@ -5,7 +5,6 @@ declare namespace Cloudflare {
 	interface Env {
 		KV_BINDING: KVNamespace;
 		USERS_KV: KVNamespace;
-		NODE_ENV: 'development';
 		SUPER_ADMIN_TOKEN: '123';
 		pages_build_output_dir: 'public';
 		DB_USER: string;

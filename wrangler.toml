@@ -21,7 +21,6 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 
 # 环境变量
 [vars]
-NODE_ENV = "development"
 SUPER_ADMIN_TOKEN = "123"
 DB_USER = "your-db-user-config"
 
