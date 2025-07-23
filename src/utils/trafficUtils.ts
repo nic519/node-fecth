@@ -28,8 +28,9 @@ export class TrafficUtils {
 
 		console.log('📡 KV缓存为空，开始从原始地址获取clash内容');
 
+		let responseClash: Response | null = null;
 		try {
-			const responseClash = await fetch(this.clashSubUrl, {
+			responseClash = await fetch(this.clashSubUrl, {
 				headers: {
 					'User-Agent': 'clash.meta',
 				},
@@ -48,12 +49,25 @@ export class TrafficUtils {
 
 			console.log(`✅ 成功获取clash内容，subInfo: ${subInfo}, 内容长度: ${content.length}`);
 
-			this.saveToKV({ subInfo, content });
+			// 异步保存到KV，不等待完成以减少响应时间
+			this.saveToKV({ subInfo, content }).catch(error => {
+				console.warn('保存到KV失败:', error);
+			});
+			
 			return { subInfo, content };
 		} catch (error) {
 			console.error(`❌ 获取clash内容时发生错误:`, error);
 			console.error(`❌ 错误详情: ${error instanceof Error ? error.message : String(error)}`);
 			throw error;
+		} finally {
+			// 确保响应流被正确释放
+			if (responseClash && responseClash.body) {
+				try {
+					await responseClash.body.cancel();
+				} catch (e) {
+					// 忽略 cancel 错误
+				}
+			}
 		}
 	}
 

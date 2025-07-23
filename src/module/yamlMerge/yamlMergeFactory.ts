@@ -49,11 +49,27 @@ export class YamlMergeFactory {
 
 	// 生成yaml内容
 	async generate(): Promise<{ yamlContent: string; subInfo: string }> {
-		if (this.userConfig.appendSubList) {
-			return await this.multiSubStrategy();
-		} else if (this.userConfig.multiPortMode) {
-			return await this.multiPortStrategy();
+		console.log('🏭 YamlMergeFactory: 开始生成YAML内容');
+		
+		try {
+			let result: { yamlContent: string; subInfo: string };
+			
+			if (this.userConfig.appendSubList) {
+				console.log('📋 使用多订阅策略');
+				result = await this.multiSubStrategy();
+			} else if (this.userConfig.multiPortMode) {
+				console.log('🔀 使用多端口策略');
+				result = await this.multiPortStrategy();
+			} else {
+				console.log('⚡ 使用快速策略');
+				result = await this.fastStrategy();
+			}
+			
+			console.log(`✅ YAML生成完成，内容长度: ${result.yamlContent.length}`);
+			return result;
+		} catch (error) {
+			console.error('❌ YAML生成失败:', error);
+			throw error;
 		}
-		return await this.fastStrategy();
 	}
 }
