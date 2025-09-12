@@ -1,9 +1,9 @@
 import { GlobalConfig } from '@/config/global-config';
 import { MiddlewareManager } from '@/routes/middleware';
 import { RouteRegistry } from '@/routes/modules';
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { ResponseCodes } from '@/types/openapi-schemas';
 
 export class Router {
 	private app: OpenAPIHono<{ Bindings: Env }>;
@@ -130,19 +130,22 @@ export class Router {
 		// 全局错误处理
 		this.app.onError((err, c) => {
 			console.error('❌ 全局错误:', err);
-			
+
 			// 处理 OpenAPI 验证错误（ZodError）
 			if (err.name === 'ZodError' || (err as any).issues) {
 				console.warn(`🚨 [OpenAPI验证错误] ${c.req.method} ${c.req.path}`, {
 					error: err,
 				});
-				return c.json({
-					code: ResponseCodes.INVALID_PARAMS,
-					msg: '请求参数验证失败',
-					data: (err as any).issues || err.message,
-				}, 400);
+				return c.json(
+					{
+						code: ResponseCodes.INVALID_PARAMS,
+						msg: '请求参数验证失败',
+						data: (err as any).issues || err.message,
+					},
+					400
+				);
 			}
-			
+
 			return c.json(
 				{
 					code: 500, // ResponseCodes.INTERNAL_ERROR

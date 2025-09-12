@@ -42,6 +42,9 @@ export default {
 		initGlobalConfig(request, env);
 
 		try {
+			// 输出headers
+			console.log('headers', request.headers);
+
 			const service = new ApplicationService(env);
 			return await service.handleRequest(request);
 		} catch (error) {

@@ -43,3 +43,33 @@ export interface SubInfo {
 	total: number;
 	expire: number;
 }
+
+// SSR订阅相关类型定义
+export interface SSRSubscriptionNode {
+	server: string;
+	port: number;
+	protocol: string;
+	method: string;
+	obfs: string;
+	password: string;
+	obfsParam?: string;
+	protocolParam?: string;
+	remarks?: string;
+	group?: string;
+}
+
+export interface SSRSubscriptionInfo {
+	totalNodes: number;
+	validNodes: number;
+	regions: Record<string, number>;
+	protocols: Record<string, number>;
+	ciphers: Record<string, number>;
+}
+
+export interface ConversionResult {
+	success: boolean;
+	clashYaml?: string;
+	nodeCount?: number;
+	errorMessage?: string;
+	stats?: SSRSubscriptionInfo;
+}

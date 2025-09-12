@@ -1,4 +1,4 @@
-import { ExtractClashNode, OutputFormat } from '@/module/extractClashNode';
+import { ExtractClashNode, OutputFormat } from '@/module/nodeFormatConverter/extractClashNode';
 
 // 示例Clash配置内容
 const sampleClashConfig = `
@@ -75,8 +75,6 @@ async function main() {
 	const remoteUrl = 'http://192.168.7.116/Hitun.yaml';
 
 	const yamlContent1 = await fetch(remoteUrl).then((res) => res.text());
-
-	// console.log(`\ncontent:\n${yamlContent1}\n\n`);
 
 	console.log(extractor.getNodes(yamlContent1, OutputFormat.ORIGINAL_LINKS));
 }
