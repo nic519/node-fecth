@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(yarn install:*)",
-      "Bash(yarn dev:*)"
+      "Bash(yarn dev:*)",
+      "Bash(yarn add:*)"
     ],
     "deny": [],
     "ask": []

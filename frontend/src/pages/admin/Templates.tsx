@@ -1,3 +1,4 @@
+import { YamlEditor } from '@/components/YamlEditor';
 import type { ConfigTemplate } from '@/types/user-config';
 import { useEffect, useState } from 'react';
 
@@ -16,6 +17,7 @@ export function AdminTemplates() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
+	const [validationErrors, setValidationErrors] = useState<string[]>([]);
 	const [configContent, setConfigContent] = useState(`# Clash 配置模板
 port: 7890
 socks-port: 7891
@@ -143,13 +145,9 @@ rules:
 			</nav>
 
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-				<div className="px-4 py-6 sm:px-0 space-y-6">
+				<div className="px-4 py-6 sm:px-0">
 					{/* 页面标题 */}
 					<div className="flex justify-between items-center">
-						<div>
-							<h2 className="text-2xl font-bold text-gray-900">配置模板管理</h2>
-							<p className="text-gray-600 mt-1">管理默认的 Clash 配置模板</p>
-						</div>
 						{!isEditing && (
 							<button
 								onClick={() => setIsEditing(true)}
@@ -180,9 +178,11 @@ rules:
 											<p className="text-sm text-gray-500 mt-1">基础配置信息</p>
 										</div>
 										<div className="flex items-center space-x-2">
-											<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-												template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-											}`}>
+											<span
+												className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+													template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+												}`}
+											>
 												{template.isActive ? '启用' : '禁用'}
 											</span>
 											<span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
@@ -212,7 +212,6 @@ rules:
 												<span className="text-gray-900">{template.lastModified}</span>
 											</div>
 											<div className="flex justify-between text-sm">
-												<span className="text-gray-500">使用次数</span>
 												<span className="text-gray-900">{template.usageCount}</span>
 											</div>
 											<div className="flex justify-between text-sm">
@@ -255,10 +254,6 @@ rules:
 												<span className="text-gray-500">最后修改</span>
 												<span className="text-gray-900">{template.lastModified}</span>
 											</div>
-											<div className="flex justify-between text-sm">
-												<span className="text-gray-500">使用次数</span>
-												<span className="text-gray-900">{template.usageCount}</span>
-											</div>
 										</div>
 									</div>
 								)}
@@ -287,33 +282,54 @@ rules:
 						{/* 右侧 - 配置编辑器 */}
 						<div className="lg:col-span-2">
 							<div className="bg-white rounded-lg shadow-sm border h-full">
-								<div className="px-6 py-4 border-b border-gray-200">
-									<h3 className="text-lg font-semibold text-gray-900">配置内容</h3>
-									<p className="text-sm text-gray-500 mt-1">YAML 格式的 Clash 配置模板</p>
+								<div className="flex justify-between items-center">
+									{validationErrors.length > 0 && (
+										<div className="flex items-center text-sm text-red-600">
+											<svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+												<path
+													fillRule="evenodd"
+													d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+													clipRule="evenodd"
+												/>
+											</svg>
+											<span>{validationErrors.length} 个语法错误</span>
+										</div>
+									)}
 								</div>
 								<div className="p-6">
-									<div className="mb-4">
-										<textarea
-											value={configContent}
-											onChange={(e) => setConfigContent((e.target as HTMLTextAreaElement).value)}
-											className="w-full h-[500px] px-4 py-3 font-mono text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-											placeholder="输入 YAML 配置内容..."
-											spellCheck={false}
-										/>
-									</div>
-									<div className="flex justify-between items-center">
+									<YamlEditor
+										value={configContent}
+										onChange={setConfigContent}
+										height="500px"
+										readOnly={!isEditing}
+										onValidate={setValidationErrors}
+									/>
+
+									{/* 验证错误显示 */}
+									{validationErrors.length > 0 && (
+										<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+											<h4 className="text-sm font-medium text-red-800 mb-2">语法错误：</h4>
+											<ul className="text-sm text-red-700 space-y-1">
+												{validationErrors.map((error, index) => (
+													<li key={index} className="flex items-start">
+														<span className="mr-2">•</span>
+														<span>{error}</span>
+													</li>
+												))}
+											</ul>
+										</div>
+									)}
+
+									<div className="flex justify-between items-center mt-4">
 										<div className="flex space-x-3">
 											<button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
-												验证语法
-											</button>
-											<button className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
-												格式化
+												导出配置
 											</button>
 											<button className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors">
 												重置为默认
 											</button>
 											<button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
-												全屏编辑
+												复制配置
 											</button>
 										</div>
 										{isEditing && (
@@ -326,8 +342,8 @@ rules:
 												</button>
 												<button
 													onClick={handleSave}
-													disabled={loading}
-													className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+													disabled={loading || validationErrors.length > 0}
+													className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 												>
 													{loading ? '保存中...' : '保存配置'}
 												</button>
