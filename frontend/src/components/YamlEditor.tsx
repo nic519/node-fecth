@@ -13,7 +13,14 @@ interface YamlEditorProps {
 	onValidate?: (errors: string[]) => void;
 }
 
-export function YamlEditor({ value, onChange, height = '500px', theme = 'light', readOnly = false, onValidate }: YamlEditorProps) {
+export function YamlEditor({
+	value,
+	onChange,
+	height = '500px',
+	theme = 'light',
+	readOnly = false,
+	onValidate
+}: YamlEditorProps) {
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
 	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
@@ -179,7 +186,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 	};
 
 	return (
-		<div className="relative border border-gray-300 rounded-lg overflow-hidden">
+		<div className="relative border border-gray-300 rounded-lg overflow-hidden h-full">
 			<Editor
 				height={height}
 				language="yaml"
