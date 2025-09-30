@@ -1,5 +1,6 @@
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { UserManager } from '@/module/userManager/userManager';
+import { TemplateManager } from '@/module/templateManager/templateManager';
 import { ClashHandler } from '@/routes/handler/clashHandler';
 import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
 import { getSubscriptionRoute } from '@/routes/openapi';
@@ -96,6 +97,43 @@ export class SubscriptionModule extends BaseRouteModule {
 					},
 					400
 				) as any;
+			}
+		});
+
+		// 模板预览端点 - 不需要用户认证，直接返回模板配置
+		app.get('/api/subscription/template/:templateId', async (c) => {
+			const startTime = Date.now();
+			const templateId = c.req.param('templateId');
+			const download = c.req.query('download');
+			const filename = c.req.query('filename');
+
+			console.log(`📋 ${this.moduleName}: 预览模板 ${templateId}`);
+
+			try {
+				const templateManager = new TemplateManager(c.env);
+				const template = await templateManager.getTemplateById(templateId);
+
+				if (!template) {
+					return c.text('模板不存在', 404);
+				}
+
+				// 直接返回模板内容
+				const content = template.content || '';
+
+				// 设置响应头
+				const headers = new Headers();
+				headers.set('Content-Type', 'text/yaml; charset=utf-8');
+
+				if (download === 'true' || filename) {
+					const finalFilename = filename || `clash-template-${templateId}.yaml`;
+					headers.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+				}
+
+				this.logResourceUsage('模板预览', startTime);
+				return new Response(content, { headers });
+			} catch (error) {
+				console.error(`❌ ${this.moduleName} 模板预览失败:`, error);
+				return c.text('获取模板失败', 500);
 			}
 		});
 	}

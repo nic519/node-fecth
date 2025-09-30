@@ -2,7 +2,7 @@ import { NavigationBar } from '@/components/NavigationBar';
 import { YamlEditor } from '@/components/YamlEditor';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { ConfigTemplate } from '@/types/user-config';
-import { CheckCircleIcon, DocumentTextIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, DocumentTextIcon, PlusIcon, TrashIcon, ArrowDownTrayIcon, LinkIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
 interface TemplateItem extends ConfigTemplate {
@@ -219,6 +219,48 @@ export function AdminTemplates() {
 		loadTemplates();
 	};
 
+	const handleDownloadTemplate = () => {
+		if (!selectedTemplate) return;
+
+		const url = `/api/subscription/template/${selectedTemplate.id}?download=true&filename=${encodeURIComponent(selectedTemplate.name)}.yaml`;
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${selectedTemplate.name}.yaml`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
+
+	const handleCopyTemplateUrl = async (templateId: string, e: React.MouseEvent) => {
+		e.stopPropagation();
+
+		try {
+			const response = await fetch(`/api/admin/templates/${templateId}/subscribe?superToken=${superToken}`);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+			const result = await response.json();
+			if (result.code === 0) {
+				await navigator.clipboard.writeText(result.data.subscribeUrl);
+				// 显示成功提示
+				const button = e.currentTarget as HTMLButtonElement;
+				if (button && button.innerHTML) {
+					const originalHTML = button.innerHTML;
+					button.innerHTML = '<svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+					setTimeout(() => {
+						if (button) {
+							button.innerHTML = originalHTML;
+						}
+					}, 2000);
+				}
+			} else {
+				throw new Error(result.msg || '获取URL失败');
+			}
+		} catch (err) {
+			alert('复制失败：' + (err instanceof Error ? err.message : '未知错误'));
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-100">
 			{/* 导航栏 */}
@@ -274,13 +316,23 @@ export function AdminTemplates() {
 														</div>
 														<div className="text-xs text-gray-500">修改于: {template.lastModified}</div>
 													</div>
-													<button
-														onClick={(e) => handleDeleteTemplate(template.id, e)}
-														className="p-1 hover:bg-red-100 rounded transition-colors group"
-														disabled={templates.length <= 1}
-													>
-														<TrashIcon className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors" />
-													</button>
+													<div className="flex items-center gap-1">
+														<button
+															onClick={(e) => handleCopyTemplateUrl(template.id, e)}
+															className="p-1.5 hover:bg-gray-100 rounded transition-colors group relative"
+															title="复制模板URL"
+														>
+															<LinkIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+														</button>
+														<button
+															onClick={(e) => handleDeleteTemplate(template.id, e)}
+															className="p-1 hover:bg-red-100 rounded transition-colors group"
+															disabled={templates.length <= 1}
+															title="删除模板"
+														>
+															<TrashIcon className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors" />
+														</button>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -363,12 +415,26 @@ export function AdminTemplates() {
 											</div>
 										)}
 
+		
 										{/* 操作按钮 */}
 										<div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
 											<div className="flex space-x-3">
-												<button className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
-													导出配置
+												<button
+													onClick={handleDownloadTemplate}
+													className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center"
+												>
+													<ArrowDownTrayIcon className="w-4 h-4 mr-1" />
+													下载配置
 												</button>
+												{selectedTemplate && (
+													<button
+														onClick={(e) => handleCopyTemplateUrl(selectedTemplate.id, e)}
+														className="px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center"
+													>
+														<LinkIcon className="w-4 h-4 mr-1" />
+														复制URL
+													</button>
+												)}
 												<button className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
 													重置为默认
 												</button>
