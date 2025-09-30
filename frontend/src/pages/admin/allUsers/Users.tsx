@@ -1,13 +1,17 @@
 // 导入自定义hooks
 import { useUserManagement } from './hooks/useUserManagement';
 import { useUserFilters } from './hooks/useUserFilters';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 // 导入组件
-import { Navigation } from './components/Navigation';
+import { NavigationBar } from '@/components/NavigationBar';
 import { UserFilters } from './components/UserFilters';
 import { UserTable } from './components/UserTable';
 
 export function AdminUsers() {
+	// 设置页面标题
+	usePageTitle('用户管理');
+
 	// 获取超级管理员令牌
 	const superToken = new URLSearchParams(window.location.search).get('superToken') || '';
 
@@ -30,7 +34,7 @@ export function AdminUsers() {
 	return (
 		<div className="min-h-screen bg-gray-100">
 			{/* 导航栏 */}
-			<Navigation superToken={superToken} />
+			<NavigationBar superToken={superToken} currentPage="users" />
 
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
 				<div className="px-4 py-6 sm:px-0 space-y-6">

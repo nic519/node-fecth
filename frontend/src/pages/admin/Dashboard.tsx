@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
+import { NavigationBar } from '@/components/NavigationBar';
 import { getApiHealth } from '@/generated/api-adapters.g';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import type { AdminStats } from '@/types/user-config';
 
 export function AdminDashboard() {
+	// 设置页面标题
+	usePageTitle('控制台');
+
 	const [stats, setStats] = useState<AdminStats | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -81,35 +86,7 @@ export function AdminDashboard() {
 	return (
 		<div className="min-h-screen bg-gray-100">
 			{/* 顶部导航 */}
-			<nav className="bg-white shadow">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex justify-between h-16">
-						<div className="flex items-center">
-							<h1 className="text-xl font-semibold text-gray-900">超级管理员控制台</h1>
-						</div>
-						<div className="flex items-center space-x-4">
-							<a
-								href={`/admin/users?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								用户管理
-							</a>
-							<a
-								href={`/admin/monitor?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								系统监控
-							</a>
-							<a
-								href={`/admin/templates?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								配置模板
-							</a>
-						</div>
-					</div>
-				</div>
-			</nav>
+			<NavigationBar superToken={superToken} currentPage="dashboard" />
 
 			{/* 主内容 */}
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -273,19 +250,6 @@ export function AdminDashboard() {
 											<div>
 												<p className="font-medium text-gray-900">管理用户</p>
 												<p className="text-sm text-gray-500">查看和管理所有用户</p>
-											</div>
-										</div>
-									</a>
-
-									<a
-										href={`/admin/monitor?superToken=${superToken}`}
-										className="block w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-									>
-										<div className="flex items-center">
-											<span className="mr-3 text-xl">📈</span>
-											<div>
-												<p className="font-medium text-gray-900">系统监控</p>
-												<p className="text-sm text-gray-500">查看系统运行状态</p>
 											</div>
 										</div>
 									</a>

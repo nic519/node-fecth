@@ -1,8 +1,13 @@
+import { NavigationBar } from '@/components/NavigationBar';
 import { YamlEditor } from '@/components/YamlEditor';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import type { ConfigTemplate } from '@/types/user-config';
 import { useEffect, useState } from 'react';
 
 export function AdminTemplates() {
+	// 设置页面标题
+	usePageTitle('配置模板');
+
 	const [template, setTemplate] = useState<ConfigTemplate>({
 		id: 1,
 		name: '默认配置模板',
@@ -10,8 +15,6 @@ export function AdminTemplates() {
 		type: 'clash',
 		lastModified: new Date().toISOString().split('T')[0],
 		isActive: true,
-		usageCount: 0,
-		version: 'v1.0.0',
 	});
 
 	const [loading, setLoading] = useState(false);
@@ -114,35 +117,7 @@ rules:
 	return (
 		<div className="min-h-screen bg-gray-100">
 			{/* 导航栏 */}
-			<nav className="bg-white shadow">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex justify-between h-16">
-						<div className="flex items-center">
-							<h1 className="text-xl font-semibold text-gray-900">配置模板</h1>
-						</div>
-						<div className="flex items-center space-x-4">
-							<a
-								href={`/admin/dashboard?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								控制台
-							</a>
-							<a
-								href={`/admin/users?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								用户管理
-							</a>
-							<a
-								href={`/admin/monitor?superToken=${superToken}`}
-								className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-							>
-								系统监控
-							</a>
-						</div>
-					</div>
-				</div>
-			</nav>
+			<NavigationBar superToken={superToken} currentPage="templates" />
 
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
 				<div className="px-4 py-6 sm:px-0">
@@ -185,10 +160,6 @@ rules:
 											<p className="text-base font-medium text-gray-900">{template.name}</p>
 										</div>
 										<div>
-											<label className="block text-sm font-medium text-gray-500 mb-1">版本</label>
-											<p className="text-base font-medium text-gray-900">{template.version}</p>
-										</div>
-										<div>
 											<label className="block text-sm font-medium text-gray-500 mb-1">模板描述</label>
 											<p className="text-sm text-gray-900 leading-relaxed">{template.description}</p>
 										</div>
@@ -196,10 +167,6 @@ rules:
 											<div className="flex justify-between text-sm">
 												<span className="text-gray-500">最后修改</span>
 												<span className="text-gray-900">{template.lastModified}</span>
-											</div>
-											<div className="flex justify-between text-sm">
-												<span className="text-gray-500">状态</span>
-												<span className="text-green-600 font-medium">正常</span>
 											</div>
 										</div>
 									</div>
@@ -232,25 +199,6 @@ rules:
 									</div>
 								)}
 							</div>
-
-							{/* 使用说明 */}
-							<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-								<h3 className="text-base font-semibold text-blue-900 mb-2">使用说明</h3>
-								<ul className="space-y-1.5 text-xs text-blue-800">
-									<li className="flex items-start">
-										<span className="mr-1.5">•</span>
-										<span>系统会自动将节点插入到 proxies 数组</span>
-									</li>
-									<li className="flex items-start">
-										<span className="mr-1.5">•</span>
-										<span>确保 proxy-groups 配置正确</span>
-									</li>
-									<li className="flex items-start">
-										<span className="mr-1.5">•</span>
-										<span>保存后所有订阅将使用新模板</span>
-									</li>
-								</ul>
-							</div>
 						</div>
 
 						{/* 右侧 - 配置编辑器 */}
@@ -274,7 +222,7 @@ rules:
 									<YamlEditor
 										value={configContent}
 										onChange={setConfigContent}
-										height="500px"
+										height="650px"
 										readOnly={!isEditing}
 										onValidate={setValidationErrors}
 									/>

@@ -1,4 +1,9 @@
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export function NotFound() {
+  // 设置页面标题
+  usePageTitle('页面未找到');
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 text-center">

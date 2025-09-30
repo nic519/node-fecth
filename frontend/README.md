@@ -60,7 +60,6 @@ frontend/
 - `/config/:userId?token=xxx` - 用户配置管理
 - `/admin/dashboard?superToken=xxx` - 管理员控制台
 - `/admin/users?superToken=xxx` - 用户管理
-- `/admin/monitor?superToken=xxx` - 系统监控
 - `/admin/templates?superToken=xxx` - 配置模板
 
 ## 🛠️ 技术栈

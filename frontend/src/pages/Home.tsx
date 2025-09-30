@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export function Home() {
+	// 设置页面标题
+	usePageTitle();
+
 	const [currentFeature, setCurrentFeature] = useState(0);
 
 	useEffect(() => {

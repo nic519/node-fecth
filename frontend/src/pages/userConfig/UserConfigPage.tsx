@@ -3,8 +3,12 @@ import { Header } from './components/Header';
 import { HelpSidebar } from './components/HelpSidebar';
 import { useHelpDisplay } from './hooks/useHelpDisplay';
 import { useUserConfig } from './hooks/useUserConfig';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
-export function UserConfigPage() { 
+export function UserConfigPage() {
+	// 设置页面标题
+	usePageTitle('配置订阅');
+
 	// 从 URL 获取 token
 	const token = new URLSearchParams(window.location.search).get('token') || '';
 	const uid = new URLSearchParams(window.location.search).get('uid') || '';

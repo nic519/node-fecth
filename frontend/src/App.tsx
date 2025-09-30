@@ -1,6 +1,5 @@
 import { AdminUsers } from '@/pages/admin/allUsers/Users';
 import { AdminDashboard } from '@/pages/admin/Dashboard';
-import { AdminMonitor } from '@/pages/admin/Monitor';
 import { AdminTemplates } from '@/pages/admin/Templates';
 import { Home } from '@/pages/Home';
 import { NotFound } from '@/pages/NotFound';
@@ -20,7 +19,6 @@ export function App() {
 				{/* 管理员页面 */}
 				<Route path="/admin/dashboard" element={<AdminDashboard />} />
 				<Route path="/admin/users" element={<AdminUsers />} />
-				<Route path="/admin/monitor" element={<AdminMonitor />} />
 				<Route path="/admin/templates" element={<AdminTemplates />} />
 
 				{/* 404 页面 */}
