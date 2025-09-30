@@ -14,154 +14,7 @@ export function AdminTemplates() {
 	// 设置页面标题
 	usePageTitle('配置模板');
 
-	const [templates, setTemplates] = useState<TemplateItem[]>([
-		{
-			id: '1',
-			name: '默认 Clash 配置',
-			type: 'clash',
-			lastModified: new Date().toISOString().split('T')[0],
-			isSelected: true,
-			configContent: `# Clash 配置模板
-port: 7890
-socks-port: 7891
-allow-lan: false
-mode: rule
-log-level: info
-
-# DNS 配置
-dns:
-  enable: true
-  ipv6: false
-  listen: 0.0.0.0:53
-  enhanced-mode: fake-ip
-  nameserver:
-    - 114.114.114.114
-    - 8.8.8.8
-
-# 代理节点将动态插入
-proxies: []
-
-# 代理组
-proxy-groups:
-  - name: "🚀 节点选择"
-    type: select
-    proxies:
-      - "⚡ 自动选择"
-      - "🔯 故障转移"
-      - DIRECT
-
-  - name: "⚡ 自动选择"
-    type: url-test
-    proxies: []
-    url: "http://www.gstatic.com/generate_204"
-    interval: 300
-
-  - name: "🔯 故障转移"
-    type: fallback
-    proxies: []
-    url: "http://www.gstatic.com/generate_204"
-    interval: 300
-
-# 规则
-rules:
-  - GEOIP,CN,DIRECT
-  - MATCH,🚀 节点选择`,
-		},
-		{
-			id: '2',
-			name: '简化 Clash 配置',
-			type: 'clash',
-			lastModified: '2024-01-20',
-			isSelected: false,
-			configContent: `# 简化 Clash 配置
-port: 7890
-socks-port: 7891
-allow-lan: false
-mode: rule
-log-level: info
-
-# DNS 配置
-dns:
-  enable: true
-  nameserver:
-    - 114.114.114.114
-    - 8.8.8.8
-
-# 代理节点
-proxies: []
-
-# 代理组
-proxy-groups:
-  - name: "🚀 节点选择"
-    type: select
-    proxies:
-      - DIRECT
-
-# 规则
-rules:
-  - DOMAIN-SUFFIX,google.com,🚀 节点选择
-  - DOMAIN-SUFFIX,youtube.com,🚀 节点选择
-  - GEOIP,CN,DIRECT
-  - MATCH,🚀 节点选择`,
-		},
-		{
-			id: '3',
-			name: '游戏专用配置',
-			type: 'clash',
-			lastModified: '2024-01-18',
-			isSelected: false,
-			configContent: `# 游戏专用 Clash 配置
-port: 7890
-socks-port: 7891
-allow-lan: false
-mode: rule
-log-level: info
-
-# DNS 配置
-dns:
-  enable: true
-  ipv6: false
-  enhanced-mode: fake-ip
-  nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-    - 8.8.8.8
-
-# 代理节点
-proxies: []
-
-# 代理组
-proxy-groups:
-  - name: "🎮 游戏"
-    type: select
-    proxies:
-      - "⚡ 自动选择"
-      - "🔯 故障转移"
-      - DIRECT
-
-  - name: "⚡ 自动选择"
-    type: url-test
-    proxies: []
-    url: "http://www.gstatic.com/generate_204"
-    interval: 150
-
-  - name: "🔯 故障转移"
-    type: fallback
-    proxies: []
-    url: "http://www.gstatic.com/generate_204"
-    interval: 150
-
-# 规则
-rules:
-  - DOMAIN-SUFFIX,steamstatic.com,DIRECT
-  - DOMAIN-SUFFIX,steamcommunity.com,DIRECT
-  - DOMAIN-SUFFIX,steampowered.com,DIRECT
-  - DOMAIN-SUFFIX,epicgames.com,DIRECT
-  - DOMAIN-SUFFIX,battle.net,DIRECT
-  - GEOIP,CN,DIRECT
-  - MATCH,🎮 游戏`,
-		},
-	]);
+	const [templates, setTemplates] = useState<TemplateItem[]>([]);
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -181,7 +34,26 @@ rules:
 	const loadTemplates = async () => {
 		try {
 			setLoading(true);
-			// TODO: 从 API 获取模板数据
+			const response = await fetch(`/api/admin/templates?superToken=${superToken}`);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+			const result = await response.json();
+			if (result.code === 0) {
+				const currentTemplates = templates;
+				const templateItems: TemplateItem[] = result.data.templates.map((t: ConfigTemplate) => ({
+					...t,
+					configContent: t.content || '',
+					isSelected: currentTemplates.length === 0 ? t.id === result.data.templates[0]?.id : currentTemplates.some(x => x.id === t.id && x.isSelected),
+				}));
+				// 确保至少有一个选中的模板
+				if (templateItems.length > 0 && !templateItems.some(t => t.isSelected)) {
+					templateItems[0].isSelected = true;
+				}
+				setTemplates(templateItems);
+			} else {
+				throw new Error(result.msg || '获取模板失败');
+			}
 			setError(null);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : '加载模板失败');
@@ -204,22 +76,48 @@ rules:
 		setValidationErrors([]);
 	};
 
-	const handleCreateTemplate = () => {
-		const newTemplate: TemplateItem = {
-			id: Date.now().toString(),
-			name: '新配置模板',
-			type: 'clash',
-			lastModified: new Date().toISOString().split('T')[0],
-			isSelected: true,
-			configContent: `# 新配置模板
+	const handleCreateTemplate = async () => {
+		try {
+			setLoading(true);
+			const response = await fetch(`/api/admin/templates?superToken=${superToken}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					name: '新配置模板',
+					description: '新创建的配置模板',
+					type: 'clash',
+					content: `# 新配置模板
 # 请在此处编辑您的配置`,
-		};
+				}),
+			});
 
-		setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat(newTemplate));
-		setIsEditing(true);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+
+			const result = await response.json();
+			if (result.code === 0) {
+				const newTemplate: TemplateItem = {
+					...result.data,
+					configContent: result.data.content || '',
+					isSelected: true,
+				};
+
+				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat(newTemplate));
+				setIsEditing(true);
+			} else {
+				throw new Error(result.msg || '创建模板失败');
+			}
+		} catch (err) {
+			alert('创建模板失败：' + (err instanceof Error ? err.message : '未知错误'));
+		} finally {
+			setLoading(false);
+		}
 	};
 
-	const handleDeleteTemplate = (templateId: string, e: React.MouseEvent) => {
+	const handleDeleteTemplate = async (templateId: string, e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (templates.length <= 1) {
 			alert('至少需要保留一个模板');
@@ -227,14 +125,34 @@ rules:
 		}
 
 		if (confirm('确定要删除这个模板吗？')) {
-			setTemplates((prev) => {
-				const newTemplates = prev.filter((t) => t.id !== templateId);
-				if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
-					newTemplates[0].isSelected = true;
+			try {
+				setLoading(true);
+				const response = await fetch(`/api/admin/templates/${templateId}?superToken=${superToken}`, {
+					method: 'DELETE',
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 				}
-				return newTemplates;
-			});
-			setIsEditing(false);
+
+				const result = await response.json();
+				if (result.code === 0) {
+					setTemplates((prev) => {
+						const newTemplates = prev.filter((t) => t.id !== templateId);
+						if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
+							newTemplates[0].isSelected = true;
+						}
+						return newTemplates;
+					});
+					setIsEditing(false);
+				} else {
+					throw new Error(result.msg || '删除模板失败');
+				}
+			} catch (err) {
+				alert('删除模板失败：' + (err instanceof Error ? err.message : '未知错误'));
+			} finally {
+				setLoading(false);
+			}
 		}
 	};
 
@@ -257,16 +175,38 @@ rules:
 
 		try {
 			setLoading(true);
-			const updatedTemplate = {
-				...selectedTemplate,
-				lastModified: new Date().toISOString().split('T')[0],
-			};
 
-			setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
+			const response = await fetch(`/api/admin/templates/${selectedTemplate.id}?superToken=${superToken}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					name: selectedTemplate.name,
+					description: selectedTemplate.description || '配置模板',
+					type: selectedTemplate.type,
+					content: selectedTemplate.configContent,
+				}),
+			});
 
-			setIsEditing(false);
-			// TODO: 保存到后端 API
-			alert('模板保存成功！');
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+
+			const result = await response.json();
+			if (result.code === 0) {
+				const updatedTemplate = {
+					...selectedTemplate,
+					...result.data,
+					lastModified: new Date().toISOString().split('T')[0],
+				};
+
+				setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
+				setIsEditing(false);
+				alert('模板保存成功！');
+			} else {
+				throw new Error(result.msg || '保存失败');
+			}
 		} catch (err) {
 			alert('保存失败：' + (err instanceof Error ? err.message : '未知错误'));
 		} finally {

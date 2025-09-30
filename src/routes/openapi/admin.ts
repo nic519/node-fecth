@@ -157,7 +157,7 @@ export const refreshUserTrafficRoute = createRoute({
 // 获取配置模板列表
 export const getConfigTemplatesRoute = createRoute({
 	method: 'get',
-	path: '/admin/templates',
+	path: '/api/admin/templates',
 	summary: '获取配置模板列表',
 	description: '获取所有可用的配置模板',
 	tags: ['管理员'],
@@ -179,7 +179,7 @@ export const getConfigTemplatesRoute = createRoute({
 // 创建配置模板
 export const createConfigTemplateRoute = createRoute({
 	method: 'post',
-	path: '/admin/templates',
+	path: '/api/admin/templates',
 	summary: '创建配置模板',
 	description: '创建新的配置模板',
 	tags: ['管理员'],
@@ -208,7 +208,7 @@ export const createConfigTemplateRoute = createRoute({
 // 更新配置模板
 export const updateConfigTemplateRoute = createRoute({
 	method: 'put',
-	path: '/admin/templates/{templateId}',
+	path: '/api/admin/templates/{templateId}',
 	summary: '更新配置模板',
 	description: '更新指定的配置模板',
 	tags: ['管理员'],
@@ -240,7 +240,7 @@ export const updateConfigTemplateRoute = createRoute({
 // 删除配置模板
 export const deleteConfigTemplateRoute = createRoute({
 	method: 'delete',
-	path: '/admin/templates/{templateId}',
+	path: '/api/admin/templates/{templateId}',
 	summary: '删除配置模板',
 	description: '删除指定的配置模板',
 	tags: ['管理员'],
@@ -265,7 +265,7 @@ export const deleteConfigTemplateRoute = createRoute({
 // 应用模板到用户
 export const applyTemplateRoute = createRoute({
 	method: 'post',
-	path: '/admin/templates/{templateId}/apply',
+	path: '/api/admin/templates/{templateId}/apply',
 	summary: '应用模板到用户',
 	description: '将指定模板应用到用户配置',
 	tags: ['管理员'],
