@@ -115,8 +115,6 @@ export const ConfigTemplateSchema = z.object({
 	type: z.enum(['clash', 'v2ray', 'shadowsocks']),
 	lastModified: z.string(),
 	isActive: z.boolean(),
-	usageCount: z.number(),
-	version: z.string(),
 	content: z.string().optional(),
 	template: UserConfigSchema.optional(), // 用于后端模板应用
 	createdAt: z.string().optional(),
@@ -154,7 +152,7 @@ export const SuccessResponseSchema = z.object({
 	data: z.any().optional(),
 });
 
-// 错误响应 Schema  
+// 错误响应 Schema
 export const ErrorResponseSchema = z.object({
 	code: z.number().min(400),
 	msg: z.string(),
@@ -197,8 +195,6 @@ export const ConfigTemplatesResponseSchema = z.object({
 		templates: z.array(ConfigTemplateSchema),
 	}),
 });
-
-
 
 // =============================================================================
 // 请求参数 Schemas

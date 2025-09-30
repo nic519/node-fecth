@@ -220,7 +220,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 			/>
 
 			{/* 工具栏 */}
-			<div className="absolute top-2 right-2 flex gap-2">
+			<div className="absolute top-2 right-6 flex gap-2">
 				<button
 					onClick={formatYaml}
 					className="px-3 py-1 text-xs bg-white/90 backdrop-blur-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors shadow-sm"

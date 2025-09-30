@@ -146,18 +146,6 @@ rules:
 
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
 				<div className="px-4 py-6 sm:px-0">
-					{/* 页面标题 */}
-					<div className="flex justify-between items-center">
-						{!isEditing && (
-							<button
-								onClick={() => setIsEditing(true)}
-								className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-							>
-								编辑模板
-							</button>
-						)}
-					</div>
-
 					{/* 错误信息 */}
 					{error && (
 						<div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -178,16 +166,14 @@ rules:
 											<p className="text-sm text-gray-500 mt-1">基础配置信息</p>
 										</div>
 										<div className="flex items-center space-x-2">
-											<span
-												className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-													template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-												}`}
-											>
-												{template.isActive ? '启用' : '禁用'}
-											</span>
-											<span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-												{template.type.toUpperCase()}
-											</span>
+											{!isEditing && (
+												<button
+													onClick={() => setIsEditing(true)}
+													className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+												>
+													编辑模板
+												</button>
+											)}
 										</div>
 									</div>
 								</div>
@@ -212,9 +198,6 @@ rules:
 												<span className="text-gray-900">{template.lastModified}</span>
 											</div>
 											<div className="flex justify-between text-sm">
-												<span className="text-gray-900">{template.usageCount}</span>
-											</div>
-											<div className="flex justify-between text-sm">
 												<span className="text-gray-500">状态</span>
 												<span className="text-green-600 font-medium">正常</span>
 											</div>
@@ -228,15 +211,6 @@ rules:
 												type="text"
 												value={template.name}
 												onChange={(e) => setTemplate({ ...template, name: (e.target as HTMLInputElement).value })}
-												className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-											/>
-										</div>
-										<div>
-											<label className="block text-sm font-medium text-gray-700 mb-2">版本号</label>
-											<input
-												type="text"
-												value={template.version}
-												onChange={(e) => setTemplate({ ...template, version: (e.target as HTMLInputElement).value })}
 												className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
 											/>
 										</div>
