@@ -71,3 +71,4 @@ import { AsyncCopyButton } from '@/components/AsyncCopyButton';
 - `getText`: 异步获取要复制的文本内容的函数
 - 其他属性与 CopyButton 相同
 
+
