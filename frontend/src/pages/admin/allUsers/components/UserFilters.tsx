@@ -40,27 +40,27 @@ export function UserFilters({
 					/>
 				</div>
 				<Select value={statusFilter} onChange={(e) => onStatusFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
-					<SelectItem key="" value="">
+					<SelectItem key="">
 						所有状态
 					</SelectItem>
-					<SelectItem key="configured" value="configured">
+					<SelectItem key="configured">
 						已配置
 					</SelectItem>
-					<SelectItem key="unconfigured" value="unconfigured">
+					<SelectItem key="unconfigured">
 						未配置
 					</SelectItem>
 				</Select>
 				<Select value={sourceFilter} onChange={(e) => onSourceFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
-					<SelectItem key="" value="">
+					<SelectItem key="">
 						所有数据源
 					</SelectItem>
-					<SelectItem key="kv" value="kv">
+					<SelectItem key="kv">
 						KV 存储
 					</SelectItem>
-					<SelectItem key="env" value="env">
+					<SelectItem key="env">
 						环境变量
 					</SelectItem>
-					<SelectItem key="none" value="none">
+					<SelectItem key="none">
 						无配置
 					</SelectItem>
 				</Select>

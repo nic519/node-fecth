@@ -6,7 +6,6 @@ interface TemplateModalsProps {
 	confirmDeleteTemplate: () => void;
 	isErrorModalOpen: boolean;
 	closeErrorModal: () => void;
-	modalMessage: string;
 	loading: boolean;
 }
 
@@ -16,7 +15,6 @@ export function TemplateModals({
 	confirmDeleteTemplate,
 	isErrorModalOpen,
 	closeErrorModal,
-	modalMessage,
 	loading,
 }: TemplateModalsProps) {
 	// 判断消息类型
@@ -59,7 +57,7 @@ export function TemplateModals({
 			<Modal isOpen={isErrorModalOpen} onOpenChange={closeErrorModal} size="sm">
 				<ModalContent>
 					{(onClose) => {
-						const messageType = getMessageType(modalMessage);
+						const messageType = getMessageType("操作失败");
 						return (
 							<>
 								<ModalHeader className="flex flex-col gap-1 items-center">
@@ -75,7 +73,7 @@ export function TemplateModals({
 									</Chip>
 								</ModalHeader>
 								<ModalBody className="text-center">
-									<p className="text-gray-700">{modalMessage}</p>
+									<p className="text-gray-700">操作失败</p>
 								</ModalBody>
 								<ModalFooter className="justify-center">
 									<Button color={messageType.color as any} variant="solid" onPress={onClose} autoFocus>

@@ -10,7 +10,6 @@ import {
   CardBody,
   CardHeader,
   Chip,
-  Badge,
   Link,
   Divider,
   Code,

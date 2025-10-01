@@ -40,7 +40,7 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, he
 							template.isSelected ? 'bg-purple-50' : 'hover:bg-gray-50'
 						}`}
 					>
-						<div className="px-6 py-4 cursor-pointer" onClick={() => onSelectTemplate(template.id)}>
+						<div className="px-6 py-4 cursor-pointer" onClick={() => onSelectTemplate(String(template.id))}>
 							<div className="flex items-start justify-between">
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center gap-2 mb-2">
@@ -56,7 +56,7 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, he
 										size="sm"
 										variant="light"
 										color="danger"
-										onPress={(e) => onDeleteTemplate(template.id, e)}
+										onPress={(e) => onDeleteTemplate(String(template.id), e)}
 										disabled={templates.length <= 1}
 										title="删除模板"
 									>

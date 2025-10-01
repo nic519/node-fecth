@@ -1,5 +1,5 @@
 # Cloudflare Workers 全栈配置
-name = "node-fetch-worker"
+name = "node-fetch"
 main = "src/index.ts"
 compatibility_date = "2025-02-14"
 compatibility_flags = ["nodejs_compat"]
@@ -21,7 +21,7 @@ id = "52fa82d5a9c3438195385f592be41ef9"
 
 # 环境变量
 [vars]
-SUPER_ADMIN_TOKEN = "123"
+SUPER_ADMIN_TOKEN = "5emA2p27qFpTTJEKf"
 DB_USER = "your-db-user-config"
 
 # 开发模式配置

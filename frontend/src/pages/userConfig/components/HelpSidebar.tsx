@@ -5,7 +5,7 @@ interface HelpSidebarProps {
 	onToggleHelp: () => void;
 }
 
-export function HelpSidebar({ showHelp, onToggleHelp }: HelpSidebarProps) {
+export function HelpSidebar({ showHelp }: HelpSidebarProps) {
 	if (!showHelp) return null;
 
 	return (

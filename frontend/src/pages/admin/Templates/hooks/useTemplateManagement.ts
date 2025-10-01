@@ -24,7 +24,6 @@ export interface UseTemplateManagementReturn {
 	isDeleteModalOpen: boolean;
 	isErrorModalOpen: boolean;
 	templateToDelete: string | null;
-	modalMessage: string;
 
 	// 操作函数
 	loadTemplates: () => void;
@@ -70,9 +69,8 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 
 	// 模态框状态
 	const { isOpen: isDeleteModalOpen, onOpen: openDeleteModal, onOpenChange: closeDeleteModal } = useDisclosure();
-	const { isOpen: isErrorModalOpen, onOpen: openErrorModal, onOpenChange: closeErrorModal } = useDisclosure();
+	const { isOpen: isErrorModalOpen, onOpenChange: closeErrorModal } = useDisclosure();
 	const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
-	const [modalMessage, setModalMessage] = useState<string>('');
 
 	// 计算属性
 	const selectedTemplate = templates.find((t) => t.isSelected) || null;
@@ -352,7 +350,6 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		isDeleteModalOpen,
 		isErrorModalOpen,
 		templateToDelete,
-		modalMessage,
 
 		// 操作函数
 		loadTemplates,

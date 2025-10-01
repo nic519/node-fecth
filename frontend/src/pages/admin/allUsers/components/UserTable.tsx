@@ -35,15 +35,14 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 						<TableColumn>操作</TableColumn>
 					</TableHeader>
 					<TableBody isLoading={loading} loadingContent={<Loading message="正在加载用户数据..." size="sm" />}>
-						{users.length === 0 && !loading && !error && (
+						{users.length === 0 && !loading && !error ? (
 							<TableRow>
 								<TableCell colSpan={6} className="text-center py-4 text-gray-500">
 									暂无用户数据
 								</TableCell>
 							</TableRow>
-						)}
-
-						{users.map((user) => (
+						) : (
+							users.map((user) => (
 							<TableRow key={user.uid}>
 								<TableCell>
 									<div>
@@ -61,7 +60,7 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									</Chip>
 								</TableCell>
 								<TableCell>
-									<Chip size="sm" color={user.source === 'clash' ? 'primary' : 'secondary'} variant="flat">
+									<Chip size="sm" color="secondary" variant="flat">
 										{getSourceText(user.source)}
 									</Chip>
 								</TableCell>
@@ -90,7 +89,8 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									<UserActions uid={user.uid} token={user.token} onUserAction={onUserAction} />
 								</TableCell>
 							</TableRow>
-						))}
+							))
+						)}
 					</TableBody>
 				</Table>
 			</div>

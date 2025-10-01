@@ -51,7 +51,7 @@ export function YamlEditor({
 
 		// 添加自动补全
 		monaco.languages.registerCompletionItemProvider('yaml', {
-			provideCompletionItems: (model: any, position: any) => {
+			provideCompletionItems: (_model: any, _position: any) => {
 				const suggestions = [
 					{
 						label: 'port',

@@ -32,7 +32,6 @@ export function AdminTemplates() {
 		// 模态框状态
 		isDeleteModalOpen,
 		isErrorModalOpen,
-		modalMessage,
 
 		// 操作函数
 		handleSelectTemplate,
@@ -138,7 +137,6 @@ export function AdminTemplates() {
 				confirmDeleteTemplate={confirmDeleteTemplate}
 				isErrorModalOpen={isErrorModalOpen}
 				closeErrorModal={closeErrorModal}
-				modalMessage={modalMessage}
 				loading={loading}
 			/>
 		</div>
