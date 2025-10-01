@@ -14,15 +14,15 @@ export function UserActions({ uid, token, onUserAction }: UserActionsProps) {
 		<div className="flex gap-2">
 			<Button
 				size="sm"
-				variant="light"
-				color="primary"
+				variant="solid"
+				className="bg-blue-600 text-white hover:bg-blue-700"
 				onClick={() => onUserAction('view', uid, token)}
 			>
 				查看
 			</Button>
 			<Button
 				size="sm"
-				variant="light"
+				variant="solid"
 				color="success"
 				onClick={() => onUserAction('refresh', uid)}
 			>
@@ -30,7 +30,7 @@ export function UserActions({ uid, token, onUserAction }: UserActionsProps) {
 			</Button>
 			<Button
 				size="sm"
-				variant="light"
+				variant="solid"
 				color="danger"
 				onClick={() => onUserAction('delete', uid)}
 			>

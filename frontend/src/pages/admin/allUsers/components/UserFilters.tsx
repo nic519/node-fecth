@@ -1,4 +1,4 @@
-import { Input, Select, SelectItem, Button } from '@heroui/react';
+import { Button, Input, Select, SelectItem } from '@heroui/react';
 
 export interface UserFiltersProps {
 	searchTerm: string;
@@ -9,6 +9,7 @@ export interface UserFiltersProps {
 	onStatusFilterChange: (filter: string) => void;
 	onSourceFilterChange: (filter: string) => void;
 	onRefresh: () => void;
+	onAddUser?: () => void;
 }
 
 /**
@@ -23,6 +24,7 @@ export function UserFilters({
 	onStatusFilterChange,
 	onSourceFilterChange,
 	onRefresh,
+	onAddUser,
 }: UserFiltersProps) {
 	return (
 		<div className="bg-white p-4 rounded-lg shadow-sm border">
@@ -37,40 +39,40 @@ export function UserFilters({
 						size="sm"
 					/>
 				</div>
-				<Select
-					value={statusFilter}
-					onChange={(e) => onStatusFilterChange(e.target.value)}
-					variant="bordered"
-					size="sm"
-					className="w-40"
-				>
-					<SelectItem key="" value="">所有状态</SelectItem>
-					<SelectItem key="configured" value="configured">已配置</SelectItem>
-					<SelectItem key="unconfigured" value="unconfigured">未配置</SelectItem>
+				<Select value={statusFilter} onChange={(e) => onStatusFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
+					<SelectItem key="" value="">
+						所有状态
+					</SelectItem>
+					<SelectItem key="configured" value="configured">
+						已配置
+					</SelectItem>
+					<SelectItem key="unconfigured" value="unconfigured">
+						未配置
+					</SelectItem>
 				</Select>
-				<Select
-					value={sourceFilter}
-					onChange={(e) => onSourceFilterChange(e.target.value)}
-					variant="bordered"
-					size="sm"
-					className="w-40"
-				>
-					<SelectItem key="" value="">所有数据源</SelectItem>
-					<SelectItem key="kv" value="kv">KV 存储</SelectItem>
-					<SelectItem key="env" value="env">环境变量</SelectItem>
-					<SelectItem key="none" value="none">无配置</SelectItem>
+				<Select value={sourceFilter} onChange={(e) => onSourceFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
+					<SelectItem key="" value="">
+						所有数据源
+					</SelectItem>
+					<SelectItem key="kv" value="kv">
+						KV 存储
+					</SelectItem>
+					<SelectItem key="env" value="env">
+						环境变量
+					</SelectItem>
+					<SelectItem key="none" value="none">
+						无配置
+					</SelectItem>
 				</Select>
-				<Button
-					onClick={onRefresh}
-					disabled={loading}
-					variant="flat"
-					color="default"
-					size="sm"
-					isLoading={loading}
-				>
+				<Button onClick={onRefresh} disabled={loading} variant="solid" color="default" size="sm" isLoading={loading}>
 					刷新
 				</Button>
+				{onAddUser && (
+					<Button onClick={onAddUser} variant="solid" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+						+ 添加用户
+					</Button>
+				)}
 			</div>
 		</div>
 	);
-} 
+}

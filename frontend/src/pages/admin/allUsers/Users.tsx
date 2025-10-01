@@ -1,7 +1,7 @@
 // 导入自定义hooks
-import { useUserManagement } from './hooks/useUserManagement';
-import { useUserFilters } from './hooks/useUserFilters';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useUserFilters } from './hooks/useUserFilters';
+import { useUserManagement } from './hooks/useUserManagement';
 
 // 导入组件
 import { NavigationBar } from '@/components/NavigationBar';
@@ -9,7 +9,7 @@ import { UserFilters } from './components/UserFilters';
 import { UserTable } from './components/UserTable';
 
 // 导入HeroUI组件
-import { Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from '@heroui/react';
+import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
 
 export function AdminUsers() {
 	// 设置页面标题
@@ -47,16 +47,22 @@ export function AdminUsers() {
 		superToken,
 	});
 
+	// 判断消息类型
+	const getMessageType = (message: string) => {
+		if (message.includes('成功') || message.includes('创建成功') || message.includes('删除成功')) {
+			return { color: 'success', icon: '✓' };
+		} else if (message.includes('失败') || message.includes('错误')) {
+			return { color: 'danger', icon: '✕' };
+		} else if (message.includes('不支持') || message.includes('请填写')) {
+			return { color: 'warning', icon: '⚠' };
+		}
+		return { color: 'primary', icon: 'ℹ' };
+	};
+
 	// 使用用户过滤Hook
-	const {
-		filteredUsers,
-		searchTerm,
-		statusFilter,
-		sourceFilter,
-		setSearchTerm,
-		setStatusFilter,
-		setSourceFilter,
-	} = useUserFilters({ users });
+	const { filteredUsers, searchTerm, statusFilter, sourceFilter, setSearchTerm, setStatusFilter, setSourceFilter } = useUserFilters({
+		users,
+	});
 
 	return (
 		<div className="min-h-screen bg-gray-100">
@@ -64,21 +70,7 @@ export function AdminUsers() {
 			<NavigationBar superToken={superToken} currentPage="users" />
 
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-				<div className="px-4 py-6 sm:px-0 space-y-6">
-					{/* 页面标题和操作按钮 */}
-					<div className="flex justify-between items-center">
-						<div>
-							<h2 className="text-2xl font-bold text-gray-900">用户管理</h2>
-							<p className="text-gray-600 mt-1">管理系统中的所有用户账户，支持实时查看、创建、删除和流量管理</p>
-						</div>
-						<Button
-							onClick={handleAddUser}
-							color="primary"
-						>
-							+ 添加用户
-						</Button>
-					</div>
-
+				<div className="px-4 py-4 sm:px-0 space-y-4">
 					{/* 搜索和筛选 */}
 					<UserFilters
 						searchTerm={searchTerm}
@@ -89,6 +81,7 @@ export function AdminUsers() {
 						onStatusFilterChange={setStatusFilter}
 						onSourceFilterChange={setSourceFilter}
 						onRefresh={fetchUsers}
+						onAddUser={handleAddUser}
 					/>
 
 					{/* 错误信息 */}
@@ -99,28 +92,23 @@ export function AdminUsers() {
 					)}
 
 					{/* 用户列表 */}
-					<UserTable
-						users={filteredUsers}
-						loading={loading}
-						error={error}
-						onUserAction={handleUserAction}
-					/>
+					<UserTable users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
 
 					{/* 分页信息 */}
-					<div className="flex items-center justify-between bg-white px-4 py-3 border rounded-lg">
-						<div className="flex items-center text-sm text-gray-700">
-							<span>
-								显示 1-{filteredUsers.length} 条，共 {filteredUsers.length} 条记录
-							</span>
+					<div className="flex items-center justify-between bg-white px-4 py-2 border rounded-lg">
+						<div className="flex items-center text-xs text-gray-600">
+							<span>共 {filteredUsers.length} 条记录</span>
 						</div>
-						<div className="flex space-x-2">
-							<button className="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 disabled:opacity-50" disabled>
+						<div className="flex gap-1">
+							<Button size="sm" variant="solid" color="default" disabled>
 								上一页
-							</button>
-							<button className="px-3 py-1 text-sm bg-blue-600 text-white rounded">1</button>
-							<button className="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 disabled:opacity-50" disabled>
+							</Button>
+							<Button size="sm" variant="solid" className="bg-blue-600 text-white hover:bg-blue-700">
+								1
+							</Button>
+							<Button size="sm" variant="solid" color="default" disabled>
 								下一页
-							</button>
+							</Button>
 						</div>
 					</div>
 				</div>
@@ -136,7 +124,7 @@ export function AdminUsers() {
 								<p>确定要删除用户 {userToDelete} 吗？此操作不可撤销！</p>
 							</ModalBody>
 							<ModalFooter>
-								<Button color="default" variant="light" onPress={onClose}>
+								<Button color="default" variant="solid" onPress={onClose}>
 									取消
 								</Button>
 								<Button color="danger" onPress={confirmDeleteUser} isLoading={loading}>
@@ -180,10 +168,14 @@ export function AdminUsers() {
 								</div>
 							</ModalBody>
 							<ModalFooter>
-								<Button color="default" variant="light" onPress={onClose}>
+								<Button color="default" variant="solid" onPress={onClose}>
 									取消
 								</Button>
-								<Button color="primary" onPress={confirmAddUser} isLoading={loading}>
+								<Button
+									onPress={confirmAddUser}
+									isLoading={loading}
+									className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+								>
 									添加
 								</Button>
 							</ModalFooter>
@@ -193,21 +185,35 @@ export function AdminUsers() {
 			</Modal>
 
 			{/* 消息提示模态框 */}
-			<Modal isOpen={showMessageModal} onOpenChange={closeMessageModal}>
+			<Modal isOpen={showMessageModal} onOpenChange={closeMessageModal} size="sm">
 				<ModalContent>
-					{(onClose) => (
-						<>
-							<ModalHeader className="flex flex-col gap-1">提示</ModalHeader>
-							<ModalBody>
-								<p>{modalMessage}</p>
-							</ModalBody>
-							<ModalFooter>
-								<Button color="primary" onPress={onClose}>
-									确定
-								</Button>
-							</ModalFooter>
-						</>
-					)}
+					{(onClose) => {
+						const messageType = getMessageType(modalMessage);
+						return (
+							<>
+								<ModalHeader className="flex flex-col gap-1 items-center">
+									<Chip color={messageType.color as any} variant="solid" size="lg" className="mb-2">
+										<span className="text-lg mr-2">{messageType.icon}</span>
+										{messageType.color === 'success'
+											? '成功'
+											: messageType.color === 'danger'
+												? '错误'
+												: messageType.color === 'warning'
+													? '警告'
+													: '提示'}
+									</Chip>
+								</ModalHeader>
+								<ModalBody className="text-center">
+									<p className="text-gray-700">{modalMessage}</p>
+								</ModalBody>
+								<ModalFooter className="justify-center">
+									<Button color={messageType.color as any} variant="solid" onPress={onClose} autoFocus>
+										确定
+									</Button>
+								</ModalFooter>
+							</>
+						);
+					}}
 				</ModalContent>
 			</Modal>
 		</div>

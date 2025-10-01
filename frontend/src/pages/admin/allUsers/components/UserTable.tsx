@@ -1,7 +1,8 @@
+import Loading from '@/components/Loading';
 import type { UserSummary } from '@/types/user-config';
-import { formatTraffic, formatDateTime, getSourceClass, getSourceText, getTrafficBarColor } from '../utils/userUtils';
+import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
+import { formatDateTime, formatTraffic, getSourceText, getTrafficBarColor } from '../utils/userUtils';
 import { UserActions } from './UserActions';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip } from '@heroui/react';
 
 export interface UserTableProps {
 	users: UserSummary[];
@@ -16,12 +17,13 @@ export interface UserTableProps {
 export function UserTable({ users, loading, error, onUserAction }: UserTableProps) {
 	return (
 		<div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-			<div className="px-6 py-4 border-b border-gray-200">
-				<h3 className="text-lg font-semibold text-gray-900">
-					用户列表
-					{loading && <Chip size="sm" variant="flat" className="ml-2">加载中...</Chip>}
-				</h3>
-			</div>
+			{loading && (
+				<div className="px-6 py-2 border-b border-gray-200">
+					<Chip size="sm" variant="flat">
+						加载中...
+					</Chip>
+				</div>
+			)}
 			<div className="overflow-x-auto">
 				<Table aria-label="用户列表">
 					<TableHeader>
@@ -32,7 +34,7 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 						<TableColumn>最后修改时间</TableColumn>
 						<TableColumn>操作</TableColumn>
 					</TableHeader>
-					<TableBody isLoading={loading} loadingContent={<div className="text-center py-4">正在加载用户数据...</div>}>
+					<TableBody isLoading={loading} loadingContent={<Loading message="正在加载用户数据..." size="sm" />}>
 						{users.length === 0 && !loading && !error && (
 							<TableRow>
 								<TableCell colSpan={6} className="text-center py-4 text-gray-500">
@@ -54,20 +56,12 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									</div>
 								</TableCell>
 								<TableCell>
-									<Chip
-										size="sm"
-										color={user.hasConfig ? "success" : "danger"}
-										variant="flat"
-									>
+									<Chip size="sm" color={user.hasConfig ? 'success' : 'danger'} variant="flat">
 										{user.hasConfig ? '已配置' : '未配置'}
 									</Chip>
 								</TableCell>
 								<TableCell>
-									<Chip
-										size="sm"
-										color={user.source === 'clash' ? 'primary' : 'secondary'}
-										variant="flat"
-									>
+									<Chip size="sm" color={user.source === 'clash' ? 'primary' : 'secondary'} variant="flat">
 										{getSourceText(user.source)}
 									</Chip>
 								</TableCell>
@@ -90,16 +84,10 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									)}
 								</TableCell>
 								<TableCell>
-									<div className="text-sm text-gray-900">
-										{formatDateTime(user.lastModified)}
-									</div>
+									<div className="text-sm text-gray-900">{formatDateTime(user.lastModified)}</div>
 								</TableCell>
 								<TableCell>
-									<UserActions
-										uid={user.uid}
-										token={user.token}
-										onUserAction={onUserAction}
-									/>
+									<UserActions uid={user.uid} token={user.token} onUserAction={onUserAction} />
 								</TableCell>
 							</TableRow>
 						))}
@@ -108,4 +96,4 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 			</div>
 		</div>
 	);
-} 
+}
