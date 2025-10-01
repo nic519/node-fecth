@@ -1,11 +1,11 @@
+import { GlobalConfig } from '@/config/global-config';
+import { TemplateManager } from '@/module/templateManager/templateManager';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { PreMergeInfo } from '@/module/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/module/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
 import { TrafficUtils } from '@/utils/trafficUtils';
 import { StrategyMultiSub } from './strategyMultiSub';
-import { TemplateManager } from '@/module/templateManager/templateManager';
-import { GlobalConfig } from '@/config/global-config';
 
 export class YamlMergeFactory {
 	constructor(private userConfig: InnerUser) {}
@@ -62,6 +62,10 @@ export class YamlMergeFactory {
 	private shouldUseInternalTemplate(urlOrId: string): boolean {
 		if (!urlOrId.startsWith('http')) {
 			return false; // 非URL格式，不使用此逻辑
+		}
+
+		if (GlobalConfig.isDev) {
+			return false;
 		}
 
 		try {
@@ -142,10 +146,10 @@ export class YamlMergeFactory {
 	// 生成yaml内容
 	async generate(): Promise<{ yamlContent: string; subInfo: string }> {
 		console.log('🏭 YamlMergeFactory: 开始生成YAML内容');
-		
+
 		try {
 			let result: { yamlContent: string; subInfo: string };
-			
+
 			if (this.userConfig.appendSubList) {
 				console.log('📋 使用多订阅策略');
 				result = await this.multiSubStrategy();
@@ -156,7 +160,7 @@ export class YamlMergeFactory {
 				console.log('⚡ 使用快速策略');
 				result = await this.fastStrategy();
 			}
-			
+
 			console.log(`✅ YAML生成完成，内容长度: ${result.yamlContent.length}`);
 			return result;
 		} catch (error) {

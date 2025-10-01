@@ -25,6 +25,7 @@ export interface UseUserConfigReturn {
 
 	// 操作
 	setConfigContent: (content: string) => void;
+	setYamlSyntaxErrors: (errors: string[]) => void;
 	saveConfig: () => Promise<void>;
 	loadConfig: () => Promise<void>;
 }
@@ -37,6 +38,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const [error, setError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
+	const [yamlSyntaxErrors, setYamlSyntaxErrors] = useState<string[]>([]);
 	const [configPreview, setConfigPreview] = useState<any>(null);
 	const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -80,7 +82,8 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 	// 保存配置
 	const saveConfig = async () => {
-		if (validationErrors.length > 0) return;
+		// 检查是否有任何验证错误（包括 YAML 语法错误和业务逻辑错误）
+		if (validationErrors.length > 0 || yamlSyntaxErrors.length > 0) return;
 
 		try {
 			setSaving(true);
@@ -133,7 +136,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		saving,
 		error,
 		saveSuccess,
-		validationErrors,
+		validationErrors: [...validationErrors, ...yamlSyntaxErrors], // 合并所有验证错误
 		configPreview,
 		connectionStatus,
 		lastSaved,
@@ -141,6 +144,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 		// 操作
 		setConfigContent: handleSetConfigContent,
+		setYamlSyntaxErrors, // 导出用于接收 YamlEditor 的验证错误
 		saveConfig,
 		loadConfig,
 	};

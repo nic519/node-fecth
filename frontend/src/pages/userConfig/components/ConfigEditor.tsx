@@ -10,6 +10,7 @@ interface ConfigEditorProps {
 	validationErrors: string[];
 	configPreview: any | null;
 	onConfigContentChange: (content: string) => void;
+	onYamlSyntaxErrorsChange: (errors: string[]) => void;
 	onToggleHelp: () => void;
 }
 
@@ -20,6 +21,7 @@ export function ConfigEditor({
 	validationErrors,
 	configPreview,
 	onConfigContentChange,
+	onYamlSyntaxErrorsChange,
 	onToggleHelp,
 }: ConfigEditorProps) {
 	return (
@@ -40,7 +42,13 @@ export function ConfigEditor({
 
 				{/* YAML 编辑器区域 */}
 				<div className="flex-1 min-h-[400px] mb-6">
-					<YamlEditor value={configContent} onChange={onConfigContentChange} height="100%" readOnly={false} />
+					<YamlEditor
+						value={configContent}
+						onChange={onConfigContentChange}
+						height="100%"
+						readOnly={false}
+						onValidate={onYamlSyntaxErrorsChange}
+					/>
 				</div>
 
 				{/* 底部操作区域 */}

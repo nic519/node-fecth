@@ -1,11 +1,11 @@
 import Loading from '@/components/Loading';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { Button, Card } from '@heroui/react';
 import { ConfigEditor } from './components/ConfigEditor';
 import { Header } from './components/Header';
 import { HelpSidebar } from './components/HelpSidebar';
 import { useHelpDisplay } from './hooks/useHelpDisplay';
 import { useUserConfig } from './hooks/useUserConfig';
-import { Card, Button } from '@heroui/react';
 
 export function UserConfigPage() {
 	// 设置页面标题
@@ -57,11 +57,7 @@ export function UserConfigPage() {
 						<Card className="max-w-md w-full p-6">
 							<h1 className="text-2xl font-bold text-danger mb-4">错误</h1>
 							<p className="text-default-600 mb-4">{userConfigState.error}</p>
-							<Button
-								onClick={() => window.location.reload()}
-								color="primary"
-								className="w-full"
-							>
+							<Button onPress={() => window.location.reload()} color="primary" className="w-full">
 								重试
 							</Button>
 						</Card>
@@ -77,6 +73,7 @@ export function UserConfigPage() {
 								validationErrors={userConfigState.validationErrors}
 								configPreview={userConfigState.configPreview}
 								onConfigContentChange={userConfigState.setConfigContent}
+								onYamlSyntaxErrorsChange={userConfigState.setYamlSyntaxErrors}
 								onToggleHelp={toggleHelp}
 							/>
 						</div>
