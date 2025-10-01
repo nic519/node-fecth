@@ -46,6 +46,7 @@ export function AdminTemplates() {
 		handleReset,
 		handleDownloadTemplate,
 		handleCopyConfigContent,
+		handleCopyTemplateUrl,
 
 		// 模态框控制
 		closeDeleteModal,
@@ -120,6 +121,7 @@ export function AdminTemplates() {
 									onReset={handleReset}
 									onSave={handleSave}
 									onCopyConfigContent={handleCopyConfigContent}
+									onCopyTemplateUrl={handleCopyTemplateUrl}
 									loading={loading}
 									saving={saving}
 								/>

@@ -1,6 +1,7 @@
 import Loading from '@/components/Loading';
+import { Button, Chip, Navbar, NavbarBrand, NavbarContent, NavbarItem } from '@heroui/react';
+import { AcmeLogo } from '../../../components/NavigationBar';
 import { formatTime } from '../utils/configUtils';
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button, Chip } from '@heroui/react';
 
 interface HeaderProps {
 	uid: string;
@@ -17,6 +18,7 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 	return (
 		<Navbar className="bg-background border-b border-divider">
 			<NavbarBrand>
+				<AcmeLogo />
 				<h1 className="text-xl font-semibold">配置管理</h1>
 			</NavbarBrand>
 
@@ -27,11 +29,7 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 					</span>
 				</NavbarItem>
 				<NavbarItem>
-					<Chip
-						size="sm"
-						color={connectionStatus === 'connected' ? 'success' : 'danger'}
-						variant="dot"
-					>
+					<Chip size="sm" color={connectionStatus === 'connected' ? 'success' : 'danger'} variant="dot">
 						{connectionStatus === 'connected' ? '已连接' : '连接失败'}
 					</Chip>
 				</NavbarItem>
@@ -51,13 +49,7 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 							saving ? (
 								<Loading size="sm" />
 							) : !saving && !saveSuccess ? (
-								<svg
-									className="h-4 w-4"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
+								<svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"
@@ -66,13 +58,7 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 									/>
 								</svg>
 							) : (
-								<svg
-									className="h-4 w-4"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
+								<svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
 								</svg>
 							)

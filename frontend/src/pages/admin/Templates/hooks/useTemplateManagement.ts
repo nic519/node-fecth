@@ -39,6 +39,7 @@ export interface UseTemplateManagementReturn {
 	handleReset: () => void;
 	handleDownloadTemplate: () => void;
 	handleCopyConfigContent: () => void;
+	handleCopyTemplateUrl: () => void;
 
 	// 模态框控制
 	closeDeleteModal: () => void;
@@ -321,6 +322,21 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
+	const handleCopyTemplateUrl = async () => {
+		if (!selectedTemplate) {
+			showToast('没有选中的模板', 'error');
+			return;
+		}
+
+		try {
+			const templateUrl = `${window.location.origin}/api/subscription/template/${selectedTemplate.id}`;
+			await navigator.clipboard.writeText(templateUrl);
+			showToast('模板链接已复制到剪贴板', 'success');
+		} catch (err) {
+			showToast('复制失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
+		}
+	};
+
 	return {
 		// 数据状态
 		templates,
@@ -351,6 +367,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		handleReset,
 		handleDownloadTemplate,
 		handleCopyConfigContent,
+		handleCopyTemplateUrl,
 
 		// 模态框控制
 		closeDeleteModal,

@@ -18,12 +18,16 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, he
 	return (
 		<Card className="flex flex-col h-full">
 			<CardHeader className="px-6 py-4 border-b border-gray-200">
-				<div className="flex justify-between items-center">
-					<div>
+				<div className="flex justify-between items-center w-full">
+					<div className="flex-1">
 						<h3 className="text-lg font-semibold text-gray-900">配置模板</h3>
 						<p className="text-sm text-gray-500 mt-1">管理多个配置模板</p>
 					</div>
-					{headerAction && <div>{headerAction}</div>}
+					{headerAction && (
+						<div className="flex-shrink-0 ml-4">
+							{headerAction}
+						</div>
+					)}
 				</div>
 			</CardHeader>
 
