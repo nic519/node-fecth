@@ -1,3 +1,5 @@
+import { Button } from '@heroui/react';
+
 export interface UserActionsProps {
 	uid: string;
 	token?: string;
@@ -9,25 +11,31 @@ export interface UserActionsProps {
  */
 export function UserActions({ uid, token, onUserAction }: UserActionsProps) {
 	return (
-		<div className="flex space-x-2">
-			<button
+		<div className="flex gap-2">
+			<Button
+				size="sm"
+				variant="light"
+				color="primary"
 				onClick={() => onUserAction('view', uid, token)}
-				className="text-indigo-600 hover:text-indigo-900"
 			>
 				查看
-			</button>
-			<button 
-				onClick={() => onUserAction('refresh', uid)} 
-				className="text-green-600 hover:text-green-900"
+			</Button>
+			<Button
+				size="sm"
+				variant="light"
+				color="success"
+				onClick={() => onUserAction('refresh', uid)}
 			>
 				刷新
-			</button>
-			<button 
-				onClick={() => onUserAction('delete', uid)} 
-				className="text-red-600 hover:text-red-900"
+			</Button>
+			<Button
+				size="sm"
+				variant="light"
+				color="danger"
+				onClick={() => onUserAction('delete', uid)}
 			>
 				删除
-			</button>
+			</Button>
 		</div>
 	);
 } 

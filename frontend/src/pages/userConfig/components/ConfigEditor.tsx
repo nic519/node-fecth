@@ -1,6 +1,7 @@
 import { KeyboardEvent } from 'react';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
 import { ValidationMessage } from './ValidationMessage';
+import { Button, Textarea } from '@heroui/react';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -49,20 +50,14 @@ export function ConfigEditor({
 						<h3 className="text-lg leading-6 font-medium text-gray-900">YAML 配置</h3>
 						<p className="mt-1 text-sm text-gray-500">编辑您的用户配置，保存后立即生效</p>
 					</div>
-					<button
+					<Button
 						onClick={onToggleHelp}
-						className="lg:hidden inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						variant="bordered"
+						size="sm"
+						className="lg:hidden"
 					>
-						<svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
 						字段说明
-					</button>
+					</Button>
 				</div>
 
 				{/* 验证消息 */}
@@ -70,13 +65,15 @@ export function ConfigEditor({
 
 				{/* 文本编辑区域 */}
 				<div className="flex-1 flex flex-col min-h-0 mb-6">
-					<textarea
+					<Textarea
 						value={configContent}
-						onChange={(e) => onConfigContentChange((e.target as HTMLTextAreaElement).value)}
+						onChange={(e) => onConfigContentChange(e.target.value)}
 						onKeyDown={handleKeyDown}
-						className="flex-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md font-mono resize-none min-h-[300px] px-1 py-2"
+						className="flex-1 font-mono"
+						style={{ minHeight: '300px', resize: 'none' }}
 						placeholder="YAML 配置将在这里显示..."
 						spellCheck={false}
+						variant="bordered"
 					/>
 				</div>
 

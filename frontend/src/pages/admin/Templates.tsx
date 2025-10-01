@@ -4,6 +4,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import type { ConfigTemplate } from '@/types/user-config';
 import { CheckCircleIcon, DocumentTextIcon, PlusIcon, TrashIcon, ArrowDownTrayIcon, LinkIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
+import { Button, Card, CardHeader, CardBody, Input, Textarea, useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Snippet } from '@heroui/react';
 
 interface TemplateItem extends ConfigTemplate {
 	isSelected?: boolean;
@@ -20,6 +21,14 @@ export function AdminTemplates() {
 	const [error, setError] = useState<string | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+	// Modal states
+	const { isOpen: isDeleteModalOpen, onOpen: openDeleteModal, onOpenChange: closeDeleteModal } = useDisclosure();
+	const { isOpen: isCopyModalOpen, onOpen: openCopyModal, onOpenChange: closeCopyModal } = useDisclosure();
+	const { isOpen: isErrorModalOpen, onOpen: openErrorModal, onOpenChange: closeErrorModal } = useDisclosure();
+	const [modalMessage, setModalMessage] = useState('');
+	const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+	const [copiedUrl, setCopiedUrl] = useState('');
 
 	const superToken = new URLSearchParams(window.location.search).get('superToken') || '';
 
@@ -105,13 +114,14 @@ export function AdminTemplates() {
 					isSelected: true,
 				};
 
-				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat(newTemplate));
+				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat({ ...newTemplate, isSelected: true }));
 				setIsEditing(true);
 			} else {
 				throw new Error(result.msg || '创建模板失败');
 			}
 		} catch (err) {
-			alert('创建模板失败：' + (err instanceof Error ? err.message : '未知错误'));
+			setModalMessage('创建模板失败：' + (err instanceof Error ? err.message : '未知错误'));
+			openErrorModal();
 		} finally {
 			setLoading(false);
 		}
@@ -120,39 +130,48 @@ export function AdminTemplates() {
 	const handleDeleteTemplate = async (templateId: string, e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (templates.length <= 1) {
-			alert('至少需要保留一个模板');
+			setModalMessage('至少需要保留一个模板');
+			openErrorModal();
 			return;
 		}
 
-		if (confirm('确定要删除这个模板吗？')) {
-			try {
-				setLoading(true);
-				const response = await fetch(`/api/admin/templates/${templateId}?superToken=${superToken}`, {
-					method: 'DELETE',
-				});
+		setTemplateToDelete(templateId);
+		openDeleteModal();
+	};
 
-				if (!response.ok) {
-					throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-				}
+	const confirmDeleteTemplate = async () => {
+		if (!templateToDelete) return;
 
-				const result = await response.json();
-				if (result.code === 0) {
-					setTemplates((prev) => {
-						const newTemplates = prev.filter((t) => t.id !== templateId);
-						if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
-							newTemplates[0].isSelected = true;
-						}
-						return newTemplates;
-					});
-					setIsEditing(false);
-				} else {
-					throw new Error(result.msg || '删除模板失败');
-				}
-			} catch (err) {
-				alert('删除模板失败：' + (err instanceof Error ? err.message : '未知错误'));
-			} finally {
-				setLoading(false);
+		try {
+			setLoading(true);
+			const response = await fetch(`/api/admin/templates/${templateToDelete}?superToken=${superToken}`, {
+				method: 'DELETE',
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 			}
+
+			const result = await response.json();
+			if (result.code === 0) {
+				setTemplates((prev) => {
+					const newTemplates = prev.filter((t) => t.id !== templateToDelete);
+					if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
+						newTemplates[0].isSelected = true;
+					}
+					return newTemplates;
+				});
+				setIsEditing(false);
+				closeDeleteModal();
+			} else {
+				throw new Error(result.msg || '删除模板失败');
+			}
+		} catch (err) {
+			setModalMessage('删除模板失败：' + (err instanceof Error ? err.message : '未知错误'));
+			closeDeleteModal();
+			openErrorModal();
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -203,12 +222,14 @@ export function AdminTemplates() {
 
 				setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
 				setIsEditing(false);
-				alert('模板保存成功！');
+				setModalMessage('模板保存成功！');
+				openErrorModal();
 			} else {
 				throw new Error(result.msg || '保存失败');
 			}
 		} catch (err) {
-			alert('保存失败：' + (err instanceof Error ? err.message : '未知错误'));
+			setModalMessage('保存失败：' + (err instanceof Error ? err.message : '未知错误'));
+			openErrorModal();
 		} finally {
 			setLoading(false);
 		}
@@ -242,22 +263,14 @@ export function AdminTemplates() {
 			const result = await response.json();
 			if (result.code === 0) {
 				await navigator.clipboard.writeText(result.data.subscribeUrl);
-				// 显示成功提示
-				const button = e.currentTarget as HTMLButtonElement;
-				if (button && button.innerHTML) {
-					const originalHTML = button.innerHTML;
-					button.innerHTML = '<svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
-					setTimeout(() => {
-						if (button) {
-							button.innerHTML = originalHTML;
-						}
-					}, 2000);
-				}
+				setCopiedUrl(result.data.subscribeUrl);
+				openCopyModal();
 			} else {
 				throw new Error(result.msg || '获取URL失败');
 			}
 		} catch (err) {
-			alert('复制失败：' + (err instanceof Error ? err.message : '未知错误'));
+			setModalMessage('复制失败：' + (err instanceof Error ? err.message : '未知错误'));
+			openErrorModal();
 		}
 	};
 
@@ -279,26 +292,26 @@ export function AdminTemplates() {
 					<div className="flex gap-6" style={{ height: 'calc(100vh - 180px)', minHeight: '700px' }}>
 						{/* 左侧 - 模板列表 */}
 						<div className="w-96 flex flex-col">
-							<div className="bg-white rounded-lg shadow-sm border flex flex-col h-full">
-								{/* 头部 */}
-								<div className="px-6 py-4 border-b border-gray-200">
+							<Card className="flex flex-col h-full">
+								<CardHeader className="px-6 py-4 border-b border-gray-200">
 									<div className="flex justify-between items-center">
 										<div>
 											<h3 className="text-lg font-semibold text-gray-900">配置模板</h3>
 											<p className="text-sm text-gray-500 mt-1">管理多个配置模板</p>
 										</div>
-										<button
+										<Button
 											onClick={handleCreateTemplate}
-											className="flex items-center px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+											color="secondary"
+											size="sm"
+											startContent={<PlusIcon className="w-4 h-4" />}
 										>
-											<PlusIcon className="w-4 h-4 mr-1" />
 											新建模板
-										</button>
+										</Button>
 									</div>
-								</div>
+								</CardHeader>
 
 								{/* 模板列表 */}
-								<div className="flex-1 overflow-y-auto">
+								<CardBody className="flex-1 overflow-y-auto p-0">
 									{templates.map((template) => (
 										<div
 											key={template.id}
@@ -337,40 +350,39 @@ export function AdminTemplates() {
 											</div>
 										</div>
 									))}
-								</div>
-							</div>
+								</CardBody>
+							</Card>
 						</div>
 
 						{/* 右侧 - 配置编辑器 */}
 						<div className="flex-1 flex flex-col">
 							{selectedTemplate ? (
-								<div className="bg-white rounded-lg shadow-sm border flex flex-col h-full">
+								<Card className="flex flex-col h-full">
 									{/* 头部 - 编辑按钮 */}
 
 									{!isEditing && (
-										<div className="px-6 py-3 border-b border-gray-200 flex justify-end">
-											<button
+										<CardHeader className="px-6 py-3 border-b border-gray-200 flex justify-end">
+											<Button
 												onClick={() => setIsEditing(true)}
-												className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+												color="secondary"
+												size="sm"
 											>
 												开始编辑
-											</button>
-										</div>
+											</Button>
+										</CardHeader>
 									)}
 
 									{/* 编辑器区域 */}
-									<div className="flex-1 flex flex-col p-6 overflow-hidden">
+									<CardBody className="flex-1 flex flex-col p-6 overflow-hidden">
 										{isEditing && (
 											<div className="mb-4 space-y-3">
-												<div>
-													<label className="block text-sm font-medium text-gray-700 mb-2">模板名称</label>
-													<input
-														type="text"
-														value={selectedTemplate.name}
-														onChange={(e) => handleUpdateTemplate('name', (e.target as HTMLInputElement).value)}
-														className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-													/>
-												</div>
+												<Input
+													label="模板名称"
+													value={selectedTemplate.name}
+													onChange={(e) => handleUpdateTemplate('name', e.target.value)}
+													variant="bordered"
+													size="sm"
+												/>
 											</div>
 										)}
 
@@ -427,54 +439,123 @@ export function AdminTemplates() {
 													下载配置
 												</button>
 												{selectedTemplate && (
-													<button
+													<Button
 														onClick={(e) => handleCopyTemplateUrl(selectedTemplate.id, e)}
-														className="px-3 py-1.5 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors flex items-center"
+														color="success"
+														size="sm"
+														variant="flat"
+														startContent={<LinkIcon className="w-4 h-4" />}
 													>
-														<LinkIcon className="w-4 h-4 mr-1" />
 														复制URL
-													</button>
+													</Button>
 												)}
-												<button className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+												<Button size="sm" variant="flat" color="secondary">
 													重置为默认
-												</button>
+												</Button>
 												<button className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
 													复制配置
 												</button>
 											</div>
 											{isEditing && (
 												<div className="flex space-x-3">
-													<button
+													<Button
 														onClick={handleReset}
-														className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+														variant="flat"
+														color="default"
+														size="sm"
 													>
 														取消
-													</button>
-													<button
+													</Button>
+													<Button
 														onClick={handleSave}
 														disabled={loading || validationErrors.length > 0}
-														className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+														color="secondary"
+														size="sm"
+														isLoading={loading}
 													>
-														{loading ? '保存中...' : '保存配置'}
-													</button>
+														保存配置
+													</Button>
 												</div>
 											)}
 										</div>
-									</div>
-								</div>
+									</CardBody>
+								</Card>
 							) : (
-								<div className="bg-white rounded-lg shadow-sm border h-full flex items-center justify-center">
-									<div className="text-center">
+								<Card className="h-full flex items-center justify-center">
+									<CardBody className="text-center">
 										<DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
 										<h3 className="mt-2 text-sm font-medium text-gray-900">未选择模板</h3>
 										<p className="mt-1 text-sm text-gray-500">请从左侧选择一个配置模板进行编辑</p>
-									</div>
-								</div>
+									</CardBody>
+								</Card>
 							)}
 						</div>
 					</div>
 				</div>
 			</main>
-		</div>
-	);
+
+			{/* 删除确认模态框 */}
+			<Modal isOpen={isDeleteModalOpen} onOpenChange={closeDeleteModal}>
+				<ModalContent>
+					{(onClose) => (
+						<>
+							<ModalHeader className="flex flex-col gap-1">确认删除</ModalHeader>
+							<ModalBody>
+								<p>确定要删除这个模板吗？此操作无法撤销。</p>
+							</ModalBody>
+							<ModalFooter>
+								<Button color="default" variant="light" onPress={onClose}>
+									取消
+								</Button>
+								<Button color="danger" onPress={confirmDeleteTemplate} isLoading={loading}>
+									删除
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
+
+			{/* URL复制成功模态框 */}
+			<Modal isOpen={isCopyModalOpen} onOpenChange={closeCopyModal}>
+				<ModalContent>
+					{(onClose) => (
+						<>
+							<ModalHeader className="flex flex-col gap-1">URL已复制</ModalHeader>
+							<ModalBody>
+								<p className="mb-4">订阅URL已成功复制到剪贴板：</p>
+								<Snippet symbol="" variant="bordered">
+									{copiedUrl}
+								</Snippet>
+							</ModalBody>
+							<ModalFooter>
+								<Button color="primary" onPress={onClose}>
+									确定
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
+
+			{/* 错误/成功消息模态框 */}
+			<Modal isOpen={isErrorModalOpen} onOpenChange={closeErrorModal}>
+				<ModalContent>
+					{(onClose) => (
+						<>
+							<ModalHeader className="flex flex-col gap-1">提示</ModalHeader>
+							<ModalBody>
+								<p>{modalMessage}</p>
+							</ModalBody>
+							<ModalFooter>
+								<Button color="primary" onPress={onClose}>
+									确定
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
+					</div>
+		);
 }

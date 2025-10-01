@@ -1,6 +1,7 @@
 import type { UserSummary } from '@/types/user-config';
 import { formatTraffic, formatDateTime, getSourceClass, getSourceText, getTrafficBarColor } from '../utils/userUtils';
 import { UserActions } from './UserActions';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip } from '@heroui/react';
 
 export interface UserTableProps {
 	users: UserSummary[];
@@ -18,63 +19,59 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 			<div className="px-6 py-4 border-b border-gray-200">
 				<h3 className="text-lg font-semibold text-gray-900">
 					用户列表
-					{loading && <span className="text-sm text-gray-500 ml-2">加载中...</span>}
+					{loading && <Chip size="sm" variant="flat" className="ml-2">加载中...</Chip>}
 				</h3>
 			</div>
 			<div className="overflow-x-auto">
-				<table className="w-full">
-					<thead className="bg-gray-50">
-						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户ID</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">配置状态</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数据源</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">流量使用</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后修改时间</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-						</tr>
-					</thead>
-					<tbody className="bg-white divide-y divide-gray-200">
-						{loading && users.length === 0 && (
-							<tr>
-								<td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-									正在加载用户数据...
-								</td>
-							</tr>
-						)}
-
-						{!loading && users.length === 0 && !error && (
-							<tr>
-								<td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+				<Table aria-label="用户列表">
+					<TableHeader>
+						<TableColumn>用户ID</TableColumn>
+						<TableColumn>配置状态</TableColumn>
+						<TableColumn>数据源</TableColumn>
+						<TableColumn>流量使用</TableColumn>
+						<TableColumn>最后修改时间</TableColumn>
+						<TableColumn>操作</TableColumn>
+					</TableHeader>
+					<TableBody isLoading={loading} loadingContent={<div className="text-center py-4">正在加载用户数据...</div>}>
+						{users.length === 0 && !loading && !error && (
+							<TableRow>
+								<TableCell colSpan={6} className="text-center py-4 text-gray-500">
 									暂无用户数据
-								</td>
-							</tr>
+								</TableCell>
+							</TableRow>
 						)}
 
 						{users.map((user) => (
-							<tr key={user.uid} className="hover:bg-gray-50">
-								<td className="px-6 py-4 whitespace-nowrap">
-									<div className="text-sm font-medium text-gray-900">{user.uid}</div>
-									{user.subscribeUrl && (
-										<div className="text-xs text-gray-500 truncate max-w-32" title={user.subscribeUrl}>
-											{user.subscribeUrl}
-										</div>
-									)}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap">
-									<span
-										className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-											user.hasConfig ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-										}`}
+							<TableRow key={user.uid}>
+								<TableCell>
+									<div>
+										<div className="text-sm font-medium text-gray-900">{user.uid}</div>
+										{user.subscribeUrl && (
+											<div className="text-xs text-gray-500 truncate max-w-32" title={user.subscribeUrl}>
+												{user.subscribeUrl}
+											</div>
+										)}
+									</div>
+								</TableCell>
+								<TableCell>
+									<Chip
+										size="sm"
+										color={user.hasConfig ? "success" : "danger"}
+										variant="flat"
 									>
 										{user.hasConfig ? '已配置' : '未配置'}
-									</span>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap">
-									<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSourceClass(user.source)}`}>
+									</Chip>
+								</TableCell>
+								<TableCell>
+									<Chip
+										size="sm"
+										color={user.source === 'clash' ? 'primary' : 'secondary'}
+										variant="flat"
+									>
 										{getSourceText(user.source)}
-									</span>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+									</Chip>
+								</TableCell>
+								<TableCell>
 									{user.trafficInfo ? (
 										<div className="space-y-1">
 											<div className="text-xs">
@@ -89,23 +86,25 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 											<div className="text-xs text-gray-500">{user.trafficInfo.usagePercent.toFixed(1)}%</div>
 										</div>
 									) : (
-										<span className="text-gray-400">无数据</span>
+										<span className="text-gray-400 text-sm">无数据</span>
 									)}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-									{formatDateTime(user.lastModified)}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-									<UserActions 
-										uid={user.uid} 
-										token={user.token} 
-										onUserAction={onUserAction} 
+								</TableCell>
+								<TableCell>
+									<div className="text-sm text-gray-900">
+										{formatDateTime(user.lastModified)}
+									</div>
+								</TableCell>
+								<TableCell>
+									<UserActions
+										uid={user.uid}
+										token={user.token}
+										onUserAction={onUserAction}
 									/>
-								</td>
-							</tr>
+								</TableCell>
+							</TableRow>
 						))}
-					</tbody>
-				</table>
+					</TableBody>
+				</Table>
 			</div>
 		</div>
 	);

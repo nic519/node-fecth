@@ -14,6 +14,23 @@ export interface UseUserManagementReturn {
 	fetchUsers: () => Promise<void>;
 	handleUserAction: (action: string, uid: string, token?: string) => Promise<void>;
 	handleAddUser: () => Promise<void>;
+	// Modal states
+	showDeleteModal: boolean;
+	showAddUserModal: boolean;
+	showMessageModal: boolean;
+	modalMessage: string;
+	userToDelete: string | null;
+	closeDeleteModal: () => void;
+	closeAddUserModal: () => void;
+	closeMessageModal: () => void;
+	confirmDeleteUser: () => Promise<void>;
+	newUserUid: string;
+	newUserToken: string;
+	newUserSubscribe: string;
+	setNewUserUid: (uid: string) => void;
+	setNewUserToken: (token: string) => void;
+	setNewUserSubscribe: (subscribe: string) => void;
+	confirmAddUser: () => Promise<void>;
 }
 
 /**
@@ -23,6 +40,16 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 	const [users, setUsers] = useState<UserSummary[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Modal states
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showAddUserModal, setShowAddUserModal] = useState(false);
+	const [showMessageModal, setShowMessageModal] = useState(false);
+	const [modalMessage, setModalMessage] = useState('');
+	const [userToDelete, setUserToDelete] = useState<string | null>(null);
+	const [newUserUid, setNewUserUid] = useState('');
+	const [newUserToken, setNewUserToken] = useState('');
+	const [newUserSubscribe, setNewUserSubscribe] = useState('');
 
 	// 初始化时获取用户列表
 	useEffect(() => {
@@ -76,23 +103,12 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 					break;
 				case 'refresh':
 					// 刷新用户流量功能暂不支持
-					alert('刷新用户流量功能暂不支持，等待后端API实现');
+					setModalMessage('刷新用户流量功能暂不支持，等待后端API实现');
+					setShowMessageModal(true);
 					break;
 				case 'delete':
-					if (confirm(`确定要删除用户 ${uid} 吗？此操作不可撤销！`)) {
-						try {
-							const response = await adminDeleteUser(superToken, { uid: uid });
-							if (response.code === 0) {
-								await fetchUsers(); // 重新加载用户列表
-								alert(`用户 ${uid} 删除成功`);
-							} else {
-								alert('删除用户失败: ' + (response.msg || '未知错误'));
-							}
-						} catch (err) {
-							console.error('删除用户失败:', err);
-							alert('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'));
-						}
-					}
+					setUserToDelete(uid);
+					setShowDeleteModal(true);
 					break;
 			}
 		} catch (error) {
@@ -101,41 +117,75 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 		}
 	};
 
+	// Modal control functions
+	const closeDeleteModal = () => setShowDeleteModal(false);
+	const closeAddUserModal = () => setShowAddUserModal(false);
+	const closeMessageModal = () => setShowMessageModal(false);
+
+	const confirmDeleteUser = async () => {
+		if (!userToDelete) return;
+
+		try {
+			const response = await adminDeleteUser(superToken, { uid: userToDelete });
+			if (response.code === 0) {
+				await fetchUsers(); // 重新加载用户列表
+				setModalMessage(`用户 ${userToDelete} 删除成功`);
+				setShowDeleteModal(false);
+				setShowMessageModal(true);
+				setUserToDelete(null);
+			} else {
+				setModalMessage('删除用户失败: ' + (response.msg || '未知错误'));
+				setShowDeleteModal(false);
+				setShowMessageModal(true);
+			}
+		} catch (err) {
+			console.error('删除用户失败:', err);
+			setModalMessage('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'));
+			setShowDeleteModal(false);
+			setShowMessageModal(true);
+		}
+	};
+
 	/**
 	 * 添加新用户
 	 */
 	const handleAddUser = async () => {
-		const uid = prompt('请输入新用户ID:');
-		if (!uid || !uid.trim()) {
-			return;
-		}
+		setNewUserUid('');
+		setNewUserToken('');
+		setNewUserSubscribe('');
+		setShowAddUserModal(true);
+	};
 
-		const accessToken = prompt('请输入用户访问令牌:');
-		if (!accessToken || !accessToken.trim()) {
-			return;
-		}
-
-		const subscribe = prompt('请输入订阅链接:');
-		if (!subscribe || !subscribe.trim()) {
+	const confirmAddUser = async () => {
+		if (!newUserUid.trim() || !newUserToken.trim() || !newUserSubscribe.trim()) {
+			setModalMessage('请填写完整的用户信息');
+			setShowMessageModal(true);
 			return;
 		}
 
 		try {
 			const userConfig: UserConfig = {
-				subscribe: subscribe.trim(),
-				accessToken: accessToken.trim(),
+				subscribe: newUserSubscribe.trim(),
+				accessToken: newUserToken.trim(),
 			};
 
-			const response = await adminUserCreate(superToken, { uid: uid.trim(), config: userConfig });
+			const response = await adminUserCreate(superToken, { uid: newUserUid.trim(), config: userConfig });
 			if (response.code === 0) {
 				await fetchUsers(); // 重新加载用户列表
-				alert(`用户 ${uid} 创建成功`);
+				setModalMessage(`用户 ${newUserUid} 创建成功`);
+				setShowAddUserModal(false);
+				setShowMessageModal(true);
+				setNewUserUid('');
+				setNewUserToken('');
+				setNewUserSubscribe('');
 			} else {
-				alert('创建用户失败: ' + (response.msg || '未知错误'));
+				setModalMessage('创建用户失败: ' + (response.msg || '未知错误'));
+				setShowMessageModal(true);
 			}
 		} catch (error) {
 			console.error('创建用户失败:', error);
-			alert('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'));
+			setModalMessage('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'));
+			setShowMessageModal(true);
 		}
 	};
 
@@ -146,5 +196,22 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 		fetchUsers,
 		handleUserAction,
 		handleAddUser,
+		// Modal states and functions
+		showDeleteModal,
+		showAddUserModal,
+		showMessageModal,
+		modalMessage,
+		userToDelete,
+		closeDeleteModal,
+		closeAddUserModal,
+		closeMessageModal,
+		confirmDeleteUser,
+		newUserUid,
+		newUserToken,
+		newUserSubscribe,
+		setNewUserUid,
+		setNewUserToken,
+		setNewUserSubscribe,
+		confirmAddUser,
 	};
 };

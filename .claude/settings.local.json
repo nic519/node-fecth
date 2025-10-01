@@ -11,7 +11,9 @@
       "Bash(pkill:*)",
       "Bash(npm run dev:*)",
       "Bash(awk:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(kill:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []
