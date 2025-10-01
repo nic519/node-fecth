@@ -31,14 +31,14 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
-	handleDeleteTemplate: (templateId: string, e: React.MouseEvent) => void;
+	handleDeleteTemplate: (templateId: string, e: any) => void;
 	confirmDeleteTemplate: () => void;
 	handleUpdateTemplate: (field: keyof TemplateItem, value: any) => void;
 	handleUpdateConfigContent: (content: string) => void;
 	handleSave: () => void;
 	handleReset: () => void;
 	handleDownloadTemplate: () => void;
-	handleCopyTemplateUrl: (templateId: string, e: React.MouseEvent) => void;
+	handleCopyTemplateUrl: (templateId: string, e: any) => void;
 	handleCopyConfigContent: () => void;
 
 	// 模态框控制
@@ -185,8 +185,10 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
-	const handleDeleteTemplate = async (templateId: string, e: React.MouseEvent) => {
-		e.stopPropagation();
+	const handleDeleteTemplate = async (templateId: string, e: any) => {
+		if (e && typeof e.stopPropagation === 'function') {
+			e.stopPropagation();
+		}
 		if (templates.length <= 1) {
 			showToast('至少需要保留一个模板', 'error');
 			return;
@@ -306,8 +308,10 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		document.body.removeChild(a);
 	};
 
-	const handleCopyTemplateUrl = async (templateId: string, e: React.MouseEvent) => {
-		e.stopPropagation();
+	const handleCopyTemplateUrl = async (templateId: string, e: any) => {
+		if (e && typeof e.stopPropagation === 'function') {
+			e.stopPropagation();
+		}
 
 		try {
 			const response = await fetch(`/api/admin/templates/${templateId}/subscribe?superToken=${superToken}`);

@@ -1,3 +1,4 @@
+import { Spinner } from '@heroui/react';
 import React from 'react';
 
 interface LoadingProps {
@@ -8,19 +9,12 @@ interface LoadingProps {
 }
 
 const Loading: React.FC<LoadingProps> = ({ message = '加载中...', size = 'md', fullScreen = false, className = '' }) => {
-	const sizeClasses = {
-		sm: 'h-8 w-8',
-		md: 'h-12 w-12',
-		lg: 'h-16 w-16',
-	};
-
 	const containerClasses = fullScreen ? 'min-h-screen bg-gray-100 flex items-center justify-center' : 'flex items-center justify-center';
 
 	return (
 		<div className={`${containerClasses} ${className}`}>
 			<div className="text-center">
-				<div className={`animate-spin rounded-full border-b-2 border-blue-500 mx-auto ${sizeClasses[size]}`}></div>
-				<p className="mt-4 text-gray-600">{message}</p>
+				<Spinner size={size} color="primary" label={message} />
 			</div>
 		</div>
 	);

@@ -95,7 +95,7 @@ export function AdminTemplates() {
 									onDeleteTemplate={handleDeleteTemplate}
 									headerAction={
 										<Button
-											onClick={handleCreateTemplate}
+											onPress={handleCreateTemplate}
 											size="sm"
 											variant="solid"
 											className="bg-blue-600 text-white hover:bg-blue-700"

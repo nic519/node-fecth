@@ -14,7 +14,7 @@ interface TemplateEditorProps {
 	onUpdateConfigContent: (content: string) => void;
 	onValidate: (errors: string[]) => void;
 	onDownloadTemplate: () => void;
-	onCopyTemplateUrl: (e: React.MouseEvent) => void;
+	onCopyTemplateUrl: (templateId: string, e: any) => void;
 	onReset: () => void;
 	onSave: () => void;
 	onCopyConfigContent: () => void;
@@ -65,7 +65,7 @@ export function TemplateEditor({
 			{/* 头部 - 编辑按钮 */}
 			{!isEditing && (
 				<CardHeader className="px-6 py-3 border-b border-gray-200 flex justify-end">
-					<Button onClick={onStartEdit} variant="solid" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+					<Button onPress={onStartEdit} variant="solid" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
 						开始编辑
 					</Button>
 				</CardHeader>
@@ -130,7 +130,7 @@ export function TemplateEditor({
 				<div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
 					<div className="flex gap-3">
 						<Button
-							onClick={onDownloadTemplate}
+							onPress={onDownloadTemplate}
 							size="sm"
 							variant="solid"
 							className="bg-blue-600 text-white hover:bg-blue-700"
@@ -138,21 +138,27 @@ export function TemplateEditor({
 						>
 							下载配置
 						</Button>
-						<Button onClick={onCopyTemplateUrl} color="success" size="sm" variant="solid" startContent={<LinkIcon className="w-4 h-4" />}>
+						<Button
+							onPress={(e) => selectedTemplate && onCopyTemplateUrl(String(selectedTemplate.id), e)}
+							color="success"
+							size="sm"
+							variant="solid"
+							startContent={<LinkIcon className="w-4 h-4" />}
+						>
 							复制URL
 						</Button>
 
-						<Button size="sm" variant="solid" color="default" onClick={onCopyConfigContent}>
+						<Button size="sm" variant="solid" color="default" onPress={onCopyConfigContent}>
 							复制配置
 						</Button>
 					</div>
 					{isEditing && (
 						<div className="flex gap-3">
-							<Button onClick={onReset} variant="solid" color="default" size="sm">
+							<Button onPress={onReset} variant="solid" color="default" size="sm">
 								取消
 							</Button>
 							<Button
-								onClick={onSave}
+								onPress={onSave}
 								disabled={saving || validationErrors.length > 0}
 								size="sm"
 								isLoading={saving}

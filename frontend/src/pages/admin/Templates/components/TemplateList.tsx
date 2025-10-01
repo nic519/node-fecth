@@ -10,8 +10,8 @@ export interface TemplateItem extends ConfigTemplate {
 interface TemplateListProps {
 	templates: TemplateItem[];
 	onSelectTemplate: (templateId: string) => void;
-	onCopyTemplateUrl: (templateId: string, e: React.MouseEvent) => void;
-	onDeleteTemplate: (templateId: string, e: React.MouseEvent) => void;
+	onCopyTemplateUrl: (templateId: string, e: any) => void;
+	onDeleteTemplate: (templateId: string, e: any) => void;
 	headerAction?: React.ReactNode;
 }
 
@@ -48,7 +48,7 @@ export function TemplateList({ templates, onSelectTemplate, onCopyTemplateUrl, o
 									<div className="text-xs text-gray-500">修改于: {template.lastModified}</div>
 								</div>
 								<div className="flex items-center gap-1">
-									<Button isIconOnly size="sm" variant="light" onClick={(e) => onCopyTemplateUrl(template.id, e)} title="复制模板URL">
+									<Button isIconOnly size="sm" variant="light" onPress={(e) => onCopyTemplateUrl(template.id, e)} title="复制模板URL">
 										<LinkIcon className="w-4 h-4" />
 									</Button>
 									<Button
@@ -56,7 +56,7 @@ export function TemplateList({ templates, onSelectTemplate, onCopyTemplateUrl, o
 										size="sm"
 										variant="light"
 										color="danger"
-										onClick={(e) => onDeleteTemplate(template.id, e)}
+										onPress={(e) => onDeleteTemplate(template.id, e)}
 										disabled={templates.length <= 1}
 										title="删除模板"
 									>

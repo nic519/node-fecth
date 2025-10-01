@@ -39,7 +39,7 @@ interface ToastContainerProps {
 
 function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
 	return (
-		<div className="fixed top-4 right-4 z-50 space-y-2">
+		<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
 			{toasts.map((toast) => (
 				<ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
 			))}
@@ -107,7 +107,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 		<div
 			className={`max-w-sm w-full border rounded-lg shadow-lg p-4 flex items-start space-x-3 ${getToastStyles()}`}
 			style={{
-				animation: 'slideInRight 0.3s ease-out',
+				animation: 'slideInDown 0.3s ease-out',
 			}}
 		>
 			<div className="flex-shrink-0">{getIcon()}</div>
