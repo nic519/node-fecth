@@ -1,5 +1,5 @@
 import type { ConfigTemplate } from '@/types/user-config';
-import { CheckCircleIcon, DocumentTextIcon, LinkIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader } from '@heroui/react';
 
 export interface TemplateItem extends ConfigTemplate {
@@ -10,12 +10,11 @@ export interface TemplateItem extends ConfigTemplate {
 interface TemplateListProps {
 	templates: TemplateItem[];
 	onSelectTemplate: (templateId: string) => void;
-	onCopyTemplateUrl: (templateId: string, e: any) => void;
 	onDeleteTemplate: (templateId: string, e: any) => void;
 	headerAction?: React.ReactNode;
 }
 
-export function TemplateList({ templates, onSelectTemplate, onCopyTemplateUrl, onDeleteTemplate, headerAction }: TemplateListProps) {
+export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, headerAction }: TemplateListProps) {
 	return (
 		<Card className="flex flex-col h-full">
 			<CardHeader className="px-6 py-4 border-b border-gray-200">
@@ -48,9 +47,6 @@ export function TemplateList({ templates, onSelectTemplate, onCopyTemplateUrl, o
 									<div className="text-xs text-gray-500">修改于: {template.lastModified}</div>
 								</div>
 								<div className="flex items-center gap-1">
-									<Button isIconOnly size="sm" variant="light" onPress={(e) => onCopyTemplateUrl(template.id, e)} title="复制模板URL">
-										<LinkIcon className="w-4 h-4" />
-									</Button>
 									<Button
 										isIconOnly
 										size="sm"

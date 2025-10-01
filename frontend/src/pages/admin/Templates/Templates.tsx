@@ -45,7 +45,6 @@ export function AdminTemplates() {
 		handleSave,
 		handleReset,
 		handleDownloadTemplate,
-		handleCopyTemplateUrl,
 		handleCopyConfigContent,
 
 		// 模态框控制
@@ -91,7 +90,6 @@ export function AdminTemplates() {
 								<TemplateList
 									templates={templates}
 									onSelectTemplate={handleSelectTemplate}
-									onCopyTemplateUrl={handleCopyTemplateUrl}
 									onDeleteTemplate={handleDeleteTemplate}
 									headerAction={
 										<Button
@@ -119,7 +117,6 @@ export function AdminTemplates() {
 									onUpdateConfigContent={handleUpdateConfigContent}
 									onValidate={setValidationErrors}
 									onDownloadTemplate={handleDownloadTemplate}
-									onCopyTemplateUrl={(e) => selectedTemplate && handleCopyTemplateUrl(String(selectedTemplate.id), e)}
 									onReset={handleReset}
 									onSave={handleSave}
 									onCopyConfigContent={handleCopyConfigContent}

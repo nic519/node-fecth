@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { copyToClipboard } from '../utils/configUtils';
+import { CopyButton } from '@/components/CopyButton';
 import { Button, Snippet } from '@heroui/react';
 
 interface SubscribeUrlPanelProps {
@@ -8,17 +7,7 @@ interface SubscribeUrlPanelProps {
 }
 
 export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
-	const [copySuccess, setCopySuccess] = useState(false);
-
 	const subscribeURL = `${window.location.origin}/api/x?uid=${uid}&token=${token}`;
-
-	const handleCopySubscribeURL = async () => {
-		const success = await copyToClipboard(subscribeURL);
-		if (success) {
-			setCopySuccess(true);
-			setTimeout(() => setCopySuccess(false), 2000);
-		}
-	};
 
 	const handlePreviewSubscribeURL = async () => {
 		window.open(subscribeURL + '&download=false', '_blank');
@@ -38,32 +27,15 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
 				<span className="text-sm font-medium text-gray-700">固定链接：</span>
 			</div>
 			<div className="flex-1 min-w-0 w-full sm:w-auto">
-				<Snippet
-					symbol=""
-					variant="bordered"
-					hideSymbol
-					className="w-full"
-				>
+				<Snippet symbol="" variant="bordered" hideSymbol className="w-full">
 					{subscribeURL}
 				</Snippet>
 			</div>
-			<Button
-				onClick={handleCopySubscribeURL}
-				color={copySuccess ? "success" : "primary"}
-				variant="solid"
-				size="sm"
-				className="w-full sm:w-auto flex-shrink-0"
-			>
-				{copySuccess ? '已复制！' : '复制订阅'}
-			</Button>
+			<CopyButton text={subscribeURL} className="w-full sm:w-auto flex-shrink-0">
+				复制订阅
+			</CopyButton>
 			{/* 预览按钮 */}
-			<Button
-				onClick={handlePreviewSubscribeURL}
-				color="secondary"
-				variant="solid"
-				size="sm"
-				className="w-full sm:w-auto flex-shrink-0"
-			>
+			<Button onClick={handlePreviewSubscribeURL} color="secondary" variant="solid" size="sm" className="w-full sm:w-auto flex-shrink-0">
 				预览
 			</Button>
 		</div>

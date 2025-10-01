@@ -1,5 +1,5 @@
 import { YamlEditor } from '@/components/YamlEditor';
-import { DocumentArrowDownIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { Button, Card, CardBody, CardHeader, Input } from '@heroui/react';
 
 import type { TemplateItem } from './TemplateList';
@@ -14,7 +14,6 @@ interface TemplateEditorProps {
 	onUpdateConfigContent: (content: string) => void;
 	onValidate: (errors: string[]) => void;
 	onDownloadTemplate: () => void;
-	onCopyTemplateUrl: (templateId: string, e: any) => void;
 	onReset: () => void;
 	onSave: () => void;
 	onCopyConfigContent: () => void;
@@ -32,7 +31,6 @@ export function TemplateEditor({
 	onUpdateConfigContent,
 	onValidate,
 	onDownloadTemplate,
-	onCopyTemplateUrl,
 	onReset,
 	onSave,
 	onCopyConfigContent,
@@ -138,16 +136,6 @@ export function TemplateEditor({
 						>
 							下载配置
 						</Button>
-						<Button
-							onPress={(e) => selectedTemplate && onCopyTemplateUrl(String(selectedTemplate.id), e)}
-							color="success"
-							size="sm"
-							variant="solid"
-							startContent={<LinkIcon className="w-4 h-4" />}
-						>
-							复制URL
-						</Button>
-
 						<Button size="sm" variant="solid" color="default" onPress={onCopyConfigContent}>
 							复制配置
 						</Button>

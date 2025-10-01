@@ -38,7 +38,6 @@ export interface UseTemplateManagementReturn {
 	handleSave: () => void;
 	handleReset: () => void;
 	handleDownloadTemplate: () => void;
-	handleCopyTemplateUrl: (templateId: string, e: any) => void;
 	handleCopyConfigContent: () => void;
 
 	// 模态框控制
@@ -308,28 +307,6 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		document.body.removeChild(a);
 	};
 
-	const handleCopyTemplateUrl = async (templateId: string, e: any) => {
-		if (e && typeof e.stopPropagation === 'function') {
-			e.stopPropagation();
-		}
-
-		try {
-			const response = await fetch(`/api/admin/templates/${templateId}/subscribe?superToken=${superToken}`);
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
-			const result = await response.json();
-			if (result.code === 0) {
-				await navigator.clipboard.writeText(result.data.subscribeUrl);
-				showToast('订阅URL已成功复制到剪贴板', 'success');
-			} else {
-				throw new Error(result.msg || '获取URL失败');
-			}
-		} catch (err) {
-			showToast('复制失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
-		}
-	};
-
 	const handleCopyConfigContent = async () => {
 		if (!selectedTemplate?.configContent) {
 			showToast('没有可复制的配置内容', 'error');
@@ -373,7 +350,6 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		handleSave,
 		handleReset,
 		handleDownloadTemplate,
-		handleCopyTemplateUrl,
 		handleCopyConfigContent,
 
 		// 模态框控制
