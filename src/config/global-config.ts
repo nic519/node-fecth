@@ -9,8 +9,8 @@ export interface GlobalConfigType {
 
 export const GlobalConfig: GlobalConfigType = {
 	isDev: false,
-	workerUrl: 'https://world.1024.hair',
-	ruleUrl: 'https://raw.githubusercontent.com/zzy333444/passwall_rule/main/miho-cfg.yaml',
+	workerUrl: 'https://node.1024.hair',
+	ruleUrl: 'https://node.1024.hair/api/subscription/template/1759313797591',
 };
 
 export function initGlobalConfig(request: Request, env: Env) {

@@ -98,12 +98,117 @@ export class TrafficUtils {
 		return clashContent;
 	}
 
-	/// 读取远程内容
-	static async fetchRawContent(url: string): Promise<string> {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw Error(`Failed to fetch rule content ${url}`);
+	/// 读取远程内容（带重试机制）
+	static async fetchRawContent(url: string, maxRetries: number = 3): Promise<string> {
+		console.log(`🌐 开始获取远程内容: ${url} (最大重试次数: ${maxRetries})`);
+
+		for (let attempt = 1; attempt <= maxRetries; attempt++) {
+			console.log(`🔄 第 ${attempt} 次尝试获取: ${url}`);
+
+			let response: Response | null = null;
+			try {
+				// 增加超时时间，特别针对可能的服务器响应慢的问题
+				const timeoutSignal = AbortSignal.timeout(30000); // 30秒超时
+
+				response = await fetch(url, {
+					headers: {
+						'User-Agent': 'clash.meta',
+						'Accept': 'text/plain, text/yaml, application/x-yaml, */*',
+						'Accept-Encoding': 'gzip, deflate, br',
+						'Connection': 'keep-alive',
+					},
+					signal: timeoutSignal,
+				});
+
+				console.log(`📊 fetchRawContent响应状态: ${response.status} ${response.statusText}`);
+
+				// 记录重要的响应头信息
+				const importantHeaders = {
+					'content-type': response.headers.get('content-type'),
+					'content-length': response.headers.get('content-length'),
+					'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+					'cache-control': response.headers.get('cache-control'),
+					'last-modified': response.headers.get('last-modified'),
+					'cf-ray': response.headers.get('cf-ray'),
+					'server': response.headers.get('server')
+				};
+				console.log(`📊 重要响应头:`, importantHeaders);
+
+				if (!response.ok) {
+					const errorText = await response.text().catch(() => '无法读取错误响应');
+					console.error(`❌ fetchRawContent失败: ${response.status} ${response.statusText}, 响应内容: ${errorText}`);
+
+					// 对于特定错误码进行重试
+					if (this.shouldRetry(response.status) && attempt < maxRetries) {
+						const waitTime = attempt * 2000; // 递增等待时间：2s, 4s, 6s
+						console.log(`⏳ 将在 ${waitTime}ms 后重试... (状态码: ${response.status})`);
+						await this.sleep(waitTime);
+						continue;
+					}
+
+					throw Error(`Failed to fetch rule content ${url}, status: ${response.status}, text: ${errorText}`);
+				}
+
+				const content = await response.text();
+				console.log(`✅ 成功获取远程内容，长度: ${content.length}, URL: ${url}, 尝试次数: ${attempt}`);
+
+				return content;
+			} catch (error) {
+				console.error(`❌ fetchRawContent第 ${attempt} 次尝试发生错误:`, error);
+				console.error(`❌ 错误详情: ${error instanceof Error ? error.message : String(error)}`);
+
+				// 如果是网络错误且还有重试机会
+				if (attempt < maxRetries && this.shouldRetryError(error)) {
+					const waitTime = attempt * 3000; // 递增等待时间：3s, 6s, 9s
+					console.log(`⏳ 网络错误，将在 ${waitTime}ms 后重试...`);
+					await this.sleep(waitTime);
+					continue;
+				}
+
+				// 最后一次尝试失败，抛出错误
+				console.error(`❌ 所有重试尝试均失败，URL: ${url}`);
+				throw new Error(`Failed to fetch rule content ${url} after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`);
+			} finally {
+				// 确保响应流被正确释放
+				if (response && response.body) {
+					try {
+						await response.body.cancel();
+					} catch (e) {
+						// 忽略 cancel 错误
+					}
+				}
+			}
 		}
-		return response.text();
+
+		throw new Error(`Failed to fetch rule content ${url} after ${maxRetries} attempts`);
+	}
+
+	// 判断是否应该重试（基于HTTP状态码）
+	private static shouldRetry(statusCode: number): boolean {
+		// 522: Cloudflare connection timeout
+		// 524: Cloudflare timeout
+		// 502: Bad gateway
+		// 503: Service unavailable
+		// 504: Gateway timeout
+		// 429: Too many requests
+		return [522, 524, 502, 503, 504, 429].includes(statusCode);
+	}
+
+	// 判断是否应该重试（基于错误类型）
+	private static shouldRetryError(error: any): boolean {
+		if (error instanceof Error) {
+			const errorMessage = error.message.toLowerCase();
+			return errorMessage.includes('fetch failed') ||
+				   errorMessage.includes('timeout') ||
+				   errorMessage.includes('network') ||
+				   errorMessage.includes('connection') ||
+				   errorMessage.includes('abort');
+		}
+		return false;
+	}
+
+	// 睡眠函数
+	private static sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 }

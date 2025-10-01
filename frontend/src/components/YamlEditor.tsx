@@ -1,7 +1,7 @@
 import Editor from '@monaco-editor/react';
-import * as yaml from 'js-yaml';
 import * as monaco from 'monaco-editor';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { parse } from 'yaml';
 
 interface YamlEditorProps {
@@ -13,41 +13,12 @@ interface YamlEditorProps {
 	onValidate?: (errors: string[]) => void;
 }
 
-export function YamlEditor({
-	value,
-	onChange,
-	height = '500px',
-	theme = 'light',
-	readOnly = false,
-	onValidate
-}: YamlEditorProps) {
+export function YamlEditor({ value, onChange, height = '500px', theme = 'light', readOnly = false, onValidate }: YamlEditorProps) {
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+	const [isFullscreen, setIsFullscreen] = useState(false);
 
 	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
 		editorRef.current = editor;
-
-		// 设置自定义 YAML 语法高亮
-		monaco.languages.registerDocumentFormattingEditProvider('yaml', {
-			provideDocumentFormattingEdits: (model: any) => {
-				try {
-					const parsed = parse(model.getValue());
-					const formatted = yaml.dump(parsed, {
-						indent: 2,
-						noRefs: true,
-						sortKeys: false,
-						lineWidth: 120,
-					});
-					return [
-						{
-							range: model.getFullModelRange(),
-							text: formatted,
-						},
-					];
-				} catch (e) {
-					return [];
-				}
-			},
-		});
 
 		// 添加自动补全
 		monaco.languages.registerCompletionItemProvider('yaml', {
@@ -129,12 +100,6 @@ export function YamlEditor({
 			},
 		});
 
-		// 添加快捷键
-		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-			// Ctrl/Cmd + S 保存
-			editor.trigger('save', 'editor.action.formatDocument', {});
-		});
-
 		// 验证 YAML 语法
 		if (onValidate) {
 			const validateYaml = () => {
@@ -179,16 +144,34 @@ export function YamlEditor({
 		}
 	};
 
-	const formatYaml = () => {
-		if (editorRef.current) {
-			editorRef.current.getAction('editor.action.formatDocument')?.run();
-		}
+	const toggleFullscreen = () => {
+		setIsFullscreen(!isFullscreen);
 	};
 
-	return (
-		<div className="relative border border-gray-300 rounded-lg overflow-hidden h-full">
+	// 监听 ESC 键退出全屏，并阻止 body 滚动
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && isFullscreen) {
+				setIsFullscreen(false);
+			}
+		};
+
+		if (isFullscreen) {
+			window.addEventListener('keydown', handleEscape);
+			// 禁止背景滚动
+			document.body.style.overflow = 'hidden';
+			return () => {
+				window.removeEventListener('keydown', handleEscape);
+				document.body.style.overflow = '';
+			};
+		}
+	}, [isFullscreen]);
+
+	// 渲染编辑器内容
+	const renderEditor = (isFullscreenMode: boolean) => (
+		<>
 			<Editor
-				height={height}
+				height={isFullscreenMode ? '100vh' : height}
 				language="yaml"
 				value={value}
 				onChange={(value) => onChange(value || '')}
@@ -227,15 +210,48 @@ export function YamlEditor({
 			/>
 
 			{/* 工具栏 */}
-			<div className="absolute top-2 right-6 flex gap-2">
+			<div className={`absolute flex gap-2 z-[100] ${isFullscreenMode ? 'top-4 right-4' : 'top-2 right-6'}`}>
 				<button
-					onClick={formatYaml}
-					className="px-3 py-1 text-xs bg-white/90 backdrop-blur-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors shadow-sm"
-					title="格式化文档 (Ctrl/Cmd + S)"
+					onClick={toggleFullscreen}
+					className={`flex items-center justify-center backdrop-blur-sm border rounded transition-all ${
+						isFullscreenMode
+							? 'w-10 h-10 bg-white/95 border-gray-400 shadow-lg hover:bg-gray-100 hover:shadow-xl'
+							: 'px-3 py-1 text-xs bg-white/90 border-gray-300 shadow-sm hover:bg-gray-50'
+					}`}
+					title={isFullscreenMode ? '退出全屏 (Esc)' : '全屏编辑'}
 				>
-					格式化
+					{isFullscreenMode ? (
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					) : (
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+							/>
+						</svg>
+					)}
 				</button>
 			</div>
-		</div>
+		</>
+	);
+
+	return (
+		<>
+			{/* 正常模式 */}
+			{!isFullscreen && <div className="relative border border-gray-300 rounded-lg overflow-hidden h-full">{renderEditor(false)}</div>}
+
+			{/* 全屏模式 - 使用 Portal 渲染到 body */}
+			{isFullscreen &&
+				createPortal(
+					<div className="fixed inset-0 w-screen h-screen bg-white overflow-hidden" style={{ zIndex: 9999, margin: 0, padding: 0 }}>
+						{renderEditor(true)}
+					</div>,
+					document.body,
+				)}
+		</>
 	);
 }
