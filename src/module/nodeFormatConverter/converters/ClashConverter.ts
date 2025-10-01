@@ -4,7 +4,7 @@
  */
 
 import { stringify as yamlStringify } from 'yaml';
-import { ClashConfig, ClashConfigBuilder, ClashProxy, ConversionResult, ProxyNode, ShadowsocksRNode } from '../models';
+import { ClashConfig, ClashConfigBuilder, ClashProxy, ConversionOptions, ConversionResult, ProxyNode, ShadowsocksRNode } from '../models';
 import { BaseConverter, ConversionContext, ConversionUtils } from './BaseConverter';
 
 /**
@@ -276,12 +276,16 @@ export class ClashConfigOptimizer {
 	 * 优化配置文件大小
 	 */
 	static optimizeSize(config: ClashConfig): ClashConfig {
-		const optimized = { ...config };
+		const optimized: ClashConfig = { ...config };
 
 		// 移除重复的代理节点
 		if (optimized.proxies) {
 			const seen = new Set<string>();
 			optimized.proxies = optimized.proxies.filter((proxy) => {
+				// 直连代理不需要去重
+				if (proxy.type === 'direct') {
+					return true;
+				}
 				const key = `${proxy.type}-${proxy.server}-${proxy.port}`;
 				if (seen.has(key)) {
 					return false;
@@ -303,7 +307,7 @@ export class ClashConfigOptimizer {
 	 * 优化性能设置
 	 */
 	static optimizePerformance(config: ClashConfig): ClashConfig {
-		const optimized = { ...config };
+		const optimized: ClashConfig = { ...config };
 
 		// 设置性能优化选项
 		optimized['interface-name'] = '';

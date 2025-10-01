@@ -9,10 +9,10 @@ export interface ClashProxy {
 	name: string;
 	/** 协议类型 */
 	type: string;
-	/** 服务器地址 */
-	server: string;
-	/** 端口 */
-	port: number;
+	/** 服务器地址（直连代理不需要） */
+	server?: string;
+	/** 端口（直连代理不需要） */
+	port?: number;
 	/** 密码 */
 	password?: string;
 	/** 加密方式 */
@@ -43,10 +43,49 @@ export interface ClashProxy {
 	'skip-cert-verify'?: boolean;
 }
 
-// 简化的 Clash 配置接口
+// 代理组接口
+export interface ClashProxyGroup {
+	/** 组名称 */
+	name: string;
+	/** 组类型 */
+	type: string;
+	/** 代理节点列表 */
+	proxies: string[];
+	/** 其他配置 */
+	[key: string]: any;
+}
+
+// DNS 配置接口
+export interface ClashDNS {
+	enable?: boolean;
+	'enhanced-mode'?: string;
+	'use-hosts'?: boolean;
+	[key: string]: any;
+}
+
+// 实验性功能接口
+export interface ClashExperimental {
+	'ignore-resolve-fail'?: boolean;
+	'sniff-tls-sni'?: boolean;
+	[key: string]: any;
+}
+
+// 完整的 Clash 配置接口
 export interface ClashConfig {
 	/** 代理节点 */
 	proxies: ClashProxy[];
+	/** 代理组 */
+	'proxy-groups'?: ClashProxyGroup[];
+	/** 接口名称 */
+	'interface-name'?: string;
+	/** 路由标记 */
+	'routing-mark'?: number;
+	/** DNS 配置 */
+	dns?: ClashDNS;
+	/** 实验性功能 */
+	experimental?: ClashExperimental;
+	/** 其他配置 */
+	[key: string]: any;
 }
 
 // 配置构建器类
