@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 export interface UseUserManagementProps {
 	superToken: string;
+	showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
 export interface UseUserManagementReturn {
@@ -13,16 +14,13 @@ export interface UseUserManagementReturn {
 	error: string | null;
 	fetchUsers: () => Promise<void>;
 	handleUserAction: (action: string, uid: string, token?: string) => Promise<void>;
-	handleAddUser: () => Promise<void>;
+	handleAddUser: () => void;
 	// Modal states
 	showDeleteModal: boolean;
 	showAddUserModal: boolean;
-	showMessageModal: boolean;
-	modalMessage: string;
 	userToDelete: string | null;
 	closeDeleteModal: () => void;
 	closeAddUserModal: () => void;
-	closeMessageModal: () => void;
 	confirmDeleteUser: () => Promise<void>;
 	newUserUid: string;
 	newUserToken: string;
@@ -36,7 +34,7 @@ export interface UseUserManagementReturn {
 /**
  * 用户管理Hook - 处理用户数据的CRUD操作
  */
-export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUserManagementReturn => {
+export const useUserManagement = ({ superToken, showToast }: UseUserManagementProps): UseUserManagementReturn => {
 	const [users, setUsers] = useState<UserSummary[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -44,8 +42,6 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 	// Modal states
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showAddUserModal, setShowAddUserModal] = useState(false);
-	const [showMessageModal, setShowMessageModal] = useState(false);
-	const [modalMessage, setModalMessage] = useState('');
 	const [userToDelete, setUserToDelete] = useState<string | null>(null);
 	const [newUserUid, setNewUserUid] = useState('');
 	const [newUserToken, setNewUserToken] = useState('');
@@ -94,33 +90,26 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 	 * 处理用户操作（查看、刷新、删除）
 	 */
 	const handleUserAction = async (action: string, uid: string, token?: string) => {
-		try {
-			switch (action) {
-				case 'view':
-					if (token) {
-						window.open(`/config?uid=${uid}&token=${token}`, '_blank');
-					}
-					break;
-				case 'refresh':
-					// 刷新用户流量功能暂不支持
-					setModalMessage('刷新用户流量功能暂不支持，等待后端API实现');
-					setShowMessageModal(true);
-					break;
-				case 'delete':
-					setUserToDelete(uid);
-					setShowDeleteModal(true);
-					break;
-			}
-		} catch (error) {
-			console.error('用户操作失败:', error);
-			setError(error instanceof Error ? error.message : '操作失败');
+		switch (action) {
+			case 'view':
+				if (token) {
+					window.open(`/config?uid=${uid}&token=${token}`, '_blank');
+				}
+				break;
+			case 'refresh':
+				// 刷新用户流量功能暂不支持
+				showToast('刷新用户流量功能暂不支持，等待后端API实现', 'info');
+				break;
+			case 'delete':
+				setUserToDelete(uid);
+				setShowDeleteModal(true);
+				break;
 		}
 	};
 
 	// Modal control functions
 	const closeDeleteModal = () => setShowDeleteModal(false);
 	const closeAddUserModal = () => setShowAddUserModal(false);
-	const closeMessageModal = () => setShowMessageModal(false);
 
 	const confirmDeleteUser = async () => {
 		if (!userToDelete) return;
@@ -128,28 +117,25 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 		try {
 			const response = await adminDeleteUser(superToken, { uid: userToDelete });
 			if (response.code === 0) {
+				showToast(`用户 ${userToDelete} 删除成功`, 'success');
 				await fetchUsers(); // 重新加载用户列表
-				setModalMessage(`用户 ${userToDelete} 删除成功`);
 				setShowDeleteModal(false);
-				setShowMessageModal(true);
 				setUserToDelete(null);
 			} else {
-				setModalMessage('删除用户失败: ' + (response.msg || '未知错误'));
+				showToast('删除用户失败: ' + (response.msg || '未知错误'), 'error');
 				setShowDeleteModal(false);
-				setShowMessageModal(true);
 			}
 		} catch (err) {
 			console.error('删除用户失败:', err);
-			setModalMessage('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'));
+			showToast('删除用户失败: ' + (err instanceof Error ? err.message : '未知错误'), 'error');
 			setShowDeleteModal(false);
-			setShowMessageModal(true);
 		}
 	};
 
 	/**
 	 * 添加新用户
 	 */
-	const handleAddUser = async () => {
+	const handleAddUser = () => {
 		setNewUserUid('');
 		setNewUserToken('');
 		setNewUserSubscribe('');
@@ -158,8 +144,7 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 
 	const confirmAddUser = async () => {
 		if (!newUserUid.trim() || !newUserToken.trim() || !newUserSubscribe.trim()) {
-			setModalMessage('请填写完整的用户信息');
-			setShowMessageModal(true);
+			showToast('请填写完整的用户信息', 'error');
 			return;
 		}
 
@@ -171,21 +156,18 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 
 			const response = await adminUserCreate(superToken, { uid: newUserUid.trim(), config: userConfig });
 			if (response.code === 0) {
+				showToast(`用户 ${newUserUid} 创建成功`, 'success');
 				await fetchUsers(); // 重新加载用户列表
-				setModalMessage(`用户 ${newUserUid} 创建成功`);
 				setShowAddUserModal(false);
-				setShowMessageModal(true);
 				setNewUserUid('');
 				setNewUserToken('');
 				setNewUserSubscribe('');
 			} else {
-				setModalMessage('创建用户失败: ' + (response.msg || '未知错误'));
-				setShowMessageModal(true);
+				showToast('创建用户失败: ' + (response.msg || '未知错误'), 'error');
 			}
 		} catch (error) {
 			console.error('创建用户失败:', error);
-			setModalMessage('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'));
-			setShowMessageModal(true);
+			showToast('创建用户失败: ' + (error instanceof Error ? error.message : '未知错误'), 'error');
 		}
 	};
 
@@ -199,12 +181,9 @@ export const useUserManagement = ({ superToken }: UseUserManagementProps): UseUs
 		// Modal states and functions
 		showDeleteModal,
 		showAddUserModal,
-		showMessageModal,
-		modalMessage,
 		userToDelete,
 		closeDeleteModal,
 		closeAddUserModal,
-		closeMessageModal,
 		confirmDeleteUser,
 		newUserUid,
 		newUserToken,

@@ -24,7 +24,7 @@ enabled = true
 
 # 环境变量（非敏感信息）
 [vars]
-DB_USER = "your-db-user-config"
+DB_USER = "{}"
 
 # 敏感信息（如 SUPER_ADMIN_TOKEN）请使用 Secret：
 # 设置方法：wrangler secret put SUPER_ADMIN_TOKEN

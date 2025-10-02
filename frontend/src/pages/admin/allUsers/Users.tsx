@@ -1,5 +1,6 @@
 // 导入自定义hooks
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useToastContext } from '@/providers/toast-provider';
 import { useUserFilters } from './hooks/useUserFilters';
 import { useUserManagement } from './hooks/useUserManagement';
 
@@ -9,7 +10,7 @@ import { UserFilters } from './components/UserFilters';
 import { UserTable } from './components/UserTable';
 
 // 导入HeroUI组件
-import { Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
 
 export function AdminUsers() {
 	// 设置页面标题
@@ -17,6 +18,9 @@ export function AdminUsers() {
 
 	// 获取超级管理员令牌
 	const superToken = new URLSearchParams(window.location.search).get('superToken') || '';
+
+	// 获取 Toast 上下文
+	const { showToast } = useToastContext();
 
 	// 使用用户管理Hook
 	const {
@@ -29,12 +33,9 @@ export function AdminUsers() {
 		// Modal states
 		showDeleteModal,
 		showAddUserModal,
-		showMessageModal,
-		modalMessage,
 		userToDelete,
 		closeDeleteModal,
 		closeAddUserModal,
-		closeMessageModal,
 		confirmDeleteUser,
 		newUserUid,
 		newUserToken,
@@ -45,19 +46,8 @@ export function AdminUsers() {
 		confirmAddUser,
 	} = useUserManagement({
 		superToken,
+		showToast,
 	});
-
-	// 判断消息类型
-	const getMessageType = (message: string) => {
-		if (message.includes('成功') || message.includes('创建成功') || message.includes('删除成功')) {
-			return { color: 'success', icon: '✓' };
-		} else if (message.includes('失败') || message.includes('错误')) {
-			return { color: 'danger', icon: '✕' };
-		} else if (message.includes('不支持') || message.includes('请填写')) {
-			return { color: 'warning', icon: '⚠' };
-		}
-		return { color: 'primary', icon: 'ℹ' };
-	};
 
 	// 使用用户过滤Hook
 	const { filteredUsers, searchTerm, statusFilter, sourceFilter, setSearchTerm, setStatusFilter, setSourceFilter } = useUserFilters({
@@ -181,39 +171,6 @@ export function AdminUsers() {
 							</ModalFooter>
 						</>
 					)}
-				</ModalContent>
-			</Modal>
-
-			{/* 消息提示模态框 */}
-			<Modal isOpen={showMessageModal} onOpenChange={closeMessageModal} size="sm">
-				<ModalContent>
-					{(onClose) => {
-						const messageType = getMessageType(modalMessage);
-						return (
-							<>
-								<ModalHeader className="flex flex-col gap-1 items-center">
-									<Chip color={messageType.color as any} variant="solid" size="lg" className="mb-2">
-										<span className="text-lg mr-2">{messageType.icon}</span>
-										{messageType.color === 'success'
-											? '成功'
-											: messageType.color === 'danger'
-												? '错误'
-												: messageType.color === 'warning'
-													? '警告'
-													: '提示'}
-									</Chip>
-								</ModalHeader>
-								<ModalBody className="text-center">
-									<p className="text-gray-700">{modalMessage}</p>
-								</ModalBody>
-								<ModalFooter className="justify-center">
-									<Button color={messageType.color as any} variant="solid" onPress={onClose} autoFocus>
-										确定
-									</Button>
-								</ModalFooter>
-							</>
-						);
-					}}
 				</ModalContent>
 			</Modal>
 		</div>
