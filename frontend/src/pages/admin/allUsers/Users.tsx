@@ -23,28 +23,7 @@ export function AdminUsers() {
 	const { showToast } = useToastContext();
 
 	// 使用用户管理Hook
-	const {
-		users,
-		loading,
-		error,
-		fetchUsers,
-		handleUserAction,
-		handleAddUser,
-		// Modal states
-		showDeleteModal,
-		showAddUserModal,
-		userToDelete,
-		closeDeleteModal,
-		closeAddUserModal,
-		confirmDeleteUser,
-		newUserUid,
-		newUserToken,
-		newUserSubscribe,
-		setNewUserUid,
-		setNewUserToken,
-		setNewUserSubscribe,
-		confirmAddUser,
-	} = useUserManagement({
+	const { users, loading, error, fetchUsers, handleUserAction, deleteModal, addUserModal } = useUserManagement({
 		superToken,
 		showToast,
 	});
@@ -71,7 +50,7 @@ export function AdminUsers() {
 						onStatusFilterChange={setStatusFilter}
 						onSourceFilterChange={setSourceFilter}
 						onRefresh={fetchUsers}
-						onAddUser={handleAddUser}
+						onAddUser={addUserModal.open}
 					/>
 
 					{/* 错误信息 */}
@@ -105,19 +84,19 @@ export function AdminUsers() {
 			</main>
 
 			{/* 删除用户确认模态框 */}
-			<Modal isOpen={showDeleteModal} onOpenChange={closeDeleteModal}>
+			<Modal isOpen={deleteModal.isOpen} onOpenChange={deleteModal.close}>
 				<ModalContent>
 					{(onClose) => (
 						<>
 							<ModalHeader className="flex flex-col gap-1">确认删除用户</ModalHeader>
 							<ModalBody>
-								<p>确定要删除用户 {userToDelete} 吗？此操作不可撤销！</p>
+								<p>确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！</p>
 							</ModalBody>
 							<ModalFooter>
 								<Button color="default" variant="solid" onPress={onClose}>
 									取消
 								</Button>
-								<Button color="danger" onPress={confirmDeleteUser} isLoading={loading}>
+								<Button color="danger" onPress={deleteModal.confirm} isLoading={loading}>
 									删除
 								</Button>
 							</ModalFooter>
@@ -127,7 +106,7 @@ export function AdminUsers() {
 			</Modal>
 
 			{/* 添加用户模态框 */}
-			<Modal isOpen={showAddUserModal} onOpenChange={closeAddUserModal}>
+			<Modal isOpen={addUserModal.isOpen} onOpenChange={addUserModal.close}>
 				<ModalContent>
 					{(onClose) => (
 						<>
@@ -137,22 +116,22 @@ export function AdminUsers() {
 									<Input
 										label="用户ID"
 										placeholder="请输入用户ID"
-										value={newUserUid}
-										onChange={(e) => setNewUserUid(e.target.value)}
+										value={addUserModal.form.uid}
+										onChange={(e) => addUserModal.setUid(e.target.value)}
 										variant="bordered"
 									/>
 									<Input
 										label="访问令牌"
 										placeholder="请输入用户访问令牌"
-										value={newUserToken}
-										onChange={(e) => setNewUserToken(e.target.value)}
+										value={addUserModal.form.token}
+										onChange={(e) => addUserModal.setToken(e.target.value)}
 										variant="bordered"
 									/>
 									<Input
 										label="订阅链接"
 										placeholder="请输入订阅链接"
-										value={newUserSubscribe}
-										onChange={(e) => setNewUserSubscribe(e.target.value)}
+										value={addUserModal.form.subscribe}
+										onChange={(e) => addUserModal.setSubscribe(e.target.value)}
 										variant="bordered"
 									/>
 								</div>
@@ -162,7 +141,7 @@ export function AdminUsers() {
 									取消
 								</Button>
 								<Button
-									onPress={confirmAddUser}
+									onPress={addUserModal.confirm}
 									isLoading={loading}
 									className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
 								>
