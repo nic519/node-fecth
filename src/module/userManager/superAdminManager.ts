@@ -1,6 +1,6 @@
 import { AdminOperation, ConfigTemplate, SuperAdminStats } from '@/module/userManager/types/supper-admin.types';
 import { UserConfig, UserSummary } from '@/types/openapi-schemas';
-import { TrafficUtils } from '@/utils/trafficUtils';
+import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserManager } from './userManager';
 
 export class SuperAdminManager {
@@ -396,7 +396,7 @@ export class SuperAdminManager {
 	 */
 	private async getUserTrafficInfo(subscribeUrl: string): Promise<UserSummary['trafficInfo']> {
 		try {
-			const trafficUtils = new TrafficUtils(subscribeUrl);
+			const trafficUtils = new ProxyFetch(subscribeUrl);
 			const clashContent = await trafficUtils.fetchFromKV();
 
 			if (!clashContent || !clashContent.subInfo) {
@@ -420,7 +420,7 @@ export class SuperAdminManager {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
-			const trafficUtils = new TrafficUtils(configResponse.config.subscribe);
+			const trafficUtils = new ProxyFetch(configResponse.config.subscribe);
 			const { subInfo } = await trafficUtils.fetchClashContent();
 
 			if (!subInfo) {

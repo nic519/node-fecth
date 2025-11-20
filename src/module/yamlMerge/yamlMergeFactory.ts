@@ -4,7 +4,8 @@ import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { PreMergeInfo } from '@/module/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/module/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
-import { TrafficUtils } from '@/utils/trafficUtils';
+import { NetworkUtils } from '@/utils/request/network-utils';
+import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { StrategyMultiSub } from './strategyMultiSub';
 
 export class YamlMergeFactory {
@@ -23,7 +24,7 @@ export class YamlMergeFactory {
 		} else if (this.userConfig.ruleUrl.startsWith('http')) {
 			// 如果是外部URL，使用fetch获取内容
 			console.log(`📡 从外部URL获取规则内容: ${this.userConfig.ruleUrl}`);
-			ruleContent = await TrafficUtils.fetchRawContent(this.userConfig.ruleUrl);
+			ruleContent = await NetworkUtils.fetchRawContent(this.userConfig.ruleUrl);
 		} else {
 			// 如果是模板ID，从本地KV获取
 			console.log(`🔑 从本地KV获取模板内容: ${this.userConfig.ruleUrl}`);
@@ -31,7 +32,7 @@ export class YamlMergeFactory {
 		}
 
 		// 2. 获取远端的代理信息
-		const trafficUtils = new TrafficUtils(this.userConfig.subscribe);
+		const trafficUtils = new ProxyFetch(this.userConfig.subscribe);
 		const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
 		return { ruleContent, clashContent, subInfo };
 	}
@@ -115,8 +116,8 @@ export class YamlMergeFactory {
 
 	// 直接合并，不把节点拉回来
 	async fastStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
-		const baseInfo = await this.fetchPreMergeInfo();
-		const yamlStrategy = new StrategyDirectly(baseInfo.ruleContent);
+		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
+		const yamlStrategy = new StrategyDirectly(baseInfo);
 		return {
 			yamlContent: yamlStrategy.generate(this.userConfig.subscribe),
 			subInfo: baseInfo.subInfo,

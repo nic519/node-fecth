@@ -1,4 +1,4 @@
-import { TrafficUtils } from '../src/utils/trafficUtils';
+import { ProxyFetch } from '../src/utils/request/proxy-fetch';
 
 /**
  * 简化版 TrafficUtils 测试类
@@ -11,7 +11,7 @@ export class TrafficUtilsSimpleTest {
 	 * 测试正常场景下的 fetchClashContent
 	 */
 	async testNormalFetch(): Promise<void> {
-		const trafficUtils = new TrafficUtils(
+		const trafficUtils = new ProxyFetch(
 			'https://moes.lnaspiring.com/Moe233-Subs/qwbm/api/v1/client/subscribe?token=721caa13f2fcc08ab2d92d5abe593105'
 		);
 
@@ -21,7 +21,6 @@ export class TrafficUtilsSimpleTest {
 			console.log('✅ 测试通过');
 			console.log(`📄 subInfo: ${result.subInfo || '无'}`);
 			console.log(`📏 内容长度: ${result.content.length} 字符`);
-			console.log(`📋 内容预览: ${result.content.substring(0, 100)}...`);
 		} catch (error) {
 			console.error('❌ 测试失败:', error);
 			throw error;

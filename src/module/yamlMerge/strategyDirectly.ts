@@ -1,12 +1,27 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { ClashProxy } from '../nodeFormatConverter';
+import { PreMergeInfo } from './clash-merge.types';
+import { StrategyUtils } from './utils/strategyUtils';
 
 export class StrategyDirectly {
-	constructor(private ruleContent: string) {}
+	constructor(private preMergeInfo: PreMergeInfo) {}
 
-	generate(subUrl: string): string {
-		const yamlObj = yamlParse(this.ruleContent);
-		if (yamlObj['proxy-providers'] && yamlObj['proxy-providers']['Airport1']) {
-			yamlObj['proxy-providers']['Airport1'].url = subUrl;
+	generate(excludeRegex: string | undefined): string {
+		// 获取主订阅的clash内容
+		const proxyList: ClashProxy[] = StrategyUtils.getProxyList({
+			clashContent: this.preMergeInfo.clashContent,
+			excludeRegex: excludeRegex,
+		});
+
+		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
+
+		delete yamlObj['proxy-providers'];
+
+		// 2.添加proxy
+		if (yamlObj['proxies']) {
+			yamlObj['proxies'].push(...proxyList);
+		} else {
+			yamlObj['proxies'] = proxyList;
 		}
 		return yamlStringify(yamlObj);
 	}
