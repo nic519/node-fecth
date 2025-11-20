@@ -1,15 +1,13 @@
 import { KvHandler } from '@/module/kv/kvHandler';
 import { StorageHandler } from '@/routes/handler/storageHandler';
-import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
+import { BaseAPI } from '@/routes/modules/base/api.base';
 import { kvRoute, MyRouter, storageRoute } from '@/routes/openapi';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
  * 存储功能路由模块
  */
-export class StorageModule extends BaseRouteModule {
-	readonly moduleName = 'Storage';
-
+export class APIStorage extends BaseAPI {
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		// 存储相关路由
 		app.openapi(storageRoute, async (c) => {

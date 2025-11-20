@@ -1,18 +1,18 @@
 import { GlobalConfig } from '@/config/global-config';
 import { MiddlewareManager } from '@/routes/middleware';
-import { RouteRegistry } from '@/routes/modules';
+import { APIRegistry } from '@/routes/modules';
 import { ResponseCodes } from '@/types/openapi-schemas';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 export class Router {
 	private app: OpenAPIHono<{ Bindings: Env }>;
-	private routeRegistry: RouteRegistry;
+	private apiRegistry: APIRegistry;
 	private initialized: boolean = false;
 
 	constructor() {
 		this.app = new OpenAPIHono<{ Bindings: Env }>();
-		this.routeRegistry = new RouteRegistry();
+		this.apiRegistry = new APIRegistry();
 	}
 
 	/**
@@ -52,12 +52,14 @@ export class Router {
 	}
 
 	/**
-	 * 设置路由（懒加载模式）
+	 * 设置路由（智能预加载模式）
 	 */
 	private async setupRoutes(): Promise<void> {
-		// 只注册核心模块，其他模块按需加载
-		await this.routeRegistry.registerCoreModules(this.app);
-		await this.routeRegistry.preloadModules(['user']);
+		// 注册核心模块
+		await this.apiRegistry.registerCoreModules(this.app);
+
+		// 预加载常用模块，提升用户体验
+		await this.apiRegistry.preloadModules(this.app, ['user', 'subscription', 'admin']);
 	}
 
 	/**
@@ -80,7 +82,7 @@ export class Router {
 						data: {
 							path: path,
 							method: c.req.method,
-							registeredModules: this.routeRegistry.getRegisteredModules(),
+							registeredModules: this.apiRegistry.getRegisteredModules(),
 						},
 					},
 					404
@@ -191,7 +193,7 @@ export class Router {
 大部分 API 需要通过 \`token\` 查询参数进行认证。管理员接口需要 \`superToken\` 参数。
 
 ## 已注册模块
-${this.routeRegistry
+${this.apiRegistry
 	.getRegisteredModules()
 	.map((name) => `- ${name}`)
 	.join('\n')}`,
@@ -200,10 +202,11 @@ ${this.routeRegistry
 		});
 	}
 
+	
 	/**
 	 * 获取路由注册器实例（用于扩展）
 	 */
-	getRouteRegistry(): RouteRegistry {
-		return this.routeRegistry;
+	getRouteRegistry(): APIRegistry {
+		return this.apiRegistry;
 	}
 }

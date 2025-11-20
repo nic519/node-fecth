@@ -1,37 +1,37 @@
-import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { TemplateManager } from '@/module/templateManager/templateManager';
-import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
+import { SuperAdminManager } from '@/module/userManager/superAdminManager';
+import { BaseAPI } from '@/routes/modules/base/api.base';
 import {
 	MyRouter,
 	adminDeleteUserRoute,
 	adminGetUsersRoute,
 	adminUserCreateRoute,
-	getConfigTemplatesRoute,
+	applyTemplateRoute,
 	createConfigTemplateRoute,
-	updateConfigTemplateRoute,
 	deleteConfigTemplateRoute,
-	applyTemplateRoute
+	getConfigTemplatesRoute,
+	updateConfigTemplateRoute,
 } from '@/routes/openapi';
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { ResponseCodes, UserConfig, ConfigTemplatesResponseSchema, CreateConfigTemplateRequestSchema } from '@/types/openapi-schemas';
 
 /**
  * 管理员功能路由模块
  */
-export class AdminModule extends BaseRouteModule {
-	readonly moduleName = 'Admin';
-
+export class APIAdmin extends BaseAPI {
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
-		
 		// 先校验superToken
 		app.use('/api/admin/*', async (c, next) => {
 			const superAdminManager = new SuperAdminManager(c.env);
 			const authResult = await superAdminManager.validateSuperAdmin(c.req.query('superToken') || '');
 			if (!authResult) {
-				return c.json({
-					code: ResponseCodes.UNAUTHORIZED,
-					msg: '超级管理员令牌无效',
-				}, 401);
+				return c.json(
+					{
+						code: ResponseCodes.UNAUTHORIZED,
+						msg: '超级管理员令牌无效',
+					},
+					401
+				);
 			}
 			await next();
 		});
@@ -47,7 +47,7 @@ export class AdminModule extends BaseRouteModule {
 				const adminId = 'super_admin'; // 简化实现，使用固定ID
 				const superAdminManager = new SuperAdminManager(c.env);
 				await superAdminManager.deleteUser(body.uid, adminId);
-				
+
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '用户删除成功',
@@ -94,7 +94,7 @@ export class AdminModule extends BaseRouteModule {
 			try {
 				const superAdminManager = new SuperAdminManager(c.env);
 				const userSummaries = await superAdminManager.getUserSummaryList();
-				
+
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '获取所有用户成功',
@@ -244,10 +244,13 @@ export class AdminModule extends BaseRouteModule {
 			const superAdminManager = new SuperAdminManager(c.env);
 			const authResult = await superAdminManager.validateSuperAdmin(superToken);
 			if (!authResult) {
-				return c.json({
-					code: ResponseCodes.UNAUTHORIZED,
-					msg: '超级管理员令牌无效',
-				}, 401);
+				return c.json(
+					{
+						code: ResponseCodes.UNAUTHORIZED,
+						msg: '超级管理员令牌无效',
+					},
+					401
+				);
 			}
 
 			try {
@@ -255,10 +258,13 @@ export class AdminModule extends BaseRouteModule {
 				const template = await templateManager.getTemplateById(templateId);
 
 				if (!template) {
-					return c.json({
-						code: ResponseCodes.NOT_FOUND,
-						msg: '模板不存在',
-					}, 404);
+					return c.json(
+						{
+							code: ResponseCodes.NOT_FOUND,
+							msg: '模板不存在',
+						},
+						404
+					);
 				}
 
 				// 生成订阅URL - 使用模板预览端点

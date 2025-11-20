@@ -1,16 +1,16 @@
-import { IRouteModule } from '@/routes/modules/base/RouteModule';
+import { IAPI } from '@/routes/modules/base/api.base';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
  * 路由注册器 - 懒加载版本（简洁Worker专用）
  */
-export class RouteRegistry {
+export class APIRegistry {
 	// 模块缓存
-	private moduleCache: Map<string, IRouteModule> = new Map();
+	private moduleCache: Map<string, IAPI> = new Map();
 	private registeredModules: Set<string> = new Set();
 
 	// 模块工厂函数
-	private moduleFactories: Record<string, () => IRouteModule | Promise<IRouteModule>> = {};
+	private moduleFactories: Record<string, () => IAPI | Promise<IAPI>> = {};
 
 	constructor() {
 		this.setupModuleFactories();
@@ -19,30 +19,30 @@ export class RouteRegistry {
 	private setupModuleFactories(): void {
 		this.moduleFactories = {
 			health: () => {
-				const { HealthModule } = require('@/routes/modules/HealthModule');
-				return new HealthModule();
+				const { APIHealth } = require('@/routes/modules/api.health');
+				return new APIHealth();
 			},
 			user: async () => {
-				const { UserModule } = await import('@/routes/modules/UserModule');
-				return new UserModule();
+				const { APIUser } = await import('@/routes/modules/api.user');
+				return new APIUser();
 			},
 			admin: async () => {
-				const { AdminModule } = await import('@/routes/modules/AdminModule');
-				return new AdminModule();
+				const { APIAdmin } = await import('@/routes/modules/api.admin');
+				return new APIAdmin();
 			},
 			storage: async () => {
-				const { StorageModule } = await import('@/routes/modules/StorageModule');
-				return new StorageModule();
+				const { APIStorage } = await import('@/routes/modules/api.kv-storage');
+				return new APIStorage();
 			},
 			subscription: async () => {
-				const { SubscriptionModule } = await import('@/routes/modules/SubscriptionModule');
-				return new SubscriptionModule();
+				const { APIProxy } = await import('@/routes/modules/api.proxy');
+				return new APIProxy();
 			},
 		};
 	}
 
 	// 懒加载模块
-	async getModule(moduleName: string): Promise<IRouteModule> {
+	async getModule(moduleName: string): Promise<IAPI> {
 		if (this.moduleCache.has(moduleName)) {
 			return this.moduleCache.get(moduleName)!;
 		}
@@ -72,9 +72,9 @@ export class RouteRegistry {
 	}
 
 	// 预加载常用模块
-	async preloadModules(moduleNames: string[]): Promise<void> {
+	async preloadModules(app: OpenAPIHono<{ Bindings: Env }>, moduleNames: string[]): Promise<void> {
 		for (const moduleName of moduleNames) {
-			await this.getModule(moduleName);
+			await this.registerModule(app, moduleName); // 加载并注册
 		}
 	}
 

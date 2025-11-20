@@ -1,5 +1,5 @@
 import { UserManager } from '@/module/userManager/userManager';
-import { BaseRouteModule } from '@/routes/modules/base/RouteModule';
+import { BaseAPI } from '@/routes/modules/base/api.base';
 import { MyRouter, getUserDetailRoute, userUpdateRoute } from '@/routes/openapi';
 import { ResponseCodes } from '@/types/openapi-schemas';
 import { AuthUtils } from '@/utils/authUtils';
@@ -9,16 +9,14 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 /**
  * 用户管理路由模块
  */
-export class UserModule extends BaseRouteModule {
-	readonly moduleName = 'User';
-
+export class APIUser extends BaseAPI {
 	register(app: OpenAPIHono<{ Bindings: Env }>): void {
 		console.log(`🔧 ${this.moduleName}: 开始注册路由...`);
- 
+
 		app.openapi(userUpdateRoute, async (c) => {
 			const query = c.req.valid('query');
 			const { uid, token } = query;
-			
+
 			console.log(`🔧 ${this.moduleName}: ${c.req.method} ${uid}`);
 			console.log(`🔗 请求URL: ${c.req.url}`);
 			console.log(`🔗 原始请求URL: ${c.req.raw.url}`);
@@ -66,7 +64,7 @@ export class UserModule extends BaseRouteModule {
 		app.openapi(getUserDetailRoute, async (c) => {
 			const query = c.req.valid('query');
 			const { uid, token } = query;
-			
+
 			console.log(`🔧 ${this.moduleName}: ${c.req.method} ${MyRouter.userDetail} - ${uid}`);
 
 			try {
@@ -78,7 +76,7 @@ export class UserModule extends BaseRouteModule {
 				// 获取用户配置
 				const userManager = new UserManager(c.env);
 				const userConfigResponse = await userManager.getUserConfig(uid);
-				
+
 				if (!userConfigResponse) {
 					return ResponseUtils.jsonError(c, ResponseCodes.NOT_FOUND, '用户配置不存在');
 				}

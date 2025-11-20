@@ -1,13 +1,13 @@
 // 基础模块
-export { BaseRouteModule } from '@/routes/modules/base/RouteModule';
-export type { IRouteModule } from '@/routes/modules/base/RouteModule';
+export { BaseAPI } from '@/routes/modules/base/api.base';
+export type { IAPI } from '@/routes/modules/base/api.base';
 
 // 功能模块
-export { AdminModule } from '@/routes/modules/AdminModule';
-export { HealthModule } from '@/routes/modules/HealthModule';
-export { StorageModule } from '@/routes/modules/StorageModule';
-export { SubscriptionModule } from '@/routes/modules/SubscriptionModule';
-export { UserModule } from '@/routes/modules/UserModule';
+export { APIAdmin } from '@/routes/modules/api.admin';
+export { APIHealth } from '@/routes/modules/api.health';
+export { APIStorage } from '@/routes/modules/api.kv-storage';
+export { APIProxy } from '@/routes/modules/api.proxy';
+export { APIUser } from '@/routes/modules/api.user';
 
 // 路由注册器
-export { RouteRegistry } from '@/routes/modules/RouteRegistry';
+export { APIRegistry } from '@/routes/modules/api-registry';

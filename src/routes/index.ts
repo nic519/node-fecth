@@ -16,11 +16,11 @@ export { Router } from '@/routes/routesHandler';
 
 // === 模块化架构 ===
 export { MiddlewareManager } from '@/routes/middleware';
-export { RouteRegistry } from '@/routes/modules/RouteRegistry';
+export { APIRegistry } from '@/routes/modules/api-registry';
 
 // === 路由模块 ===
-export { AdminModule, BaseRouteModule, HealthModule, StorageModule, SubscriptionModule, UserModule } from '@/routes/modules';
-export type { IRouteModule } from '@/routes/modules';
+export { APIAdmin, APIHealth, APIProxy, APIStorage, APIUser } from '@/routes/modules';
+export type { IAPI } from '@/routes/modules';
 
 // === OpenAPI 规范 ===
 export { HealthStatusSchema, MyRouter as ROUTE_PATHS, SuperAdminTokenParamSchema, UserTokenParamSchema } from '@/routes/openapi';
@@ -29,7 +29,7 @@ export { HealthStatusSchema, MyRouter as ROUTE_PATHS, SuperAdminTokenParamSchema
 /**
  * @example
  * ```typescript
- * import { Router, RouteRegistry } from '@/routes';
+ * import { Router, APIRegistry } from '@/routes';
  *
  * // 创建路由实例
  * const router = new Router();

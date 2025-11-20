@@ -6,6 +6,43 @@ const KvKey = (url: string) => `clash-sub:${url}`;
 // 缓存有效期 5分钟
 const cacheAvailableTime = 5 * 60 * 1000;
 
+/**
+ * 安全的JSON解析函数，带错误处理和数据清理
+ * @param jsonString 要解析的JSON字符串
+ * @param fallbackValue 解析失败时的默认返回值
+ * @returns 解析结果或fallback值
+ */
+function safeJsonParse<T>(jsonString: string, fallbackValue: T | null = null): T | null {
+	try {
+		// 移除BOM标记和其他不可见字符
+		let cleaned = jsonString.replace(/^\uFEFF/, '');
+
+		// 移除控制字符，但保留常见的空白字符
+		cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+		// 检查是否为空字符串
+		if (!cleaned.trim()) {
+			throw new Error('JSON字符串为空');
+		}
+
+		const result = JSON.parse(cleaned);
+		console.log('✅ JSON解析成功', {
+			dataLength: jsonString.length,
+			cleanedLength: cleaned.length,
+		});
+
+		return result;
+	} catch (error) {
+		console.error('❌ JSON解析失败:', {
+			error: error instanceof Error ? error.message : String(error),
+			dataLength: jsonString.length,
+			dataPreview: jsonString.substring(0, 200) + (jsonString.length > 200 ? '...' : ''),
+		});
+
+		return fallbackValue;
+	}
+}
+
 interface ClashContent {
 	subInfo: string;
 	content: string;

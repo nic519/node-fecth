@@ -4,7 +4,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 /**
  * 路由模块基础接口
  */
-export interface IRouteModule {
+export interface IAPI {
 	/**
 	 * 注册路由到应用实例
 	 * @param app OpenAPIHono 应用实例
@@ -20,8 +20,12 @@ export interface IRouteModule {
 /**
  * 路由模块基础抽象类
  */
-export abstract class BaseRouteModule implements IRouteModule {
-	abstract readonly moduleName: string;
+export abstract class BaseAPI implements IAPI {
+	readonly moduleName: string;
+
+	constructor() {
+		this.moduleName = this.constructor.name.replace(/^API/, '').toLowerCase();
+	}
 
 	abstract register(app: OpenAPIHono<{ Bindings: Env }>): void;
 

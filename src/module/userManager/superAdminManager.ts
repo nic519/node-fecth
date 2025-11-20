@@ -99,7 +99,7 @@ export class SuperAdminManager {
 				}
 
 				const summary: UserSummary = {
-					uid: uid,   
+					uid: uid,
 					token: configResponse?.config.accessToken || '',
 					hasConfig: !!configResponse,
 					source: configResponse?.meta.source || 'none',
@@ -397,7 +397,7 @@ export class SuperAdminManager {
 	private async getUserTrafficInfo(subscribeUrl: string): Promise<UserSummary['trafficInfo']> {
 		try {
 			const trafficUtils = new TrafficUtils(subscribeUrl);
-			const clashContent = await trafficUtils.fetchFromKV(false);
+			const clashContent = await trafficUtils.fetchFromKV();
 
 			if (!clashContent || !clashContent.subInfo) {
 				return undefined;
