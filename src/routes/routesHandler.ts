@@ -8,21 +8,24 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 export class Router {
 	private app: OpenAPIHono<{ Bindings: Env }>;
 	private routeRegistry: RouteRegistry;
+	private initialized: boolean = false;
 
 	constructor() {
 		this.app = new OpenAPIHono<{ Bindings: Env }>();
 		this.routeRegistry = new RouteRegistry();
-		this.initialize();
 	}
 
 	/**
-	 * 初始化路由器
+	 * 懒初始化路由器
 	 */
-	private initialize(): void {
+	private async ensureInitialized(): Promise<void> {
+		if (this.initialized) return;
+
 		this.setupMiddleware();
 		this.setupDocumentation();
-		this.setupRoutes();
+		await this.setupRoutes();
 		this.setupErrorHandling();
+		this.initialized = true;
 	}
 
 	/**
@@ -49,13 +52,12 @@ export class Router {
 	}
 
 	/**
-	 * 设置所有路由
+	 * 设置路由（懒加载模式）
 	 */
-	private setupRoutes(): void {
-		// 注册所有模块化路由
-		this.routeRegistry.registerAllModules(this.app);
-
-		console.log('📋 已注册的路由模块:', this.routeRegistry.getRegisteredModules().join(', '));
+	private async setupRoutes(): Promise<void> {
+		// 只注册核心模块，其他模块按需加载
+		await this.routeRegistry.registerCoreModules(this.app);
+		await this.routeRegistry.preloadModules(['user']);
 	}
 
 	/**
@@ -163,6 +165,8 @@ export class Router {
 	 * @param env 环境变量
 	 */
 	async route(request: Request, env: Env): Promise<Response> {
+		// 确保路由器已初始化（懒加载）
+		await this.ensureInitialized();
 		return this.app.fetch(request, env);
 	}
 

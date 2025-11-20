@@ -1,75 +1,84 @@
-import { AdminModule } from '@/routes/modules/AdminModule';
-import { HealthModule } from '@/routes/modules/HealthModule';
-import { StorageModule } from '@/routes/modules/StorageModule';
-import { SubscriptionModule } from '@/routes/modules/SubscriptionModule';
-import { UserModule } from '@/routes/modules/UserModule';
 import { IRouteModule } from '@/routes/modules/base/RouteModule';
 import { OpenAPIHono } from '@hono/zod-openapi';
 
 /**
- * 路由注册器 - 统一管理所有路由模块
+ * 路由注册器 - 懒加载版本（简洁Worker专用）
  */
 export class RouteRegistry {
-	private modules: IRouteModule[] = [];
+	// 模块缓存
+	private moduleCache: Map<string, IRouteModule> = new Map();
+	private registeredModules: Set<string> = new Set();
+
+	// 模块工厂函数
+	private moduleFactories: Record<string, () => IRouteModule | Promise<IRouteModule>> = {};
 
 	constructor() {
-		this.initializeModules();
+		this.setupModuleFactories();
 	}
 
-	/**
-	 * 初始化所有路由模块
-	 */
-	private initializeModules(): void {
-		this.modules = [new HealthModule(), new UserModule(), new AdminModule(), new StorageModule(), new SubscriptionModule()];
+	private setupModuleFactories(): void {
+		this.moduleFactories = {
+			health: () => {
+				const { HealthModule } = require('@/routes/modules/HealthModule');
+				return new HealthModule();
+			},
+			user: async () => {
+				const { UserModule } = await import('@/routes/modules/UserModule');
+				return new UserModule();
+			},
+			admin: async () => {
+				const { AdminModule } = await import('@/routes/modules/AdminModule');
+				return new AdminModule();
+			},
+			storage: async () => {
+				const { StorageModule } = await import('@/routes/modules/StorageModule');
+				return new StorageModule();
+			},
+			subscription: async () => {
+				const { SubscriptionModule } = await import('@/routes/modules/SubscriptionModule');
+				return new SubscriptionModule();
+			},
+		};
 	}
 
-	/**
-	 * 注册所有路由模块到应用实例
-	 * @param app OpenAPIHono 应用实例
-	 */
-	registerAllModules(app: OpenAPIHono<{ Bindings: Env }>): void {
-		console.log('🚀 开始注册路由模块...');
-
-		this.modules.forEach((module) => {
-			try {
-				module.register(app);
-				console.log(`✅ 路由模块注册成功: ${module.moduleName}`);
-			} catch (error) {
-				console.error(`❌ 路由模块注册失败: ${module.moduleName}`, error);
-				throw error;
-			}
-		});
-
-		console.log(`🎉 所有路由模块注册完成，共 ${this.modules.length} 个模块`);
-	}
-
-	/**
-	 * 获取已注册的模块列表
-	 */
-	getRegisteredModules(): string[] {
-		return this.modules.map((module) => module.moduleName);
-	}
-
-	/**
-	 * 添加自定义路由模块
-	 * @param module 路由模块实例
-	 */
-	addModule(module: IRouteModule): void {
-		this.modules.push(module);
-		console.log(`➕ 添加自定义路由模块: ${module.moduleName}`);
-	}
-
-	/**
-	 * 移除路由模块
-	 * @param moduleName 模块名称
-	 */
-	removeModule(moduleName: string): boolean {
-		const index = this.modules.findIndex((module) => module.moduleName === moduleName);
-		if (index !== -1) {
-			this.modules.splice(index, 1);
-			console.log(`➖ 移除路由模块: ${moduleName}`);
-			return true;
+	// 懒加载模块
+	async getModule(moduleName: string): Promise<IRouteModule> {
+		if (this.moduleCache.has(moduleName)) {
+			return this.moduleCache.get(moduleName)!;
 		}
-		return false;
+
+		const factory = this.moduleFactories[moduleName];
+		if (!factory) {
+			throw new Error(`未知的路由模块: ${moduleName}`);
+		}
+
+		const module = await factory();
+		this.moduleCache.set(moduleName, module);
+		return module;
+	}
+
+	// 注册模块
+	async registerModule(app: OpenAPIHono<{ Bindings: Env }>, moduleName: string): Promise<void> {
+		if (this.registeredModules.has(moduleName)) return;
+
+		const module = await this.getModule(moduleName);
+		module.register(app);
+		this.registeredModules.add(moduleName);
+	}
+
+	// 注册核心模块
+	async registerCoreModules(app: OpenAPIHono<{ Bindings: Env }>): Promise<void> {
+		await this.registerModule(app, 'health');
+	}
+
+	// 预加载常用模块
+	async preloadModules(moduleNames: string[]): Promise<void> {
+		for (const moduleName of moduleNames) {
+			await this.getModule(moduleName);
+		}
+	}
+
+	getRegisteredModules(): string[] {
+		return Array.from(this.registeredModules);
 	}
 }

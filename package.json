@@ -13,12 +13,13 @@
 		"build:api": "tsx scripts/generate-api-client.ts",
 		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit",
 		"preview": "yarn build:frontend && wrangler dev --local",
-		"test-traffic-utils": "tsx tests/test.trafficUtils.ts"
+		"test-traffic-utils": "tsx tests/traffic-utils.test.ts"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24.0.3",
+		"@types/pino": "^7.0.4",
 		"concurrently": "^9.2.0",
 		"fs-extra": "^11.3.0",
 		"oazapfts": "^6.3.0",
@@ -33,6 +34,8 @@
 		"@oazapfts/runtime": "^1.0.4",
 		"dotenv": "^17.2.0",
 		"hono": "^4.8.0",
+		"pino": "^10.1.0",
+		"pino-pretty": "^13.1.2",
 		"yaml": "^2.7.0",
 		"zod": "^3.25.67"
 	},

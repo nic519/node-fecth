@@ -17,7 +17,10 @@
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
       "Bash(yarn deploy:*)",
-      "Bash(claude:*)"
+      "Bash(claude:*)",
+      "Bash(npm run)",
+      "Bash(npm run type-check:*)",
+      "Bash(timeout 5 npm run dev:backend:*)"
     ],
     "deny": [],
     "ask": []
