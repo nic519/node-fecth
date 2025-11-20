@@ -67,7 +67,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 		}
 	};
 
-	const { color, icon, label } = getColorAndIcon();
+	const { color, icon } = getColorAndIcon();
 
 	return (
 		<Card

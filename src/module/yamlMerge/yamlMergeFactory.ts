@@ -13,7 +13,7 @@ export class YamlMergeFactory {
 	// 公共方法：1.获取模板内容，2.获取clash订阅配置
 	async fetchPreMergeInfo(): Promise<PreMergeInfo> {
 		let ruleContent: string;
-
+		// 1. 获取模板内容
 		// 智能判断：检测URL域名是否与worker域名相同，避免循环访问
 		if (this.shouldUseInternalTemplate(this.userConfig.ruleUrl)) {
 			// 如果是同域名，从本地KV获取模板内容
@@ -30,6 +30,7 @@ export class YamlMergeFactory {
 			ruleContent = await this.getTemplateFromKV(this.userConfig.ruleUrl);
 		}
 
+		// 2. 获取远端的代理信息
 		const trafficUtils = new TrafficUtils(this.userConfig.subscribe);
 		const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
 		return { ruleContent, clashContent, subInfo };

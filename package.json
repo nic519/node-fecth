@@ -13,8 +13,7 @@
 		"build:api": "tsx scripts/generate-api-client.ts",
 		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit",
 		"preview": "yarn build:frontend && wrangler dev --local",
-		"test-fetch": "tsx test-fetch.ts",
-		"test-smart-detection": "tsx test-smart-detection.ts"
+		"test-traffic-utils": "tsx tests/test.trafficUtils.ts"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",

@@ -1,8 +1,8 @@
-import { RouteHandler } from '@/types/routes.types';
+import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
-import { InnerUser } from '@/module/userManager/innerUserConfig';
+import { RouteHandler } from '@/types/routes.types';
 
 // 响应头配置
 const RESPONSE_HEADERS: Record<string, string> = {
@@ -22,9 +22,12 @@ const RESPONSE_HEADERS: Record<string, string> = {
 	'X-XSS-Protection': '1; mode=block',
 };
 
+/// 把用户配置转成Clash的yaml配置
+/// 包含模板与代理
 export class ClashHandler implements RouteHandler {
-	// 构建响应头
-	private buildHeaders(subInfo: string, fileName?: string): Record<string, string> {
+	/// 构建响应头
+	/// 告知【订阅流量情况】【文件名】
+	private _buildRespHeaders(subInfo: string, fileName?: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			...RESPONSE_HEADERS,
 			'Subscription-Userinfo': subInfo,
@@ -52,7 +55,7 @@ export class ClashHandler implements RouteHandler {
 
 			return new Response(yamlContent, {
 				status: 200,
-				headers: this.buildHeaders(subInfo, queryParams.download ? innerUser.fileName : undefined),
+				headers: this._buildRespHeaders(subInfo, queryParams.download ? innerUser.fileName : undefined),
 			});
 		} catch (error) {
 			console.error('Error:', error);

@@ -21,12 +21,13 @@ export class TrafficUtils {
 		console.log(`🔗 准备获取clash内容，订阅URL: ${this.clashSubUrl}`);
 
 		const clashContent: ClashContent | null = await this.fetchFromKV();
-		if (clashContent) {
+		const cacheAvailable: boolean = clashContent != null && !this.checkExpire(clashContent);
+		if (cacheAvailable) {
 			console.log('✅ 从KV缓存中获取到clash内容');
-			return { subInfo: clashContent.subInfo, content: clashContent.content };
+			return { subInfo: clashContent!.subInfo, content: clashContent!.content };
 		}
 
-		console.log('📡 KV缓存为空，开始从原始地址获取clash内容');
+		console.log('📡 开始从原始地址获取clash内容, 是否有缓存: ', clashContent ? '有' : '无');
 
 		let responseClash: Response | null = null;
 		try {
@@ -39,6 +40,10 @@ export class TrafficUtils {
 			console.log(`📈 Fetch响应状态: ${responseClash.status} ${responseClash.statusText}`);
 
 			if (!responseClash.ok) {
+				if (clashContent != null) {
+					console.log('✅ 网络获取代理失败，直接返回KV缓存的clash内容');
+					return { subInfo: clashContent!.subInfo, content: clashContent!.content };
+				}
 				const errorText = await responseClash.text().catch(() => '无法读取错误响应');
 				console.error(`❌ Fetch失败: ${responseClash.status} ${responseClash.statusText}, 响应内容: ${errorText}`);
 				throw Error(`Failed to fetch subscription content ${this.clashSubUrl}, status: ${responseClash.status}, text: ${errorText}`);
@@ -50,10 +55,10 @@ export class TrafficUtils {
 			console.log(`✅ 成功获取clash内容，subInfo: ${subInfo}, 内容长度: ${content.length}`);
 
 			// 异步保存到KV，不等待完成以减少响应时间
-			this.saveToKV({ subInfo, content }).catch(error => {
+			this.saveToKV({ subInfo, content }).catch((error) => {
 				console.warn('保存到KV失败:', error);
 			});
-			
+
 			return { subInfo, content };
 		} catch (error) {
 			console.error(`❌ 获取clash内容时发生错误:`, error);
@@ -77,7 +82,10 @@ export class TrafficUtils {
 		await env?.USERS_KV.put(KvKey(this.clashSubUrl), JSON.stringify(clashContent));
 	}
 
-	async fetchFromKV(expireCheck: boolean = true): Promise<ClashContent | null> {
+	/// 从KV中获取配置
+	/// @param expireCheck 是否检查过期时间
+	/// @returns 订阅配置
+	async fetchFromKV(): Promise<ClashContent | null> {
 		const env = GlobalConfig.env;
 		const clashContentStr = await env?.USERS_KV.get(KvKey(this.clashSubUrl));
 		if (clashContentStr == null) {
@@ -86,16 +94,14 @@ export class TrafficUtils {
 		}
 
 		const clashContent = JSON.parse(clashContentStr) as ClashContent;
+		return clashContent;
+	}
+
+	/// 检查 ClashContent 是否有过期
+	private checkExpire(clashContent: ClashContent): boolean {
 		// 将字符串转换回 Date 对象
 		clashContent.fetchTime = new Date(clashContent.fetchTime);
-
-		if (expireCheck && clashContent.fetchTime.getTime() + cacheAvailableTime < Date.now()) {
-			console.log('🔑 从KV中获取到clash内容 已过期');
-			return null;
-		}
-		const formatTime = (clashContent.fetchTime.getTime() + cacheAvailableTime - Date.now()) / 1000;
-		console.log(`🔑 从KV中获取到clash内容 有效时间：${formatTime}s`);
-		return clashContent;
+		return clashContent.fetchTime.getTime() + cacheAvailableTime < Date.now();
 	}
 
 	/// 读取远程内容（带重试机制）
@@ -113,9 +119,9 @@ export class TrafficUtils {
 				response = await fetch(url, {
 					headers: {
 						'User-Agent': 'clash.meta',
-						'Accept': 'text/plain, text/yaml, application/x-yaml, */*',
+						Accept: 'text/plain, text/yaml, application/x-yaml, */*',
 						'Accept-Encoding': 'gzip, deflate, br',
-						'Connection': 'keep-alive',
+						Connection: 'keep-alive',
 					},
 					signal: timeoutSignal,
 				});
@@ -130,7 +136,7 @@ export class TrafficUtils {
 					'cache-control': response.headers.get('cache-control'),
 					'last-modified': response.headers.get('last-modified'),
 					'cf-ray': response.headers.get('cf-ray'),
-					'server': response.headers.get('server')
+					server: response.headers.get('server'),
 				};
 				console.log(`📊 重要响应头:`, importantHeaders);
 
@@ -167,7 +173,9 @@ export class TrafficUtils {
 
 				// 最后一次尝试失败，抛出错误
 				console.error(`❌ 所有重试尝试均失败，URL: ${url}`);
-				throw new Error(`Failed to fetch rule content ${url} after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`);
+				throw new Error(
+					`Failed to fetch rule content ${url} after ${maxRetries} attempts: ${error instanceof Error ? error.message : String(error)}`
+				);
 			} finally {
 				// 确保响应流被正确释放
 				if (response && response.body) {
@@ -198,17 +206,19 @@ export class TrafficUtils {
 	private static shouldRetryError(error: any): boolean {
 		if (error instanceof Error) {
 			const errorMessage = error.message.toLowerCase();
-			return errorMessage.includes('fetch failed') ||
-				   errorMessage.includes('timeout') ||
-				   errorMessage.includes('network') ||
-				   errorMessage.includes('connection') ||
-				   errorMessage.includes('abort');
+			return (
+				errorMessage.includes('fetch failed') ||
+				errorMessage.includes('timeout') ||
+				errorMessage.includes('network') ||
+				errorMessage.includes('connection') ||
+				errorMessage.includes('abort')
+			);
 		}
 		return false;
 	}
 
 	// 睡眠函数
 	private static sleep(ms: number): Promise<void> {
-		return new Promise(resolve => setTimeout(resolve, ms));
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 }
