@@ -235,7 +235,7 @@ export class ProxyFetch {
 	 * 从源地址获取内容
 	 */
 	private async fetchFromSource(): Promise<ClashSubscription> {
-		logger.info({ url: this.clashSubUrl }, '从源地址获取');
+		logger.info({ url: this.clashSubUrl }, '开始从源地址获取');
 
 		// 尝试获取过期缓存，作为降级方案
 		const staleCache = await this.fetchFromKVInternal();

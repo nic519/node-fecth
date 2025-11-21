@@ -16,6 +16,7 @@ export class StrategyMultiSub {
 			clashContent: this.preMergeInfo.clashContent,
 			excludeRegex: this.userConfig.excludeRegex,
 		});
+		console.log(`✅ 成功处理主订阅，总计获得 ${mainProxyList.length} 个代理`);
 
 		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
@@ -40,23 +41,16 @@ export class StrategyMultiSub {
 							includeArea: sub.includeArea,
 							excludeRegex: this.userConfig.excludeRegex,
 						});
-
+						console.log(`✅ 成功处理追加订阅 ${sub.flag}，总计获得 ${appendProxyList.length} 个代理`);
 						return { proxyList: appendProxyList, subInfo, flag: sub.flag };
 					} catch (error) {
-						console.error(`❌ 获取追加订阅失败 ${sub.flag}:`, error);
-						// 返回空结果而不是抛出错误，允许其他订阅继续处理
+						console.error(`❌ 获取追加订阅 ${sub.flag} 失败:`, error);
 						return { proxyList: [], subInfo: '', flag: sub.flag };
 					}
 				});
 
-				const batchResults = await Promise.allSettled(batchPromises);
-
-				// 处理批次结果
-				for (const result of batchResults) {
-					if (result.status === 'fulfilled' && result.value.proxyList.length > 0) {
-						results.push(result.value);
-					}
-				}
+				const batchResults = await Promise.all(batchPromises);
+				results.push(...batchResults);
 
 				// 在批次之间短暂延迟，减少资源压力
 				if (i + MAX_CONCURRENT < appendSubList.length) {

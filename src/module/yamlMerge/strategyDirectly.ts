@@ -14,7 +14,6 @@ export class StrategyDirectly {
 		});
 
 		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
-
 		delete yamlObj['proxy-providers'];
 
 		// 2.添加proxy
