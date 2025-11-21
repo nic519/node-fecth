@@ -39,7 +39,6 @@ export class StrategyUtils {
 		excludeRegex?: string; // 排除匹配的
 	}): ClashProxy[] {
 		const { clashContent, flag, includeArea, excludeRegex } = options;
-		console.log(`includeArea: ${includeArea}, excludeRegex: ${excludeRegex}, flag: ${flag}`);
 
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']

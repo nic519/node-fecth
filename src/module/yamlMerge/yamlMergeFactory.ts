@@ -13,8 +13,19 @@ export class YamlMergeFactory {
 
 	// 公共方法：1.获取模板内容，2.获取clash订阅配置
 	async fetchPreMergeInfo(): Promise<PreMergeInfo> {
+		const templatePromise = this.fetchRuleContent();
+
+		const trafficUtils = new ProxyFetch(this.userConfig.subscribe);
+		const clashPromise = trafficUtils.fetchClashContent();
+
+		const [ruleContent, { subInfo, content: clashContent }] = await Promise.all([templatePromise, clashPromise]);
+
+		return { ruleContent, clashContent, subInfo };
+	}
+
+	// 获取模板内容（包含内部KV/外部URL判断）
+	private async fetchRuleContent(): Promise<string> {
 		let ruleContent: string;
-		// 1. 获取模板内容
 		// 智能判断：检测URL域名是否与worker域名相同，避免循环访问
 		if (this.shouldUseInternalTemplate(this.userConfig.ruleUrl)) {
 			// 如果是同域名，从本地KV获取模板内容
@@ -31,10 +42,7 @@ export class YamlMergeFactory {
 			ruleContent = await this.getTemplateFromKV(this.userConfig.ruleUrl);
 		}
 
-		// 2. 获取远端的代理信息
-		const trafficUtils = new ProxyFetch(this.userConfig.subscribe);
-		const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
-		return { ruleContent, clashContent, subInfo };
+		return ruleContent;
 	}
 
 	// 从本地KV获取模板内容
@@ -53,7 +61,7 @@ export class YamlMergeFactory {
 			}
 
 			console.log(`✅ 成功从KV获取模板 ${templateId}, 名称: ${template.name}`);
-			return template.content;
+			return template.content || '';
 		} catch (error) {
 			console.error(`❌ 从KV获取模板失败:`, error);
 			throw new Error(`无法获取模板 ${templateId}: ${error instanceof Error ? error.message : String(error)}`);
@@ -114,7 +122,7 @@ export class YamlMergeFactory {
 		}
 	}
 
-	// 直接合并，不把节点拉回来
+	// 单订阅模式
 	async fastStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
 		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
 		const yamlStrategy = new StrategyDirectly(baseInfo);
@@ -136,7 +144,7 @@ export class YamlMergeFactory {
 
 	// 多订阅模式
 	async multiSubStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
-		const baseInfo = await this.fetchPreMergeInfo();
+		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
 
 		const yamlStrategy = new StrategyMultiSub(baseInfo, this.userConfig);
 		return {

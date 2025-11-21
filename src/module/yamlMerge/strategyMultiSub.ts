@@ -15,6 +15,7 @@ export class StrategyMultiSub {
 		const mainProxyList: ClashProxy[] = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
 			excludeRegex: this.userConfig.excludeRegex,
+			flag: '🐙',
 		});
 		console.log(`✅ 成功处理主订阅，总计获得 ${mainProxyList.length} 个代理`);
 
