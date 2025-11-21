@@ -13,18 +13,9 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 /** Clash订阅内容缓存结构 */
 interface ClashContent {
-	/** 订阅信息（流量、过期时间等） */
 	subInfo: string;
-	/** Clash配置内容 */
 	content: string;
-	/** 获取时间 */
 	fetchTime: Date;
-}
-
-/** Clash订阅返回结构 */
-export interface ClashSubscription {
-	subInfo: string;
-	content: string;
 }
 
 // ==================== 工具函数 ====================
@@ -90,18 +81,19 @@ export class ProxyFetch {
 	 * 获取Clash订阅内容（优先使用缓存）
 	 * @returns 订阅信息和配置内容
 	 */
-	async fetchClashContent(): Promise<ClashSubscription> {
+	async fetchClashContent(): Promise<ClashContent> {
 		logger.info({ url: this.clashSubUrl }, '获取Clash订阅');
 
 		// 1. 尝试从缓存获取
-		const cached = await this.getCachedContent();
-		if (cached) {
-			logger.info('使用缓存数据');
+		const cached: ClashContent | null = await this.fetchFromKVInternal();
+
+		if (cached && !this.isExpired(cached)) {
+			logger.info({ url: this.clashSubUrl }, '使用有效期的缓存数据');
 			return cached;
 		}
 
 		// 2. 从源地址获取
-		return await this.fetchFromSource();
+		return await this.fetchFromSource(cached);
 	}
 
 	/**
@@ -113,27 +105,6 @@ export class ProxyFetch {
 	}
 
 	// ==================== 私有方法 - 缓存管理 ====================
-
-	/**
-	 * 从KV缓存获取有效内容
-	 */
-	private async getCachedContent(): Promise<ClashSubscription | null> {
-		const cached = await this.fetchFromKVInternal();
-		if (!cached) {
-			return null;
-		}
-
-		// 检查是否过期
-		if (this.isExpired(cached)) {
-			logger.debug('缓存已过期');
-			return null;
-		}
-
-		return {
-			subInfo: cached.subInfo,
-			content: cached.content,
-		};
-	}
 
 	/**
 	 * 从KV读取缓存数据（内部方法）
@@ -165,7 +136,7 @@ export class ProxyFetch {
 	/**
 	 * 保存内容到KV缓存
 	 */
-	private async saveToKV(data: ClashSubscription): Promise<boolean> {
+	private async saveToKV(data: ClashContent): Promise<boolean> {
 		const env = GlobalConfig.env;
 		if (!env?.USERS_KV) {
 			logger.error('KV环境未初始化');
@@ -173,11 +144,7 @@ export class ProxyFetch {
 		}
 
 		const key = generateKvKey(this.clashSubUrl);
-		const cacheData: ClashContent = {
-			...data,
-			fetchTime: new Date(),
-		};
-		const jsonString = JSON.stringify(cacheData);
+		const jsonString = JSON.stringify(data);
 
 		// 检查大小限制
 		const { bytes, mb } = calculateSize(jsonString);
@@ -233,12 +200,10 @@ export class ProxyFetch {
 
 	/**
 	 * 从源地址获取内容
+	 * [cacheData] 缓存数据，如果不为空，则在网络请求失败时，会作为降级返回
 	 */
-	private async fetchFromSource(): Promise<ClashSubscription> {
+	private async fetchFromSource(cacheData: ClashContent | null): Promise<ClashContent> {
 		logger.info({ url: this.clashSubUrl }, '开始从源地址获取');
-
-		// 尝试获取过期缓存，作为降级方案
-		const staleCache = await this.fetchFromKVInternal();
 
 		try {
 			const response = await fetch(this.clashSubUrl, {
@@ -246,8 +211,8 @@ export class ProxyFetch {
 			});
 
 			if (!response.ok) {
-				// 如果有过期缓存，返回过期缓存
-				if (staleCache) {
+				// 如果有过期缓存，返回过期缓存// 尝试获取过期缓存，作为降级方案
+				if (cacheData) {
 					logger.warn(
 						{
 							status: response.status,
@@ -255,7 +220,7 @@ export class ProxyFetch {
 						},
 						'源地址获取失败，使用过期缓存'
 					);
-					return { subInfo: staleCache.subInfo, content: staleCache.content };
+					return cacheData;
 				}
 				throw new Error(`获取失败 [${response.status}]`);
 			}
@@ -267,20 +232,24 @@ export class ProxyFetch {
 			logger.info({ size: `${mb}MB`, subInfo }, '从源地址获取成功');
 
 			// 同步保存到缓存（在 Workers 中必须等待，否则响应返回后操作会被中断）
-			const saveSuccess = await this.saveToKV({ subInfo, content });
+			const fetchTime = new Date();
+			const saveSuccess = await this.saveToKV({ subInfo, content, fetchTime });
 			if (!saveSuccess) {
 				logger.warn('缓存保存失败，但不影响当前响应');
 			}
 
-			return { subInfo, content };
+			return { subInfo, content, fetchTime };
 		} catch (error) {
 			logger.error(
 				{
 					error: error instanceof Error ? error.message : String(error),
 					url: this.clashSubUrl,
 				},
-				'从源地址获取失败'
+				'从源地址获取失败 使用缓存=' + (cacheData ? '是' : '否')
 			);
+			if (cacheData) {
+				return cacheData;
+			}
 			throw error;
 		}
 	}

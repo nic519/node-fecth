@@ -30,6 +30,10 @@ export class APIRegistry {
 				const { APIAdmin } = await import('@/routes/modules/api.admin');
 				return new APIAdmin();
 			},
+			adminTemplate: async () => {
+				const { APIAdminTemplate } = await import('@/routes/modules/api.admin-template');
+				return new APIAdminTemplate();
+			},
 			storage: async () => {
 				const { APIStorage } = await import('@/routes/modules/api.kv-storage');
 				return new APIStorage();
