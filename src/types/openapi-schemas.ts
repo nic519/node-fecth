@@ -112,14 +112,9 @@ export const ConfigTemplateSchema = z.object({
 	id: z.union([z.number(), z.string()]), // 支持数字或字符串ID
 	name: z.string(),
 	description: z.string(),
-	type: z.enum(['clash', 'v2ray', 'shadowsocks']),
-	lastModified: z.string(),
-	isActive: z.boolean(),
-	content: z.string().optional(),
-	template: UserConfigSchema.optional(), // 用于后端模板应用
-	createdAt: z.string().optional(),
-	updatedAt: z.string().optional(),
-	isDefault: z.boolean().optional(),
+	content: z.string(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
 
 // =============================================================================
@@ -234,7 +229,6 @@ export const UpdateUserConfigRequestSchema = z
 export const CreateConfigTemplateRequestSchema = z.object({
 	name: z.string().min(1, '模板名称不能为空'),
 	description: z.string(),
-	type: z.enum(['clash', 'v2ray', 'shadowsocks']),
 	content: z.string().min(1, '模板内容不能为空'),
 });
 

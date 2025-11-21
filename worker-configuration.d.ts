@@ -3,6 +3,7 @@
 // Runtime types generated with workerd@1.20250712.0 2025-02-14 nodejs_compat
 declare namespace Cloudflare {
 	interface Env {
+		DB: D1Database;
 		KV_BINDING: KVNamespace;
 		USERS_KV: KVNamespace;
 		SUPER_ADMIN_TOKEN: '123';

@@ -256,12 +256,11 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					name: selectedTemplate.name,
-					description: selectedTemplate.description || '配置模板',
-					type: selectedTemplate.type,
-					content: selectedTemplate.configContent,
-				}),
+			body: JSON.stringify({
+				name: selectedTemplate.name,
+				description: selectedTemplate.description || '配置模板',
+				content: selectedTemplate.configContent,
+			}),
 			});
 
 			if (!response.ok) {
@@ -270,11 +269,10 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 
 			const result = await response.json();
 			if (result.code === 0) {
-				const updatedTemplate = {
-					...selectedTemplate,
-					...result.data,
-					lastModified: new Date().toISOString().split('T')[0],
-				};
+			const updatedTemplate = {
+				...selectedTemplate,
+				...result.data,
+			};
 
 				setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
 				setIsEditing(false);

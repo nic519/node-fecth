@@ -48,7 +48,7 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, he
 										<span className="font-medium text-gray-900 truncate">{template.name}</span>
 										{template.isSelected && <CheckCircleIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />}
 									</div>
-									<div className="text-xs text-gray-500">修改于: {template.lastModified}</div>
+									<div className="text-xs text-gray-500">修改于: {template.updatedAt.split('T')[0]}</div>
 								</div>
 								<div className="flex items-center gap-1">
 									<Button

@@ -11,9 +11,7 @@ export class TrafficUtilsSimpleTest {
 	 * 测试正常场景下的 fetchClashContent
 	 */
 	async testNormalFetch(): Promise<void> {
-		const trafficUtils = new ProxyFetch(
-			'https://moes.lnaspiring.com/Moe233-Subs/qwbm/api/v1/client/subscribe?token=721caa13f2fcc08ab2d92d5abe593105'
-		);
+		const trafficUtils = new ProxyFetch('https://moes.lnaspiring.com/M');
 
 		try {
 			const result = await trafficUtils.fetchClashContent();

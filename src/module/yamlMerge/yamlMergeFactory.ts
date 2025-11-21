@@ -30,7 +30,7 @@ export class YamlMergeFactory {
 		if (this.shouldUseInternalTemplate(this.userConfig.ruleUrl)) {
 			// 如果是同域名，从本地KV获取模板内容
 			const templateId = this.extractTemplateIdFromUrl(this.userConfig.ruleUrl);
-			console.log(`🔄 检测到同域名访问，自动切换到内部KV获取模板: ${templateId}`);
+			console.log(`🔄 检测到同域名访问，自动切换到内部 D1 获取模板: ${templateId}`);
 			ruleContent = await this.getTemplateFromKV(templateId);
 		} else if (this.userConfig.ruleUrl.startsWith('http')) {
 			// 如果是外部URL，使用fetch获取内容
@@ -45,7 +45,7 @@ export class YamlMergeFactory {
 		return ruleContent;
 	}
 
-	// 从本地KV获取模板内容
+	// 从本地 D1 数据库获取模板内容
 	private async getTemplateFromKV(templateId: string): Promise<string> {
 		try {
 			const env = GlobalConfig.env;
@@ -60,10 +60,10 @@ export class YamlMergeFactory {
 				throw new Error(`模板 ${templateId} 不存在`);
 			}
 
-			console.log(`✅ 成功从KV获取模板 ${templateId}, 名称: ${template.name}`);
+			console.log(`✅ 成功从 D1 获取模板 ${templateId}, 名称: ${template.name}`);
 			return template.content || '';
 		} catch (error) {
-			console.error(`❌ 从KV获取模板失败:`, error);
+			console.error(`❌ 从 D1 获取模板失败:`, error);
 			throw new Error(`无法获取模板 ${templateId}: ${error instanceof Error ? error.message : String(error)}`);
 		}
 	}

@@ -10,7 +10,13 @@ directory = "public"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# KV 绑定
+# D1 数据库绑定
+[[d1_databases]]
+binding = "DB"
+database_name = "node-fetch-db"
+database_id = "7b3a5b77-a944-42e8-a822-614840ff97f9"
+
+# KV 绑定（将逐步迁移到 D1）
 [[kv_namespaces]]
 binding = "KV_BINDING"
 id = "52fa82d5a9c3438195385f592be41ef9"
