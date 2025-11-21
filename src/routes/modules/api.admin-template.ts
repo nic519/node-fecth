@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { BaseAPI } from '@/routes/modules/base/api.base';
@@ -9,21 +9,8 @@ import {
 	getConfigTemplatesRoute,
 	updateConfigTemplateRoute,
 } from '@/routes/openapi';
-import { ConfigTemplate, ResponseCodes } from '@/types/openapi-schemas';
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { eq } from 'drizzle-orm';
-
-/**
- * 数据库行转换为 API 格式
- */
-const toApiFormat = (row: Template): ConfigTemplate => ({
-	id: row.id,
-	name: row.name,
-	description: row.description,
-	content: row.content,
-	createdAt: row.createdAt,
-	updatedAt: row.updatedAt,
-});
 
 /**
  * 管理员模板功能路由模块
@@ -34,12 +21,12 @@ export class APIAdminTemplate extends BaseAPI {
 		// 📋 查询所有
 		app.openapi(getConfigTemplatesRoute, async (c) => {
 			try {
-				const db = getDb(c.env);
-				const result = await db.select().from(templates);
+				const crud = new BaseCRUD<Template>(c.env, templates);
+				const result = await crud.select();
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '获取模板成功',
-					data: { templates: result.map(toApiFormat) },
+					data: { templates: result },
 				});
 			} catch (error) {
 				return c.json(this.handleError(error, '获取模板列表'), 500) as any;
@@ -50,16 +37,13 @@ export class APIAdminTemplate extends BaseAPI {
 		app.openapi(createConfigTemplateRoute, async (c) => {
 			try {
 				const body = c.req.valid('json');
-				const db = getDb(c.env);
-				const now = new Date().toISOString();
-				const newTemplate = { id: Date.now().toString(), ...body, createdAt: now, updatedAt: now };
-
-				await db.insert(templates).values(newTemplate);
+				const crud = new BaseCRUD<Template>(c.env, templates);
+				const newTemplate = await crud.insert(body);
 
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '模板创建成功',
-					data: toApiFormat(newTemplate),
+					data: newTemplate,
 				});
 			} catch (error) {
 				return c.json(this.handleError(error, '创建模板'), 500) as any;
@@ -71,23 +55,19 @@ export class APIAdminTemplate extends BaseAPI {
 			try {
 				const id = c.req.param('templateId');
 				const body = c.req.valid('json');
-				const db = getDb(c.env);
+				const crud = new BaseCRUD<Template>(c.env, templates);
 
-				const [existing] = await db.select().from(templates).where(eq(templates.id, id)).limit(1);
-				if (!existing) return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404) as any;
-
-				const now = new Date().toISOString();
-				await db
-					.update(templates)
-					.set({ ...body, updatedAt: now })
-					.where(eq(templates.id, id));
+				const updated = await crud.update(id, body);
 
 				return c.json({
 					code: ResponseCodes.SUCCESS,
 					msg: '模板更新成功',
-					data: toApiFormat({ ...existing, ...body, updatedAt: now }),
+					data: updated,
 				});
 			} catch (error) {
+				if (error instanceof Error && error.message === '记录不存在') {
+					return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404) as any;
+				}
 				return c.json(this.handleError(error, '更新模板'), 500) as any;
 			}
 		});
@@ -96,12 +76,9 @@ export class APIAdminTemplate extends BaseAPI {
 		app.openapi(deleteConfigTemplateRoute, async (c) => {
 			try {
 				const id = c.req.param('templateId');
-				const db = getDb(c.env);
+				const crud = new BaseCRUD<Template>(c.env, templates);
 
-				const [existing] = await db.select().from(templates).where(eq(templates.id, id)).limit(1);
-				if (!existing) return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404) as any;
-
-				await db.delete(templates).where(eq(templates.id, id));
+				await crud.delete(id);
 
 				return c.json({
 					code: ResponseCodes.SUCCESS,
@@ -109,6 +86,9 @@ export class APIAdminTemplate extends BaseAPI {
 					data: { templateId: id },
 				});
 			} catch (error) {
+				if (error instanceof Error && error.message === '记录不存在') {
+					return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404) as any;
+				}
 				return c.json(this.handleError(error, '删除模板'), 500) as any;
 			}
 		});
@@ -118,9 +98,9 @@ export class APIAdminTemplate extends BaseAPI {
 			try {
 				const id = c.req.param('templateId');
 				const { uid } = c.req.valid('json');
-				const db = getDb(c.env);
+				const crud = new BaseCRUD<Template>(c.env, templates);
 
-				const [template] = await db.select().from(templates).where(eq(templates.id, id)).limit(1);
+				const template = await crud.selectById(id);
 				if (!template) return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404) as any;
 
 				const baseUrl = new URL(c.req.url).origin;
@@ -147,8 +127,8 @@ export class APIAdminTemplate extends BaseAPI {
 					return c.json({ code: ResponseCodes.UNAUTHORIZED, msg: '超级管理员令牌无效' }, 401);
 				}
 
-				const db = getDb(c.env);
-				const [template] = await db.select().from(templates).where(eq(templates.id, id)).limit(1);
+				const crud = new BaseCRUD<Template>(c.env, templates);
+				const template = await crud.selectById(id);
 				if (!template) return c.json({ code: ResponseCodes.NOT_FOUND, msg: '模板不存在' }, 404);
 
 				const baseUrl = new URL(c.req.url).origin;

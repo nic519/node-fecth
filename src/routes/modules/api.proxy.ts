@@ -1,4 +1,5 @@
-import { TemplateManager } from '@/module/templateManager/templateManager';
+import { BaseCRUD } from '@/db/base-crud';
+import { templates, type Template } from '@/db/schema';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { ClashHandler } from '@/routes/handler/clashHandler';
 import { BaseAPI } from '@/routes/modules/base/api.base';
@@ -88,8 +89,8 @@ export class APIProxy extends BaseAPI {
 			const performanceTracker = createPerformanceTracker(this.logger, '模板预览', { templateId, download, filename });
 
 			try {
-				const templateManager = new TemplateManager(c.env);
-				const template = await templateManager.getTemplateById(templateId);
+				const crud = new BaseCRUD<Template>(c.env, templates);
+				const template = await crud.selectById(templateId);
 
 				if (!template) {
 					performanceTracker.end({ success: false, reason: 'template_not_found' });

@@ -1,4 +1,4 @@
-import { AdminOperation, ConfigTemplate, SuperAdminStats } from '@/module/userManager/types/supper-admin.types';
+import { AdminOperation, SuperAdminStats } from '@/module/userManager/types/supper-admin.types';
 import { UserConfig, UserSummary } from '@/types/openapi-schemas';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserManager } from './userManager';
@@ -245,7 +245,6 @@ export class SuperAdminManager {
 		return { success, failed };
 	}
 
-
 	/**
 	 * 记录管理员操作日志
 	 */
@@ -402,5 +401,4 @@ export class SuperAdminManager {
 			return undefined;
 		}
 	}
-
 }

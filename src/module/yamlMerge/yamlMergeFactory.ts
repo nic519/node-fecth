@@ -1,5 +1,6 @@
 import { GlobalConfig } from '@/config/global-config';
-import { TemplateManager } from '@/module/templateManager/templateManager';
+import { BaseCRUD } from '@/db/base-crud';
+import { templates, type Template } from '@/db/schema';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { PreMergeInfo } from '@/module/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/module/yamlMerge/strategyDirectly';
@@ -53,8 +54,8 @@ export class YamlMergeFactory {
 				throw new Error('环境变量未初始化');
 			}
 
-			const templateManager = new TemplateManager(env);
-			const template = await templateManager.getTemplateById(templateId);
+			const crud = new BaseCRUD<Template>(env, templates);
+			const template = await crud.selectById(templateId);
 
 			if (!template) {
 				throw new Error(`模板 ${templateId} 不存在`);
