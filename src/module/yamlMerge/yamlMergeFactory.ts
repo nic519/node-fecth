@@ -144,13 +144,10 @@ export class YamlMergeFactory {
 
 	// 多订阅模式
 	async multiSubStrategy(): Promise<{ yamlContent: string; subInfo: string }> {
-		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
-
-		const yamlStrategy = new StrategyMultiSub(baseInfo, this.userConfig);
-		return {
-			yamlContent: await yamlStrategy.generate(),
-			subInfo: baseInfo.subInfo,
-		};
+		const ruleContent = await this.fetchRuleContent();
+		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig);
+		const { yamlContent, subInfo } = await yamlStrategy.generate();
+		return { yamlContent, subInfo };
 	}
 
 	// 生成yaml内容

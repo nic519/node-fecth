@@ -7,21 +7,28 @@ import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
-	constructor(private preMergeInfo: PreMergeInfo, private userConfig: InnerUser) {}
+	constructor(private ruleContent: string, private userConfig: InnerUser) {}
 
 	/// 取出所有proxy
-	private async getProxyList(): Promise<ClashProxy[]> {
-		// 获取主订阅的clash内容
-		const mainProxyList: ClashProxy[] = StrategyUtils.getProxyList({
-			clashContent: this.preMergeInfo.clashContent,
-			excludeRegex: this.userConfig.excludeRegex,
-			flag: '🐙',
-		});
-		console.log(`✅ 成功处理主订阅，总计获得 ${mainProxyList.length} 个代理`);
+	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
+		const allProxyList: ClashProxy[] = [];
+		/// 为了兼容回去而使用的
+		let preMergeInfo: PreMergeInfo = {
+			ruleContent: this.ruleContent,
+			clashContent: '',
+			subInfo: '',
+		};
 
 		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
+
 		if (appendSubList && appendSubList.length > 0) {
+			// 把主订阅链接，拼接在这里一起获取
+			appendSubList.push({
+				subscribe: this.userConfig.subscribe,
+				flag: '🐙',
+			});
+
 			console.log(`📡 开始处理 ${appendSubList.length} 个追加订阅`);
 
 			// 限制并发请求数量，避免资源过载
@@ -35,6 +42,8 @@ export class StrategyMultiSub {
 					try {
 						const trafficUtils = new ProxyFetch(sub.subscribe);
 						const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
+
+						preMergeInfo.clashContent = clashContent;
 
 						const appendProxyList = StrategyUtils.getProxyList({
 							clashContent,
@@ -71,42 +80,43 @@ export class StrategyMultiSub {
 			for (const { proxyList, subInfo, flag } of results) {
 				// 添加流量信息proxy
 				if (subInfo) {
-					mainProxyList.push({
+					allProxyList.push({
 						name: `${flag}-${StrategyUtils.formatSubInfo(subInfo)}`,
 						server: 'www.baidu.com',
 						port: 1443,
 						type: 'http',
 					});
+					preMergeInfo.subInfo = subInfo;
 				}
-				mainProxyList.push(...proxyList);
+				allProxyList.push(...proxyList);
 			}
 
-			console.log(`✅ 成功处理追加订阅，总计获得 ${mainProxyList.length} 个代理`);
+			console.log(`✅ 成功处理追加订阅，总计获得 ${allProxyList.length} 个代理`);
 		}
 
-		return mainProxyList;
+		return { allProxyList, preMergeInfo };
 	}
 
 	/// 取出所有proxy-provider
-	async generate(): Promise<string> {
+	async generate(): Promise<{ yamlContent: string; subInfo: string }> {
 		// 1.删除proxy-providers
-		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
+		const yamlObj = yamlParse(this.ruleContent);
 		delete yamlObj['proxy-providers'];
 
 		// 2.添加proxy
-		const proxyList = await this.getProxyList();
+		const { allProxyList, preMergeInfo } = await this.getProxyList();
 		if (yamlObj['proxies']) {
-			yamlObj['proxies'].push(...proxyList);
+			yamlObj['proxies'].push(...allProxyList);
 		} else {
-			yamlObj['proxies'] = proxyList;
+			yamlObj['proxies'] = allProxyList;
 		}
 
 		// 3. 检查是否支持多出口模式
 		if (this.userConfig.multiPortMode) {
-			const strategyMultiPort = new StrategyMultiPort(this.preMergeInfo, this.userConfig);
+			const strategyMultiPort = new StrategyMultiPort(preMergeInfo, this.userConfig);
 			yamlObj['listeners'] = strategyMultiPort.createListeners(yamlObj['proxies']);
 		}
 
-		return yamlStringify(yamlObj);
+		return { yamlContent: yamlStringify(yamlObj), subInfo: preMergeInfo.subInfo };
 	}
 }
