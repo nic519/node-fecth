@@ -42,6 +42,14 @@ export class StrategyMultiSub {
 							excludeRegex: this.userConfig.excludeRegex,
 						});
 						console.log(`✅ 成功处理追加订阅 ${sub.flag}，总计获得 ${appendProxyList.length} 个代理`);
+						if (appendProxyList.length === 0) {
+							console.log(
+								`❌ 追加订阅 ${sub.flag} 没有获取到代理, clashContent=${clashContent.length}, subInfo=${subInfo}, ${clashContent.substring(
+									0,
+									500
+								)}`
+							);
+						}
 						return { proxyList: appendProxyList, subInfo, flag: sub.flag };
 					} catch (error) {
 						console.error(`❌ 获取追加订阅 ${sub.flag} 失败:`, error);
@@ -63,7 +71,7 @@ export class StrategyMultiSub {
 				// 添加流量信息proxy
 				if (subInfo) {
 					mainProxyList.push({
-						name: `${StrategyUtils.formatSubInfo(subInfo)}-${flag}`,
+						name: `${flag}-${StrategyUtils.formatSubInfo(subInfo)}`,
 						server: 'www.baidu.com',
 						port: 1443,
 						type: 'http',

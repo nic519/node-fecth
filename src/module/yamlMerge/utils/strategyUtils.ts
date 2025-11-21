@@ -1,7 +1,7 @@
-import { ClashProxy, ProxyAreaInfo, SubInfo } from '@/types/clash.types';
-import { AreaCode } from '@/types/openapi-schemas';
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ProxyAreaObjects } from '@/config/proxy-area.config';
+import { ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
+import { AreaCode } from '@/types/openapi-schemas';
+import { parse as yamlParse } from 'yaml';
 
 export class StrategyUtils {
 	/// 根据代理名称，获取代理所属的地区信息
@@ -39,6 +39,8 @@ export class StrategyUtils {
 		excludeRegex?: string; // 排除匹配的
 	}): ClashProxy[] {
 		const { clashContent, flag, includeArea, excludeRegex } = options;
+		console.log(`includeArea: ${includeArea}, excludeRegex: ${excludeRegex}, flag: ${flag}`);
+
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']
 			.filter((proxy: ClashProxy) => {
@@ -47,7 +49,7 @@ export class StrategyUtils {
 					return false;
 				}
 				// 检查地区包含
-				if (includeArea) {
+				if (includeArea && includeArea.length > 0) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
 					return proxyArea && includeArea.includes(proxyArea.code);
 				}
@@ -55,7 +57,7 @@ export class StrategyUtils {
 			})
 			.map((proxy: ClashProxy) => {
 				if (flag) {
-					proxy.name = `${proxy.name}-${flag}`;
+					proxy.name = `${flag}-${proxy.name}`;
 				}
 				return proxy;
 			});
