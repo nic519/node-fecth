@@ -30,3 +30,32 @@ export const templates = sqliteTable('templates', {
  */
 export type Template = typeof templates.$inferSelect;
 export type NewTemplate = typeof templates.$inferInsert;
+
+/**
+ * 用户配置表
+ * 存储用户的订阅配置和访问令牌等信息
+ */
+export const users = sqliteTable('users', {
+	// 主键：用户ID
+	id: text('id').primaryKey(),
+
+	// 用户配置（JSON格式）
+	config: text('config').notNull(), // 存储 JSON 字符串
+
+	// 访问令牌（从 config 中提取，用于快速查询）
+	accessToken: text('access_token').notNull(),
+
+	// 时间戳
+	createdAt: text('created_at')
+		.notNull()
+		.default(sql`(datetime('now'))`),
+	updatedAt: text('updated_at')
+		.notNull()
+		.default(sql`(datetime('now'))`),
+});
+
+/**
+ * 类型导出：用于 TypeScript 类型推导
+ */
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;

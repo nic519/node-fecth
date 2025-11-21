@@ -8,6 +8,13 @@
       "when": 1763707473142,
       "tag": "0000_smooth_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1763717304620,
+      "tag": "0001_furry_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

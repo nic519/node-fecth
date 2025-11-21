@@ -1,4 +1,5 @@
-import { ResponseCodes, BaseResponseSchema, SuccessResponseSchema, ErrorResponseSchema } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/routes/modules/base/schema.base';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 /**
  * 统一响应工具类
@@ -16,18 +17,15 @@ export class ResponseUtils {
 			data,
 		};
 
-		return new Response(
-			JSON.stringify(responseData),
-			{
-				status: 200,
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-				},
-			}
-		);
+		return new Response(JSON.stringify(responseData), {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+			},
+		});
 	}
 
 	/**
@@ -41,30 +39,21 @@ export class ResponseUtils {
 		};
 
 		const statusCode = code >= 400 ? code : 500;
-		return new Response(
-			JSON.stringify(responseData),
-			{
-				status: statusCode,
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-					'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-				},
-			}
-		);
+		return new Response(JSON.stringify(responseData), {
+			status: statusCode,
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+			},
+		});
 	}
 
 	/**
 	 * 通用JSON响应创建器
 	 */
-	static json<T = any>(
-		c: any,
-		data: T,
-		msg: string,
-		code: number = ResponseCodes.SUCCESS,
-		statusCode: number = 200
-	): Response {
+	static json<T = any>(c: any, data: T, msg: string, code: number = ResponseCodes.SUCCESS, statusCode: number = 200): Response {
 		const responseData = {
 			code,
 			msg,
@@ -99,14 +88,14 @@ export class ResponseUtils {
 	 * 基于 openapi-schemas.ts 中的 SuccessResponseSchema
 	 */
 	static isSuccessResponse(response: any): response is { code: 0; msg: string; data: any } {
-		return SuccessResponseSchema.safeParse(response).success;
+		return BaseResponseSchema.safeParse(response).success;
 	}
 
 	/**
-	 * 类型守卫：检查是否为错误响应  
+	 * 类型守卫：检查是否为错误响应
 	 * 基于 openapi-schemas.ts 中的 ErrorResponseSchema
 	 */
 	static isErrorResponse(response: any): response is { code: number; msg: string; data: any } {
-		return ErrorResponseSchema.safeParse(response).success;
+		return BaseResponseSchema.safeParse(response).success;
 	}
-} 
+}

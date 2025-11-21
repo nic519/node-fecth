@@ -4,49 +4,41 @@
 
 // 从后端核心类型定义导入所有类型
 export type {
-  // 基础类型
-  AreaCode,
-  SubConfig,
-  UserConfig,
-  UserConfigMeta,
-  ConfigResponse,
-  
-  // 管理员相关类型
-  AdminStats,
-  TrafficInfo,
-  UserSummary,
-  
-  // 系统监控类型
-  SystemStats,
-  SystemInfo,
-  ServiceStatus,
-  SystemLog,
-  
-  // 配置模板类型
-  ConfigTemplate,
-  
-  // API响应类型
-  BaseResponse,
-  ErrorResponse as ApiError,
-  SuccessResponse,
-  UserDetailResponse,
-  UsersListResponse,
-  AdminStatsResponse,
-  ConfigTemplatesResponse,
-  AdminLogsResponse,
-  RefreshTrafficResponse,
-  CreateTemplateResponse,
-  ResponseCodes,
-  
-  // 请求类型
-  CreateUserRequest,
-  UpdateUserConfigRequest,
-  CreateConfigTemplateRequest
+	AdminLogsResponse,
+	// 管理员相关类型
+	AdminStats,
+	AdminStatsResponse,
+	// 基础类型
+	AreaCode,
+	// API响应类型
+	BaseResponse,
+	ConfigResponse,
+	// 请求类型
+	RefreshTrafficResponse,
+	ResponseCodes,
+	ServiceStatus,
+	SubConfig,
+	SystemInfo,
+	SystemLog,
+	// 系统监控类型
+	SystemStats,
+	TrafficInfo,
+	UserConfig,
+	UserConfigMeta,
+	UsersListResponse,
+	UserSummary,
 } from '../../../src/types/openapi-schemas';
+
+export type {
+	IScTemplateModel as ConfigTemplate,
+	IScTemplateListResp as ConfigTemplatesResponse,
+	IScTemplateCreateReq as CreateConfigTemplateRequest,
+	IScTemplateCreateResp as CreateTemplateResponse,
+} from '../../../src/routes/modules/template/schema.template';
 
 // =============================================================================
 // 前端特定的工具类型（如有需要）
 // =============================================================================
 
 // 如果需要前端特定的扩展类型，可以在这里添加
-// 例如：前端表单状态、UI状态等 
+// 例如：前端表单状态、UI状态等

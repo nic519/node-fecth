@@ -1,6 +1,6 @@
-import { BaseResponseSchema } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/routes/modules/base/schema.base';
+import { MyRouter } from '@/routes/openapi/common';
 import { createRoute, z } from '@hono/zod-openapi';
-import { MyRouter } from './common';
 
 // =============================================================================
 // 订阅路由

@@ -2,7 +2,11 @@
 	"compilerOptions": {
 		"target": "ES2020",
 		"useDefineForClassFields": true,
-		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"lib": [
+			"ES2020",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"module": "ESNext",
 		"skipLibCheck": true,
 		"moduleResolution": "bundler",
@@ -18,15 +22,37 @@
 		"noFallthroughCasesInSwitch": true,
 		"baseUrl": "./src",
 		"paths": {
-			"@/*": ["./*"],
-			"@/components/*": ["./components/*"],
-			"@/pages/*": ["./pages/*"],
-			"@/utils/*": ["./utils/*"],
-			"@/types/*": ["./types/*"],
-			"@/api/*": ["./api/*"],
-			"@/hooks/*": ["./hooks/*"]
+			"@/*": [
+				"./*",
+				"../../src/*"
+			],
+			"@/components/*": [
+				"./components/*"
+			],
+			"@/pages/*": [
+				"./pages/*"
+			],
+			"@/utils/*": [
+				"./utils/*"
+			],
+			"@/types/*": [
+				"./types/*",
+				"../../src/types/*"
+			],
+			"@/api/*": [
+				"./api/*"
+			],
+			"@/hooks/*": [
+				"./hooks/*"
+			]
 		}
 	},
-	"include": ["src"],
-	"references": [{ "path": "./tsconfig.node.json" }]
+	"include": [
+		"src"
+	],
+	"references": [
+		{
+			"path": "./tsconfig.node.json"
+		}
+	]
 }

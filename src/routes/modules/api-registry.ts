@@ -23,20 +23,16 @@ export class APIRegistry {
 				return new APIHealth();
 			},
 			user: async () => {
-				const { APIUser } = await import('@/routes/modules/api.user');
+				const { APIUser } = await import('@/routes/modules/user/api.user');
 				return new APIUser();
 			},
-			admin: async () => {
-				const { APIAdmin } = await import('@/routes/modules/api.admin');
-				return new APIAdmin();
+			userForAdmin: async () => {
+				const { APIUserForAdmin } = await import('@/routes/modules/user/api.user-for-admin');
+				return new APIUserForAdmin();
 			},
 			adminTemplate: async () => {
-				const { APIAdminTemplate } = await import('@/routes/modules/api.admin-template');
+				const { APIAdminTemplate } = await import('@/routes/modules/template/api.admin-template');
 				return new APIAdminTemplate();
-			},
-			storage: async () => {
-				const { APIStorage } = await import('@/routes/modules/api.kv-storage');
-				return new APIStorage();
 			},
 			subscription: async () => {
 				const { APIProxy } = await import('@/routes/modules/api.proxy');

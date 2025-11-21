@@ -9,13 +9,13 @@ export * from './common';
 export * from './health';
 
 // 导出用户配置路由
-export * from './user';
+export * from '../modules/user/method.user';
 
 // 导出订阅路由
-export * from './subscription';
+export * from '../modules/proxy/method.proxy';
 
-// 导出存储相关路由
-export * from './storage';
+// 导出管理员用户路由
+export * from '../modules/user/method.user-for-admin';
 
-// 导出管理员路由
-export * from './admin';
+// 导出管理员模板路由
+export * from '../modules/template/method.admin-template';

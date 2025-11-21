@@ -19,7 +19,7 @@ export { MiddlewareManager } from '@/routes/middleware';
 export { APIRegistry } from '@/routes/modules/api-registry';
 
 // === 路由模块 ===
-export { APIAdmin, APIHealth, APIProxy, APIStorage, APIUser } from '@/routes/modules';
+export { APIHealth, APIProxy, APIUser } from '@/routes/modules';
 export type { IAPI } from '@/routes/modules';
 
 // === OpenAPI 规范 ===

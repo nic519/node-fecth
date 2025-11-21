@@ -59,7 +59,7 @@ export class Router {
 		await this.apiRegistry.registerCoreModules(this.app);
 
 		// 预加载常用模块，提升用户体验
-		await this.apiRegistry.preloadModules(this.app, ['user', 'subscription', 'admin', 'adminTemplate']);
+		await this.apiRegistry.preloadModules(this.app, ['user', 'subscription', 'adminTemplate']);
 	}
 
 	/**

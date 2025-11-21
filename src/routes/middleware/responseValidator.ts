@@ -1,4 +1,5 @@
-import { BaseResponseSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { ResponseCodes } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/routes/modules/base/schema.base';
 import { Context, Next } from 'hono';
 import { GlobalConfig } from '../../config/global-config';
 
