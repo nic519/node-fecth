@@ -40,6 +40,8 @@ DB_USER = "{}"
 [dev]
 port = 8787
 local_protocol = "http"
+# 指定持久化目录，确保数据库文件位置固定
+persist_to = "./.wrangler"
 
 # 启用 workers.dev 子域名 (用于生产部署)
 workers_dev = true 

@@ -16,8 +16,7 @@
 		"test-traffic-utils": "tsx tests/traffic-utils.test.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:push:local": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio",
-		"db:migrate:remote": "wrangler d1 execute node-fetch-db --remote --file=./drizzle/0000_smooth_rafael_vega.sql"
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.4",

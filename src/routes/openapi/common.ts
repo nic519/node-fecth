@@ -1,5 +1,5 @@
-import { z } from '@hono/zod-openapi';
 import { ResponseCodes } from '@/types/openapi-schemas';
+import { z } from '@hono/zod-openapi';
 
 // =============================================================================
 // 路由路径常量定义
@@ -9,8 +9,8 @@ export const MyRouter = {
 	// === OpenAPI 标准路由 ===
 	health: '/api/health',
 	// 用户配置路由
-	userUpdate: '/api/config/user/update',
-	userDetail: '/api/config/user/detail',
+	userUpdate: '/api/user',
+	userDetail: '/api/user',
 	// 管理员路由
 	adminUserCreate: '/api/admin/user/create',
 	adminUserDelete: '/api/admin/user/delete',
@@ -22,7 +22,6 @@ export const MyRouter = {
 	// 订阅路由
 	subscription: '/api/x',
 } as const;
-
 
 // =============================================================================
 // 公共 Schema 定义

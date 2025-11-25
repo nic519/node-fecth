@@ -1,4 +1,7 @@
+import { getDb } from '@/db';
+import { users } from '@/db/schema';
 import { ConfigResponse, UserConfig, UserConfigMeta, UserConfigSchema } from '@/types/openapi-schemas';
+import { eq } from 'drizzle-orm';
 import { parse as yamlParse } from 'yaml';
 
 export class UserManager {
@@ -208,7 +211,7 @@ export class UserManager {
 	}
 
 	/**
-	 * 验证用户token并获取用户配置（支持KV存储）
+	 * 验证用户token并获取用户配置（仅从数据库获取）
 	 * @param uid 用户ID
 	 * @param accessToken 访问token
 	 * @returns 验证通过返回ConfigResponse，验证失败返回null
@@ -220,22 +223,40 @@ export class UserManager {
 		}
 
 		try {
-			const userConfigResponse = await this.getUserConfig(uid);
+			// 仅从数据库获取用户配置
+			const db = getDb(this.env);
+			const userRecord = await db.select().from(users).where(eq(users.id, uid)).get();
 
-			if (!userConfigResponse) {
+			if (!userRecord) {
 				console.log(`🔒 验证失败: 用户配置不存在 - ${uid}`);
 				return null;
 			}
 
-			const { config } = userConfigResponse;
+			// 解析配置
+			const config = JSON.parse(userRecord.config) as UserConfig;
+			console.log('🔍 用户配置 (JSON):', config);
 
-			if (accessToken !== config.accessToken) {
+			if (accessToken !== userRecord.accessToken) {
 				console.log(`🔒 验证失败: token 无效 - ${uid}`);
 				return null;
 			}
 
-			console.log(`✅ 用户验证成功: ${uid} (来源: ${userConfigResponse.meta.source})`);
-			return userConfigResponse;
+			// 把json格式的配置，转成yaml配置
+			// const yamlConfig = yamlStringify(config);
+			// console.log('🔍 用户配置 (YAML):\n', yamlConfig);
+
+			// 构造返回结果
+			const response: ConfigResponse = {
+				config: config,
+				meta: {
+					lastModified: userRecord.updatedAt,
+					source: 'd1' as const,
+					uid: uid,
+				},
+			};
+
+			console.log(`✅ 用户验证成功: ${uid} (来源: d1)`);
+			return response;
 		} catch (error) {
 			console.error(`❌ 验证用户token失败: ${uid}`, error);
 			return null;

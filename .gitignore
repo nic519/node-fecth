@@ -174,3 +174,4 @@ dist
 .prettierrc
 .yarn/
 .vscode/local.db*
+*.db 

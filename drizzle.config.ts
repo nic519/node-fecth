@@ -2,7 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 
 /**
  * Drizzle Kit 配置 - 推荐方案
- * 
+ *
  * 最佳实践：
  * 1. 本地开发：使用独立的稳定 SQLite 文件
  * 2. 生产环境：使用 Cloudflare D1 HTTP API

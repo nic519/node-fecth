@@ -6,7 +6,7 @@ import { AuthUtils } from '@/utils/authUtils';
  * 从路径参数和查询参数中获取 uid 和 token 进行验证
  */
 export const userAuthHook = async (c: any): Promise<void | Response> => {
-	const uid = c.req.param('uid');
+	const uid = c.req.query('uid');
 	const token = c.req.query('token');
 
 	console.log(`🔐 用户验证钩子: uid=${uid}, token=${token ? '***' : 'undefined'}`);

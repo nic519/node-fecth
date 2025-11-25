@@ -49,8 +49,8 @@ src/routes/modules/user/
 
 **路由前缀**: `/api/config/user/`
 
-- `POST /api/config/user/update?uid={uid}&token={token}` - 更新自己的配置（upsert）
-- `GET /api/config/user/detail?uid={uid}&token={token}` - 获取自己的配置
+- `POST /api/users?uid={uid}&token={token}` - 更新自己的配置（upsert）
+- `GET /api/users?uid={uid}&token={token}` - 获取自己的配置
 
 **验证方式**:
 

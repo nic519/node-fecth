@@ -20,6 +20,7 @@ export class APIUser extends BaseAPI {
 			table: users,
 			resourceName: '用户',
 			idParamName: 'uid',
+			idParamSource: 'query', // 从查询参数获取 uid
 			transformer: userTransformer,
 			hooks: {
 				beforeEach: userAuthHook,
@@ -27,7 +28,7 @@ export class APIUser extends BaseAPI {
 		});
 
 		// 📋 注册标准 REST 路由
-		app.openapi(getUserRoute, crudHandlers.get); // GET /api/users/:uid?token=xxx
-		app.openapi(updateUserRoute, crudHandlers.update); // PUT /api/users/:uid?token=xxx
+		app.openapi(getUserRoute, crudHandlers.get); // GET /api/user?uid=xxx&token=xxx
+		app.openapi(updateUserRoute, crudHandlers.update); // PUT /api/user?uid=xxx&token=xxx
 	}
 }

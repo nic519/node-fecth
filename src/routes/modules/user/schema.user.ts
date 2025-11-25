@@ -1,4 +1,3 @@
-import { ResponseCodes } from '@/types/openapi-schemas';
 import { z } from 'zod';
 
 // =============================================================================
@@ -118,13 +117,12 @@ export const ScUserAdminUpdateReq = z.object({
 
 // 基础响应 Schema
 export const ScBaseResponse = z.object({
-	code: z.number(),
+	code: z.number().default(0),
 	msg: z.string(),
 });
 
 // 用户详情响应 Schema（普通用户获取自己的配置）
 export const ScUserDetailResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: z.object({
 		config: UserConfigSchema,
 		meta: UserConfigMetaSchema,
@@ -133,7 +131,6 @@ export const ScUserDetailResponse = ScBaseResponse.extend({
 
 // 用户更新响应 Schema
 export const ScUserUpdateResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: z.object({
 		uid: z.string(),
 		timestamp: z.string(),
@@ -143,7 +140,6 @@ export const ScUserUpdateResponse = ScBaseResponse.extend({
 
 // 管理员获取用户列表响应 Schema
 export const ScUserListResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: z.object({
 		users: z.array(ScUserApiModel),
 	}),
@@ -151,25 +147,21 @@ export const ScUserListResponse = ScBaseResponse.extend({
 
 // 管理员获取单个用户响应 Schema
 export const ScUserGetResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: ScUserApiModel,
 });
 
 // 管理员创建用户响应 Schema
 export const ScUserCreateResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: ScUserApiModel,
 });
 
 // 管理员更新用户响应 Schema
 export const ScUserAdminUpdateResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: ScUserApiModel,
 });
 
 // 管理员删除用户响应 Schema
 export const ScUserDeleteResponse = ScBaseResponse.extend({
-	code: z.literal(ResponseCodes.SUCCESS),
 	data: z.object({
 		uid: z.string(),
 	}),

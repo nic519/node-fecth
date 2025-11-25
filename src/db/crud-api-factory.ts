@@ -41,6 +41,8 @@ export interface CRUDConfig<T extends { id: string; createdAt: string; updatedAt
 	resourceName: string;
 	/** ID 参数名称，默认 'id' */
 	idParamName?: string;
+	/** ID 参数来源：'path' 从路径参数获取，'query' 从查询参数获取，默认 'path' */
+	idParamSource?: 'path' | 'query';
 	/** list 操作返回数据的 key（如 templates、users），默认为复数形式 */
 	dataKey?: string;
 	/** 自定义消息 */
@@ -94,15 +96,22 @@ export interface CRUDHandlers {
 export function createCRUDHandlers<T extends { id: string; createdAt: string; updatedAt: string }, TOutput = T>(
 	config: CRUDConfig<T, TOutput>
 ): CRUDHandlers {
-	const { table, resourceName, idParamName = 'id', dataKey, messages, transformer, hooks } = config;
+	const { table, resourceName, idParamName = 'id', idParamSource = 'path', dataKey, messages, transformer, hooks } = config;
+
+	/**
+	 * 获取 ID 参数（支持从路径参数或查询参数获取）
+	 */
+	const getId = (c: any): string => {
+		if (idParamSource === 'query') {
+			return c.req.query(idParamName);
+		}
+		return c.req.param(idParamName);
+	};
 
 	/**
 	 * 执行钩子，如果钩子返回 Response 则直接返回
 	 */
-	const runHook = async (
-		hookFn: ((c: any) => Promise<void | Response>) | undefined,
-		c: any
-	): Promise<Response | null> => {
+	const runHook = async (hookFn: ((c: any) => Promise<void | Response>) | undefined, c: any): Promise<Response | null> => {
 		if (!hookFn) return null;
 		const result = await hookFn(c);
 		return result instanceof Response ? result : null;
@@ -168,7 +177,7 @@ export function createCRUDHandlers<T extends { id: string; createdAt: string; up
 			const beforeGetResult = await runHook(hooks?.beforeGet, c);
 			if (beforeGetResult) return beforeGetResult;
 
-			const id = c.req.param(idParamName);
+			const id = getId(c);
 			const crud = new BaseCRUD<T>(c.env as Env, table);
 			const result = await crud.selectById(id);
 
@@ -253,7 +262,7 @@ export function createCRUDHandlers<T extends { id: string; createdAt: string; up
 			const beforeUpdateResult = await runHook(hooks?.beforeUpdate, c);
 			if (beforeUpdateResult) return beforeUpdateResult;
 
-			const id = c.req.param(idParamName);
+			const id = getId(c);
 			const body = c.req.valid('json');
 			const crud = new BaseCRUD<T>(c.env as Env, table);
 
@@ -304,7 +313,7 @@ export function createCRUDHandlers<T extends { id: string; createdAt: string; up
 			const beforeDeleteResult = await runHook(hooks?.beforeDelete, c);
 			if (beforeDeleteResult) return beforeDeleteResult;
 
-			const id = c.req.param(idParamName);
+			const id = getId(c);
 			const crud = new BaseCRUD<T>(c.env as Env, table);
 
 			await crud.delete(id);
