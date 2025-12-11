@@ -42,14 +42,8 @@ export class SuperAdminManager {
 			for (const uid of userList) {
 				const configResponse = await this.userManager.getUserConfig(uid);
 				if (configResponse) {
-					if (configResponse.meta.source === 'kv') {
-						kvConfigUsers++;
-					} else {
-						envConfigUsers++;
-					}
-
 					// 检查是否为今日新增用户
-					if (configResponse.meta.lastModified?.startsWith(today)) {
+					if (configResponse.updatedAt?.startsWith(today)) {
 						todayNewUsers++;
 					}
 
@@ -102,8 +96,7 @@ export class SuperAdminManager {
 					uid: uid,
 					token: configResponse?.config.accessToken || '',
 					hasConfig: !!configResponse,
-					source: configResponse?.meta.source || 'none',
-					lastModified: configResponse?.meta.lastModified || null,
+					lastModified: configResponse?.updatedAt || null,
 					isActive: !!(configResponse?.config.subscribe && configResponse?.config.accessToken),
 					subscribeUrl,
 					status: configResponse ? 'active' : 'inactive',

@@ -19,14 +19,18 @@
 // 导入原始函数（带下划线前缀）
 import {
   getApiHealth as _getApiHealth,
-  postApiConfigUserUpdate as _postApiConfigUserUpdate,
-  getApiConfigUserDetail as _getApiConfigUserDetail,
-  adminDeleteUser as _adminDeleteUser,
-  adminUserCreate as _adminUserCreate,
+  getUser as _getUser,
+  updateUser as _updateUser,
+  getApiX as _getApiX,
+  getApiAdminTemplates as _getApiAdminTemplates,
+  postApiAdminTemplates as _postApiAdminTemplates,
+  putApiAdminTemplatesByTemplateId as _putApiAdminTemplatesByTemplateId,
+  deleteApiAdminTemplatesByTemplateId as _deleteApiAdminTemplatesByTemplateId,
   adminGetUsers as _adminGetUsers,
-  getApiStorage as _getApiStorage,
-  getApiKv as _getApiKv,
-  getApiX as _getApiX
+  adminUserCreate as _adminUserCreate,
+  adminGetUser as _adminGetUser,
+  adminUserUpdate as _adminUserUpdate,
+  adminDeleteUser as _adminDeleteUser
 } from './api-client.g';
 
 // 解包装的 getApiHealth 函数
@@ -35,27 +39,45 @@ export const getApiHealth = async (...args: Parameters<typeof _getApiHealth>) =>
   return response.data;
 };
 
-// 解包装的 postApiConfigUserUpdate 函数
-export const postApiConfigUserUpdate = async (...args: Parameters<typeof _postApiConfigUserUpdate>) => {
-  const response = await _postApiConfigUserUpdate(...args);
+// 解包装的 getUser 函数
+export const getUser = async (...args: Parameters<typeof _getUser>) => {
+  const response = await _getUser(...args);
   return response.data;
 };
 
-// 解包装的 getApiConfigUserDetail 函数
-export const getApiConfigUserDetail = async (...args: Parameters<typeof _getApiConfigUserDetail>) => {
-  const response = await _getApiConfigUserDetail(...args);
+// 解包装的 updateUser 函数
+export const updateUser = async (...args: Parameters<typeof _updateUser>) => {
+  const response = await _updateUser(...args);
   return response.data;
 };
 
-// 解包装的 adminDeleteUser 函数
-export const adminDeleteUser = async (...args: Parameters<typeof _adminDeleteUser>) => {
-  const response = await _adminDeleteUser(...args);
+// 解包装的 getApiX 函数
+export const getApiX = async (...args: Parameters<typeof _getApiX>) => {
+  const response = await _getApiX(...args);
   return response.data;
 };
 
-// 解包装的 adminUserCreate 函数
-export const adminUserCreate = async (...args: Parameters<typeof _adminUserCreate>) => {
-  const response = await _adminUserCreate(...args);
+// 解包装的 getApiAdminTemplates 函数
+export const getApiAdminTemplates = async (...args: Parameters<typeof _getApiAdminTemplates>) => {
+  const response = await _getApiAdminTemplates(...args);
+  return response.data;
+};
+
+// 解包装的 postApiAdminTemplates 函数
+export const postApiAdminTemplates = async (...args: Parameters<typeof _postApiAdminTemplates>) => {
+  const response = await _postApiAdminTemplates(...args);
+  return response.data;
+};
+
+// 解包装的 putApiAdminTemplatesByTemplateId 函数
+export const putApiAdminTemplatesByTemplateId = async (...args: Parameters<typeof _putApiAdminTemplatesByTemplateId>) => {
+  const response = await _putApiAdminTemplatesByTemplateId(...args);
+  return response.data;
+};
+
+// 解包装的 deleteApiAdminTemplatesByTemplateId 函数
+export const deleteApiAdminTemplatesByTemplateId = async (...args: Parameters<typeof _deleteApiAdminTemplatesByTemplateId>) => {
+  const response = await _deleteApiAdminTemplatesByTemplateId(...args);
   return response.data;
 };
 
@@ -65,21 +87,27 @@ export const adminGetUsers = async (...args: Parameters<typeof _adminGetUsers>) 
   return response.data;
 };
 
-// 解包装的 getApiStorage 函数
-export const getApiStorage = async (...args: Parameters<typeof _getApiStorage>) => {
-  const response = await _getApiStorage(...args);
+// 解包装的 adminUserCreate 函数
+export const adminUserCreate = async (...args: Parameters<typeof _adminUserCreate>) => {
+  const response = await _adminUserCreate(...args);
   return response.data;
 };
 
-// 解包装的 getApiKv 函数
-export const getApiKv = async (...args: Parameters<typeof _getApiKv>) => {
-  const response = await _getApiKv(...args);
+// 解包装的 adminGetUser 函数
+export const adminGetUser = async (...args: Parameters<typeof _adminGetUser>) => {
+  const response = await _adminGetUser(...args);
   return response.data;
 };
 
-// 解包装的 getApiX 函数
-export const getApiX = async (...args: Parameters<typeof _getApiX>) => {
-  const response = await _getApiX(...args);
+// 解包装的 adminUserUpdate 函数
+export const adminUserUpdate = async (...args: Parameters<typeof _adminUserUpdate>) => {
+  const response = await _adminUserUpdate(...args);
+  return response.data;
+};
+
+// 解包装的 adminDeleteUser 函数
+export const adminDeleteUser = async (...args: Parameters<typeof _adminDeleteUser>) => {
+  const response = await _adminDeleteUser(...args);
   return response.data;
 };
 
@@ -90,37 +118,31 @@ export const modules = {
     getApiHealth
   },
 
-  // userConfig 模块 (2 个函数)
-  userConfig: {
-    postApiConfigUserUpdate,
-    getApiConfigUserDetail
-  },
-
-  // admin 模块 (3 个函数)
-  admin: {
-    adminDeleteUser,
-    adminUserCreate,
-    adminGetUsers
-  },
-
-  // storage 模块 (2 个函数)
-  storage: {
-    getApiStorage,
-    getApiKv
-  },
-
-  // general 模块 (1 个函数)
+  // general 模块 (3 个函数)
   general: {
+    getUser,
+    updateUser,
     getApiX
+  },
+
+  // admin 模块 (9 个函数)
+  admin: {
+    getApiAdminTemplates,
+    postApiAdminTemplates,
+    putApiAdminTemplatesByTemplateId,
+    deleteApiAdminTemplatesByTemplateId,
+    adminGetUsers,
+    adminUserCreate,
+    adminGetUser,
+    adminUserUpdate,
+    adminDeleteUser
   }
 };
 
 // 向后兼容的导出
 export const healthApi = modules.health;
-export const userConfigApi = modules.userConfig;
-export const adminApi = modules.admin;
-export const storageApi = modules.storage;
 export const generalApi = modules.general;
+export const adminApi = modules.admin;
 
 // 默认导出模块集合
 export default modules;

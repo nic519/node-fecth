@@ -50,7 +50,16 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 			}
 
 			// 从响应结构中提取用户列表数据
-			setUsers(response.data.users);
+			setUsers(
+				response.data.users.map((user) => ({
+					uid: user.id,
+					token: user.accessToken,
+					status: user.config.subscribe ? 'active' : 'inactive',
+					hasConfig: !!user.config.subscribe,
+					lastModified: user.updatedAt,
+					isActive: !!user.config.subscribe,
+				})),
+			);
 		} catch (err) {
 			console.error('获取用户列表失败:', err);
 			setError(err instanceof Error ? err.message : '加载用户数据失败');

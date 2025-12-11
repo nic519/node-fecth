@@ -6,6 +6,7 @@ import { Header } from './components/Header';
 import { HelpSidebar } from './components/HelpSidebar';
 import { useHelpDisplay } from './hooks/useHelpDisplay';
 import { useUserConfig } from './hooks/useUserConfig';
+import { configToYaml } from './utils/configUtils';
 
 export function UserConfigPage() {
 	// 设置页面标题
@@ -31,6 +32,14 @@ export function UserConfigPage() {
 	const userConfigState = useUserConfig({ uid, token });
 	const { showHelp, toggleHelp } = useHelpDisplay();
 
+	// 将配置对象转换为 YAML 字符串
+	let yamlString = '';
+	if (userConfigState.config?.config) {
+		yamlString = configToYaml(userConfigState.config.config);
+		console.log('配置 YAML:', yamlString);
+	}
+
+	console.log('aaa', JSON.stringify(userConfigState.config?.config, null, 2));
 	return (
 		<div className="min-h-screen">
 			{/* 头部 */}
@@ -69,7 +78,7 @@ export function UserConfigPage() {
 							<ConfigEditor
 								uid={uid}
 								token={token}
-								configContent={userConfigState.configContent}
+								configContent={yamlString}
 								validationErrors={userConfigState.validationErrors}
 								configPreview={userConfigState.configPreview}
 								onConfigContentChange={userConfigState.setConfigContent}

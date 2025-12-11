@@ -9,10 +9,8 @@ export interface UseUserFiltersReturn {
 	filteredUsers: UserSummary[];
 	searchTerm: string;
 	statusFilter: string;
-	sourceFilter: string;
 	setSearchTerm: (term: string) => void;
 	setStatusFilter: (filter: string) => void;
-	setSourceFilter: (filter: string) => void;
 }
 
 /**
@@ -22,12 +20,11 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 	const [filteredUsers, setFilteredUsers] = useState<UserSummary[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('');
-	const [sourceFilter, setSourceFilter] = useState('');
 
 	// 当用户列表或过滤条件变化时，重新过滤
 	useEffect(() => {
 		filterUsers();
-	}, [users, searchTerm, statusFilter, sourceFilter]);
+	}, [users, searchTerm, statusFilter]);
 
 	/**
 	 * 过滤用户列表
@@ -49,11 +46,6 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 			}
 		}
 
-		// 根据数据源过滤
-		if (sourceFilter) {
-			filtered = filtered.filter((user) => user.source === sourceFilter);
-		}
-
 		setFilteredUsers(filtered);
 	};
 
@@ -61,9 +53,7 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 		filteredUsers,
 		searchTerm,
 		statusFilter,
-		sourceFilter,
 		setSearchTerm,
 		setStatusFilter,
-		setSourceFilter,
 	};
 };

@@ -1,7 +1,7 @@
 import Loading from '@/components/Loading';
 import type { UserSummary } from '@/types/user-config';
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
-import { formatDateTime, formatTraffic, getSourceText, getTrafficBarColor } from '../utils/userUtils';
+import { formatDateTime, formatTraffic, getTrafficBarColor } from '../utils/userUtils';
 import { UserActions } from './UserActions';
 
 export interface UserTableProps {
@@ -50,11 +50,6 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									<TableCell>
 										<Chip size="sm" color={user.hasConfig ? 'success' : 'danger'} variant="flat">
 											{user.hasConfig ? '已配置' : '未配置'}
-										</Chip>
-									</TableCell>
-									<TableCell>
-										<Chip size="sm" color="secondary" variant="flat">
-											{getSourceText(user.source)}
 										</Chip>
 									</TableCell>
 									<TableCell>

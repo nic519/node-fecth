@@ -18,11 +18,9 @@ export interface UserFiltersProps {
 export function UserFilters({
 	searchTerm,
 	statusFilter,
-	sourceFilter,
 	loading,
 	onSearchTermChange,
 	onStatusFilterChange,
-	onSourceFilterChange,
 	onRefresh,
 	onAddUser,
 }: UserFiltersProps) {
@@ -40,29 +38,9 @@ export function UserFilters({
 					/>
 				</div>
 				<Select value={statusFilter} onChange={(e) => onStatusFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
-					<SelectItem key="">
-						所有状态
-					</SelectItem>
-					<SelectItem key="configured">
-						已配置
-					</SelectItem>
-					<SelectItem key="unconfigured">
-						未配置
-					</SelectItem>
-				</Select>
-				<Select value={sourceFilter} onChange={(e) => onSourceFilterChange(e.target.value)} variant="bordered" size="sm" className="w-40">
-					<SelectItem key="">
-						所有数据源
-					</SelectItem>
-					<SelectItem key="kv">
-						KV 存储
-					</SelectItem>
-					<SelectItem key="env">
-						环境变量
-					</SelectItem>
-					<SelectItem key="none">
-						无配置
-					</SelectItem>
+					<SelectItem key="">所有状态</SelectItem>
+					<SelectItem key="configured">已配置</SelectItem>
+					<SelectItem key="unconfigured">未配置</SelectItem>
 				</Select>
 				<Button onClick={onRefresh} disabled={loading} variant="solid" color="default" size="sm" isLoading={loading}>
 					刷新

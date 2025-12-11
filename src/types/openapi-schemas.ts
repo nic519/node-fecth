@@ -29,7 +29,6 @@ export const UserSummarySchema = z.object({
 	uid: z.string(),
 	token: z.string(),
 	hasConfig: z.boolean(),
-	source: z.enum(['kv', 'env', 'd1', 'none']), // 添加 'd1' 支持
 	lastModified: z.string().nullable(),
 	isActive: z.boolean(),
 	subscribeUrl: z.string().optional(),

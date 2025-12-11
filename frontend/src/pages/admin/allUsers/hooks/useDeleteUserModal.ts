@@ -40,7 +40,7 @@ export const useDeleteUserModal = ({ superToken, showToast, onSuccess }: UseDele
 		if (!userToDelete) return;
 
 		try {
-			const response = await adminDeleteUser(superToken, { uid: userToDelete });
+			const response = await adminDeleteUser(userToDelete, superToken);
 			if (response.code === 0) {
 				showToast(`用户 ${userToDelete} 删除成功`, 'success');
 				closeDeleteModal();

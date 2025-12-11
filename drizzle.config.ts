@@ -29,7 +29,7 @@ export default defineConfig({
 		: {
 				// 开发环境：使用独立的本地文件（不依赖 Wrangler）
 				dbCredentials: {
-					url: './local.db',
+					url: '.wrangler/state/v3/d1/miniflare-D1DatabaseObject/4177397522330b0ecc63f8d05c202d6aa6790575b55e4ab4250a5029b2fd1b10.sqlite',
 				},
 		  }),
 

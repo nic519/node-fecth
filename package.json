@@ -7,7 +7,7 @@
 		"deploy": "yarn build:frontend && wrangler deploy",
 		"dev:backend": "wrangler dev --port 8787",
 		"dev:frontend": "cd frontend && yarn dev",
-		"dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
+		"dev": "concurrently  \"yarn db:path\" \"yarn dev:backend\" \"yarn dev:frontend\"",
 		"build:frontend": "cd frontend && yarn build",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
@@ -16,6 +16,7 @@
 		"test-traffic-utils": "tsx tests/traffic-utils.test.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:push:local": "drizzle-kit push",
+		"db:path": "find .wrangler -path '*d1*' -name '*.sqlite' -type f -exec stat -f '%m %N' {} + 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2- || find .wrangler -path '*d1*' -name '*.sqlite' -type f | head -1",
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {

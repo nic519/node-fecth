@@ -29,7 +29,7 @@ export function AdminUsers() {
 	});
 
 	// 使用用户过滤Hook
-	const { filteredUsers, searchTerm, statusFilter, sourceFilter, setSearchTerm, setStatusFilter, setSourceFilter } = useUserFilters({
+	const { filteredUsers, searchTerm, statusFilter, setSearchTerm, setStatusFilter } = useUserFilters({
 		users,
 	});
 
@@ -44,11 +44,9 @@ export function AdminUsers() {
 					<UserFilters
 						searchTerm={searchTerm}
 						statusFilter={statusFilter}
-						sourceFilter={sourceFilter}
 						loading={loading}
 						onSearchTermChange={setSearchTerm}
 						onStatusFilterChange={setStatusFilter}
-						onSourceFilterChange={setSourceFilter}
 						onRefresh={fetchUsers}
 						onAddUser={addUserModal.open}
 					/>

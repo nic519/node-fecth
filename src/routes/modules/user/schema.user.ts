@@ -35,7 +35,8 @@ export const UserConfigMetaSchema = z.object({
 // 配置响应 Schema（兼容旧接口）
 export const ConfigResponseSchema = z.object({
 	config: UserConfigSchema,
-	meta: UserConfigMetaSchema,
+	assetToken: z.string(),
+	updatedAt: z.string(),
 });
 
 export const SubscribeParamsSchema = z.object({

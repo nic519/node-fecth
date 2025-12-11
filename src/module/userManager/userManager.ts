@@ -34,7 +34,8 @@ export class UserManager {
 			if (envConfig) {
 				return {
 					config: envConfig,
-					meta: { lastModified: new Date().toISOString(), source: 'env' as const, uid: uid },
+					assetToken: '',
+					updatedAt: new Date().toISOString(),
 				};
 			}
 
@@ -66,7 +67,7 @@ export class UserManager {
 						uid: uid,
 				  };
 
-			return { config, meta };
+			return { config, assetToken: '', updatedAt: new Date().toISOString() };
 		} catch (error) {
 			console.error(`从KV获取配置失败: ${uid}`, error);
 			return null;
@@ -248,11 +249,8 @@ export class UserManager {
 			// 构造返回结果
 			const response: ConfigResponse = {
 				config: config,
-				meta: {
-					lastModified: userRecord.updatedAt,
-					source: 'd1' as const,
-					uid: uid,
-				},
+				assetToken: userRecord.accessToken,
+				updatedAt: userRecord.updatedAt,
 			};
 
 			console.log(`✅ 用户验证成功: ${uid} (来源: d1)`);

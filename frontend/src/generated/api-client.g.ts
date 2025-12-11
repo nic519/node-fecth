@@ -59,9 +59,50 @@ export function getApiHealth(opts?: Oazapfts.RequestOpts) {
 	});
 }
 /**
+ * 获取用户配置
+ */
+export function getUser(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			code?: number;
+			msg: string;
+			data: {
+				id: string;
+				config: {
+					subscribe: string;
+					accessToken: string;
+					ruleUrl?: string;
+					fileName?: string;
+					multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					appendSubList?: {
+						subscribe: string;
+						flag: string;
+						includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					}[];
+					excludeRegex?: string;
+				};
+				accessToken: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		};
+	}>(
+		`/api/user${QS.query(
+			QS.explode({
+				uid,
+				token,
+			}),
+		)}`,
+		{
+			...opts,
+		},
+	);
+}
+/**
  * 更新用户配置
  */
-export function postApiConfigUserUpdate(
+export function updateUser(
 	uid: string,
 	token: string,
 	body?: {
@@ -84,12 +125,27 @@ export function postApiConfigUserUpdate(
 	return oazapfts.fetchJson<{
 		status: 200;
 		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
+			code?: number;
 			msg: string;
-			/** 响应数据 */
-			data?: any;
+			data: {
+				id: string;
+				config: {
+					subscribe: string;
+					accessToken: string;
+					ruleUrl?: string;
+					fileName?: string;
+					multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					appendSubList?: {
+						subscribe: string;
+						flag: string;
+						includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					}[];
+					excludeRegex?: string;
+				};
+				accessToken: string;
+				createdAt: string;
+				updatedAt: string;
+			};
 		};
 	}>(
 		`/api/user${QS.query(
@@ -100,216 +156,9 @@ export function postApiConfigUserUpdate(
 		)}`,
 		oazapfts.json({
 			...opts,
-			method: 'POST',
+			method: 'PUT',
 			body,
 		}),
-	);
-}
-/**
- * 用户详情
- */
-export function getApiConfigUserDetail(uid: string, token: string, opts?: Oazapfts.RequestOpts) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/user${QS.query(
-			QS.explode({
-				uid,
-				token,
-			}),
-		)}`,
-		{
-			...opts,
-		},
-	);
-}
-/**
- * 管理员删除用户
- */
-export function adminDeleteUser(
-	superToken: string,
-	body?: {
-		/** 用户ID */
-		uid: string;
-	},
-	opts?: Oazapfts.RequestOpts,
-) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/admin/user/delete${QS.query(
-			QS.explode({
-				superToken,
-			}),
-		)}`,
-		oazapfts.json({
-			...opts,
-			method: 'POST',
-			body,
-		}),
-	);
-}
-/**
- * 创建新用户
- */
-export function adminUserCreate(
-	superToken: string,
-	body?: {
-		uid: string;
-		config: {
-			subscribe: string;
-			accessToken: string;
-			ruleUrl?: string;
-			fileName?: string;
-			multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
-			appendSubList?: {
-				subscribe: string;
-				flag: string;
-				includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
-			}[];
-			excludeRegex?: string;
-		};
-	},
-	opts?: Oazapfts.RequestOpts,
-) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/admin/user/create${QS.query(
-			QS.explode({
-				superToken,
-			}),
-		)}`,
-		oazapfts.json({
-			...opts,
-			method: 'POST',
-			body,
-		}),
-	);
-}
-/**
- * 获取所有用户列表
- */
-export function adminGetUsers(superToken: string, opts?: Oazapfts.RequestOpts) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/admin/user/all${QS.query(
-			QS.explode({
-				superToken,
-			}),
-		)}`,
-		{
-			...opts,
-		},
-	);
-}
-/**
- * 存储内容获取操作
- */
-export function getApiStorage(
-	{
-		action,
-		key,
-		token,
-	}: {
-		action?: string;
-		key?: string;
-		token?: string;
-	} = {},
-	opts?: Oazapfts.RequestOpts,
-) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/storage${QS.query(
-			QS.explode({
-				action,
-				key,
-				token,
-			}),
-		)}`,
-		{
-			...opts,
-		},
-	);
-}
-/**
- * KV 存储操作
- */
-export function getApiKv(
-	{
-		key,
-		$namespace,
-		token,
-	}: {
-		key?: string;
-		$namespace?: string;
-		token?: string;
-	} = {},
-	opts?: Oazapfts.RequestOpts,
-) {
-	return oazapfts.fetchJson<{
-		status: 200;
-		data: {
-			/** 响应代码：0=成功，其他=错误码 */
-			code: number;
-			/** 响应消息 */
-			msg: string;
-			/** 响应数据 */
-			data?: any;
-		};
-	}>(
-		`/api/kv${QS.query(
-			QS.explode({
-				key,
-				namespace: $namespace,
-				token,
-			}),
-		)}`,
-		{
-			...opts,
-		},
 	);
 }
 /**
@@ -338,6 +187,367 @@ export function getApiX(
 		)}`,
 		{
 			...opts,
+		},
+	);
+}
+/**
+ * 获取配置模板列表
+ */
+export function getApiAdminTemplates(superToken: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			/** 响应代码：0=成功，其他=错误码 */
+			code?: number;
+			/** 响应消息 */
+			msg: string;
+			/** 响应数据 */
+			data?: any;
+		};
+	}>(
+		`/api/admin/templates${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		{
+			...opts,
+		},
+	);
+}
+/**
+ * 创建配置模板
+ */
+export function postApiAdminTemplates(
+	superToken: string,
+	body?: {
+		name: string;
+		description: string;
+		content: string;
+	},
+	opts?: Oazapfts.RequestOpts,
+) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			/** 响应代码：0=成功，其他=错误码 */
+			code?: number;
+			/** 响应消息 */
+			msg: string;
+			/** 响应数据 */
+			data?: any;
+		};
+	}>(
+		`/api/admin/templates${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		oazapfts.json({
+			...opts,
+			method: 'POST',
+			body,
+		}),
+	);
+}
+/**
+ * 更新配置模板
+ */
+export function putApiAdminTemplatesByTemplateId(
+	templateId: string,
+	superToken: string,
+	body?: {
+		name: string;
+		description: string;
+		content: string;
+	},
+	opts?: Oazapfts.RequestOpts,
+) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			/** 响应代码：0=成功，其他=错误码 */
+			code?: number;
+			/** 响应消息 */
+			msg: string;
+			/** 响应数据 */
+			data?: any;
+		};
+	}>(
+		`/api/admin/templates/${encodeURIComponent(templateId)}${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		oazapfts.json({
+			...opts,
+			method: 'PUT',
+			body,
+		}),
+	);
+}
+/**
+ * 删除配置模板
+ */
+export function deleteApiAdminTemplatesByTemplateId(templateId: string, superToken: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			/** 响应代码：0=成功，其他=错误码 */
+			code?: number;
+			/** 响应消息 */
+			msg: string;
+			/** 响应数据 */
+			data?: any;
+		};
+	}>(
+		`/api/admin/templates/${encodeURIComponent(templateId)}${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		{
+			...opts,
+			method: 'DELETE',
+		},
+	);
+}
+/**
+ * 获取所有用户列表
+ */
+export function adminGetUsers(superToken: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			code?: number;
+			msg: string;
+			data: {
+				users: {
+					id: string;
+					config: {
+						subscribe: string;
+						accessToken: string;
+						ruleUrl?: string;
+						fileName?: string;
+						multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+						appendSubList?: {
+							subscribe: string;
+							flag: string;
+							includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+						}[];
+						excludeRegex?: string;
+					};
+					accessToken: string;
+					createdAt: string;
+					updatedAt: string;
+				}[];
+			};
+		};
+	}>(
+		`/api/admin/users${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		{
+			...opts,
+		},
+	);
+}
+/**
+ * 创建新用户
+ */
+export function adminUserCreate(
+	superToken: string,
+	body?: {
+		uid: string;
+		config: {
+			subscribe: string;
+			accessToken: string;
+			ruleUrl?: string;
+			fileName?: string;
+			multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+			appendSubList?: {
+				subscribe: string;
+				flag: string;
+				includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+			}[];
+			excludeRegex?: string;
+		};
+	},
+	opts?: Oazapfts.RequestOpts,
+) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			code?: number;
+			msg: string;
+			data: {
+				id: string;
+				config: {
+					subscribe: string;
+					accessToken: string;
+					ruleUrl?: string;
+					fileName?: string;
+					multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					appendSubList?: {
+						subscribe: string;
+						flag: string;
+						includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					}[];
+					excludeRegex?: string;
+				};
+				accessToken: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		};
+	}>(
+		`/api/admin/users${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		oazapfts.json({
+			...opts,
+			method: 'POST',
+			body,
+		}),
+	);
+}
+/**
+ * 获取用户详情
+ */
+export function adminGetUser(uid: string, superToken: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<
+		| {
+				status: 200;
+				data: {
+					code?: number;
+					msg: string;
+					data: {
+						id: string;
+						config: {
+							subscribe: string;
+							accessToken: string;
+							ruleUrl?: string;
+							fileName?: string;
+							multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+							appendSubList?: {
+								subscribe: string;
+								flag: string;
+								includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+							}[];
+							excludeRegex?: string;
+						};
+						accessToken: string;
+						createdAt: string;
+						updatedAt: string;
+					};
+				};
+		  }
+		| {
+				status: 404;
+		  }
+	>(
+		`/api/admin/users/${encodeURIComponent(uid)}${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		{
+			...opts,
+		},
+	);
+}
+/**
+ * 更新用户配置
+ */
+export function adminUserUpdate(
+	uid: string,
+	superToken: string,
+	body?: {
+		config: {
+			subscribe: string;
+			accessToken: string;
+			ruleUrl?: string;
+			fileName?: string;
+			multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+			appendSubList?: {
+				subscribe: string;
+				flag: string;
+				includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+			}[];
+			excludeRegex?: string;
+		};
+	},
+	opts?: Oazapfts.RequestOpts,
+) {
+	return oazapfts.fetchJson<{
+		status: 200;
+		data: {
+			code?: number;
+			msg: string;
+			data: {
+				id: string;
+				config: {
+					subscribe: string;
+					accessToken: string;
+					ruleUrl?: string;
+					fileName?: string;
+					multiPortMode?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					appendSubList?: {
+						subscribe: string;
+						flag: string;
+						includeArea?: ('TW' | 'SG' | 'JP' | 'VN' | 'HK' | 'US')[];
+					}[];
+					excludeRegex?: string;
+				};
+				accessToken: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		};
+	}>(
+		`/api/admin/users/${encodeURIComponent(uid)}${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		oazapfts.json({
+			...opts,
+			method: 'PUT',
+			body,
+		}),
+	);
+}
+/**
+ * 删除用户
+ */
+export function adminDeleteUser(uid: string, superToken: string, opts?: Oazapfts.RequestOpts) {
+	return oazapfts.fetchJson<
+		| {
+				status: 200;
+				data: {
+					code?: number;
+					msg: string;
+					data: {
+						uid: string;
+					};
+				};
+		  }
+		| {
+				status: 404;
+		  }
+	>(
+		`/api/admin/users/${encodeURIComponent(uid)}${QS.query(
+			QS.explode({
+				superToken,
+			}),
+		)}`,
+		{
+			...opts,
+			method: 'DELETE',
 		},
 	);
 }

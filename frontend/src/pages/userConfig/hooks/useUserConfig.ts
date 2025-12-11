@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 // 直接使用类型安全的原始函数（Hono 最佳实践）
-import { getApiConfigUserDetail, postApiConfigUserUpdate } from '@/generated/api-adapters.g';
+import { getUser, updateUser } from '@/generated/api-adapters.g';
 import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, validateConfig, yamlToConfig } from '../utils/configUtils';
 
@@ -42,13 +42,12 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const [configPreview, setConfigPreview] = useState<any>(null);
 	const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
-	const [configSource, setConfigSource] = useState<string>('');
 
 	// 加载配置数据
 	const loadConfig = async () => {
 		try {
 			setLoading(true);
-			const response = await getApiConfigUserDetail(uid, token);
+			const response = await getUser(uid, token);
 
 			// 检查业务响应码
 			if (response.code !== 0) {
@@ -58,8 +57,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 			// 从响应结构中提取配置数据
 			const configData = response.data;
-			setConfig(configData);
-			setConfigSource((configData.meta as any).source || '环境变量');
+			setConfig({ config: configData.config, assetToken: configData.accessToken, updatedAt: configData.updatedAt });
 
 			// 将配置转换为 YAML 格式显示
 			const yamlContent = configToYaml(configData.config);
@@ -92,7 +90,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-			const response = await postApiConfigUserUpdate(uid, token, { config: newConfig });
+			const response = await updateUser(uid, token, { config: newConfig });
 
 			// 检查响应是否成功
 			if (response.code === 0) {
@@ -140,7 +138,6 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		configPreview,
 		connectionStatus,
 		lastSaved,
-		configSource,
 
 		// 操作
 		setConfigContent: handleSetConfigContent,

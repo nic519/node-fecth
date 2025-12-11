@@ -24,7 +24,7 @@ export const userAuthHook = async (c: any): Promise<void | Response> => {
 
 	try {
 		const authResult = await AuthUtils.authenticate(c.req.raw, c.env, uid);
-		console.log(`✅ 用户验证成功: ${uid} (来源: ${authResult.meta.source})`);
+		console.log(`✅ 用户验证成功: ${uid} `);
 		// 验证成功，不返回任何内容，继续执行后续操作
 	} catch (error) {
 		console.error(`❌ 用户验证失败: ${uid}`, error);
