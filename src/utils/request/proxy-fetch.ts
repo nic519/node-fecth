@@ -75,6 +75,37 @@ function calculateSize(data: string): { bytes: number; mb: string } {
 	return { bytes, mb };
 }
 
+/**
+ * 带超时的 fetch 请求
+ * @param url 请求URL
+ * @param options fetch选项
+ * @param timeoutMs 超时时间（毫秒），默认20秒
+ */
+async function fetchWithTimeout(
+	url: string,
+	options: RequestInit = {},
+	timeoutMs: number = 20000
+): Promise<Response> {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+	try {
+		const response = await fetch(url, {
+			...options,
+			signal: controller.signal,
+		});
+		clearTimeout(timeoutId);
+		return response;
+	} catch (error) {
+		clearTimeout(timeoutId);
+		// 如果是 AbortError，转换为超时错误
+		if (error instanceof Error && error.name === 'AbortError') {
+			throw new Error('请求超时');
+		}
+		throw error;
+	}
+}
+
 // ==================== 主类 ====================
 
 /**
@@ -82,7 +113,7 @@ function calculateSize(data: string): { bytes: number; mb: string } {
  * 提供订阅内容获取、KV缓存管理等功能
  */
 export class ProxyFetch {
-	constructor(private readonly clashSubUrl: string) {}
+	constructor(private readonly clashSubUrl: string) { }
 
 	// ==================== 公共方法 ====================
 
@@ -241,9 +272,14 @@ export class ProxyFetch {
 		const staleCache = await this.fetchFromKVInternal();
 
 		try {
-			const response = await fetch(this.clashSubUrl, {
-				headers: { 'User-Agent': 'clash.meta' },
-			});
+			// 使用带超时的 fetch，设置为20秒（小于api.proxy.ts的25秒超时）
+			const response = await fetchWithTimeout(
+				this.clashSubUrl,
+				{
+					headers: { 'User-Agent': 'clash.meta' },
+				},
+				20000 // 20秒超时
+			);
 
 			if (!response.ok) {
 				// 如果有过期缓存，返回过期缓存
@@ -274,6 +310,19 @@ export class ProxyFetch {
 
 			return { subInfo, content };
 		} catch (error) {
+			// 如果是超时错误，尝试使用过期缓存
+			if (error instanceof Error && error.message === '请求超时') {
+				if (staleCache) {
+					logger.warn(
+						{
+							hasStaleCache: true,
+						},
+						'请求超时，使用过期缓存'
+					);
+					return { subInfo: staleCache.subInfo, content: staleCache.content };
+				}
+			}
+
 			logger.error(
 				{
 					error: error instanceof Error ? error.message : String(error),

@@ -160,7 +160,14 @@ export class APIProxy extends BaseAPI {
 				if (error instanceof Error) {
 					const errorMessage = error.message.toLowerCase();
 
-					if (error.message === '请求超时') {
+					// 改进超时错误识别：识别多种超时错误格式
+					if (
+						error.message === '请求超时' ||
+						errorMessage.includes('timeout') ||
+						errorMessage.includes('timed out') ||
+						errorMessage.includes('aborted') ||
+						error.name === 'AbortError'
+					) {
 						this.logger.error({ uid: query.uid }, '请求处理超时');
 						return c.json(
 							{
