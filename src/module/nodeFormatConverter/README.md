@@ -253,13 +253,13 @@ npx ts-node src/example/exampleNewProxyConverter.ts
 ### 开发环境设置
 ```bash
 # 安装依赖
-yarn install
+bun install
 
 # 类型检查
-yarn type-check
+bun run type-check
 
 # 运行示例
-yarn example:new-converter
+bun run example:new-converter
 ```
 
 ### 代码规范

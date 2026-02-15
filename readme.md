@@ -13,7 +13,7 @@
 ### 1. 启动完整开发环境
 
 ```bash
-yarn dev
+bun dev
 ```
 
 这会同时启动：
@@ -25,10 +25,10 @@ yarn dev
 
 ```bash
 # 仅启动后端
-yarn dev:backend
+bun run dev:backend
 
 # 仅启动前端
-yarn dev:frontend
+bun run dev:frontend
 ```
 
 ## 部署流程
@@ -38,13 +38,13 @@ yarn dev:frontend
 1. **安装依赖**
 
 ```bash
-yarn install
+bun install
 ```
 
 2. **构建并部署到 Pages**
 
 ```bash
-yarn deploy:pages
+bun run deploy
 ```
 
 ### 方式二：通过 Cloudflare Dashboard
@@ -52,7 +52,7 @@ yarn deploy:pages
 1. **构建前端**
 
 ```bash
-yarn build:frontend
+bun run build:frontend
 ```
 
 2. **创建 Pages 项目**
@@ -73,7 +73,7 @@ yarn build:frontend
 **构建配置:**
 
 ```
-构建命令: yarn build:frontend
+构建命令: bun run build:frontend
 构建输出目录: frontend/dist
 ```
 
@@ -123,8 +123,8 @@ SUPER_ADMIN_TOKEN="xxx"
 
 2. **构建失败**
 
-   - 检查 TypeScript 类型错误: `yarn type-check`
-   - 确认依赖安装完整: `yarn install`
+   - 检查 TypeScript 类型错误: `bun run type-check`
+   - 确认依赖安装完整: `bun install`
 
 3. **环境变量未生效**
    - 检查 `wrangler.pages.toml` 配置
@@ -134,10 +134,10 @@ SUPER_ADMIN_TOKEN="xxx"
 
 ```bash
 # 类型检查
-yarn type-check
+bun run type-check
 
 # 本地预览构建结果
-cd frontend && yarn preview
+cd frontend && bun run preview
 
 # 查看 Pages 部署日志
 wrangler pages deployment list
@@ -166,7 +166,7 @@ node-fetch/
 
 ## 最佳实践
 
-1. **开发时使用分离模式** (`yarn dev`)，便于调试
+1. **开发时使用分离模式** (`bun dev`)，便于调试
 2. **生产部署使用 Pages Functions**，简化运维
 3. **定期更新依赖**，保持安全性
 4. **使用环境变量管理敏感配置**

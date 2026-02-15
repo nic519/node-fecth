@@ -19,11 +19,11 @@
 
 ```bash
 # 使用默认服务器 (http://localhost:8787)
-yarn build:api
+bun run build:api
 
 # 指定自定义服务器地址
-yarn build:api http://localhost:3000
-yarn build:api https://api.example.com
+bun run build:api http://localhost:3000
+bun run build:api https://api.example.com
 
 # 直接运行脚本
 npx tsx scripts/generate-api-client.ts
@@ -35,13 +35,13 @@ npx tsx scripts/generate-api-client.ts http://localhost:3000
 1. **启动服务器**:
 
    ```bash
-   yarn dev:backend  # 启动后端服务器
+   bun run dev:backend  # 启动后端服务器
    ```
 
 2. **生成 API 客户端**:
 
    ```bash
-   yarn build:api    # 从服务器获取规范并生成客户端
+   bun run build:api    # 从服务器获取规范并生成客户端
    ```
 
 3. **使用生成的客户端**:
@@ -96,8 +96,8 @@ await generator.generate();
 
 ## 最佳实践
 
-1. **开发时**: 使用 `yarn dev:with-watch` 自动监听 API 变化
-2. **部署前**: 运行 `yarn build:api` 确保客户端代码最新
+1. **开发时**: 使用 `bun run dev:with-watch` 自动监听 API 变化
+2. **部署前**: 运行 `bun run build:api` 确保客户端代码最新
 3. **生产环境**: 使用具体的服务器地址生成客户端
 4. **团队协作**: 将生成的客户端代码提交到版本控制
 
@@ -113,7 +113,7 @@ await generator.generate();
 
 2. **类型错误**
 
-   - 运行 `yarn type-check` 检查类型
+   - 运行 `bun run type-check` 检查类型
    - 确保 TypeScript 版本兼容
 
 3. **生成失败**
@@ -124,5 +124,5 @@ await generator.generate();
 
 ```bash
 # 启用详细日志
-DEBUG=* yarn build:api
+DEBUG=* bun run build:api
 ```

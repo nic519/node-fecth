@@ -4,15 +4,15 @@
 	"private": true,
 	"scripts": {
 		"convert-vars": "tsx scripts/convert-vars.ts",
-		"deploy": "yarn build:frontend && wrangler deploy",
+		"deploy": "bun run build:frontend && wrangler deploy",
 		"dev:backend": "wrangler dev --port 8787",
-		"dev:frontend": "cd frontend && yarn dev",
-		"dev": "concurrently  \"yarn db:path\" \"yarn dev:backend\" \"yarn dev:frontend\"",
-		"build:frontend": "cd frontend && yarn build",
+		"dev:frontend": "cd frontend && bun run dev",
+		"dev": "concurrently  \"bun run db:path\" \"bun run dev:backend\" \"bun run dev:frontend\"",
+		"build:frontend": "cd frontend && bun run build",
 		"build:cf-type": "wrangler types",
 		"build:api": "tsx scripts/generate-api-client.ts",
 		"type-check": "tsc --noEmit && cd frontend && tsc --noEmit",
-		"preview": "yarn build:frontend && wrangler dev --local",
+		"preview": "bun run build:frontend && wrangler dev --local",
 		"test-traffic-utils": "tsx tests/traffic-utils.test.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:push:local": "drizzle-kit push",
@@ -45,6 +45,5 @@
 		"pino-pretty": "^13.1.2",
 		"yaml": "^2.7.0",
 		"zod": "^3.25.67"
-	},
-	"packageManager": "yarn@4.9.2"
+	}
 }
