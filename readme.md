@@ -1,173 +1,36 @@
-# Cloudflare Pages 部署指南
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## 架构说明
+## Getting Started
 
-本项目采用 **Cloudflare Pages + Functions** 的架构：
-
-- 🎨 **前端**: Preact + Vite，构建为静态资源
-- ⚡ **后端**: Pages Functions 处理 `/api/*` 路由，复用 Workers 代码
-- 🗄️ **存储**: Cloudflare KV (用户配置、统计数据)
-
-## 开发模式
-
-### 1. 启动完整开发环境
+First, run the development server:
 
 ```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
 bun dev
 ```
 
-这会同时启动：
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- 前端开发服务器 (http://localhost:3000) - 使用 Vite
-- 后端开发服务器 (http://localhost:8787) - 使用 Workers (仅用于开发)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### 2. 分别启动
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-# 仅启动后端
-bun run dev:backend
+## Learn More
 
-# 仅启动前端
-bun run dev:frontend
-```
+To learn more about Next.js, take a look at the following resources:
 
-## 部署流程
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-### 方式一：自动化部署 (推荐)
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-1. **安装依赖**
+## Deploy on Vercel
 
-```bash
-bun install
-```
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-2. **构建并部署到 Pages**
-
-```bash
-bun run deploy
-```
-
-### 方式二：通过 Cloudflare Dashboard
-
-1. **构建前端**
-
-```bash
-bun run build:frontend
-```
-
-2. **创建 Pages 项目**
-
-   - 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
-   - 进入 Pages 页面
-   - 选择 "上传资源" 或连接 Git 仓库
-   - 上传 `frontend/dist` 目录
-
-3. **配置 Functions**
-   - 确保 `functions/` 目录包含在部署中
-   - 配置 KV 绑定和环境变量
-
-### 方式三：Git 自动部署
-
-在 Cloudflare Pages 中连接 Git 仓库，配置：
-
-**构建配置:**
-
-```
-构建命令: bun run build:frontend
-构建输出目录: frontend/dist
-```
-
-**环境变量:**
-
-```
-SUPER_ADMIN_TOKEN=your-secret-token
-```
-
-## 环境配置
-
-### KV 命名空间
-
-在 Cloudflare Dashboard 中创建 KV 命名空间，并更新配置：
-
-```toml
-# wrangler.pages.toml
-[[kv_namespaces]]
-binding = "KV_BINDING"
-id = "your-kv-namespace-id"
-
-[[kv_namespaces]]
-binding = "USERS_KV"
-id = "your-users-kv-namespace-id"
-```
-
-### 环境变量
-
-通过 Cloudflare Dashboard 或 CLI 设置：
-
-```bash
-wrangler pages secret put SUPER_ADMIN_TOKEN
-``` 
-
-在开发阶段
-需要设置环境变量，则在项目根目录的 .dev.vars 设置，如:
-SUPER_ADMIN_TOKEN="xxx"
-
-## 故障排除
-
-### 常见问题
-
-1. **API 请求 404**
-
-   - 检查 `functions/api/[[path]].ts` 文件是否存在
-   - 确认 KV 绑定配置正确
-
-2. **构建失败**
-
-   - 检查 TypeScript 类型错误: `bun run type-check`
-   - 确认依赖安装完整: `bun install`
-
-3. **环境变量未生效**
-   - 检查 `wrangler.pages.toml` 配置
-   - 通过 Dashboard 验证环境变量设置
-
-### 调试命令
-
-```bash
-# 类型检查
-bun run type-check
-
-# 本地预览构建结果
-cd frontend && bun run preview
-
-# 查看 Pages 部署日志
-wrangler pages deployment list
-```
-
-## 项目结构说明
-
-### 开发 vs 生产
-
-- **开发模式**:
-
-  - 前端: Vite 开发服务器 (3000 端口)
-  - 后端: Workers 开发服务器 (8787 端口) - 使用 `src/index.ts`
-  - 配置: `wrangler.dev.toml`
- 
-
-### 文件说明
-
-```
-node-fetch/
-├── src/index.ts          # 仅用于开发模式的 Workers 入口
-├── functions/api/[[path]].ts  # 生产模式的 Pages Functions 入口
-├── wrangler.toml     # 配置文件
-└── src/                  # 共享的业务逻辑代码
-```
-
-## 最佳实践
-
-1. **开发时使用分离模式** (`bun dev`)，便于调试
-2. **生产部署使用 Pages Functions**，简化运维
-3. **定期更新依赖**，保持安全性
-4. **使用环境变量管理敏感配置**
-5. **设置 CI/CD 自动化部署流程**
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

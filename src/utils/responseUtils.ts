@@ -1,4 +1,4 @@
-import { BaseResponseSchema } from '@/routes/modules/base/schema.base';
+import { BaseResponseSchema } from '@/types/schema.base';
 import { ResponseCodes } from '@/types/openapi-schemas';
 
 /**

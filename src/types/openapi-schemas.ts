@@ -6,7 +6,7 @@ import {
 	SubConfigSchema,
 	UserConfigMetaSchema,
 	UserConfigSchema,
-} from '@/routes/modules/user/schema.user';
+} from '@/types/schema.user';
 
 // =============================================================================
 // 基础 Schemas - 作为单一真理源(Single Source of Truth)
@@ -144,7 +144,7 @@ export {
 	type IScUserApiModel,
 	type IUserConfig as UserConfig,
 	type IUserConfigMeta as UserConfigMeta,
-} from '@/routes/modules/user/schema.user';
+} from '@/types/schema.user';
 
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
 export type SubConfig = z.infer<typeof SubConfigSchema>;
@@ -161,7 +161,7 @@ export type SystemLog = z.infer<typeof SystemLogSchema>;
 export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
 
 // 导出响应类型
-export type { BaseResponse } from '@/routes/modules/base/schema.base';
+// export type { BaseResponse } from '@/routes/modules/base/schema.base';
 export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
 export type AdminStatsResponse = z.infer<typeof AdminStatsResponseSchema>;
 export type AdminLogsResponse = z.infer<typeof AdminLogsResponseSchema>;

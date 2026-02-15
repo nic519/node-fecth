@@ -1,5 +1,5 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { ClashProxy } from '../nodeFormatConverter';
+import { ClashProxy } from '@/types/clash.types';
 import { PreMergeInfo } from './clash-merge.types';
 import { StrategyUtils } from './utils/strategyUtils';
 

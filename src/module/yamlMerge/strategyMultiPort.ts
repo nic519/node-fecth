@@ -1,5 +1,5 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { ClashListener, ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
+import { ClashProxy, ClashListener, ProxyAreaInfo } from '@/types/clash.types';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { PreMergeInfo } from './clash-merge.types';
