@@ -54,6 +54,22 @@ export const users = sqliteTable('users', {
 		.default(sql`(datetime('now'))`),
 });
 
+
+export const dynamic = sqliteTable('dynamic', {
+	id: text('id').primaryKey(),            // url 的 md5
+	url: text('url').notNull(),             // 订阅地址
+	content: text('content').notNull(),     // 订阅内容
+	traffic: text('traffic'),               // 流量剩余情况
+	status: text('status').notNull(),       // SUCCESS / ERROR
+	msg: text('msg'),                       // 错误原因等
+	createdAt: text('created_at')
+		.notNull()
+		.default(sql`(datetime('now'))`),
+	updatedAt: text('updated_at')
+		.notNull()
+		.default(sql`(datetime('now'))`),
+});
+
 /**
  * 类型导出：用于 TypeScript 类型推导
  */

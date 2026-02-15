@@ -15,6 +15,13 @@
       "when": 1763717304620,
       "tag": "0001_furry_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771165007589,
+      "tag": "0002_wise_mojo",
+      "breakpoints": true
     }
   ]
 }

@@ -18,20 +18,20 @@ export default defineConfig({
 
 	...(isProduction
 		? {
-				// 生产环境：使用 D1 HTTP API
-				driver: 'd1-http' as const,
-				dbCredentials: {
-					accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
-					databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-					token: process.env.CLOUDFLARE_D1_TOKEN!,
-				},
-		  }
+			// 生产环境：使用 D1 HTTP API
+			driver: 'd1-http' as const,
+			dbCredentials: {
+				accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+				databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
+				token: process.env.CLOUDFLARE_D1_TOKEN!,
+			},
+		}
 		: {
-				// 开发环境：使用独立的本地文件（不依赖 Wrangler）
-				dbCredentials: {
-					url: '.wrangler/state/v3/d1/miniflare-D1DatabaseObject/4177397522330b0ecc63f8d05c202d6aa6790575b55e4ab4250a5029b2fd1b10.sqlite',
-				},
-		  }),
+			// 开发环境：使用独立的本地文件（不依赖 Wrangler）
+			dbCredentials: {
+				url: '.wrangler/state/v3/d1/miniflare-D1DatabaseObject/4177397522330b0ecc63f8d05c202d6aa6790575b55e4ab4250a5029b2fd1b10.sqlite',
+			},
+		}),
 
 	verbose: true,
 	strict: true,
