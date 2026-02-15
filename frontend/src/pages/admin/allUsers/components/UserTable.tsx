@@ -22,7 +22,6 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 					<TableHeader>
 						<TableColumn>用户ID</TableColumn>
 						<TableColumn>配置状态</TableColumn>
-						<TableColumn>数据源</TableColumn>
 						<TableColumn>流量使用</TableColumn>
 						<TableColumn>最后修改时间</TableColumn>
 						<TableColumn>操作</TableColumn>
@@ -30,7 +29,7 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 					<TableBody isLoading={loading} loadingContent={<Loading message="正在加载用户数据..." size="sm" />}>
 						{users.length === 0 && !loading && !error ? (
 							<TableRow>
-								<TableCell colSpan={6} className="text-center py-4 text-gray-500">
+								<TableCell colSpan={5} className="text-center py-4 text-gray-500">
 									暂无用户数据
 								</TableCell>
 							</TableRow>
