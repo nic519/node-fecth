@@ -40,12 +40,12 @@ function AdminUsersContent() {
 	});
 
 	return (
-		<div className="min-h-screen bg-gray-100">
+		<div className="min-h-screen">
 			{/* 导航栏 */}
 			<NavigationBar superToken={superToken} currentPage="users" />
 
-			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-				<div className="px-4 py-4 sm:px-0 space-y-4">
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+				<div className="space-y-6">
 					{/* 搜索和筛选 */}
 					<UserFilters
 						searchTerm={searchTerm}
@@ -68,18 +68,18 @@ function AdminUsersContent() {
 					<UserTable users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
 
 					{/* 分页信息 */}
-					<div className="flex items-center justify-between bg-white px-4 py-2 border rounded-lg">
+					<div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 rounded-xl shadow-sm">
 						<div className="flex items-center text-xs text-gray-600">
 							<span>共 {filteredUsers.length} 条记录</span>
 						</div>
 						<div className="flex gap-1">
-							<Button size="sm" variant="solid" color="default" disabled>
+							<Button size="sm" variant="flat" radius="lg" className="bg-gray-100 text-gray-400 rounded-lg" disabled>
 								上一页
 							</Button>
-							<Button size="sm" variant="solid" className="bg-blue-600 text-white hover:bg-blue-700">
+							<Button size="sm" variant="solid" radius="lg" className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-sm">
 								1
 							</Button>
-							<Button size="sm" variant="solid" color="default" disabled>
+							<Button size="sm" variant="flat" radius="lg" className="bg-gray-100 text-gray-400 rounded-lg" disabled>
 								下一页
 							</Button>
 						</div>
@@ -97,10 +97,10 @@ function AdminUsersContent() {
 								<p>确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！</p>
 							</ModalBody>
 							<ModalFooter>
-								<Button color="default" variant="solid" onPress={onClose}>
+								<Button color="default" variant="flat" radius="lg" className="bg-gray-100 text-gray-700 rounded-lg" onPress={onClose}>
 									取消
 								</Button>
-								<Button color="danger" onPress={deleteModal.confirm} isLoading={loading}>
+								<Button color="danger" radius="lg" className="rounded-lg" onPress={deleteModal.confirm} isLoading={loading}>
 									删除
 								</Button>
 							</ModalFooter>
@@ -141,13 +141,14 @@ function AdminUsersContent() {
 								</div>
 							</ModalBody>
 							<ModalFooter>
-								<Button color="default" variant="solid" onPress={onClose}>
+								<Button color="default" variant="flat" radius="lg" className="bg-gray-100 text-gray-700 rounded-lg" onPress={onClose}>
 									取消
 								</Button>
 								<Button
 									onPress={addUserModal.confirm}
 									isLoading={loading}
-									className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+									radius="lg"
+									className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 rounded-lg"
 								>
 									添加
 								</Button>

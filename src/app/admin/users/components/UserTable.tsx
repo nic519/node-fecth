@@ -18,61 +18,85 @@ export interface UserTableProps {
  */
 export function UserTable({ users, loading, error, onUserAction }: UserTableProps) {
 	return (
-		<div className="">
+		<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 			<div className="overflow-x-auto">
-				<Table aria-label="用户列表">
+				<Table 
+                    aria-label="用户列表"
+                    removeWrapper
+                    classNames={{
+                        th: "bg-gray-50 text-gray-500 font-medium text-xs uppercase tracking-wider h-12 border-b border-gray-100",
+                        td: "py-3 border-b border-gray-50 text-sm group-last:border-none",
+                        base: "min-w-full",
+                    }}
+                >
 					<TableHeader>
-						<TableColumn>用户ID</TableColumn>
+						<TableColumn>用户ID / 订阅链接</TableColumn>
 						<TableColumn>配置状态</TableColumn>
-						<TableColumn>流量使用</TableColumn>
-						<TableColumn>最后修改时间</TableColumn>
+						<TableColumn>流量使用情况</TableColumn>
+						<TableColumn>最后修改</TableColumn>
 						<TableColumn>操作</TableColumn>
 					</TableHeader>
 					<TableBody isLoading={loading} loadingContent={<Loading message="正在加载用户数据..." size="sm" />}>
 						{users.length === 0 && !loading && !error ? (
 							<TableRow>
-								<TableCell colSpan={5} className="text-center py-4 text-gray-500">
-									暂无用户数据
+								<TableCell colSpan={5} className="text-center py-12 text-gray-500">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-300 mb-3">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                        </svg>
+									    <span>暂无用户数据</span>
+                                    </div>
 								</TableCell>
 							</TableRow>
 						) : (
 							users.map((user) => (
-								<TableRow key={user.uid}>
+								<TableRow key={user.uid} className="hover:bg-gray-50 transition-colors">
 									<TableCell>
-										<div>
-											<div className="text-sm font-medium text-gray-900">{user.uid}</div>
+										<div className="flex flex-col">
+											<div className="font-semibold text-gray-900">{user.uid}</div>
 											{user.subscribeUrl && (
-												<div className="text-xs text-gray-500 truncate max-w-32" title={user.subscribeUrl}>
+												<div className="text-xs text-gray-400 truncate max-w-[200px] mt-0.5 font-mono" title={user.subscribeUrl}>
 													{user.subscribeUrl}
 												</div>
 											)}
 										</div>
 									</TableCell>
 									<TableCell>
-										<Chip size="sm" color={user.hasConfig ? 'success' : 'danger'} variant="flat">
+										<Chip 
+                                            size="sm" 
+                                            color={user.hasConfig ? 'success' : 'danger'} 
+                                            variant="flat"
+                                            className="h-6 px-2 font-medium"
+                                            startContent={
+                                                <span className={`w-1.5 h-1.5 rounded-full ml-1 ${user.hasConfig ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                            }
+                                        >
 											{user.hasConfig ? '已配置' : '未配置'}
 										</Chip>
 									</TableCell>
 									<TableCell>
 										{user.trafficInfo ? (
-											<div className="space-y-1">
-												<div className="text-xs">
-													{formatTraffic(user.trafficInfo.used)} / {formatTraffic(user.trafficInfo.total)}
+											<div className="space-y-1.5 min-w-[160px]">
+												<div className="flex justify-between text-xs font-medium text-gray-600">
+													<span>{formatTraffic(user.trafficInfo.used)}</span>
+                                                    <span className="text-gray-400">/ {formatTraffic(user.trafficInfo.total)}</span>
 												</div>
-												<div className="w-20 bg-gray-200 rounded-full h-1.5">
+												<div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
 													<div
-														className={`h-1.5 rounded-full ${getTrafficBarColor(user.trafficInfo.usagePercent)}`}
+														className={`h-1.5 rounded-full transition-all duration-500 ${getTrafficBarColor(user.trafficInfo.usagePercent)}`}
 														style={{ width: `${Math.min(user.trafficInfo.usagePercent, 100)}%` }}
 													/>
 												</div>
-												<div className="text-xs text-gray-500">{user.trafficInfo.usagePercent.toFixed(1)}%</div>
+                                                <div className="text-[10px] text-right text-gray-400">
+                                                    已用 {user.trafficInfo.usagePercent.toFixed(1)}%
+                                                </div>
 											</div>
 										) : (
-											<span className="text-gray-400 text-sm">无数据</span>
+											<span className="text-gray-400 text-xs italic">无流量数据</span>
 										)}
 									</TableCell>
 									<TableCell>
-										<div className="text-sm text-gray-900">{formatDateTime(user.lastModified)}</div>
+										<div className="text-sm text-gray-600 font-mono">{formatDateTime(user.lastModified)}</div>
 									</TableCell>
 									<TableCell>
 										<UserActions uid={user.uid} token={user.token} onUserAction={onUserAction} />

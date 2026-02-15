@@ -16,35 +16,54 @@ interface HeaderProps {
 
 export function Header({ uid, connectionStatus, lastSaved, configSource, saving, saveSuccess, validationErrors, onSave }: HeaderProps) {
 	return (
-		<Navbar className="bg-background border-b border-divider">
-			<NavbarBrand>
+		<Navbar 
+            className="bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm"
+            maxWidth="xl"
+            position="sticky"
+        >
+			<NavbarBrand className="gap-2">
 				<AcmeLogo />
-				<h1 className="text-xl font-semibold">配置管理</h1>
+				<h1 className="text-xl font-bold text-gray-900 tracking-tight">配置管理</h1>
 			</NavbarBrand>
 
-			<NavbarContent className="hidden md:flex gap-4" justify="center">
-				<NavbarItem>
-					<span className="text-sm text-default-500">
-						用户ID: <span className="font-medium text-foreground">{uid}</span>
-					</span>
+			<NavbarContent className="hidden md:flex gap-6" justify="center">
+				<NavbarItem className="flex items-center gap-2">
+					<span className="text-sm text-gray-500 font-medium">用户ID</span>
+                    <Chip size="sm" variant="flat" color="default" className="font-mono bg-gray-100 text-gray-700">
+                        {uid}
+                    </Chip>
 				</NavbarItem>
 				<NavbarItem>
-					<Chip size="sm" color={connectionStatus === 'connected' ? 'success' : 'danger'} variant="dot">
+					<Chip 
+                        size="sm" 
+                        color={connectionStatus === 'connected' ? 'success' : 'danger'} 
+                        variant="flat"
+                        className="capitalize"
+                        startContent={
+                            <span className={`w-1.5 h-1.5 rounded-full ml-1 ${connectionStatus === 'connected' ? 'bg-success-500' : 'bg-danger-500'}`}></span>
+                        }
+                    >
 						{connectionStatus === 'connected' ? '已连接' : '连接失败'}
 					</Chip>
 				</NavbarItem>
 			</NavbarContent>
 
 			<NavbarContent justify="end">
-				<NavbarItem className="text-right">
-					<div className="text-sm text-default-500">{lastSaved ? `最后保存: ${formatTime(lastSaved)}` : '未保存'}</div>
-					<div className="text-xs text-default-400">数据源: {configSource}</div>
+				<NavbarItem className="text-right hidden sm:block">
+					<div className="text-xs text-gray-500 font-medium">
+                        {lastSaved ? `最后保存: ${formatTime(lastSaved)}` : '未保存'}
+                    </div>
+					<div className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
+                        数据源: {configSource}
+                    </div>
 				</NavbarItem>
 				<NavbarItem>
 					<Button
-						onClick={onSave}
+						onPress={onSave}
 						isDisabled={saving || validationErrors.length > 0}
 						color={saveSuccess ? 'success' : 'primary'}
+                        variant="solid"
+                        className={`font-medium ${saveSuccess ? 'bg-green-600 text-white' : 'bg-blue-600 text-white shadow-blue-200 shadow-lg'}`}
 						startContent={
 							saving ? (
 								<Loading size="sm" />
@@ -64,7 +83,7 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 							)
 						}
 					>
-						{saving ? '保存中...' : saveSuccess ? '保存成功！' : '保存'}
+						{saving ? '保存中...' : saveSuccess ? '保存成功' : '保存配置'}
 					</Button>
 				</NavbarItem>
 			</NavbarContent>
