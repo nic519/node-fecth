@@ -70,7 +70,7 @@ export class UserManager {
 				requiredFilters: requiredFilters || '',
 				ruleUrl: ruleUrl || '',
 				// fileName 有默认值 'miho-cfg.yaml'，如果未提供则使用默认值
-				fileName: fileName || 'miho-cfg.yaml',
+				fileName: fileName || `${uid}.yaml`,
 				// appendSubList 有默认值 ''，如果未提供则使用默认值
 				appendSubList: appendSubList ? JSON.stringify(appendSubList) : '',
 				ruleOverwrite: ruleOverwrite || '',

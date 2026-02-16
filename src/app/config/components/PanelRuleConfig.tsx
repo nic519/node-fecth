@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Edit } from 'lucide-react';
+import { Loader2, Edit, Link, ListFilter } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -39,7 +39,10 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="ruleUrl">规则 URL</Label>
+                <Label htmlFor="ruleUrl" className="flex items-center gap-2">
+                    <Link className="w-4 h-4" />
+                    规则模板 URL
+                </Label>
                 <Input
                     id="ruleUrl"
                     value={config.ruleUrl || ''}
@@ -54,7 +57,10 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="requiredFilters" className="text-base">需要的过滤项</Label>
+                    <Label htmlFor="requiredFilters" className="text-base flex items-center gap-2">
+                        <ListFilter className="w-4 h-4" />
+                        需要的过滤项
+                    </Label>
                     <div className="flex items-center space-x-2">
                         <Switch
                             id="enable-filters"

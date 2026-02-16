@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { PanelPreview } from './PanelPreview';
+import { Settings, Shield, RefreshCw, Key, Eye } from 'lucide-react';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -63,28 +64,32 @@ export function ConfigEditor({
 						className={cn('w-full justify-start', activeTab === 'basic' && 'bg-white shadow-sm')}
 						onClick={() => setActiveTab('basic')}
 					>
-						📝 基础配置
+						<Settings className="w-4 h-4 mr-2" />
+						基础配置
 					</Button>
 					<Button
 						variant={activeTab === 'rules' ? 'secondary' : 'ghost'}
 						className={cn('w-full justify-start', activeTab === 'rules' && 'bg-white shadow-sm')}
 						onClick={() => setActiveTab('rules')}
 					>
-						🛡️ 规则配置
+						<Shield className="w-4 h-4 mr-2" />
+						规则模板
 					</Button>
 					<Button
 						variant={activeTab === 'dynamic' ? 'secondary' : 'ghost'}
 						className={cn('w-full justify-start', activeTab === 'dynamic' && 'bg-white shadow-sm')}
 						onClick={() => setActiveTab('dynamic')}
 					>
-						🔄 订阅加载
+						<RefreshCw className="w-4 h-4 mr-2" />
+						订阅加载
 					</Button>
 					<Button
 						variant={activeTab === 'token' ? 'secondary' : 'ghost'}
 						className={cn('w-full justify-start', activeTab === 'token' && 'bg-white shadow-sm')}
 						onClick={() => setActiveTab('token')}
 					>
-						🔑 访问令牌
+						<Key className="w-4 h-4 mr-2" />
+						访问令牌
 					</Button>
 
 					<Separator className="my-2" />
@@ -94,7 +99,8 @@ export function ConfigEditor({
 						className={cn('w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50', activeTab === 'preview' && 'bg-blue-50 text-blue-700')}
 						onClick={() => setActiveTab('preview')}
 					>
-						👀 预览结果
+						<Eye className="w-4 h-4 mr-2" />
+						预览结果
 					</Button>
 				</div>
 
@@ -112,7 +118,7 @@ export function ConfigEditor({
 						{activeTab === 'preview' ? (
 							<PanelPreview uid={uid} token={token} />
 						) : (
-							<ConfigForm config={config} onChange={onConfigChange} activeTab={activeTab} />
+							<ConfigForm config={config} onChange={onConfigChange} activeTab={activeTab} uid={uid} />
 						)}
 					</div>
 				</div>

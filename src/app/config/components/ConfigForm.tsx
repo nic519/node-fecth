@@ -12,9 +12,10 @@ interface ConfigFormProps {
     onChange: (newConfig: UserConfig) => void;
     readOnly?: boolean;
     activeTab: ConfigTab;
+    uid?: string;
 }
 
-export function ConfigForm({ config, onChange, readOnly = false, activeTab }: ConfigFormProps) {
+export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid }: ConfigFormProps) {
     const handleChange = (key: keyof UserConfig, value: any) => {
         onChange({ ...config, [key]: value });
     };
@@ -22,7 +23,7 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab }: Co
     return (
         <div className="space-y-6 p-6">
             {activeTab === 'basic' && (
-                <PanelBasicConfig config={config} onChange={onChange} readOnly={readOnly} />
+                <PanelBasicConfig config={config} onChange={onChange} readOnly={readOnly} uid={uid} />
             )}
 
             {activeTab === 'rules' && (

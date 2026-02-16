@@ -3,10 +3,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrashIcon } from '@heroicons/react/24/outline';
 import { AREA_CODES } from '@/config/proxy-area.config';
 import { Checkbox } from '@/components/ui/checkbox';
 import { memo } from 'react';
+import { Link, Flag, Globe, Trash2 } from 'lucide-react';
 
 interface SubConfigCardProps {
     index: number;
@@ -41,13 +41,16 @@ export const SubConfigCard = memo(function SubConfigCard({
                         disabled={readOnly}
                         className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
                     >
-                        <TrashIcon className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                     </Button>
                 </div>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor={`sub-url-${index}`}>订阅链接</Label>
+                        <Label htmlFor={`sub-url-${index}`} className="flex items-center gap-2">
+                            <Link className="w-4 h-4" />
+                            订阅链接
+                        </Label>
                         <Input
                             id={`sub-url-${index}`}
                             value={item.subscribe}
@@ -60,7 +63,10 @@ export const SubConfigCard = memo(function SubConfigCard({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                         <div className="space-y-2">
-                            <Label htmlFor={`sub-flag-${index}`}>标识 (Flag)</Label>
+                            <Label htmlFor={`sub-flag-${index}`} className="flex items-center gap-2">
+                                <Flag className="w-4 h-4" />
+                                标识 (Flag)
+                            </Label>
                             <Input
                                 id={`sub-flag-${index}`}
                                 value={item.flag}
@@ -75,7 +81,10 @@ export const SubConfigCard = memo(function SubConfigCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>包含地区 (Include Areas)</Label>
+                            <Label className="flex items-center gap-2">
+                                <Globe className="w-4 h-4" />
+                                包含地区 (Include Areas)
+                            </Label>
                             <div className="flex flex-wrap gap-2 pt-2">
                                 {AREA_CODES.map((area) => {
                                     const isChecked = item.includeArea?.includes(area as any) || false;

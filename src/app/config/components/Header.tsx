@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { CloudArrowUpIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, CloudUpload, CheckCircle2, Loader2 } from 'lucide-react';
 import { AcmeLogo } from '../../../components/NavigationBar';
 import { cn } from '@/lib/utils';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
@@ -47,11 +46,11 @@ export function Header({ lastSaved, saving, saveSuccess, validationErrors, onSav
 								)}
 							>
 								{saving ? (
-									<ArrowPathIcon className="w-4 h-4 animate-spin mr-2" />
+									<Loader2 className="w-4 h-4 animate-spin mr-2" />
 								) : saveSuccess ? (
-									<CheckCircleIcon className="w-4 h-4 mr-2" />
+									<CheckCircle2 className="w-4 h-4 mr-2" />
 								) : (
-									<CloudArrowUpIcon className="w-4 h-4 mr-2" />
+									<CloudUpload className="w-4 h-4 mr-2" />
 								)}
 								{saving ? '保存中...' : saveSuccess ? '保存成功' : '保存配置'}
 							</Button>

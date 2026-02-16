@@ -2,7 +2,7 @@ import { UserConfig, SubConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { Settings2, Link, FileText, Filter, ListPlus, Plus } from 'lucide-react';
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback } from 'react';
 import { SubConfigCard } from './SubConfigCard';
@@ -13,9 +13,10 @@ interface BasicConfigProps {
     config: UserConfig;
     onChange: (newConfig: UserConfig) => void;
     readOnly?: boolean;
+    uid?: string;
 }
 
-export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicConfigProps) {
+export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
     const handleChange = useCallback((key: keyof UserConfig, value: any) => {
         onChange({ ...config, [key]: value });
     }, [config, onChange]);
@@ -61,12 +62,18 @@ export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicCo
             {/* Main Configuration Section */}
             <Card>
                 <CardHeader>
-                    <CardTitle>基础设置</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                        <Settings2 className="w-5 h-5" />
+                        基础设置
+                    </CardTitle>
                     <CardDescription>配置主订阅链接和全局选项</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="subscribe" className="text-base">主订阅地址</Label>
+                        <Label htmlFor="subscribe" className="text-base flex items-center gap-2">
+                            <Link className="w-4 h-4" />
+                            主订阅地址
+                        </Label>
                         <Input
                             id="subscribe"
                             value={config.subscribe || ''}
@@ -82,21 +89,27 @@ export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicCo
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="fileName">输出文件名</Label>
+                            <Label htmlFor="fileName" className="flex items-center gap-2">
+                                <FileText className="w-4 h-4" />
+                                配置显示名
+                            </Label>
                             <Input
                                 id="fileName"
                                 value={config.fileName || ''}
                                 onChange={(e) => handleChange('fileName', e.target.value)}
-                                placeholder="miho-cfg.yaml"
+                                placeholder={uid ? `${uid}.yaml` : 'miho-cfg.yaml'}
                                 readOnly={readOnly}
                             />
                             <p className="text-xs text-muted-foreground">
-                                生成的配置文件名 (默认为 miho-cfg.yaml)
+                                生成的配置文件名 (默认为 {uid ? `${uid}.yaml` : 'miho-cfg.yaml'})
                             </p>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="excludeRegex">节点排除正则</Label>
+                            <Label htmlFor="excludeRegex" className="flex items-center gap-2">
+                                <Filter className="w-4 h-4" />
+                                节点排除正则
+                            </Label>
                             <Input
                                 id="excludeRegex"
                                 value={config.excludeRegex || ''}
@@ -119,7 +132,10 @@ export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicCo
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-medium">追加订阅列表</h3>
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                            <ListPlus className="w-5 h-5" />
+                            追加订阅列表
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                             合并其他机场订阅，支持自定义筛选地区
                         </p>
@@ -131,7 +147,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicCo
                         disabled={readOnly}
                         className="flex items-center gap-1"
                     >
-                        <PlusIcon className="w-4 h-4" />
+                        <Plus className="w-4 h-4" />
                         添加订阅源
                     </Button>
                 </div>
