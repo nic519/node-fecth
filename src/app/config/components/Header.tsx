@@ -9,14 +9,13 @@ interface HeaderProps {
 	uid: string;
 	connectionStatus: 'connected' | 'disconnected';
 	lastSaved: Date | null;
-	configSource: string;
 	saving: boolean;
 	saveSuccess: boolean;
 	validationErrors: string[];
 	onSave: () => void;
 }
 
-export function Header({ uid, connectionStatus, lastSaved, configSource, saving, saveSuccess, validationErrors, onSave }: HeaderProps) {
+export function Header({ uid, connectionStatus, lastSaved, saving, saveSuccess, validationErrors, onSave }: HeaderProps) {
 	return (
 		<header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,9 +50,6 @@ export function Header({ uid, connectionStatus, lastSaved, configSource, saving,
 						<div className="text-right hidden sm:block">
 							<div className="text-xs text-gray-500 font-medium">
 								{lastSaved ? `最后保存: ${formatTime(lastSaved)}` : '未保存'}
-							</div>
-							<div className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
-								数据源: {configSource}
 							</div>
 						</div>
 						<div>

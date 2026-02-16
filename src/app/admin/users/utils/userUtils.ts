@@ -26,38 +26,6 @@ export const formatDateTime = (dateStr: string | null): string => {
 };
 
 /**
- * 获取数据源对应的样式类
- * @param source 数据源类型
- * @returns CSS 类名字符串
- */
-export const getSourceClass = (source: string): string => {
-	switch (source) {
-		case 'kv':
-			return 'bg-blue-100 text-blue-800';
-		case 'env':
-			return 'bg-green-100 text-green-800';
-		default:
-			return 'bg-gray-100 text-gray-800';
-	}
-};
-
-/**
- * 获取数据源对应的显示文本
- * @param source 数据源类型
- * @returns 显示文本
- */
-export const getSourceText = (source: string): string => {
-	switch (source) {
-		case 'kv':
-			return 'KV 存储';
-		case 'env':
-			return '环境变量';
-		default:
-			return '无配置';
-	}
-};
-
-/**
  * 获取流量使用率对应的进度条颜色
  * @param usagePercent 使用率百分比
  * @returns CSS 类名字符串

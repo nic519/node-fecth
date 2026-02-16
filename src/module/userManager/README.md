@@ -103,8 +103,6 @@ GET /api/admin/stats?superToken=xxx
 	"data": {
 		"totalUsers": 25,
 		"activeUsers": 18,
-		"kvConfigUsers": 12,
-		"envConfigUsers": 13,
 		"configCompleteRate": 92.5,
 		"todayNewUsers": 3
 	}

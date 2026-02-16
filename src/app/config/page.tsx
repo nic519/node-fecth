@@ -16,9 +16,9 @@ import { configToYaml } from '@/utils/configUtils';
 function UserConfigContent() {
 	usePageTitle('配置订阅');
 
-    const searchParams = useSearchParams();
-    const token = searchParams.get('token') || '';
-    const uid = searchParams.get('uid') || '';
+	const searchParams = useSearchParams();
+	const token = searchParams.get('token') || '';
+	const uid = searchParams.get('uid') || '';
 
 	const userConfigState = useUserConfig({ uid, token });
 	const { showHelp, toggleHelp } = useHelpDisplay();
@@ -27,10 +27,10 @@ function UserConfigContent() {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<Card className="max-w-md w-full">
-                    <CardContent className="p-6">
-					    <h1 className="text-2xl font-bold text-destructive mb-4">错误</h1>
-					    <p className="text-muted-foreground mb-4">缺少用户ID参数</p>
-                    </CardContent>
+					<CardContent className="p-6">
+						<h1 className="text-2xl font-bold text-destructive mb-4">错误</h1>
+						<p className="text-muted-foreground mb-4">缺少用户ID参数</p>
+					</CardContent>
 				</Card>
 			</div>
 		);
@@ -47,7 +47,6 @@ function UserConfigContent() {
 				uid={uid}
 				connectionStatus={userConfigState.connectionStatus}
 				lastSaved={userConfigState.lastSaved}
-				configSource={userConfigState.configSource}
 				saving={userConfigState.saving}
 				saveSuccess={userConfigState.saveSuccess}
 				validationErrors={userConfigState.validationErrors}
@@ -62,13 +61,13 @@ function UserConfigContent() {
 				) : userConfigState.error && !userConfigState.config ? (
 					<div className="flex items-center justify-center py-20">
 						<Card className="max-w-md w-full">
-                            <CardContent className="p-6">
-							    <h1 className="text-2xl font-bold text-destructive mb-4">错误</h1>
-							    <p className="text-muted-foreground mb-4">{userConfigState.error}</p>
-							    <Button onClick={() => window.location.reload()} variant="default" className="w-full">
-								    重试
-							    </Button>
-                            </CardContent>
+							<CardContent className="p-6">
+								<h1 className="text-2xl font-bold text-destructive mb-4">错误</h1>
+								<p className="text-muted-foreground mb-4">{userConfigState.error}</p>
+								<Button onClick={() => window.location.reload()} variant="default" className="w-full">
+									重试
+								</Button>
+							</CardContent>
 						</Card>
 					</div>
 				) : (
@@ -95,9 +94,9 @@ function UserConfigContent() {
 }
 
 export default function UserConfigPage() {
-    return (
-        <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-            <UserConfigContent />
-        </Suspense>
-    );
+	return (
+		<Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+			<UserConfigContent />
+		</Suspense>
+	);
 }

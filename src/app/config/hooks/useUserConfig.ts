@@ -21,7 +21,6 @@ export interface UseUserConfigReturn {
 	configPreview: any | null;
 	connectionStatus: 'connected' | 'disconnected';
 	lastSaved: Date | null;
-	configSource: string;
 
 	// 操作
 	setConfigContent: (content: string) => void;
@@ -42,7 +41,6 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const [configPreview, setConfigPreview] = useState<unknown>(null);
 	const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
-	const [configSource] = useState('cloud'); // 默认为云端
 
 	// 加载配置数据
 	const loadConfig = useCallback(async () => {
@@ -140,8 +138,6 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		configPreview,
 		connectionStatus,
 		lastSaved,
-		configSource,
-
 		// 操作
 		setConfigContent: handleSetConfigContent,
 		setYamlSyntaxErrors, // 导出用于接收 YamlEditor 的验证错误

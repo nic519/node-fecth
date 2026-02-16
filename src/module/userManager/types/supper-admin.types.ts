@@ -3,8 +3,6 @@ import { UserConfig } from "@/types/openapi-schemas";
 export interface SuperAdminStats {
 	totalUsers: number;
 	activeUsers: number;
-	kvConfigUsers: number;
-	envConfigUsers: number;
 	configCompleteRate: number;
 	todayNewUsers: number;
 }
@@ -13,8 +11,7 @@ export interface UserSummary {
 	uid: string;
 	token: string;
 	hasConfig: boolean;
-	source: 'kv' | 'env' | 'none';
-	lastModified: string | null; 
+	lastModified: string | null;
 	isActive: boolean;
 	subscribeUrl?: string;
 	status: 'active' | 'inactive' | 'disabled';

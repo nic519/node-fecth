@@ -34,8 +34,6 @@ export class SuperAdminManager {
 			const userList = await this.userManager.getAllUsers();
 			const today = new Date().toISOString().split('T')[0];
 
-			const kvConfigUsers = await this.getKvConfigUsers();
-			const envConfigUsers = await this.getEnvConfigUsers();
 			let activeUsers = 0;
 			let todayNewUsers = 0;
 
@@ -55,13 +53,11 @@ export class SuperAdminManager {
 				}
 			}
 
-			const configCompleteRate = userList.length > 0 ? ((kvConfigUsers + envConfigUsers) / userList.length) * 100 : 0;
+			const configCompleteRate = userList.length > 0 ? (activeUsers / userList.length) * 100 : 0;
 
 			return {
 				totalUsers: userList.length,
 				activeUsers,
-				kvConfigUsers,
-				envConfigUsers,
 				configCompleteRate: Math.round(configCompleteRate * 100) / 100,
 				todayNewUsers,
 			};
@@ -396,19 +392,4 @@ export class SuperAdminManager {
 		}
 	}
 
-	/**
-	 * 获取KV配置用户数量
-	 */
-	private async getKvConfigUsers(): Promise<number> {
-		// TODO: 实现获取KV配置用户数量的逻辑
-		return 0;
-	}
-
-	/**
-	 * 获取环境变量配置用户数量
-	 */
-	private async getEnvConfigUsers(): Promise<number> {
-		// TODO: 实现获取环境变量配置用户数量的逻辑
-		return 0;
-	}
 }
