@@ -1,7 +1,6 @@
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useToastContext } from '@/providers/toast-provider';
 import type { ConfigTemplate } from '@/types/user-config';
-import { useDisclosure } from '@heroui/react';
 import { useEffect, useState } from 'react';
 import type { TemplateItem } from '../components/TemplateList';
 
@@ -30,7 +29,7 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
-	handleDeleteTemplate: (templateId: string, e: any) => void;
+	handleDeleteTemplate: (templateId: string, e?: any) => void;
 	confirmDeleteTemplate: () => void;
 	handleUpdateTemplate: (field: keyof TemplateItem, value: any) => void;
 	handleUpdateConfigContent: (content: string) => void;
@@ -68,9 +67,13 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
 	// 模态框状态
-	const { isOpen: isDeleteModalOpen, onOpen: openDeleteModal, onOpenChange: closeDeleteModal } = useDisclosure();
-	const { isOpen: isErrorModalOpen, onOpenChange: closeErrorModal } = useDisclosure();
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 	const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+
+    const openDeleteModal = () => setIsDeleteModalOpen(true);
+    const closeDeleteModal = () => setIsDeleteModalOpen(false);
+    const closeErrorModal = () => setIsErrorModalOpen(false);
 
 	// 计算属性
 	const selectedTemplate = templates.find((t) => t.isSelected) || null;
@@ -131,7 +134,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		setTemplates((prev) =>
 			prev.map((template) => ({
 				...template,
-				isSelected: template.id === templateId,
+				isSelected: String(template.id) === templateId,
 			})),
 		);
 		setIsEditing(false);
@@ -183,7 +186,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
-	const handleDeleteTemplate = async (templateId: string, e: any) => {
+	const handleDeleteTemplate = async (templateId: string, e?: any) => {
 		if (e && typeof e.stopPropagation === 'function') {
 			e.stopPropagation();
 		}
@@ -212,7 +215,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 			const result = await response.json() as any;
 			if (result.code === 0) {
 				setTemplates((prev) => {
-					const newTemplates = prev.filter((t) => t.id !== templateToDelete);
+					const newTemplates = prev.filter((t) => String(t.id) !== templateToDelete);
 					if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
 						newTemplates[0].isSelected = true;
 					}

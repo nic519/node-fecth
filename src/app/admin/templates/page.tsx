@@ -3,7 +3,7 @@
 import Loading from '@/components/Loading';
 import { NavigationBar } from '@/components/NavigationBar';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Button } from '@heroui/react';
+import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { TemplateEditor } from './components/TemplateEditor';
@@ -81,12 +81,12 @@ function AdminTemplatesContent() {
 								<div className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center">
 									<h2 className="text-lg font-semibold text-gray-900">模板列表</h2>
 									<Button
-										onPress={handleCreateTemplate}
+										onClick={handleCreateTemplate}
 										size="sm"
-										color="primary"
-										variant="solid"
-										startContent={<PlusIcon className="w-4 h-4" />}
+										variant="default"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
 									>
+                                        <PlusIcon className="w-4 h-4 mr-2" />
 										新建模板
 									</Button>
 								</div>

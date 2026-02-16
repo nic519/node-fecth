@@ -1,75 +1,79 @@
 'use client';
 
 import type { ConfigTemplate } from '@/types/user-config';
-import { CheckCircleIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Button, Card, CardBody, CardHeader } from '@heroui/react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 export interface TemplateItem extends ConfigTemplate {
-	isSelected?: boolean;
-	configContent?: string;
+    configContent?: string;
+    isSelected?: boolean;
 }
 
 interface TemplateListProps {
 	templates: TemplateItem[];
-	onSelectTemplate: (templateId: string) => void;
-	onDeleteTemplate: (templateId: string, e: any) => void;
-	headerAction?: React.ReactNode;
+	onSelectTemplate: (id: string) => void;
+	onDeleteTemplate: (id: string) => void;
 }
 
-export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, headerAction }: TemplateListProps) {
-	return (
-		<Card className="flex flex-col h-full">
-			<CardHeader className="px-6 py-4 border-b border-gray-200">
-				<div className="flex justify-between items-center w-full">
-					<div className="flex-1">
-						<h3 className="text-lg font-semibold text-gray-900">配置模板</h3>
-						<p className="text-sm text-gray-500 mt-1">管理多个配置模板</p>
-					</div>
-					{headerAction && (
-						<div className="flex-shrink-0 ml-4">
-							{headerAction}
-						</div>
-					)}
-				</div>
-			</CardHeader>
+export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate }: TemplateListProps) {
+	if (templates.length === 0) {
+		return (
+			<Card className="bg-white rounded-lg shadow-sm">
+				<CardContent className="p-8 text-center text-gray-500">
+					暂无模板
+				</CardContent>
+			</Card>
+		);
+	}
 
-			{/* 模板列表 */}
-			<CardBody className="flex-1 overflow-y-auto p-0">
-				{templates.map((template) => (
-					<div
-						key={template.id}
-						className={`border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
-							template.isSelected ? 'bg-purple-50' : 'hover:bg-gray-50'
-						}`}
-					>
-						<div className="px-6 py-4 cursor-pointer" onClick={() => onSelectTemplate(String(template.id))}>
-							<div className="flex items-start justify-between">
-								<div className="flex-1 min-w-0">
-									<div className="flex items-center gap-2 mb-2">
-										<DocumentTextIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-										<span className="font-medium text-gray-900 truncate">{template.name}</span>
-										{template.isSelected && <CheckCircleIcon className="w-5 h-5 text-purple-600 flex-shrink-0" />}
-									</div>
-									<div className="text-xs text-gray-500">修改于: {template.updatedAt.split('T')[0]}</div>
-								</div>
-								<div className="flex items-center gap-1">
-									<Button
-										isIconOnly
-										size="sm"
-										variant="light"
-										color="danger"
-										onPress={(e) => onDeleteTemplate(String(template.id), e)}
-										disabled={templates.length <= 1}
-										title="删除模板"
-									>
-										<TrashIcon className="w-4 h-4" />
-									</Button>
-								</div>
+	return (
+		<div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+			{templates.map((template) => (
+				<Card
+					key={template.id}
+					className={cn(
+						"cursor-pointer transition-all border relative group hover:shadow-md bg-white",
+                        template.isSelected ? "border-blue-500 ring-1 ring-blue-500 shadow-md" : "border-gray-200 hover:border-blue-300"
+					)}
+                    onClick={() => onSelectTemplate(String(template.id))}
+				>
+					<CardContent className="p-4">
+						<div className="flex justify-between items-start">
+							<div>
+								<h3 className={cn("font-medium line-clamp-1", template.isSelected ? "text-blue-700" : "text-gray-900")}>
+                                    {template.name}
+                                </h3>
+								<p className="text-xs text-gray-500 mt-1 line-clamp-2">
+									{template.description || '无描述'}
+								</p>
 							</div>
+							<Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-2"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteTemplate(String(template.id));
+                                }}
+                            >
+                                <TrashIcon className="h-4 w-4" />
+                            </Button>
 						</div>
-					</div>
-				))}
-			</CardBody>
-		</Card>
+						<div className="mt-3 flex items-center gap-2">
+							<div className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">
+								ID: {template.id}
+							</div>
+                            {template.isSelected && (
+                                <div className="text-[10px] bg-blue-100 px-2 py-0.5 rounded text-blue-600 font-medium">
+                                    编辑中
+                                </div>
+                            )}
+						</div>
+					</CardContent>
+				</Card>
+			))}
+		</div>
 	);
 }

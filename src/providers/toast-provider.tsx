@@ -1,8 +1,11 @@
 'use client';
 
 import { useCustomToast, type Toast } from '@/hooks/useToast';
-import { Button, Card, CardBody, Chip } from '@heroui/react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import React, { createContext, useContext } from 'react';
+import { X } from 'lucide-react';
 
 interface ToastContextType {
 	showToast: (message: string, type?: 'success' | 'error' | 'info', duration?: number) => void;
@@ -42,7 +45,7 @@ interface ToastContainerProps {
 
 function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
 	return (
-		<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
+		<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2 w-full max-w-sm px-4">
 			{toasts.map((toast) => (
 				<ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
 			))}
@@ -59,42 +62,33 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 	const getColorAndIcon = () => {
 		switch (toast.type) {
 			case 'success':
-				return { color: 'success' as const, icon: '✓', label: '成功' };
+				return { variant: 'outline' as const, className: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100', icon: '✓' };
 			case 'error':
-				return { color: 'danger' as const, icon: '✕', label: '错误' };
+				return { variant: 'destructive' as const, className: '', icon: '✕' };
 			case 'info':
-				return { color: 'primary' as const, icon: 'ℹ', label: '提示' };
+				return { variant: 'default' as const, className: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100', icon: 'ℹ' };
 			default:
-				return { color: 'default' as const, icon: 'ℹ', label: '提示' };
+				return { variant: 'secondary' as const, className: '', icon: 'ℹ' };
 		}
 	};
 
-	const { color, icon } = getColorAndIcon();
+	const { variant, className, icon } = getColorAndIcon();
 
 	return (
 		<Card
-			className="max-w-sm w-full shadow-lg"
-			style={{
-				animation: 'slideInDown 0.3s ease-out',
-			}}
+			className="w-full shadow-lg overflow-hidden animate-in slide-in-from-top-2 fade-in duration-300 bg-white dark:bg-slate-950"
 		>
-			<CardBody className="flex flex-row items-start gap-3 p-4">
-				<Chip color={color} variant="flat" size="sm" className="mt-0.5">
-					<span className="font-semibold">{icon}</span>
-				</Chip>
+			<CardContent className="flex flex-row items-center gap-3 p-3">
+				<Badge variant={variant} className={`h-6 w-6 flex items-center justify-center rounded-full p-0 shrink-0 ${className}`}>
+					<span className="font-semibold text-xs">{icon}</span>
+				</Badge>
 				<div className="flex-1">
-					<p className="text-sm font-medium text-gray-700">{toast.message}</p>
+					<p className="text-sm font-medium text-foreground">{toast.message}</p>
 				</div>
-				<Button isIconOnly size="sm" variant="light" onPress={() => onRemove(toast.id)} className="min-w-6 w-6 h-6">
-					<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-						<path
-							fillRule="evenodd"
-							d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-							clipRule="evenodd"
-						/>
-					</svg>
+				<Button size="icon" variant="ghost" onClick={() => onRemove(toast.id)} className="h-6 w-6 shrink-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+					<X className="h-3 w-3" />
 				</Button>
-			</CardBody>
+			</CardContent>
 		</Card>
 	);
 }

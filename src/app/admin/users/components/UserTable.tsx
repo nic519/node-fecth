@@ -2,9 +2,18 @@
 
 import Loading from '@/components/Loading';
 import type { UserSummary } from '@/types/user-config';
-import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { formatDateTime, formatTraffic, getTrafficBarColor } from '../utils/userUtils';
 import { UserActions } from './UserActions';
+import { cn } from '@/lib/utils';
 
 export interface UserTableProps {
 	users: UserSummary[];
@@ -20,24 +29,24 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 	return (
 		<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 			<div className="overflow-x-auto">
-				<Table 
-                    aria-label="用户列表"
-                    removeWrapper
-                    classNames={{
-                        th: "bg-gray-50 text-gray-500 font-medium text-xs uppercase tracking-wider h-12 border-b border-gray-100",
-                        td: "py-3 border-b border-gray-50 text-sm group-last:border-none",
-                        base: "min-w-full",
-                    }}
-                >
-					<TableHeader>
-						<TableColumn>用户ID / 订阅链接</TableColumn>
-						<TableColumn>配置状态</TableColumn>
-						<TableColumn>流量使用情况</TableColumn>
-						<TableColumn>最后修改</TableColumn>
-						<TableColumn>操作</TableColumn>
+				<Table>
+					<TableHeader className="bg-gray-50">
+						<TableRow>
+                            <TableHead className="w-[250px] font-medium text-xs uppercase tracking-wider h-12 text-gray-500">用户ID / 订阅链接</TableHead>
+                            <TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">配置状态</TableHead>
+                            <TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">流量使用情况</TableHead>
+                            <TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">最后修改</TableHead>
+                            <TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500 text-right">操作</TableHead>
+						</TableRow>
 					</TableHeader>
-					<TableBody isLoading={loading} loadingContent={<Loading message="正在加载用户数据..." size="sm" />}>
-						{users.length === 0 && !loading && !error ? (
+					<TableBody>
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center">
+                                    <Loading message="正在加载用户数据..." size="sm" />
+                                </TableCell>
+                            </TableRow>
+                        ) : users.length === 0 && !error ? (
 							<TableRow>
 								<TableCell colSpan={5} className="text-center py-12 text-gray-500">
                                     <div className="flex flex-col items-center justify-center">
@@ -62,17 +71,16 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 										</div>
 									</TableCell>
 									<TableCell>
-										<Chip 
-                                            size="sm" 
-                                            color={user.hasConfig ? 'success' : 'danger'} 
-                                            variant="flat"
-                                            className="h-6 px-2 font-medium"
-                                            startContent={
-                                                <span className={`w-1.5 h-1.5 rounded-full ml-1 ${user.hasConfig ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                                            }
+										<Badge 
+                                            variant={user.hasConfig ? 'outline' : 'destructive'} 
+                                            className={cn(
+                                                "h-6 px-2 font-medium border-transparent",
+                                                user.hasConfig ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''
+                                            )}
                                         >
+                                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user.hasConfig ? 'bg-green-500' : 'bg-red-500'}`}></span>
 											{user.hasConfig ? '已配置' : '未配置'}
-										</Chip>
+										</Badge>
 									</TableCell>
 									<TableCell>
 										{user.trafficInfo ? (
@@ -98,7 +106,7 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 									<TableCell>
 										<div className="text-sm text-gray-600 font-mono">{formatDateTime(user.lastModified)}</div>
 									</TableCell>
-									<TableCell>
+									<TableCell className="text-right">
 										<UserActions uid={user.uid} token={user.token} onUserAction={onUserAction} />
 									</TableCell>
 								</TableRow>

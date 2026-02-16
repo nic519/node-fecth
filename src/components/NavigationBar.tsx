@@ -1,4 +1,5 @@
-import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from '@heroui/react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export interface NavigationBarProps {
 	superToken: string;
@@ -19,11 +20,7 @@ export const AcmeLogo = () => {
 	);
 };
 
-/**
- * 管理员页面通用导航栏组件
- */
 export function NavigationBar({ superToken, currentPage, title }: NavigationBarProps) {
-	// 根据当前页面设置标题
 	const pageTitle =
 		title ||
 		(currentPage === 'dashboard'
@@ -35,49 +32,49 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 					: '管理员控制台');
 
 	return (
-		<Navbar 
-            className="bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm" 
-            maxWidth="xl"
-            position="sticky"
-        >
-			<NavbarBrand className="gap-2">
-				<AcmeLogo />
-				<p className="font-bold text-gray-900 text-lg tracking-tight">{pageTitle}</p>
-			</NavbarBrand>
-			<NavbarContent className="hidden sm:flex gap-6" justify="center">
-				<NavbarItem isActive={currentPage === 'dashboard'}>
-					<Link 
-                        href={`/admin/dashboard?superToken=${superToken}`} 
-                        className={`text-sm font-medium ${currentPage === 'dashboard' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
-                        aria-current={currentPage === 'dashboard' ? 'page' : undefined}
-                    >
-						控制台
-					</Link>
-				</NavbarItem>
-				<NavbarItem isActive={currentPage === 'users'}>
-					<Link 
-                        href={`/admin/users?superToken=${superToken}`} 
-                        className={`text-sm font-medium ${currentPage === 'users' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
-                        aria-current={currentPage === 'users' ? 'page' : undefined}
-                    >
-						用户管理
-					</Link>
-				</NavbarItem>
-				<NavbarItem isActive={currentPage === 'templates'}>
-					<Link 
-                        href={`/admin/templates?superToken=${superToken}`} 
-                        className={`text-sm font-medium ${currentPage === 'templates' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
-                        aria-current={currentPage === 'templates' ? 'page' : undefined}
-                    >
-						配置模板
-					</Link>
-				</NavbarItem>
-			</NavbarContent>
-			<NavbarContent justify="end">
-				<NavbarItem className="hidden lg:flex">
-					<Link href="/" className="text-sm text-gray-500 hover:text-gray-900">返回首页</Link>
-				</NavbarItem>
-			</NavbarContent>
-		</Navbar>
+		<nav className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="flex h-16 items-center justify-between">
+					<div className="flex items-center gap-2">
+						<AcmeLogo />
+						<p className="font-bold text-gray-900 text-lg tracking-tight">{pageTitle}</p>
+					</div>
+					
+					<div className="hidden sm:flex items-center gap-6 justify-center flex-1">
+						<Link 
+                            href={`/admin/dashboard?superToken=${superToken}`} 
+                            className={cn(
+                                "text-sm font-medium transition-colors",
+                                currentPage === 'dashboard' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
+                            )}
+                        >
+							控制台
+						</Link>
+						<Link 
+                            href={`/admin/users?superToken=${superToken}`} 
+                            className={cn(
+                                "text-sm font-medium transition-colors",
+                                currentPage === 'users' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
+                            )}
+                        >
+							用户管理
+						</Link>
+						<Link 
+                            href={`/admin/templates?superToken=${superToken}`} 
+                            className={cn(
+                                "text-sm font-medium transition-colors",
+                                currentPage === 'templates' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
+                            )}
+                        >
+							配置模板
+						</Link>
+					</div>
+
+					<div className="hidden lg:flex items-center justify-end">
+						<Link href="/" className="text-sm text-gray-500 hover:text-gray-900">返回首页</Link>
+					</div>
+				</div>
+			</div>
+		</nav>
 	);
 }

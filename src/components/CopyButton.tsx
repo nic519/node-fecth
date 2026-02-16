@@ -1,28 +1,21 @@
 import { copyToClipboard } from '@/utils/configUtils';
-import { Button } from '@heroui/react';
+import { Button, ButtonProps } from '@/components/ui/button';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
-interface CopyButtonProps {
+interface CopyButtonProps extends Omit<ButtonProps, 'onError' | 'color' | 'variant'> {
 	/** 要复制的文本内容 */
 	text: string;
-	/** 按钮显示的文本 */
-	children?: React.ReactNode;
 	/** 复制成功时显示的文本 */
 	successText?: string;
 	/** 复制失败时的回调 */
 	onError?: (error: string) => void;
 	/** 复制成功时的回调 */
 	onSuccess?: () => void;
-	/** 按钮的样式属性 */
-	className?: string;
-	/** 按钮的颜色 */
-	color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
-	/** 按钮的变体 */
-	variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
-	/** 按钮的大小 */
-	size?: 'sm' | 'md' | 'lg';
-	/** 是否禁用按钮 */
-	disabled?: boolean;
+	/** 兼容 HeroUI color 属性 (已废弃，请使用 className) */
+	color?: string;
+    /** 按钮变体 */
+    variant?: ButtonProps['variant'] | 'flat';
 	/** 开始图标 */
 	startContent?: React.ReactNode;
 	/** 结束图标 */
@@ -36,12 +29,13 @@ export function CopyButton({
 	onError,
 	onSuccess,
 	className,
-	color = 'primary',
-	variant = 'solid',
+	variant = 'default',
 	size = 'sm',
 	disabled = false,
+	color,
 	startContent,
 	endContent,
+	...props
 }: CopyButtonProps) {
 	const [copySuccess, setCopySuccess] = useState(false);
 
@@ -61,18 +55,24 @@ export function CopyButton({
 		}
 	};
 
+	// Map HeroUI "flat" variant to "secondary" or "ghost"
+	const mappedVariant = (variant as string) === 'flat' ? 'secondary' : variant;
+
 	return (
 		<Button
-			onPress={handleCopy}
-			color={copySuccess ? 'success' : color}
-			variant={variant}
+			onClick={handleCopy}
+			variant={mappedVariant as ButtonProps['variant']}
 			size={size}
-			className={className}
+			className={cn(
+				copySuccess && "bg-green-600 hover:bg-green-700 text-white border-green-600",
+				className
+			)}
 			disabled={disabled}
-			startContent={startContent}
-			endContent={endContent}
+			{...props}
 		>
+			{startContent && <span className="mr-2 flex items-center">{startContent}</span>}
 			{copySuccess ? successText : children}
+			{endContent && <span className="ml-2 flex items-center">{endContent}</span>}
 		</Button>
 	);
 }

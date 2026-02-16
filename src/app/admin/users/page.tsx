@@ -11,8 +11,19 @@ import { NavigationBar } from '@/components/NavigationBar';
 import { UserFilters } from './components/UserFilters';
 import { UserTable } from './components/UserTable';
 
-// 导入HeroUI组件
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+// 导入UI组件
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Loader2 } from 'lucide-react';
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -73,13 +84,13 @@ function AdminUsersContent() {
 							<span>共 {filteredUsers.length} 条记录</span>
 						</div>
 						<div className="flex gap-1">
-							<Button size="sm" variant="flat" radius="lg" className="bg-gray-100 text-gray-400 rounded-lg" disabled>
+							<Button size="sm" variant="outline" className="bg-gray-100 text-gray-400 border-transparent" disabled>
 								上一页
 							</Button>
-							<Button size="sm" variant="solid" radius="lg" className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-sm">
+							<Button size="sm" variant="default" className="bg-blue-600 text-white hover:bg-blue-700 shadow-sm">
 								1
 							</Button>
-							<Button size="sm" variant="flat" radius="lg" className="bg-gray-100 text-gray-400 rounded-lg" disabled>
+							<Button size="sm" variant="outline" className="bg-gray-100 text-gray-400 border-transparent" disabled>
 								下一页
 							</Button>
 						</div>
@@ -88,75 +99,73 @@ function AdminUsersContent() {
 			</main>
 
 			{/* 删除用户确认模态框 */}
-			<Modal isOpen={deleteModal.isOpen} onOpenChange={deleteModal.close}>
-				<ModalContent>
-					{(onClose) => (
-						<>
-							<ModalHeader className="flex flex-col gap-1">确认删除用户</ModalHeader>
-							<ModalBody>
-								<p>确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！</p>
-							</ModalBody>
-							<ModalFooter>
-								<Button color="default" variant="flat" radius="lg" className="bg-gray-100 text-gray-700 rounded-lg" onPress={onClose}>
-									取消
-								</Button>
-								<Button color="danger" radius="lg" className="rounded-lg" onPress={deleteModal.confirm} isLoading={loading}>
-									删除
-								</Button>
-							</ModalFooter>
-						</>
-					)}
-				</ModalContent>
-			</Modal>
+			<Dialog open={deleteModal.isOpen} onOpenChange={(open) => !open && deleteModal.close()}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>确认删除用户</DialogTitle>
+                        <DialogDescription>
+                            确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！
+                        </DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="secondary" onClick={deleteModal.close}>
+							取消
+						</Button>
+						<Button variant="destructive" onClick={deleteModal.confirm} disabled={loading}>
+							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							删除
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			{/* 添加用户模态框 */}
-			<Modal isOpen={addUserModal.isOpen} onOpenChange={addUserModal.close}>
-				<ModalContent>
-					{(onClose) => (
-						<>
-							<ModalHeader className="flex flex-col gap-1">添加新用户</ModalHeader>
-							<ModalBody>
-								<div className="space-y-4">
-									<Input
-										label="用户ID"
-										placeholder="请输入用户ID"
-										value={addUserModal.form.uid}
-										onChange={(e) => addUserModal.setUid(e.target.value)}
-										variant="bordered"
-									/>
-									<Input
-										label="访问令牌"
-										placeholder="请输入用户访问令牌"
-										value={addUserModal.form.token}
-										onChange={(e) => addUserModal.setToken(e.target.value)}
-										variant="bordered"
-									/>
-									<Input
-										label="订阅链接"
-										placeholder="请输入订阅链接"
-										value={addUserModal.form.subscribe}
-										onChange={(e) => addUserModal.setSubscribe(e.target.value)}
-										variant="bordered"
-									/>
-								</div>
-							</ModalBody>
-							<ModalFooter>
-								<Button color="default" variant="flat" radius="lg" className="bg-gray-100 text-gray-700 rounded-lg" onPress={onClose}>
-									取消
-								</Button>
-								<Button
-									onPress={addUserModal.confirm}
-									isLoading={loading}
-									radius="lg"
-									className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 rounded-lg"
-								>
-									添加
-								</Button>
-							</ModalFooter>
-						</>
-					)}
-				</ModalContent>
-			</Modal>
+			<Dialog open={addUserModal.isOpen} onOpenChange={(open) => !open && addUserModal.close()}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>添加新用户</DialogTitle>
+					</DialogHeader>
+					<div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>用户ID</Label>
+                            <Input
+                                placeholder="请输入用户ID"
+                                value={addUserModal.form.uid}
+                                onChange={(e) => addUserModal.setUid(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>访问令牌</Label>
+                            <Input
+                                placeholder="请输入用户访问令牌"
+                                value={addUserModal.form.token}
+                                onChange={(e) => addUserModal.setToken(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>订阅链接</Label>
+                            <Input
+                                placeholder="请输入订阅链接"
+                                value={addUserModal.form.subscribe}
+                                onChange={(e) => addUserModal.setSubscribe(e.target.value)}
+                            />
+                        </div>
+					</div>
+					<DialogFooter>
+						<Button variant="secondary" onClick={addUserModal.close}>
+							取消
+						</Button>
+						<Button
+							onClick={addUserModal.confirm}
+							disabled={loading}
+							className="bg-blue-600 hover:bg-blue-700 text-white"
+						>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							添加
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
