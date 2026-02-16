@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
 import { ValidationMessage } from './ValidationMessage';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, CheckCircle } from 'lucide-react';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -30,11 +30,14 @@ export function ConfigEditor({
 	return (
 		<Card className="w-full flex flex-col shadow-sm border border-gray-200 bg-white rounded-xl overflow-hidden">
 			<CardHeader className="flex flex-row items-center justify-between px-6 py-4 bg-white space-y-0">
-				<div>
+				<div className="flex flex-row items-center gap-4">
 					<h3 className="text-lg font-bold text-gray-900">配置编辑器</h3>
-					<p className="text-sm text-muted-foreground mt-1">
-						直接编辑 YAML 配置文件，保存后即时生效
-					</p>
+					{validationErrors.length === 0 && configPreview && (
+						<div className="flex items-center text-xs font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-100">
+							<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
+							配置格式正确
+						</div>
+					)}
 				</div>
 				<Button
 					onClick={onToggleHelp}
@@ -50,9 +53,11 @@ export function ConfigEditor({
 
 			<CardContent className="flex-1 flex flex-col min-h-0 p-0">
 				{/* 验证消息 */}
-				<div className="px-6 pt-6">
-					<ValidationMessage validationErrors={validationErrors} configPreview={configPreview} />
-				</div>
+				{validationErrors.length > 0 && (
+					<div className="px-6 pt-6">
+						<ValidationMessage validationErrors={validationErrors} />
+					</div>
+				)}
 
 				{/* YAML 编辑器区域 */}
 				<div className="flex-1 min-h-[500px] relative border-y border-gray-100">
