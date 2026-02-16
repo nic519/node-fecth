@@ -4,7 +4,6 @@ import {
 	AreaCodeSchema,
 	ConfigResponseSchema,
 	SubConfigSchema,
-	UserConfigMetaSchema,
 	UserConfigSchema,
 } from '@/types/schema.user';
 
@@ -139,11 +138,9 @@ export {
 	AreaCodeSchema,
 	ConfigResponseSchema,
 	SubConfigSchema,
-	UserConfigMetaSchema,
 	UserConfigSchema,
 	type IScUserApiModel,
 	type IUserConfig as UserConfig,
-	type IUserConfigMeta as UserConfigMeta,
 } from '@/types/schema.user';
 
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
@@ -171,11 +168,10 @@ export type RefreshTrafficResponse = z.infer<typeof RefreshTrafficResponseSchema
 // 管理员API 额外 Schemas
 // =============================================================================
 
-// 用户详情 Schema（使用顶部导入的 UserConfigSchema 和 UserConfigMetaSchema）
+// 用户详情 Schema（使用顶部导入的 UserConfigSchema
 export const UserDetailsSchema = z.object({
 	uid: z.string().describe('用户ID'),
 	config: UserConfigSchema.describe('用户配置'),
-	meta: UserConfigMetaSchema.describe('配置元数据'),
 	trafficInfo: TrafficInfoSchema.optional().describe('流量信息'),
 });
 

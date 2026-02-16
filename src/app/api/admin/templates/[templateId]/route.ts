@@ -1,8 +1,9 @@
 import { getDb } from '@/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
+import { ScTemplateCreateReq } from '@/types/schema.template';
+import { ResponseCodes } from '@/types/openapi-schemas';
 import { eq } from 'drizzle-orm';
-import { NextResponse } from 'next/server';
 import { withAuth } from '@/utils/apiMiddleware';
 
 // PUT: 更新模板
@@ -11,12 +12,14 @@ export const PUT = withAuth(async (request, { params }) => {
   const { templateId } = await params;
 
   try {
-    const body = await request.json() as { name: string; description?: string; content: string };
-    const { name, description, content } = body;
+    const body = await request.json();
+    const validationResult = ScTemplateCreateReq.safeParse(body);
 
-    if (!name || !content) {
-      return NextResponse.json({ code: 400, msg: 'Missing name or content' }, { status: 400 });
+    if (!validationResult.success) {
+      return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);
     }
+
+    const { name, description, content } = validationResult.data;
 
     const db = getDb(env);
     const now = new Date().toISOString();
@@ -26,14 +29,16 @@ export const PUT = withAuth(async (request, { params }) => {
       .where(eq(templates.id, templateId))
       .execute();
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success',
-      data: { id: templateId, name, description, content, updatedAt: now }
+    return ResponseUtils.success({
+      id: templateId,
+      name,
+      description,
+      content,
+      updatedAt: now
     });
   } catch (error) {
     console.error('更新模板失败:', error);
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+    return ResponseUtils.handleApiError(error);
   }
 }, { adminOnly: true });
 
@@ -46,10 +51,7 @@ export const DELETE = withAuth(async (_, { params }) => {
     const db = getDb(env);
     await db.delete(templates).where(eq(templates.id, templateId)).execute();
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success'
-    });
+    return ResponseUtils.success(null);
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }

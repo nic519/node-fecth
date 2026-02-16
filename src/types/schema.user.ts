@@ -25,13 +25,6 @@ export const UserConfigSchema = z.object({
 	excludeRegex: z.string().optional(),
 });
 
-// 配置元数据 Schema（兼容旧的 KV 存储模式）
-export const UserConfigMetaSchema = z.object({
-	lastModified: z.string(),
-	source: z.enum(['kv', 'env', 'd1']), // 添加 d1 来源
-	uid: z.string(),
-});
-
 // 配置响应 Schema（兼容旧接口）
 export const ConfigResponseSchema = z.object({
 	config: UserConfigSchema,
@@ -125,8 +118,7 @@ export const ScBaseResponse = z.object({
 // 用户详情响应 Schema（普通用户获取自己的配置）
 export const ScUserDetailResponse = ScBaseResponse.extend({
 	data: z.object({
-		config: UserConfigSchema,
-		meta: UserConfigMetaSchema,
+		config: UserConfigSchema
 	}),
 });
 
@@ -176,7 +168,7 @@ export const ScUserDeleteResponse = ScBaseResponse.extend({
 export type IScUserDbModel = z.infer<typeof ScUserDbModel>;
 export type IScUserApiModel = z.infer<typeof ScUserApiModel>;
 export type IUserConfig = z.infer<typeof UserConfigSchema>;
-export type IUserConfigMeta = z.infer<typeof UserConfigMetaSchema>;
+
 
 // 请求参数类型
 export type IScUserTokenParams = z.infer<typeof ScUserTokenParams>;

@@ -3,6 +3,7 @@ import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { UserConfig } from '@/types/openapi-schemas';
 import { withAuth } from '@/utils/apiMiddleware';
 
+/// 获取所有用户信息
 export const GET = withAuth(async () => {
   const env = process.env as unknown as Env;
 
@@ -22,6 +23,7 @@ export const GET = withAuth(async () => {
   }
 }, { adminOnly: true });
 
+/// 创建新用户
 export const POST = withAuth(async (request) => {
   const env = process.env as unknown as Env;
 
