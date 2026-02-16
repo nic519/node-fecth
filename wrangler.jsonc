@@ -1,0 +1,37 @@
+{
+  "name": "node-fetch",
+  "compatibility_date": "2025-05-05",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "node-fetch-db",
+      "database_id": "7b3a5b77-a944-42e8-a822-614840ff97f9"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV_BINDING",
+      "id": "52fa82d5a9c3438195385f592be41ef9"
+    },
+    {
+      "binding": "USERS_KV",
+      "id": "52fa82d5a9c3438195385f592be41ef9"
+    }
+  ],
+  "observability": {
+    "logs": {
+      "enabled": true
+    }
+  },
+  "vars": {
+    "DB_USER": "{}"
+  }
+}

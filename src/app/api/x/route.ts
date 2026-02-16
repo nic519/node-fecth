@@ -3,12 +3,9 @@ import { AuthUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/lib/clashHandler';
 import { InnerUser } from '@/module/userManager/innerUserConfig';
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
-export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
-  const { env } = getRequestContext<Env & Record<string, unknown>>();
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const uid = searchParams.get('uid');
 

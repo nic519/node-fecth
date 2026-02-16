@@ -2,15 +2,12 @@
 import { getDb } from '@/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 // GET: 获取模板列表
 export async function GET(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
 
@@ -36,7 +33,7 @@ export async function GET(request: NextRequest) {
 
 // POST: 创建模板
 export async function POST(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
 

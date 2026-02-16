@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserManager } from '@/module/userManager/userManager';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { UserConfig } from '@/types/openapi-schemas';
-
-export const runtime = 'edge';
 
 // GET: 获取用户配置
 export async function GET(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const uid = searchParams.get('uid');
   const token = searchParams.get('token');
@@ -53,7 +50,7 @@ export async function GET(request: NextRequest) {
 
 // PUT: 更新用户配置
 export async function PUT(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const uid = searchParams.get('uid');
   const token = searchParams.get('token');

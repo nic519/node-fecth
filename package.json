@@ -5,6 +5,9 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
+		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
 		"start": "next start",
 		"lint": "eslint",
 		"db:generate": "drizzle-kit generate",
@@ -41,8 +44,8 @@
 		"zustand": "^5.0.11"
 	},
 	"devDependencies": {
-		"@cloudflare/next-on-pages": "^1.13.16",
 		"@cloudflare/workers-types": "^4.20260214.0",
+		"@opennextjs/cloudflare": "^1.16.5",
 		"@tailwindcss/postcss": "^4",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^20",

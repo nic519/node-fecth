@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
-export const runtime = 'edge';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const { env } = getRequestContext<Env & Record<string, unknown>>();
+  const env = process.env as unknown as Env;
   const { templateId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const download = searchParams.get('download');

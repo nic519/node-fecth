@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { UserConfig } from '@/types/openapi-schemas';
 
-export const runtime = 'edge';
-
 export async function GET(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
 
@@ -31,7 +28,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
 

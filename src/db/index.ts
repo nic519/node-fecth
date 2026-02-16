@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './schema';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export function getDb(env?: any) {
   // If env is passed explicitly (legacy), use it
@@ -9,22 +8,14 @@ export function getDb(env?: any) {
     return drizzle(env.DB, { schema });
   }
 
-  // Otherwise try to get from request context
-  try {
-    const context = getRequestContext();
-    // Force cast to any to bypass strict type checks during migration
-    const contextEnv = context.env as any;
-
-    if (contextEnv && contextEnv.DB) {
-      return drizzle(contextEnv.DB, { schema });
-    }
-  } catch {
-    // Ignore error if not in request context
+  // Otherwise try to get from process.env (OpenNext)
+  const processEnv = process.env as any;
+  if (processEnv && processEnv.DB) {
+    return drizzle(processEnv.DB, { schema });
   }
 
   // Fallback or error
   console.warn("DB binding not found, verify context");
-  // Fallback for missing DB binding
   return drizzle(env?.DB || {}, { schema });
 }
 

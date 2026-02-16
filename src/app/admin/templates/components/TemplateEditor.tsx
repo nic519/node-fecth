@@ -29,6 +29,7 @@ interface TemplateEditorProps {
 	onCopyConfigContent: () => void;
 	onCopyTemplateUrl: () => void;
 	saving: boolean;
+	loading?: boolean;
 }
 
 export function TemplateEditor({
@@ -46,6 +47,7 @@ export function TemplateEditor({
 	onCopyConfigContent,
 	onCopyTemplateUrl,
 	saving,
+	loading,
 }: TemplateEditorProps) {
 	if (!selectedTemplate) {
 		return (
@@ -83,13 +85,13 @@ export function TemplateEditor({
 			<CardContent className="flex-1 flex flex-col p-6 overflow-hidden">
 				{isEditing && (
 					<div className="mb-4 space-y-3">
-                        <div className="space-y-1.5">
-                            <Label>模板名称</Label>
-						    <Input
-							    value={selectedTemplate.name}
-							    onChange={(e) => onUpdateTemplate('name', e.target.value)}
-						    />
-                        </div>
+						<div className="space-y-1.5">
+							<Label>模板名称</Label>
+							<Input
+								value={selectedTemplate.name}
+								onChange={(e) => onUpdateTemplate('name', e.target.value)}
+							/>
+						</div>
 					</div>
 				)}
 
@@ -143,7 +145,7 @@ export function TemplateEditor({
 							variant="default"
 							className="bg-blue-600 text-white hover:bg-blue-700"
 						>
-                            <DocumentArrowDownIcon className="w-4 h-4 mr-2" />
+							<DocumentArrowDownIcon className="w-4 h-4 mr-2" />
 							下载配置
 						</Button>
 						<Button size="sm" variant="secondary" onClick={onCopyConfigContent}>
@@ -152,10 +154,10 @@ export function TemplateEditor({
 						<Button
 							size="sm"
 							variant="default"
-                            className="bg-green-600 text-white hover:bg-green-700"
+							className="bg-green-600 text-white hover:bg-green-700"
 							onClick={onCopyTemplateUrl}
 						>
-                            <LinkIcon className="w-4 h-4 mr-2" />
+							<LinkIcon className="w-4 h-4 mr-2" />
 							复制链接
 						</Button>
 					</div>
@@ -170,7 +172,7 @@ export function TemplateEditor({
 								size="sm"
 								className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
 							>
-                                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 								保存配置
 							</Button>
 						</div>

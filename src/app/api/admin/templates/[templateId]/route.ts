@@ -1,18 +1,15 @@
 import { getDb } from '@/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-
-export const runtime = 'edge';
 
 // PUT: 更新模板
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const { templateId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
@@ -53,7 +50,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const { env } = getRequestContext() as unknown as { env: Env };
+  const env = process.env as unknown as Env;
   const { templateId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const superToken = searchParams.get('superToken');
