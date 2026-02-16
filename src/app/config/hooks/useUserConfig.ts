@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ConfigResponse, UserConfig } from '@/types/user-config';
+import type { UserConfig } from '@/types/user-config';
 import { UserConfigSchema } from '@/types/openapi-schemas';
 import { userService } from '@/services/userService';
 
@@ -73,7 +73,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		// 验证配置
 		const result = UserConfigSchema.safeParse(config);
 		if (!result.success) {
-			setValidationErrors(result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`));
+			setValidationErrors(result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`));
 			return;
 		}
 		setValidationErrors([]);
