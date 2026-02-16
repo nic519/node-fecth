@@ -6,6 +6,12 @@ import { Button } from '@/components/ui/button';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { AREA_CODES } from '@/config/proxy-area.config';
 
+const EMOJIS = ['😀', '🚀', '🌟', '🎉', '🔥', '🌈', '🍕', '🎈', '🐱', '🐶', '🌺', '🍎', '⚽', '🎸', '🚗', '✈️', '💡', '📚', '💎', '🎁', '⚡', '🌙', '☀️', '🌊', '🍔', '🍦', '🍩', '🍪', '🍫', '🍭', '🍬', '🎮', '🕹️', '🎲', '🎨', '🎭', '🎪', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎻', '🎬', '📷', '📹', '📼', '🔍', '🔎', '🕯️', '💡', '🔦', '🏮', '📔', '📕', '📖', '📗', '📘', '📙', '📚', '📓', '📒', '📃', '📜', '📄', '📰', '🗞️', '📑', '🔖', '🏷️', '💰', '💴', '💵', '💶', '💷', '💸', '💳', '🧾', '✉️', '📧', '📨', '📩', '📤', '📥', '📦', '📫', '📪', '📬', '📭', '📮', '🗳️', '✏️', '✒️', '🖋️', '🖊️', '🖌️', '🖍️', '📝', '💼', '📁', '📂', '🗂️', '📅', '📆', '🗒️', '🗓️', '📇', '📈', '📉', '📊', '📋', '📌', '📍', '📎', '🖇️', '📏', '📐', '✂️', '🗃️', '🗄️', '🗑️', '🔒', '🔓', '🔏', '🔐', '🔑', '🗝️', '🔨', '🪓', '⛏️', '⚒️', '🛠️', '🗡️', '⚔️', '🔫', '🏹', '🛡️', '🔧', '🔩', '⚙️', '🗜️', '⚖️', '🔗', '⛓️', '🧰', '🧲', '⚗️', '🧪', '🧫', '🧬', '🔬', '🔭', '📡', '💉', '💊', '🚪', '🛏️', '🛋️', '🚽', '🚿', '🛁', '🪑', '🧹', '🧺', '💨', '☁️', '⛈️', '🌩️', '🌪️', '🌫️', '🌂', '☂️', '⛱️', '⚡', '❄️', '☃️', '⛄', '☄️', '🔥', '💧', '🌊'];
+
+const getRandomEmoji = () => {
+    return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+};
+
 interface BasicConfigProps {
     config: UserConfig;
     onChange: (newConfig: UserConfig) => void;
@@ -21,7 +27,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
         const currentList = config.appendSubList || [];
         const newItem: SubConfig = {
             subscribe: '',
-            flag: '',
+            flag: getRandomEmoji(),
             includeArea: []
         };
         handleChange('appendSubList', [...currentList, newItem]);
@@ -91,7 +97,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                     readOnly={readOnly}
                 />
                 <p className="text-sm text-muted-foreground">
-                    可选。用于排除不需要的节点的正则表达式。
+                    可选。用于排除不需要的节点的正则表达式。如：Standard|3.0x|2.0x
                 </p>
             </div>
 
@@ -144,8 +150,8 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                         />
                                     </div>
 
-                                    <div className="flex flex-col md:flex-row gap-4 items-start">
-                                        <div className="space-y-2 w-full md:w-32 flex-shrink-0">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                                        <div className="space-y-2">
                                             <Label htmlFor={`sub-flag-${index}`}>标识</Label>
                                             <Input
                                                 id={`sub-flag-${index}`}
@@ -155,9 +161,10 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                                 readOnly={readOnly}
                                                 maxLength={5}
                                             />
+                                            <p className="text-xs text-muted-foreground mt-1">作为名称的前缀，方便辨认</p>
                                         </div>
 
-                                        <div className="space-y-2 flex-grow">
+                                        <div className="space-y-2">
                                             <Label>包含地区</Label>
                                             <div className="flex flex-wrap gap-4 pt-2">
                                                 {AREA_CODES.map((area) => (
