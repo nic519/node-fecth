@@ -1,10 +1,10 @@
 import { GlobalConfig } from '@/config/global-config';
 import { logger } from './network.config';
+import { getDb } from '@/db';
+import { dynamic } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 // ==================== 常量定义 ====================
-
-/** KV缓存键前缀 */
-const KV_KEY_PREFIX = 'clash-sub:';
 
 /** 缓存有效期：5分钟 */
 const CACHE_TTL = 5 * 60 * 1000;
@@ -21,10 +21,14 @@ interface ClashContent {
 // ==================== 工具函数 ====================
 
 /**
- * 生成KV存储键
+ * 计算字符串Hash (SHA-256)
  */
-function generateKvKey(url: string): string {
-	return `${KV_KEY_PREFIX}${url}`;
+async function hashUrl(message: string): Promise<string> {
+	const msgUint8 = new TextEncoder().encode(message);
+	const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+	return hashHex;
 }
 
 /**
@@ -73,7 +77,7 @@ function calculateSize(data: string): { bytes: number; mb: string } {
  * 提供订阅内容获取、KV缓存管理等功能
  */
 export class ProxyFetch {
-	constructor(private readonly clashSubUrl: string) {}
+	constructor(private readonly clashSubUrl: string) { }
 
 	// ==================== 公共方法 ====================
 
@@ -107,61 +111,90 @@ export class ProxyFetch {
 	// ==================== 私有方法 - 缓存管理 ====================
 
 	/**
-	 * 从KV读取缓存数据（内部方法）
+	 * 从数据库读取缓存数据（内部方法）
 	 */
 	private async fetchFromKVInternal(): Promise<ClashContent | null> {
 		const env = GlobalConfig.env;
-		const key = generateKvKey(this.clashSubUrl);
-		const data = await env?.USERS_KV.get(key);
+		const db = getDb(env);
+		const url = this.clashSubUrl;
 
-		if (!data) {
-			logger.debug({ key }, '缓存不存在');
+		try {
+			const id = await hashUrl(url);
+			const [result] = await db.select().from(dynamic).where(eq(dynamic.id, id)).limit(1);
+
+			if (!result) {
+				logger.debug({ id, url }, '缓存不存在');
+				return null;
+			}
+
+			// 如果状态不是SUCCESS，视为无缓存
+			if (result.status !== 'SUCCESS') {
+				return null;
+			}
+
+			const { mb } = calculateSize(result.content);
+			logger.debug({ size: `${mb}MB`, id }, '读取缓存');
+
+			return {
+				subInfo: result.traffic || '',
+				content: result.content,
+				fetchTime: new Date(result.updatedAt),
+			};
+		} catch (error) {
+			logger.error(
+				{
+					error: error instanceof Error ? error.message : String(error),
+					url,
+				},
+				'从数据库读取缓存失败'
+			);
 			return null;
 		}
-
-		const { mb } = calculateSize(data);
-		logger.debug({ size: `${mb}MB` }, '读取缓存');
-
-		// 解析缓存数据
-		const parsed = safeJsonParse<ClashContent>(data, null);
-		if (!parsed) {
-			logger.error({ key }, '缓存数据损坏，将清除');
-			await this.clearCache();
-			return null;
-		}
-
-		return parsed;
 	}
 
 	/**
-	 * 保存内容到KV缓存
+	 * 保存内容到KV缓存 (实际是数据库)
 	 */
 	private async saveToKV(data: ClashContent): Promise<boolean> {
 		const env = GlobalConfig.env;
-		if (!env?.USERS_KV) {
-			logger.error('KV环境未初始化');
-			return false;
-		}
+		const db = getDb(env);
+		const url = this.clashSubUrl;
 
-		const key = generateKvKey(this.clashSubUrl);
-		const jsonString = JSON.stringify(data);
-
-		// 检查大小限制
-		const { bytes, mb } = calculateSize(jsonString);
-		logger.debug({ size: `${mb}MB`, bytes }, '准备保存缓存');
+		const { mb } = calculateSize(data.content);
 
 		try {
-			// 写入KV（Cloudflare KV 的 put 操作是可靠的，成功返回即表示数据会被持久化）
-			await env.USERS_KV.put(key, jsonString);
-			logger.info({ key, size: `${mb}MB` }, '缓存已写入KV');
+			const id = await hashUrl(url);
+			logger.debug({ size: `${mb}MB`, id }, '准备保存缓存到数据库');
+
+			await db
+				.insert(dynamic)
+				.values({
+					id,
+					url,
+					content: data.content,
+					traffic: data.subInfo,
+					status: 'SUCCESS',
+					updatedAt: data.fetchTime.toISOString(),
+				})
+				.onConflictDoUpdate({
+					target: dynamic.id,
+					set: {
+						content: data.content,
+						traffic: data.subInfo,
+						status: 'SUCCESS',
+						updatedAt: data.fetchTime.toISOString(),
+					},
+				});
+
+			logger.info({ id, url, size: `${mb}MB` }, '缓存已写入数据库');
 			return true;
 		} catch (error) {
 			logger.error(
 				{
 					error: error instanceof Error ? error.message : String(error),
-					key,
+					url,
 				},
-				'KV保存失败'
+				'数据库保存失败'
 			);
 			return false;
 		}
@@ -172,16 +205,18 @@ export class ProxyFetch {
 	 */
 	private async clearCache(): Promise<void> {
 		const env = GlobalConfig.env;
-		const key = generateKvKey(this.clashSubUrl);
+		const db = getDb(env);
+		const url = this.clashSubUrl;
 
 		try {
-			await env?.USERS_KV.delete(key);
-			logger.info({ key }, '缓存已清除');
+			const id = await hashUrl(url);
+			await db.delete(dynamic).where(eq(dynamic.id, id));
+			logger.info({ id, url }, '缓存已清除');
 		} catch (error) {
 			logger.error(
 				{
 					error: error instanceof Error ? error.message : String(error),
-					key,
+					url,
 				},
 				'清除缓存失败'
 			);
