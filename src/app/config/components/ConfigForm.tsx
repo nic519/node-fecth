@@ -1,4 +1,3 @@
-
 import { UserConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +35,7 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab }: Co
 
             {activeTab === 'token' && (
                 <div className="space-y-2">
-                    <Label htmlFor="accessToken">访问令牌 (Access Token)</Label>
+                    <Label htmlFor="accessToken">访问令牌</Label>
                     <Input
                         id="accessToken"
                         value={config.accessToken || ''}

@@ -57,7 +57,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
     return (
         <>
             <div className="space-y-2">
-                <Label htmlFor="subscribe">订阅地址 (Subscribe URL)</Label>
+                <Label htmlFor="subscribe">订阅地址</Label>
                 <Input
                     id="subscribe"
                     value={config.subscribe || ''}
@@ -69,7 +69,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="fileName">文件名 (File Name)</Label>
+                <Label htmlFor="fileName">文件名</Label>
                 <Input
                     id="fileName"
                     value={config.fileName || ''}
@@ -83,7 +83,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="excludeRegex">排除正则 (Exclude Regex)</Label>
+                <Label htmlFor="excludeRegex">排除正则</Label>
                 <Input
                     id="excludeRegex"
                     value={config.excludeRegex || ''}
@@ -98,7 +98,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <Label className="text-base font-semibold">追加订阅列表 (Append Sub List)</Label>
+                    <Label className="text-base font-semibold">追加订阅列表</Label>
                     <Button
                         variant="outline"
                         size="sm"
@@ -135,7 +135,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor={`sub-url-${index}`}>订阅链接 (Subscribe URL)</Label>
+                                        <Label htmlFor={`sub-url-${index}`}>订阅链接</Label>
                                         <Input
                                             id={`sub-url-${index}`}
                                             value={item.subscribe}
@@ -145,7 +145,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor={`sub-flag-${index}`}>标识 (Flag)</Label>
+                                        <Label htmlFor={`sub-flag-${index}`}>标识</Label>
                                         <Input
                                             id={`sub-flag-${index}`}
                                             value={item.flag}
@@ -157,7 +157,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>包含地区 (Include Area)</Label>
+                                    <Label>包含地区</Label>
                                     <div className="flex flex-wrap gap-4">
                                         {AREA_CODES.map((area) => (
                                             <div key={`${index}-${area}`} className="flex items-center space-x-2">

@@ -13,12 +13,8 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
-import yaml from 'js-yaml';
 import Editor from '@monaco-editor/react';
-
-const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/refs/heads/main/miho-cfg.yaml';
-const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "自动"];
+import { useRuleConfig } from '../hooks/useRuleConfig';
 
 interface RuleConfigProps {
     config: UserConfig;
@@ -27,115 +23,23 @@ interface RuleConfigProps {
 }
 
 export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigProps) {
-    const handleChange = (key: keyof UserConfig, value: any) => {
-        onChange({ ...config, [key]: value });
-    };
-
-    // Filter Logic
-    const [filterOptions, setFilterOptions] = useState<string[]>([]);
-    const [loadingFilters, setLoadingFilters] = useState(false);
-    const [filterError, setFilterError] = useState<string | null>(null);
-    const [enableCustomFilters, setEnableCustomFilters] = useState(!!config.requiredFilters);
-
-    const isMandatory = (option: string) => {
-        return MANDATORY_KEYWORDS.some(keyword => option.includes(keyword));
-    };
-
-    // Sync enable state with config
-    useEffect(() => {
-        if (config.requiredFilters) {
-            setEnableCustomFilters(true);
-        }
-    }, [config.requiredFilters]);
-
-    // Ensure mandatory filters are selected when options are available and filters are enabled
-    useEffect(() => {
-        if (enableCustomFilters && filterOptions.length > 0) {
-            const currentFilters = config.requiredFilters ? config.requiredFilters.split(',').map(s => s.trim()) : [];
-            const mandatoryFilters = filterOptions.filter(isMandatory);
-
-            const missingMandatory = mandatoryFilters.filter(m => !currentFilters.includes(m));
-
-            if (missingMandatory.length > 0) {
-                const newFilters = [...currentFilters, ...missingMandatory];
-                handleChange('requiredFilters', newFilters.join(','));
-            }
-        }
-    }, [enableCustomFilters, filterOptions, config.requiredFilters]);
-
-    // Fetch filters
-    useEffect(() => {
-        const fetchFilters = async () => {
-            setLoadingFilters(true);
-            setFilterError(null);
-            try {
-                const url = config.ruleUrl || DEFAULT_RULE_URL;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch rules');
-                const text = await response.text();
-                const data = yaml.load(text) as any;
-
-                if (data && data['proxy-groups'] && Array.isArray(data['proxy-groups'])) {
-                    const options = data['proxy-groups']
-                        .map((g: any) => g.name)
-                        .filter((n: string) => n);
-                    // Remove duplicates just in case
-                    setFilterOptions([...new Set(options)] as string[]);
-                } else {
-                    setFilterError('Invalid YAML format: missing proxy-groups');
-                }
-            } catch (err: any) {
-                setFilterError(err.message || 'Error loading filters');
-                console.error(err);
-            } finally {
-                setLoadingFilters(false);
-            }
-        };
-
-        fetchFilters();
-    }, [config.ruleUrl]);
-
-    const handleFilterToggle = (checked: boolean) => {
-        setEnableCustomFilters(checked);
-        if (!checked) {
-            handleChange('requiredFilters', '');
-        }
-    };
-
-    const handleFilterSelection = (option: string, checked: boolean) => {
-        const current = config.requiredFilters ? config.requiredFilters.split(',').map(s => s.trim()).filter(s => s) : [];
-        let newFilters;
-        if (checked) {
-            newFilters = [...current, option];
-        } else {
-            newFilters = current.filter(f => f !== option);
-        }
-        handleChange('requiredFilters', newFilters.join(','));
-    };
-
-    const [yamlError, setYamlError] = useState<string | null>(null);
-
-    const handleYamlChange = (value: string | undefined) => {
-        const newValue = value || '';
-        handleChange('ruleOverride', newValue);
-
-        if (!newValue.trim()) {
-            setYamlError(null);
-            return;
-        }
-
-        try {
-            yaml.load(newValue);
-            setYamlError(null);
-        } catch (err: any) {
-            setYamlError(err.message || 'Invalid YAML format');
-        }
-    };
+    const {
+        filterOptions,
+        loadingFilters,
+        filterError,
+        enableCustomFilters,
+        yamlError,
+        isMandatory,
+        handleChange,
+        handleFilterToggle,
+        handleFilterSelection,
+        handleYamlChange
+    } = useRuleConfig({ config, onChange });
 
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="ruleUrl">规则 URL (Rule URL)</Label>
+                <Label htmlFor="ruleUrl">规则 URL</Label>
                 <Input
                     id="ruleUrl"
                     value={config.ruleUrl || ''}
@@ -150,7 +54,7 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="requiredFilters" className="text-base">需要的过滤项 (Required Filters)</Label>
+                    <Label htmlFor="requiredFilters" className="text-base">需要的过滤项</Label>
                     <div className="flex items-center space-x-2">
                         <Switch
                             id="enable-filters"
@@ -159,7 +63,7 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
                             disabled={readOnly}
                         />
                         <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground">
-                            {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有 (Default All)'}
+                            {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有'}
                         </Label>
                     </div>
                 </div>
@@ -222,17 +126,17 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <Label>规则覆写 (Rule Override)</Label>
+                    <Label>规则覆写</Label>
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="outline" size="sm" disabled={readOnly}>
                                 <Edit className="w-4 h-4 mr-2" />
-                                编辑规则 (Edit Rules)
+                                编辑规则
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
                             <DialogHeader>
-                                <DialogTitle>编辑规则覆写 (Edit Rule Override)</DialogTitle>
+                                <DialogTitle>编辑规则覆写</DialogTitle>
                                 <DialogDescription>
                                     在此处输入 YAML 格式的内容以覆写或追加规则。
                                     <span className="text-xs opacity-80 block mt-1">注意：这将合并到生成的配置中，顶层字段将被替换。</span>
@@ -248,32 +152,21 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
                                         minimap: { enabled: false },
                                         scrollBeyondLastLine: false,
                                         readOnly: readOnly,
-                                        theme: 'vs-dark'
+                                        fontSize: 14,
+                                        wordWrap: 'on'
                                     }}
                                 />
                             </div>
                             {yamlError && (
-                                <p className="text-sm text-destructive font-medium">
-                                    YAML 格式错误: {yamlError}
-                                </p>
+                                <div className="text-destructive text-sm mt-2">
+                                    {yamlError}
+                                </div>
                             )}
                         </DialogContent>
                     </Dialog>
                 </div>
-
-                <div className="border rounded-md p-4 bg-muted/30 min-h-[100px] max-h-[300px] overflow-y-auto">
-                    {config.ruleOverride ? (
-                        <pre className="text-xs font-mono whitespace-pre-wrap break-all">
-                            {config.ruleOverride}
-                        </pre>
-                    ) : (
-                        <div className="text-sm text-muted-foreground italic flex items-center justify-center h-full min-h-[60px]">
-                            暂无规则覆写 (No rule overrides)
-                        </div>
-                    )}
-                </div>
                 <p className="text-sm text-muted-foreground">
-                    可选。点击上方按钮进行编辑。
+                    可选。高级用户专用。可以覆盖生成的配置中的任意字段。
                 </p>
             </div>
         </div>
