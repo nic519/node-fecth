@@ -1,15 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
 import { UserConfig } from '@/types/openapi-schemas';
+import { withAuth } from '@/utils/apiMiddleware';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async () => {
   const env = process.env as unknown as Env;
-  const searchParams = request.nextUrl.searchParams;
-  const superToken = searchParams.get('superToken');
-
-  if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-    return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     const manager = new SuperAdminManager(env);
@@ -25,16 +20,10 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
   }
-}
+}, { adminOnly: true });
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   const env = process.env as unknown as Env;
-  const searchParams = request.nextUrl.searchParams;
-  const superToken = searchParams.get('superToken');
-
-  if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-    return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     const body = await request.json() as { uid: string; config: UserConfig };
@@ -54,4 +43,4 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
   }
-}
+}, { adminOnly: true });

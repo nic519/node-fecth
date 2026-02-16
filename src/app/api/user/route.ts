@@ -1,53 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { UserManager } from '@/module/userManager/userManager';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { UserConfig } from '@/types/openapi-schemas';
-import { AuthUtils } from '@/utils/authUtils';
+import { withAuth } from '@/utils/apiMiddleware';
 
 // GET: 获取用户配置
-export async function GET(request: NextRequest) {
-  const env = process.env as unknown as Env;
-  const searchParams = request.nextUrl.searchParams;
-  const uid = searchParams.get('uid');
-
-  if (!uid) {
-    return NextResponse.json({
-      code: 400,
-      msg: 'Missing uid',
-    }, { status: 400 });
-  }
-
-  try {
-    // 使用统一认证：支持 User Token 或 Super Admin Token
-    const userConfig = await AuthUtils.authenticate(request, env, uid);
-
-    return NextResponse.json({
-      code: 0,
-      msg: 'success',
-      data: userConfig,
-    });
-  } catch (error: unknown) {
-    return ResponseUtils.handleApiError(error);
-  }
-}
+export const GET = withAuth(async (request) => {
+  return NextResponse.json({
+    code: 0,
+    msg: 'success',
+    data: request.auth,
+  });
+}, { authenticateUser: true });
 
 // PUT: 更新用户配置
-export async function PUT(request: NextRequest) {
+export const PUT = withAuth(async (request) => {
   const env = process.env as unknown as Env;
-  const searchParams = request.nextUrl.searchParams;
-  const uid = searchParams.get('uid');
-
-  if (!uid) {
-    return NextResponse.json({
-      code: 400,
-      msg: 'Missing uid',
-    }, { status: 400 });
-  }
+  const uid = request.uid!;
 
   try {
-    // 使用统一认证
-    await AuthUtils.authenticate(request, env, uid);
-
     const userManager = new UserManager(env);
     const body = await request.json() as { config: UserConfig };
 
@@ -73,4 +44,4 @@ export async function PUT(request: NextRequest) {
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }
-}
+}, { authenticateUser: true });

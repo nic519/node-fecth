@@ -2,21 +2,13 @@ import { getDb } from '@/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { eq } from 'drizzle-orm';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/utils/apiMiddleware';
 
 // PUT: 更新模板
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ templateId: string }> }
-) {
+export const PUT = withAuth(async (request, { params }) => {
   const env = process.env as unknown as Env;
   const { templateId } = await params;
-  const searchParams = request.nextUrl.searchParams;
-  const superToken = searchParams.get('superToken');
-
-  if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-    return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     const body = await request.json() as { name: string; description?: string; content: string };
@@ -43,21 +35,12 @@ export async function PUT(
     console.error('更新模板失败:', error);
     return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
   }
-}
+}, { adminOnly: true });
 
 // DELETE: 删除模板
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ templateId: string }> }
-) {
+export const DELETE = withAuth(async (_, { params }) => {
   const env = process.env as unknown as Env;
   const { templateId } = await params;
-  const searchParams = request.nextUrl.searchParams;
-  const superToken = searchParams.get('superToken');
-
-  if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-    return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     const db = getDb(env);
@@ -70,4 +53,4 @@ export async function DELETE(
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }
-}
+}, { adminOnly: true });
