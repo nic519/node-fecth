@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ConfigResponse } from '@/types/user-config';
-import { configToYaml, validateConfig, yamlToConfig } from '@/utils/configUtils';
+import type { ConfigResponse, UserConfig } from '@/types/user-config';
+import { UserConfigSchema } from '@/types/openapi-schemas';
 import { userService } from '@/services/userService';
-
 
 export interface UseUserConfigProps {
 	uid: string;
@@ -11,34 +10,28 @@ export interface UseUserConfigProps {
 
 export interface UseUserConfigReturn {
 	// 状态
-	config: ConfigResponse | null;
-	configContent: string;
+	config: UserConfig | null;
 	loading: boolean;
 	saving: boolean;
 	error: string | null;
 	saveSuccess: boolean;
 	validationErrors: string[];
-	configPreview: any | null;
 	connectionStatus: 'connected' | 'disconnected';
 	lastSaved: Date | null;
 
 	// 操作
-	setConfigContent: (content: string) => void;
-	setYamlSyntaxErrors: (errors: string[]) => void;
+	setConfig: (config: UserConfig) => void;
 	saveConfig: () => Promise<void>;
 	loadConfig: () => Promise<void>;
 }
 
 export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfigReturn {
-	const [config, setConfig] = useState<ConfigResponse | null>(null);
-	const [configContent, setConfigContent] = useState('');
+	const [config, setConfig] = useState<UserConfig | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
-	const [yamlSyntaxErrors, setYamlSyntaxErrors] = useState<string[]>([]);
-	const [configPreview, setConfigPreview] = useState<unknown>(null);
 	const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
 	const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
@@ -57,19 +50,11 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 			// 从响应结构中提取配置数据
 			const configData = response.data;
-			setConfig(configData);
 
-			// 将配置转换为 YAML 格式显示
-			// 移除 updatedAt 等非配置字段后再转换
+			// 移除 updatedAt 等非配置字段
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { updatedAt, ...userConfig } = configData;
-			const yamlContent = configToYaml(userConfig);
-			setConfigContent(yamlContent);
-
-			// 验证配置
-			const validation = validateConfig(yamlContent);
-			setValidationErrors(validation.errors);
-			setConfigPreview(validation.configPreview);
+			setConfig(userConfig);
 
 			setError(null);
 			setConnectionStatus('connected');
@@ -83,17 +68,21 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 	// 保存配置
 	const saveConfig = async () => {
-		// 检查是否有任何验证错误（包括 YAML 语法错误和业务逻辑错误）
-		if (validationErrors.length > 0 || yamlSyntaxErrors.length > 0) return;
+		if (!config) return;
+
+		// 验证配置
+		const result = UserConfigSchema.safeParse(config);
+		if (!result.success) {
+			setValidationErrors(result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`));
+			return;
+		}
+		setValidationErrors([]);
 
 		try {
 			setSaving(true);
 			setError(null);
 
-			// 解析 YAML 配置
-			const newConfig = yamlToConfig(configContent);
-
-			const response = await userService.updateUserConfig(uid, token, newConfig);
+			const response = await userService.updateUserConfig(uid, token, config);
 
 			// 检查响应是否成功
 			if (response.code === 0) {
@@ -110,14 +99,6 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		}
 	};
 
-	// 更新配置内容并验证
-	const handleSetConfigContent = (content: string) => {
-		setConfigContent(content);
-		const validation = validateConfig(content);
-		setValidationErrors(validation.errors);
-		setConfigPreview(validation.configPreview);
-	};
-
 	// 初始化加载
 	useEffect(() => {
 		if (!token) {
@@ -132,18 +113,15 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	return {
 		// 状态
 		config,
-		configContent,
 		loading,
 		saving,
 		error,
 		saveSuccess,
-		validationErrors: [...validationErrors, ...yamlSyntaxErrors], // 合并所有验证错误
-		configPreview,
+		validationErrors,
 		connectionStatus,
 		lastSaved,
 		// 操作
-		setConfigContent: handleSetConfigContent,
-		setYamlSyntaxErrors, // 导出用于接收 YamlEditor 的验证错误
+		setConfig,
 		saveConfig,
 		loadConfig,
 	};

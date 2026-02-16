@@ -1,3 +1,4 @@
+
 'use client';
 
 import Loading from '@/components/Loading';
@@ -8,10 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { ConfigEditor } from './components/ConfigEditor';
 import { Header } from './components/Header';
-import { HelpSidebar } from './components/HelpSidebar';
-import { useHelpDisplay } from './hooks/useHelpDisplay';
 import { useUserConfig } from './hooks/useUserConfig';
-import { configToYaml } from '@/utils/configUtils';
 
 function UserConfigContent() {
 	usePageTitle('配置订阅');
@@ -21,7 +19,6 @@ function UserConfigContent() {
 	const uid = searchParams.get('uid') || '';
 
 	const userConfigState = useUserConfig({ uid, token });
-	const { showHelp, toggleHelp } = useHelpDisplay();
 
 	if (!uid) {
 		return (
@@ -66,21 +63,14 @@ function UserConfigContent() {
 						</Card>
 					</div>
 				) : (
-					<div className="flex flex-col lg:flex-row gap-6 lg:items-stretch min-h-[500px] max-h-[calc(100vh-200px)]">
-						<div className="flex-1 flex">
-							<ConfigEditor
-								uid={uid}
-								token={token}
-								configContent={userConfigState.configContent}
-								validationErrors={userConfigState.validationErrors}
-								configPreview={userConfigState.configPreview}
-								onConfigContentChange={userConfigState.setConfigContent}
-								onYamlSyntaxErrorsChange={userConfigState.setYamlSyntaxErrors}
-								onToggleHelp={toggleHelp}
-							/>
-						</div>
-
-						<HelpSidebar showHelp={showHelp} onToggleHelp={toggleHelp} />
+					<div className="flex flex-col gap-6 min-h-[500px]">
+						<ConfigEditor
+							uid={uid}
+							token={token}
+							config={userConfigState.config}
+							validationErrors={userConfigState.validationErrors}
+							onConfigChange={userConfigState.setConfig}
+						/>
 					</div>
 				)}
 			</main>
