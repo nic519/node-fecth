@@ -77,7 +77,7 @@ export function ConfigEditor({
 						className={cn('w-full justify-start', activeTab === 'dynamic' && 'bg-white shadow-sm')}
 						onClick={() => setActiveTab('dynamic')}
 					>
-						🔄 动态管理
+						🔄 订阅加载
 					</Button>
 					<Button
 						variant={activeTab === 'token' ? 'secondary' : 'ghost'}

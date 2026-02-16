@@ -1,189 +1,183 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, CheckCircle2, XCircle, Clock, Activity } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle2, XCircle, Clock, Activity, Link as LinkIcon } from 'lucide-react';
 import { UserConfig } from '@/types/openapi-schemas';
-import { ApiResponse } from '@/types/api';
+import { useDynamicSync, SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
+import { cn } from '@/lib/utils';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
 }
 
-interface SyncStatus {
-    status: 'idle' | 'loading' | 'success' | 'error';
-    message?: string;
-}
-
-interface DynamicInfo {
-    id: string;
-    url: string;
-    traffic: string | null;
-    updatedAt: string;
-}
-
 export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
-    const [statuses, setStatuses] = useState<Record<string, SyncStatus>>({});
-    const [dynamicInfos, setDynamicInfos] = useState<Record<string, DynamicInfo>>({});
+    const { items, statuses, dynamicInfos, syncUrl, syncAll } = useDynamicSync(config);
 
-    const items = [
-        ...(config.subscribe ? [{ url: config.subscribe, source: '主订阅' }] : []),
-        ...(config.appendSubList || []).map(sub => ({ url: sub.subscribe, source: '追加订阅' }))
-    ].filter(item => item.url);
-
-    useEffect(() => {
-        const fetchDynamicInfos = async () => {
-            if (items.length === 0) return;
-
-            try {
-                const urls = items.map(item => item.url).join(',');
-                const res = await fetch(`/api/dynamic/sync?urls=${encodeURIComponent(urls)}`);
-                const data = (await res.json()) as ApiResponse<DynamicInfo[]>;
-
-                if (data.code === 0 && Array.isArray(data.data)) {
-                    const infoMap: Record<string, DynamicInfo> = {};
-                    data.data.forEach(info => {
-                        infoMap[info.url] = info;
-                    });
-                    setDynamicInfos(infoMap);
-                }
-            } catch (error) {
-                console.error('Failed to fetch dynamic infos:', error);
-            }
-        };
-
-        fetchDynamicInfos();
-    }, [config.subscribe, config.appendSubList]); // Re-fetch when config changes
-
-    const handleSync = async (url: string) => {
-        if (!url) return;
-        setStatuses(prev => ({ ...prev, [url]: { status: 'loading' } }));
-
-        try {
-            const res = await fetch('/api/dynamic/sync', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
-            });
-            const data = (await res.json()) as ApiResponse;
-
-            if (data.code === 0) {
-                setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));
-                // Refresh info after sync
-                const updatedInfo = data.data as unknown as DynamicInfo; // POST returns partial info
-                // We might need to fetch again or just update local state if POST returns enough info
-                // The POST endpoint returns { id, url, traffic } but not full updated record with updatedAt
-                // But we can estimate updatedAt or just re-fetch. 
-                // Let's just update with what we have and set updatedAt to now.
-                setDynamicInfos(prev => ({
-                    ...prev,
-                    [url]: {
-                        ...prev[url],
-                        traffic: (data.data as any).traffic,
-                        updatedAt: new Date().toISOString()
-                    } as DynamicInfo
-                }));
-
-            } else {
-                setStatuses(prev => ({ ...prev, [url]: { status: 'error', message: data.msg || '失败' } }));
-            }
-        } catch (error) {
-            setStatuses(prev => ({ ...prev, [url]: { status: 'error', message: '网络错误' } }));
-        }
-    };
-
-    const handleSyncAll = async () => {
-        for (const item of items) {
-            await handleSync(item.url);
-        }
-    };
+    const isAnyLoading = items.some(item => statuses[item.url]?.status === 'loading');
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-medium">动态订阅管理</h3>
+                    <h3 className="text-lg font-medium">订阅加载管理</h3>
                     <p className="text-sm text-muted-foreground">
-                        共 {items.length} 个订阅源。可以单独更新并同步到数据库。
+                        - 共 {items.length} 个订阅源。可以单独预更新
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        - 当订阅较多的时候，才需要关心此面板，绝大多数情况请直接忽略
                     </p>
                 </div>
                 <Button
-                    onClick={handleSyncAll}
+                    onClick={syncAll}
                     variant="outline"
-                    disabled={items.length === 0 || items.some(item => statuses[item.url]?.status === 'loading')}
+                    disabled={items.length === 0 || isAnyLoading}
+                    className="min-w-[100px]"
                 >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${items.some(item => statuses[item.url]?.status === 'loading') ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={cn("w-4 h-4 mr-2", isAnyLoading && "animate-spin")} />
                     全部更新
                 </Button>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {items.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
-                        暂无订阅源
+                    <div className="col-span-full text-center py-12 text-muted-foreground border border-dashed rounded-lg bg-muted/50">
+                        <div className="flex flex-col items-center gap-2">
+                            <LinkIcon className="w-8 h-8 opacity-50" />
+                            <p>暂无订阅源</p>
+                        </div>
                     </div>
                 )}
 
-                {items.map((item, index) => {
-                    const status = statuses[item.url] || { status: 'idle' };
-                    return (
-                        <Card key={`${index}-${item.url}`} className="overflow-hidden">
-                            <CardContent className="p-4 flex items-center justify-between gap-4">
-                                <div className="flex-1 min-w-0 grid gap-1">
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant={item.source === '主订阅' ? 'default' : 'secondary'}>
-                                            {item.source}
-                                        </Badge>
-                                        <span className="font-mono text-xs text-muted-foreground truncate" title={item.url}>
-                                            {item.url}
-                                        </span>
-                                    </div>
-                                    {dynamicInfos[item.url] && (
-                                        <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                            <div className="flex items-center gap-1" title="最后更新时间">
-                                                <Clock className="w-3 h-3" />
-                                                <span>
-                                                    {new Date(dynamicInfos[item.url].updatedAt).toLocaleString()}
-                                                </span>
-                                            </div>
-                                            {dynamicInfos[item.url].traffic && (
-                                                <div className="flex items-center gap-1" title="流量信息">
-                                                    <Activity className="w-3 h-3" />
-                                                    <span className="truncate max-w-[200px]">
-                                                        {dynamicInfos[item.url].traffic}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {status.message && (
-                                        <p className={`text-xs ${status.status === 'error' ? 'text-red-500' : 'text-green-500'}`}>
-                                            {status.message}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleSync(item.url)}
-                                    disabled={status.status === 'loading'}
-                                >
-                                    {status.status === 'loading' ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : status.status === 'success' ? (
-                                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                    ) : status.status === 'error' ? (
-                                        <XCircle className="w-4 h-4 text-red-500" />
-                                    ) : (
-                                        <RefreshCw className="w-4 h-4" />
-                                    )}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
+                {items.map((item, index) => (
+                    <SyncItem
+                        key={`${index}-${item.url}`}
+                        item={item}
+                        status={statuses[item.url] || { status: 'idle' }}
+                        info={dynamicInfos[item.url]}
+                        onSync={() => syncUrl(item.url)}
+                    />
+                ))}
             </div>
         </div>
+    );
+}
+
+interface SyncItemProps {
+    item: SyncItemData;
+    status: SyncStatus;
+    info?: DynamicInfo;
+    onSync: () => void;
+}
+
+function SyncItem({ item, status, info, onSync }: SyncItemProps) {
+    const isLoading = status.status === 'loading';
+    const isSuccess = status.status === 'success';
+    const isError = status.status === 'error';
+
+    return (
+        <Card className="overflow-hidden transition-all hover:shadow-md">
+            <CardContent className="p-4 space-y-3">
+                {/* Header: Badges */}
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <Badge variant={item.source === '主订阅' ? 'default' : 'secondary'} className="shrink-0">
+                            {item.flag} {item.source}
+                        </Badge>
+                    </div>
+
+                    {/* Status Indicator */}
+                    <div
+                        className={cn(
+                            "h-2 w-2 rounded-full shrink-0 transition-colors duration-300",
+                            isLoading ? "bg-blue-500 animate-pulse" :
+                                isSuccess ? "bg-green-500" :
+                                    isError ? "bg-red-500" :
+                                        "bg-slate-200 dark:bg-slate-700"
+                        )}
+                    />
+                </div>
+
+                {/* URL */}
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="bg-muted/50 p-2 rounded text-xs font-mono text-muted-foreground cursor-help select-all">
+                                <div className="line-clamp-2 break-all">
+                                    {item.url}
+                                </div>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="max-w-[300px] break-all font-mono text-xs">{item.url}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
+                {/* Info & Actions */}
+                <div className="flex items-end justify-between gap-2 pt-2">
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                        {info ? (
+                            <>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">
+                                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="truncate">
+                                        {new Date(info.updatedAt).toLocaleString()}
+                                    </span>
+                                </div>
+                                {info.traffic && (
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="流量信息">
+                                        <Activity className="w-3.5 h-3.5 shrink-0" />
+                                        <span className="truncate font-medium">
+                                            {info.traffic}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="h-8 flex items-center text-xs text-muted-foreground/50 italic">
+                                尚未同步信息
+                            </div>
+                        )}
+
+                        {/* Error Message */}
+                        {status.message && (
+                            <p className={cn(
+                                "text-xs font-medium truncate",
+                                isError ? "text-red-500" : "text-green-500"
+                            )}>
+                                {status.message}
+                            </p>
+                        )}
+                    </div>
+
+                    <Button
+                        size="sm"
+                        variant={isError ? "destructive" : "secondary"}
+                        onClick={onSync}
+                        disabled={isLoading}
+                        className={cn(
+                            "h-8 w-8 p-0 shrink-0 rounded-full transition-all",
+                            isSuccess && "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400"
+                        )}
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isSuccess ? (
+                            <CheckCircle2 className="w-4 h-4" />
+                        ) : isError ? (
+                            <RefreshCw className="w-4 h-4" /> // Show refresh icon on error to retry
+                        ) : (
+                            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                        )}
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

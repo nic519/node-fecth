@@ -5,6 +5,7 @@ import { ClashProxy } from '@/types/clash.types';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { PreMergeInfo } from './clash-merge.types';
+import { DEFAULT_SUB_FLAG } from '@/config/constants';
 
 export class StrategyMultiSub {
     constructor(private ruleContent: string, private userConfig: UserConfig) { }
@@ -26,7 +27,7 @@ export class StrategyMultiSub {
 			// 把主订阅链接，拼接在这里一起获取
 			appendSubList.push({
 				subscribe: this.userConfig.subscribe,
-				flag: '🐙',
+				flag: DEFAULT_SUB_FLAG,
 			});
 
 			console.log(`📡 开始处理 ${appendSubList.length} 个追加订阅`);
