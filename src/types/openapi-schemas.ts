@@ -22,18 +22,6 @@ export const TrafficInfoSchema = z.object({
 	usagePercent: z.number(),
 });
 
-// 用户摘要 Schema
-export const UserSummarySchema = z.object({
-	uid: z.string(),
-	token: z.string(),
-	hasConfig: z.boolean(),
-	lastModified: z.string().nullable(),
-	isActive: z.boolean(),
-	subscribeUrl: z.string().optional(),
-	status: z.enum(['active', 'inactive', 'disabled']),
-	trafficInfo: TrafficInfoSchema.optional(),
-});
-
 // 系统日志 Schema - 新增
 export const SystemLogSchema = z.object({
 	time: z.string(),
@@ -65,7 +53,7 @@ export const UsersListResponseSchema = z.object({
 	code: z.literal(ResponseCodes.SUCCESS),
 	msg: z.string(),
 	data: z.object({
-		users: z.array(UserSummarySchema),
+		users: z.array(UserConfigSchema),
 		count: z.number(),
 		timestamp: z.string(),
 	}),
@@ -95,7 +83,6 @@ export {
 	SubConfigSchema,
 	UserConfigSchema,
 	ConfigResponseSchema,
-	type IScUserApiModel,
 	type IUserConfig as UserConfig,
 	type IConfigResponse as ConfigResponse,
 } from '@/types/schema.user';
@@ -104,7 +91,6 @@ export type AreaCode = z.infer<typeof AreaCodeSchema>;
 export type SubConfig = z.infer<typeof SubConfigSchema>;
 
 export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
-export type UserSummary = z.infer<typeof UserSummarySchema>;
 export type SystemLog = z.infer<typeof SystemLogSchema>;
 // 导出响应代码类型
 export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];

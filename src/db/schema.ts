@@ -61,6 +61,9 @@ export const users = sqliteTable('users', {
 	// 格式为 JSON 字符串，存储需要追加的子配置项
 	appendSubList: text('append_sub_list').default(''),
 
+	// 覆写规则
+	// overwrite: text('overwrite').default(''),
+
 	// 时间戳
 	createdAt: text('created_at')
 		.notNull()

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AdminOperation, SuperAdminStats } from '@/module/userManager/types/supper-admin.types';
-import { UserConfig, UserSummary } from '@/types/openapi-schemas';
+import { getDb } from '@/db';
+import { users } from '@/db/schema';
+import { desc } from 'drizzle-orm';
+import { AdminOperation, SuperAdminStats, UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
+import { TrafficInfo, UserConfig } from '@/types/openapi-schemas';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserManager } from './userManager';
 
@@ -31,25 +34,26 @@ export class SuperAdminManager {
 	 */
 	async getSystemStats(): Promise<SuperAdminStats> {
 		try {
-			const userList = await this.userManager.getAllUsers();
+			const db = getDb(this.env);
+			const userList = await db.select().from(users).all();
 			const today = new Date().toISOString().split('T')[0];
 
 			let activeUsers = 0;
 			let todayNewUsers = 0;
 
 			// 分析每个用户的配置状态
-			for (const uid of userList) {
-				const configResponse = await this.userManager.getUserConfig(uid);
-				if (configResponse) {
-					// 检查是否为今日新增用户
-					if (configResponse.updatedAt?.startsWith(today)) {
-						todayNewUsers++;
-					}
+			for (const user of userList) {
+				const config = JSON.parse(user.config);
+				const updatedAt = user.updatedAt;
 
-					// 检查用户活跃度（有配置且订阅地址有效）
-					if (configResponse.subscribe && configResponse.accessToken) {
-						activeUsers++;
-					}
+				// 检查是否为今日新增用户
+				if (updatedAt?.startsWith(today)) {
+					todayNewUsers++;
+				}
+
+				// 检查用户活跃度（有配置且订阅地址有效）
+				if (config.subscribe && user.accessToken) {
+					activeUsers++;
 				}
 			}
 
@@ -68,51 +72,36 @@ export class SuperAdminManager {
 	}
 
 	/**
-	 * 获取用户摘要列表
+	 * 获取用户列表
 	 */
-	async getUserSummaryList(): Promise<UserSummary[]> {
+	async getUserSummaryList(): Promise<UserAdminConfig[]> {
 		try {
-			const userList = await this.userManager.getAllUsers();
-			const summaries: UserSummary[] = [];
+			const db = getDb(this.env);
+			// 直接从数据库获取所有用户，按更新时间倒序排序
+			const userList = await db.select().from(users).orderBy(desc(users.updatedAt)).all();
 
-			for (const uid of userList) {
-				const configResponse = await this.userManager.getUserConfig(uid);
-				const subscribeUrl = configResponse?.subscribe;
+			const summaries: UserAdminConfig[] = [];
 
-				// 获取流量信息（仅当有订阅地址时）
-				let trafficInfo: UserSummary['trafficInfo'] = undefined;
-				if (subscribeUrl) {
-					try {
-						trafficInfo = await this.getUserTrafficInfo(subscribeUrl);
-					} catch (error) {
-						console.warn(`获取用户 ${uid} 流量信息失败:`, error);
-					}
-				}
+			for (const user of userList) {
+				const partialConfig = JSON.parse(user.config);
 
-				const summary: UserSummary = {
-					uid: uid,
-					token: configResponse?.accessToken || '',
-					hasConfig: !!configResponse,
-					lastModified: configResponse?.updatedAt || null,
-					isActive: !!(configResponse?.subscribe && configResponse?.accessToken),
-					subscribeUrl,
-					status: configResponse ? 'active' : 'inactive',
-					trafficInfo,
+				// 合并数据库字段到配置对象
+				const config: UserAdminConfig = {
+					...partialConfig,
+					uid: user.id,
+					updatedAt: user.updatedAt,
+					accessToken: user.accessToken,
+					requiredFilters: user.requiredFilters || undefined,
+					ruleUrl: user.ruleUrl || undefined,
+					fileName: user.fileName || undefined,
+					appendSubList: user.appendSubList || undefined,
 				};
-				summaries.push(summary);
+				summaries.push(config);
 			}
-
-			// 按最后修改时间排序
-			summaries.sort((a, b) => {
-				if (!a.lastModified && !b.lastModified) return 0;
-				if (!a.lastModified) return 1;
-				if (!b.lastModified) return -1;
-				return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime();
-			});
 
 			return summaries;
 		} catch (error) {
-			console.error('获取用户摘要列表失败:', error);
+			console.error('获取用户列表失败:', error);
 			throw error;
 		}
 	}
@@ -286,28 +275,9 @@ export class SuperAdminManager {
 	}
 
 	/**
-	 * 获取用户流量信息（从KV缓存）
-	 */
-	private async getUserTrafficInfo(subscribeUrl: string): Promise<UserSummary['trafficInfo']> {
-		try {
-			const trafficUtils = new ProxyFetch(subscribeUrl);
-			const clashContent = await trafficUtils.fetchFromKV();
-
-			if (!clashContent || !clashContent.subInfo) {
-				return undefined;
-			}
-
-			return this.parseSubInfo(clashContent.subInfo);
-		} catch (error) {
-			console.error(`获取用户流量信息失败 (${subscribeUrl}):`, error);
-			return undefined;
-		}
-	}
-
-	/**
 	 * 刷新用户流量信息（从远程获取最新数据）
 	 */
-	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<UserSummary['trafficInfo']> {
+	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<TrafficInfo | undefined> {
 		try {
 			const configResponse = await this.userManager.getUserConfig(uid);
 			if (!configResponse?.subscribe) {
@@ -355,7 +325,7 @@ export class SuperAdminManager {
 	 * 解析 subscription-userinfo 字符串
 	 * 格式: upload=123456; download=789012; total=21474836480; expire=1640995200
 	 */
-	private parseSubInfo(subInfo: string): UserSummary['trafficInfo'] {
+	private parseSubInfo(subInfo: string): TrafficInfo | undefined {
 		try {
 			const info: any = {};
 

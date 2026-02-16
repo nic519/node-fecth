@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserSummary } from '@/types/user-config';
+import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
 import { useAddUserModal } from './useAddUserModal';
 import { useDeleteUserModal } from './useDeleteUserModal';
 import { useUserData } from './useUserData';
@@ -12,7 +12,7 @@ export interface UseUserManagementProps {
 
 export interface UseUserManagementReturn {
 	// 用户数据
-	users: UserSummary[];
+	users: UserAdminConfig[];
 	loading: boolean;
 	error: string | null;
 	fetchUsers: () => Promise<void>;

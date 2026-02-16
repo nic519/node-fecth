@@ -37,27 +37,6 @@ export const SubscribeParamsSchema = z.object({
 	filename: z.string().optional(),
 });
 
-// =============================================================================
-// 数据库模型 Schemas
-// =============================================================================
-
-// 用户模型 Schema（数据库记录 - config 为 JSON 字符串）
-export const ScUserDbModel = z.object({
-	id: z.string(), // 用户ID
-	config: z.string(), // JSON 字符串格式的配置
-	accessToken: z.string(), // 访问令牌
-	createdAt: z.string(), // 创建时间
-	updatedAt: z.string(), // 更新时间
-});
-
-// 用户模型 Schema（API 返回 - config 已解析为对象）
-export const ScUserApiModel = z.object({
-	id: z.string(), // 用户ID
-	config: UserConfigSchema, // 解析后的配置对象
-	accessToken: z.string(), // 访问令牌
-	createdAt: z.string(), // 创建时间
-	updatedAt: z.string(), // 更新时间
-});
 
 // =============================================================================
 // 请求参数 Schemas
@@ -88,19 +67,9 @@ export const ScUserQueryToken = z.object({
 // 请求体 Schemas
 // =============================================================================
 
-// 创建用户请求 Schema
-export const ScUserCreateReq = z.object({
-	uid: z.string().min(1, '用户ID不能为空'),
-	config: UserConfigSchema,
-});
 
 // 更新用户配置请求 Schema（用户自己使用）
 export const ScUserUpdateReq = z.object({
-	config: UserConfigSchema,
-});
-
-// 管理员更新用户配置请求 Schema（不需要 uid，从路径参数获取）
-export const ScUserAdminUpdateReq = z.object({
 	config: UserConfigSchema,
 });
 
@@ -133,23 +102,23 @@ export const ScUserUpdateResponse = ScBaseResponse.extend({
 // 管理员获取用户列表响应 Schema
 export const ScUserListResponse = ScBaseResponse.extend({
 	data: z.object({
-		users: z.array(ScUserApiModel),
+		users: z.array(UserConfigSchema),
 	}),
 });
 
 // 管理员获取单个用户响应 Schema
 export const ScUserGetResponse = ScBaseResponse.extend({
-	data: ScUserApiModel,
+	data: UserConfigSchema,
 });
 
 // 管理员创建用户响应 Schema
 export const ScUserCreateResponse = ScBaseResponse.extend({
-	data: ScUserApiModel,
+	data: UserConfigSchema,
 });
 
 // 管理员更新用户响应 Schema
 export const ScUserAdminUpdateResponse = ScBaseResponse.extend({
-	data: ScUserApiModel,
+	data: UserConfigSchema,
 });
 
 // 管理员删除用户响应 Schema
@@ -163,9 +132,7 @@ export const ScUserDeleteResponse = ScBaseResponse.extend({
 // 导出 TypeScript 类型
 // =============================================================================
 
-// 数据模型类型
-export type IScUserDbModel = z.infer<typeof ScUserDbModel>;
-export type IScUserApiModel = z.infer<typeof ScUserApiModel>;
+// 数据模型类型 
 export type IUserConfig = z.infer<typeof UserConfigSchema>;
 
 
@@ -175,10 +142,8 @@ export type IScSuperAdminTokenParams = z.infer<typeof ScSuperAdminTokenParams>;
 export type IScUserIdParams = z.infer<typeof ScUserIdParams>;
 export type IScUserQueryToken = z.infer<typeof ScUserQueryToken>;
 
-// 请求体类型
-export type IScUserCreateReq = z.infer<typeof ScUserCreateReq>;
+// 请求体类型 
 export type IScUserUpdateReq = z.infer<typeof ScUserUpdateReq>;
-export type IScUserAdminUpdateReq = z.infer<typeof ScUserAdminUpdateReq>;
 export type IConfigResponse = z.infer<typeof ConfigResponseSchema>;
 
 // 响应类型

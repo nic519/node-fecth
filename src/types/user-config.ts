@@ -18,7 +18,6 @@ export type {
 	TrafficInfo,
 	UserConfig,
 	UsersListResponse,
-	UserSummary,
 } from './openapi-schemas';
 
 export type {

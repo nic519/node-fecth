@@ -1,17 +1,15 @@
 'use client';
 
-import type { UserSummary } from '@/types/user-config';
+import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
 import { adminService } from '@/services/adminService';
 import { useCallback, useEffect, useState } from 'react';
-
-
 
 export interface UseUserDataProps {
 	superToken: string;
 }
 
 export interface UseUserDataReturn {
-	users: UserSummary[];
+	users: UserAdminConfig[];
 	loading: boolean;
 	error: string | null;
 	fetchUsers: () => Promise<void>;
@@ -21,7 +19,7 @@ export interface UseUserDataReturn {
  * 用户数据管理 Hook - 负责用户列表的获取和状态管理
  */
 export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn => {
-	const [users, setUsers] = useState<UserSummary[]>([]);
+	const [users, setUsers] = useState<UserAdminConfig[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -43,18 +41,7 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 			}
 
 			// 从响应结构中提取用户列表数据
-			setUsers(
-				response.data.users.map((user: UserSummary) => ({
-					uid: user.uid,
-					token: user.token,
-					status: user.status,
-					hasConfig: user.hasConfig,
-					lastModified: user.lastModified,
-					isActive: user.isActive,
-					trafficInfo: user.trafficInfo,
-					subscribeUrl: user.subscribeUrl,
-				})),
-			);
+			setUsers(response.data.users);
 		} catch (err) {
 			console.error('获取用户列表失败:', err);
 			setError(err instanceof Error ? err.message : '加载用户数据失败');

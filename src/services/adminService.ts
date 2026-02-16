@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { UserSummary } from '@/types/user-config';
+import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
 
 export const adminService = {
 	/**
@@ -7,6 +7,6 @@ export const adminService = {
 	 * GET /api/admin/users?superToken=xxx
 	 */
 	getUsers: (superToken: string) => {
-		return apiClient.get<{ users: UserSummary[] }>('/admin/users', { superToken });
+		return apiClient.get<{ users: UserAdminConfig[] }>('/admin/users', { superToken });
 	},
 };

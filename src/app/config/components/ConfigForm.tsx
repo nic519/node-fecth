@@ -4,12 +4,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import yaml from 'js-yaml';
 
 import { DynamicSyncPanel } from './DynamicSyncPanel';
 
 export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'preview';
+
+const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/refs/heads/main/miho-cfg.yaml';
+const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "自动"];
 
 interface ConfigFormProps {
     config: UserConfig;
@@ -70,6 +77,96 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab }: Co
             newAreas = currentAreas.filter((a: string) => a !== area);
         }
         handleAppendSubListUpdate(index, 'includeArea', newAreas);
+    };
+
+    // Filter Logic
+    const [filterOptions, setFilterOptions] = useState<string[]>([]);
+    const [loadingFilters, setLoadingFilters] = useState(false);
+    const [filterError, setFilterError] = useState<string | null>(null);
+    const [enableCustomFilters, setEnableCustomFilters] = useState(!!config.requiredFilters);
+
+    const isMandatory = (option: string) => {
+        return MANDATORY_KEYWORDS.some(keyword => option.includes(keyword));
+    };
+
+    // Sync enable state with config
+    useEffect(() => {
+        if (config.requiredFilters) {
+            setEnableCustomFilters(true);
+        }
+    }, [config.requiredFilters]);
+
+    // Ensure mandatory filters are selected when options are available and filters are enabled
+    useEffect(() => {
+        if (enableCustomFilters && filterOptions.length > 0) {
+            const currentFilters = config.requiredFilters ? config.requiredFilters.split(',').map(s => s.trim()) : [];
+            const mandatoryFilters = filterOptions.filter(isMandatory);
+
+            const missingMandatory = mandatoryFilters.filter(m => !currentFilters.includes(m));
+
+            if (missingMandatory.length > 0) {
+                const newFilters = [...currentFilters, ...missingMandatory];
+                // Use a timeout to avoid immediate state update conflicts if this runs during render
+                // But useEffect runs after render.
+                // We need to be careful not to cause infinite loops. 
+                // We checked `missingMandatory.length > 0`, so it should stabilize.
+                handleChange('requiredFilters', newFilters.join(','));
+            }
+        }
+    }, [enableCustomFilters, filterOptions, config.requiredFilters]);
+
+    // Fetch filters
+    useEffect(() => {
+        if (activeTab === 'rules') {
+            const fetchFilters = async () => {
+                // If we already have options and URL hasn't changed, maybe skip? 
+                // But URL might change.
+                setLoadingFilters(true);
+                setFilterError(null);
+                try {
+                    const url = config.ruleUrl || DEFAULT_RULE_URL;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Failed to fetch rules');
+                    const text = await response.text();
+                    const data = yaml.load(text) as any;
+
+                    if (data && data['proxy-groups'] && Array.isArray(data['proxy-groups'])) {
+                        const options = data['proxy-groups']
+                            .map((g: any) => g.name)
+                            .filter((n: string) => n);
+                        // Remove duplicates just in case
+                        setFilterOptions([...new Set(options)] as string[]);
+                    } else {
+                        setFilterError('Invalid YAML format: missing proxy-groups');
+                    }
+                } catch (err: any) {
+                    setFilterError(err.message || 'Error loading filters');
+                    console.error(err);
+                } finally {
+                    setLoadingFilters(false);
+                }
+            };
+
+            fetchFilters();
+        }
+    }, [activeTab, config.ruleUrl]);
+
+    const handleFilterToggle = (checked: boolean) => {
+        setEnableCustomFilters(checked);
+        if (!checked) {
+            handleChange('requiredFilters', '');
+        }
+    };
+
+    const handleFilterSelection = (option: string, checked: boolean) => {
+        const current = config.requiredFilters ? config.requiredFilters.split(',').map(s => s.trim()).filter(s => s) : [];
+        let newFilters;
+        if (checked) {
+            newFilters = [...current, option];
+        } else {
+            newFilters = current.filter(f => f !== option);
+        }
+        handleChange('requiredFilters', newFilters.join(','));
     };
 
     return (
@@ -222,17 +319,79 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab }: Co
                         </p>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="requiredFilters">需要的过滤项 (Required Filters)</Label>
-                        <Input
-                            id="requiredFilters"
-                            value={config.requiredFilters || ''}
-                            onChange={(e) => handleChange('requiredFilters', e.target.value)}
-                            placeholder="[单]-Facebook👥, [单]-LinkedIn👥"
-                            readOnly={readOnly}
-                        />
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="requiredFilters" className="text-base">需要的过滤项 (Required Filters)</Label>
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="enable-filters"
+                                    checked={enableCustomFilters}
+                                    onCheckedChange={handleFilterToggle}
+                                    disabled={readOnly}
+                                />
+                                <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground">
+                                    {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有 (Default All)'}
+                                </Label>
+                            </div>
+                        </div>
+
+                        {enableCustomFilters ? (
+                            <div className="border rounded-md p-4 space-y-4 bg-background">
+                                {loadingFilters ? (
+                                    <div className="flex items-center justify-center py-4 text-muted-foreground">
+                                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                        正在加载过滤选项...
+                                    </div>
+                                ) : filterError ? (
+                                    <div className="text-destructive text-sm">
+                                        加载失败: {filterError}
+                                        <br />
+                                        <span className="text-xs text-muted-foreground">请检查规则 URL 是否正确且允许跨域访问。</span>
+                                    </div>
+                                ) : filterOptions.length === 0 ? (
+                                    <div className="text-muted-foreground text-sm">未找到可用的过滤选项。</div>
+                                ) : (
+                                    <>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-60 overflow-y-auto pr-2">
+                                            {filterOptions.map((option) => {
+                                                const mandatory = isMandatory(option);
+                                                const isChecked = mandatory || config.requiredFilters?.split(',').map(s => s.trim()).includes(option);
+
+                                                return (
+                                                    <div key={option} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`filter-${option}`}
+                                                            checked={isChecked}
+                                                            onCheckedChange={(checked) => !mandatory && handleFilterSelection(option, checked as boolean)}
+                                                            disabled={readOnly || mandatory}
+                                                        />
+                                                        <Label
+                                                            htmlFor={`filter-${option}`}
+                                                            className={`text-sm font-normal cursor-pointer ${mandatory ? 'text-muted-foreground' : ''}`}
+                                                        >
+                                                            {option}
+                                                            {mandatory && <span className="ml-1 text-xs text-primary">(必选)</span>}
+                                                        </Label>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {(!config.requiredFilters || config.requiredFilters.length === 0) && (
+                                            <p className="text-sm text-destructive font-medium">
+                                                请至少选择一项，否则将无法生效 (视为未启用)。
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="text-sm text-muted-foreground p-4 border border-dashed rounded-md bg-muted/50">
+                                自定义过滤已禁用。将保留规则文件中的所有代理组。
+                            </div>
+                        )}
+
                         <p className="text-sm text-muted-foreground">
-                            可选。根据 ruleUrl 的 proxy-groups 得出，用逗号隔开。
+                            可选。根据 ruleUrl 的 proxy-groups 得出。启用后需手动勾选保留的组。
                         </p>
                     </div>
                 </>

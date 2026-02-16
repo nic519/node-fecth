@@ -7,25 +7,10 @@ export interface SuperAdminStats {
 	todayNewUsers: number;
 }
 
-export interface UserSummary {
+export type UserAdminConfig = UserConfig & {
 	uid: string;
-	token: string;
-	hasConfig: boolean;
-	lastModified: string | null;
-	isActive: boolean;
-	subscribeUrl?: string;
-	status: 'active' | 'inactive' | 'disabled';
-	trafficInfo?: {
-		upload: number;
-		download: number;
-		total: number;
-		used: number;
-		remaining: number;
-		expire?: number;
-		isExpired: boolean;
-		usagePercent: number;
-	};
-}
+	updatedAt: string;
+};
 
 export interface AdminOperation {
 	timestamp: string;

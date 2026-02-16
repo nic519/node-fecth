@@ -1,14 +1,14 @@
 'use client';
 
-import type { UserSummary } from '@/types/user-config';
+import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
 import { useMemo, useState } from 'react';
 
 export interface UseUserFiltersProps {
-	users: UserSummary[];
+	users: UserAdminConfig[];
 }
 
 export interface UseUserFiltersReturn {
-	filteredUsers: UserSummary[];
+	filteredUsers: UserAdminConfig[];
 	searchTerm: string;
 	statusFilter: string;
 	setSearchTerm: (term: string) => void;
@@ -30,7 +30,8 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 			filtered = filtered.filter((user) => user.uid.toLowerCase().includes(searchTerm.toLowerCase()));
 		}
 
-		// 根据配置状态过滤
+		// 根据配置状态过滤 (暂时移除 hasConfig 过滤，因为所有用户都有配置)
+		/*
 		if (statusFilter) {
 			if (statusFilter === 'configured') {
 				filtered = filtered.filter((user) => user.hasConfig);
@@ -38,6 +39,7 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 				filtered = filtered.filter((user) => !user.hasConfig);
 			}
 		}
+		*/
 
 		return filtered;
 	}, [users, searchTerm, statusFilter]);
