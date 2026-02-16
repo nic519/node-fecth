@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { StoredUserConfig } from '@/types/openapi-schemas';
 
 /**
  * 配置模板表
@@ -40,7 +41,7 @@ export const users = sqliteTable('users', {
 	id: text('id').primaryKey(),
 
 	// 用户配置（JSON格式）
-	config: text('config').notNull(), // 存储 JSON 字符串
+	config: text('config', { mode: 'json' }).notNull().$type<StoredUserConfig>(), // 存储 JSON 字符串
 
 	// 访问令牌（从 config 中提取，用于快速查询）
 	accessToken: text('access_token').notNull(),

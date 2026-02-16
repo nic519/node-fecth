@@ -83,8 +83,10 @@ export {
 	SubConfigSchema,
 	UserConfigSchema,
 	ConfigResponseSchema,
+	StoredUserConfigSchema,
 	type IUserConfig as UserConfig,
 	type IConfigResponse as ConfigResponse,
+	type IStoredUserConfig as StoredUserConfig,
 } from '@/types/schema.user';
 
 export type AreaCode = z.infer<typeof AreaCodeSchema>;

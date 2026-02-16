@@ -41,7 +41,7 @@ export class SuperAdminManager {
 			const summaries: UserAdminConfig[] = [];
 
 			for (const user of userList) {
-				const partialConfig = JSON.parse(user.config);
+				const partialConfig = user.config;
 
 				// 合并数据库字段到配置对象
 				const config: UserAdminConfig = {
@@ -52,7 +52,7 @@ export class SuperAdminManager {
 					requiredFilters: user.requiredFilters || undefined,
 					ruleUrl: user.ruleUrl || undefined,
 					fileName: user.fileName || undefined,
-					appendSubList: user.appendSubList || undefined,
+					appendSubList: user.appendSubList ? JSON.parse(user.appendSubList) : undefined,
 				};
 				summaries.push(config);
 			}

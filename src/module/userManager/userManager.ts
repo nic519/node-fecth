@@ -23,7 +23,7 @@ export class UserManager {
 			}
 
 			// 解析基础配置
-			const partialConfig = JSON.parse(userRecord.config);
+			const partialConfig = userRecord.config;
 
 			// 合并数据库字段到配置对象
 			// 优先使用数据库字段作为单一真理源
@@ -75,7 +75,7 @@ export class UserManager {
 				appendSubList: appendSubList ? JSON.stringify(appendSubList) : '',
 				ruleOverwrite: ruleOverwrite || '',
 				// config 字段只存储剩余的配置项，避免数据冗余
-				config: JSON.stringify(restConfig),
+				config: restConfig,
 				updatedAt: now
 			};
 

@@ -27,6 +27,19 @@ export const UserConfigSchema = z.object({
 	ruleOverwrite: z.string().optional(),
 });
 
+/**
+ * 存储在数据库中的用户配置 Schema
+ * 移除了已经作为独立字段存储的配置项
+ */
+export const StoredUserConfigSchema = UserConfigSchema.omit({
+	accessToken: true,
+	requiredFilters: true,
+	ruleUrl: true,
+	fileName: true,
+	appendSubList: true,
+	ruleOverwrite: true,
+});
+
 // 配置响应 Schema（扁平化结构）
 export const ConfigResponseSchema = UserConfigSchema.extend({
 	updatedAt: z.string(),
@@ -135,6 +148,7 @@ export const ScUserDeleteResponse = ScBaseResponse.extend({
 
 // 数据模型类型 
 export type IUserConfig = z.infer<typeof UserConfigSchema>;
+export type IStoredUserConfig = z.infer<typeof StoredUserConfigSchema>;
 
 
 // 请求参数类型
