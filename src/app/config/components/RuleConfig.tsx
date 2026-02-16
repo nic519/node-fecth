@@ -13,7 +13,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import Editor from '@monaco-editor/react';
+import { YamlEditor } from '@/components/YamlEditor';
 import { useRuleConfig } from '../hooks/useRuleConfig';
 
 interface RuleConfigProps {
@@ -143,18 +143,11 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
                                 </DialogDescription>
                             </DialogHeader>
                             <div className={`flex-1 min-h-0 border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`}>
-                                <Editor
+                                <YamlEditor
                                     height="100%"
-                                    defaultLanguage="yaml"
                                     value={config.ruleOverride || ''}
-                                    onChange={handleYamlChange}
-                                    options={{
-                                        minimap: { enabled: false },
-                                        scrollBeyondLastLine: false,
-                                        readOnly: readOnly,
-                                        fontSize: 14,
-                                        wordWrap: 'on'
-                                    }}
+                                    onChange={(val) => handleYamlChange(val)}
+                                    readOnly={readOnly}
                                 />
                             </div>
                             {yamlError && (
