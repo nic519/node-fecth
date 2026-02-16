@@ -3,7 +3,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Edit } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import yaml from 'js-yaml';
 import Editor from '@monaco-editor/react';
@@ -212,32 +221,60 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
             </div>
 
             <div className="space-y-2">
-                <Label>规则覆写 (Rule Override)</Label>
-                <div className={`border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`} style={{ minHeight: '300px' }}>
-                    <Editor
-                        height="300px"
-                        defaultLanguage="yaml"
-                        value={config.ruleOverride || ''}
-                        onChange={handleYamlChange}
-                        options={{
-                            minimap: { enabled: false },
-                            scrollBeyondLastLine: false,
-                            readOnly: readOnly,
-                            theme: 'vs-dark'
-                        }}
-                    />
+                <div className="flex items-center justify-between">
+                    <Label>规则覆写 (Rule Override)</Label>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={readOnly}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                编辑规则 (Edit Rules)
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                            <DialogHeader>
+                                <DialogTitle>编辑规则覆写 (Edit Rule Override)</DialogTitle>
+                                <DialogDescription>
+                                    在此处输入 YAML 格式的内容以覆写或追加规则。
+                                    <span className="text-xs opacity-80 block mt-1">注意：这将合并到生成的配置中，顶层字段将被替换。</span>
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className={`flex-1 min-h-0 border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`}>
+                                <Editor
+                                    height="100%"
+                                    defaultLanguage="yaml"
+                                    value={config.ruleOverride || ''}
+                                    onChange={handleYamlChange}
+                                    options={{
+                                        minimap: { enabled: false },
+                                        scrollBeyondLastLine: false,
+                                        readOnly: readOnly,
+                                        theme: 'vs-dark'
+                                    }}
+                                />
+                            </div>
+                            {yamlError && (
+                                <p className="text-sm text-destructive font-medium">
+                                    YAML 格式错误: {yamlError}
+                                </p>
+                            )}
+                        </DialogContent>
+                    </Dialog>
                 </div>
-                {yamlError ? (
-                    <p className="text-sm text-destructive font-medium">
-                        YAML 格式错误: {yamlError}
-                    </p>
-                ) : (
-                    <p className="text-sm text-muted-foreground">
-                        可选。在此处输入 YAML 格式的内容以覆写或追加规则。
-                        <br />
-                        <span className="text-xs opacity-80">注意：这将合并到生成的配置中，顶层字段将被替换。</span>
-                    </p>
-                )}
+
+                <div className="border rounded-md p-4 bg-muted/30 min-h-[100px] max-h-[300px] overflow-y-auto">
+                    {config.ruleOverride ? (
+                        <pre className="text-xs font-mono whitespace-pre-wrap break-all">
+                            {config.ruleOverride}
+                        </pre>
+                    ) : (
+                        <div className="text-sm text-muted-foreground italic flex items-center justify-center h-full min-h-[60px]">
+                            暂无规则覆写 (No rule overrides)
+                        </div>
+                    )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    可选。点击上方按钮进行编辑。
+                </p>
             </div>
         </div>
     );
