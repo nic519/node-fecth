@@ -139,7 +139,7 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
                                 <DialogTitle>编辑规则覆写</DialogTitle>
                                 <DialogDescription>
                                     在此处输入 YAML 格式的内容以覆写或追加规则。
-                                    <span className="text-xs opacity-80 block mt-1">注意：这将合并到生成的配置中，顶层字段将被替换。</span>
+                                    <span className="text-xs opacity-80 block mt-1">教程：<a href="https://clashparty.org/docs/guide/override/yaml" target="_blank" rel="noopener noreferrer">https://clashparty.org/docs/guide/override/yaml</a></span>
                                 </DialogDescription>
                             </DialogHeader>
                             <div className={`flex-1 min-h-0 border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`}>
