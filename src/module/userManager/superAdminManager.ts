@@ -2,7 +2,7 @@
 import { getDb } from '@/db';
 import { users } from '@/db/schema';
 import { desc } from 'drizzle-orm';
-import { AdminOperation, SuperAdminStats, UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
+import { AdminOperation, UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
 import { TrafficInfo, UserConfig } from '@/types/openapi-schemas';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserManager } from './userManager';
@@ -27,48 +27,6 @@ export class SuperAdminManager {
 			return false;
 		}
 		return token === superAdminToken;
-	}
-
-	/**
-	 * 获取系统统计数据
-	 */
-	async getSystemStats(): Promise<SuperAdminStats> {
-		try {
-			const db = getDb(this.env);
-			const userList = await db.select().from(users).all();
-			const today = new Date().toISOString().split('T')[0];
-
-			let activeUsers = 0;
-			let todayNewUsers = 0;
-
-			// 分析每个用户的配置状态
-			for (const user of userList) {
-				const config = JSON.parse(user.config);
-				const updatedAt = user.updatedAt;
-
-				// 检查是否为今日新增用户
-				if (updatedAt?.startsWith(today)) {
-					todayNewUsers++;
-				}
-
-				// 检查用户活跃度（有配置且订阅地址有效）
-				if (config.subscribe && user.accessToken) {
-					activeUsers++;
-				}
-			}
-
-			const configCompleteRate = userList.length > 0 ? (activeUsers / userList.length) * 100 : 0;
-
-			return {
-				totalUsers: userList.length,
-				activeUsers,
-				configCompleteRate: Math.round(configCompleteRate * 100) / 100,
-				todayNewUsers,
-			};
-		} catch (error) {
-			console.error('获取系统统计失败:', error);
-			throw error;
-		}
 	}
 
 	/**

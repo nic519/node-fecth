@@ -1,12 +1,5 @@
 import { UserConfig } from "@/types/openapi-schemas";
 
-export interface SuperAdminStats {
-	totalUsers: number;
-	activeUsers: number;
-	configCompleteRate: number;
-	todayNewUsers: number;
-}
-
 export type UserAdminConfig = UserConfig & {
 	uid: string;
 	updatedAt: string;
