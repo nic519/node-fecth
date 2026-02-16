@@ -102,6 +102,22 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		}
 	};
 
+	// Set config with validation check if errors exist
+	const setConfigWithValidation = useCallback((newConfig: UserConfig) => {
+		setConfig(newConfig);
+		setValidationErrors((prevErrors) => {
+			if (prevErrors.length > 0) {
+				const result = UserConfigSchema.safeParse(newConfig);
+				if (result.success) {
+					return [];
+				} else {
+					return result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`);
+				}
+			}
+			return prevErrors;
+		});
+	}, []);
+
 	// 初始化加载
 	useEffect(() => {
 		if (!token) {
@@ -124,7 +140,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		connectionStatus,
 		lastSaved,
 		// 操作
-		setConfig,
+		setConfig: setConfigWithValidation,
 		saveConfig,
 		loadConfig,
 	};

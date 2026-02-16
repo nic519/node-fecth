@@ -1,11 +1,12 @@
 import { z } from 'zod';
+import { AREA_CODES } from '@/config/proxy-area.config';
 
 // =============================================================================
 // 基础 Schemas
 // =============================================================================
 
 // 地区代码 Schema
-export const AreaCodeSchema = z.enum(['TW', 'SG', 'JP', 'VN', 'HK', 'US']);
+export const AreaCodeSchema = z.enum(AREA_CODES);
 
 // 订阅配置 Schema
 export const SubConfigSchema = z.object({

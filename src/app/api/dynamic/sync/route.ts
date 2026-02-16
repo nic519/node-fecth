@@ -2,7 +2,38 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/db';
 import { dynamic } from '@/db/schema';
 import { createHash } from 'node:crypto';
-import { sql } from 'drizzle-orm';
+import { sql, eq, inArray } from 'drizzle-orm';
+
+export const GET = async (request: Request) => {
+    try {
+        const { searchParams } = new URL(request.url);
+        const urls = searchParams.get('urls')?.split(',').filter(Boolean);
+
+        const db = getDb();
+        let query = db.select({
+            id: dynamic.id,
+            url: dynamic.url,
+            traffic: dynamic.traffic,
+            updatedAt: dynamic.updatedAt,
+        }).from(dynamic);
+
+        if (urls && urls.length > 0) {
+            // @ts-ignore
+            query = query.where(inArray(dynamic.url, urls));
+        }
+
+        const results = await query;
+
+        return NextResponse.json({
+            code: 0,
+            msg: 'success',
+            data: results
+        });
+    } catch (error: any) {
+        console.error('Dynamic fetch error:', error);
+        return NextResponse.json({ code: 500, msg: error.message || 'Internal Server Error' }, { status: 500 });
+    }
+};
 
 export const POST = async (request: Request) => {
     try {
@@ -26,7 +57,7 @@ export const POST = async (request: Request) => {
 
         // Upsert into DB
         const db = getDb();
-        
+
         await db.insert(dynamic).values({
             id,
             url,

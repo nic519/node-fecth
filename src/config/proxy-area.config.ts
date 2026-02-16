@@ -1,5 +1,7 @@
 import { ProxyAreaInfo } from '@/types/clash.types';
 
+export const AREA_CODES = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'] as const;
+
 export const ProxyAreaObjects: ProxyAreaInfo[] = [
 	{
 		code: 'TW',

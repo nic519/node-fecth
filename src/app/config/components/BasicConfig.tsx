@@ -4,14 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { AREA_CODES } from '@/config/proxy-area.config';
 
 interface BasicConfigProps {
     config: UserConfig;
     onChange: (newConfig: UserConfig) => void;
     readOnly?: boolean;
 }
-
-const AREA_CODES = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'];
 
 export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigProps) {
     const handleChange = (key: keyof UserConfig, value: any) => {
@@ -133,7 +132,7 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                     </Button>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor={`sub-url-${index}`}>订阅链接</Label>
                                         <Input
@@ -144,36 +143,40 @@ export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigP
                                             readOnly={readOnly}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor={`sub-flag-${index}`}>标识</Label>
-                                        <Input
-                                            id={`sub-flag-${index}`}
-                                            value={item.flag}
-                                            onChange={(e) => handleAppendSubListUpdate(index, 'flag', e.target.value)}
-                                            placeholder="sub-1"
-                                            readOnly={readOnly}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="space-y-2">
-                                    <Label>包含地区</Label>
-                                    <div className="flex flex-wrap gap-4">
-                                        {AREA_CODES.map((area) => (
-                                            <div key={`${index}-${area}`} className="flex items-center space-x-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`sub-${index}-area-${area}`}
-                                                    checked={item.includeArea?.includes(area as any) || false}
-                                                    onChange={(e) => handleAppendSubListAreaChange(index, area, e.target.checked)}
-                                                    disabled={readOnly}
-                                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                                />
-                                                <Label htmlFor={`sub-${index}-area-${area}`}>{area}</Label>
+                                    <div className="flex flex-col md:flex-row gap-4 items-start">
+                                        <div className="space-y-2 w-full md:w-32 flex-shrink-0">
+                                            <Label htmlFor={`sub-flag-${index}`}>标识</Label>
+                                            <Input
+                                                id={`sub-flag-${index}`}
+                                                value={item.flag}
+                                                onChange={(e) => handleAppendSubListUpdate(index, 'flag', e.target.value)}
+                                                placeholder="sub-1"
+                                                readOnly={readOnly}
+                                                maxLength={5}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2 flex-grow">
+                                            <Label>包含地区</Label>
+                                            <div className="flex flex-wrap gap-4 pt-2">
+                                                {AREA_CODES.map((area) => (
+                                                    <div key={`${index}-${area}`} className="flex items-center space-x-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`sub-${index}-area-${area}`}
+                                                            checked={item.includeArea?.includes(area as any) || false}
+                                                            onChange={(e) => handleAppendSubListAreaChange(index, area, e.target.checked)}
+                                                            disabled={readOnly}
+                                                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                        />
+                                                        <Label htmlFor={`sub-${index}-area-${area}`}>{area}</Label>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                            <p className="text-xs text-muted-foreground mt-1">可选。若不选则默认包含所有地区。</p>
+                                        </div>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">可选。若不选则默认包含所有地区。</p>
                                 </div>
                             </CardContent>
                         </Card>
