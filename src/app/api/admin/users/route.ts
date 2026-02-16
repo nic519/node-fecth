@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
-import { ResponseUtils } from '@/utils/responseUtils';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { UserConfig } from '@/types/openapi-schemas';
 

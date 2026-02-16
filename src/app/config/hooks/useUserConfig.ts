@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ConfigResponse } from '@/types/user-config';
 import { configToYaml, validateConfig, yamlToConfig } from '@/utils/configUtils';
+import { userService } from '@/services/userService';
 
-interface ApiResponse<T> {
-	code: number;
-	msg: string;
-	data: T;
-}
 
 export interface UseUserConfigProps {
 	uid: string;
@@ -53,13 +49,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 		try {
 			setLoading(true);
 
-			const res = await fetch(`/api/user?uid=${uid}&token=${token}`);
-			if (!res.ok) {
-				const errorData = await res.json() as ApiResponse<null>;
-				throw new Error(errorData.msg || '获取配置失败');
-			}
-
-			const response = await res.json() as ApiResponse<ConfigResponse>;
+			const response = await userService.getUserConfig(uid, token);
 
 			// 检查业务响应码
 			if (response.code !== 0) {
@@ -102,20 +92,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			// 解析 YAML 配置
 			const newConfig = yamlToConfig(configContent);
 
-			const res = await fetch(`/api/user?uid=${uid}&token=${token}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ config: newConfig }),
-			});
-
-			if (!res.ok) {
-				const errorData = await res.json() as any;
-				throw new Error(errorData.msg || '保存配置失败');
-			}
-
-			const response = await res.json() as any;
+			const response = await userService.updateUserConfig(uid, token, newConfig);
 
 			// 检查响应是否成功
 			if (response.code === 0) {

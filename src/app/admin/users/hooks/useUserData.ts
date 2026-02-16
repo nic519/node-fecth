@@ -1,13 +1,10 @@
 'use client';
 
 import type { UserSummary } from '@/types/user-config';
+import { adminService } from '@/services/adminService';
 import { useCallback, useEffect, useState } from 'react';
 
-interface ApiResponse<T> {
-	code: number;
-	msg: string;
-	data: T;
-}
+
 
 export interface UseUserDataProps {
 	superToken: string;
@@ -36,8 +33,7 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 			setLoading(true);
 			setError(null);
 
-			const res = await fetch(`/api/admin/users?superToken=${superToken}`);
-			const response = await res.json() as ApiResponse<{ users: UserSummary[] }>;
+			const response = await adminService.getUsers(superToken);
 
 			// 检查业务响应码
 			if (response.code !== 0) {
