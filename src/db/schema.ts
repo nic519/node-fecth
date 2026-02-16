@@ -57,6 +57,10 @@ export const users = sqliteTable('users', {
 	// 文件名，默认值为：miho-cfg.yaml
 	fileName: text('file_name').notNull().default('miho-cfg.yaml'),
 
+	// 追加的子配置列表	
+	// 格式为 JSON 字符串，存储需要追加的子配置项
+	appendSubList: text('append_sub_list').default(''),
+
 	// 时间戳
 	createdAt: text('created_at')
 		.notNull()

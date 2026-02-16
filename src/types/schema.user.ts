@@ -26,10 +26,8 @@ export const UserConfigSchema = z.object({
 	excludeRegex: z.string().optional(),
 });
 
-// 配置响应 Schema（兼容旧接口）
-export const ConfigResponseSchema = z.object({
-	config: UserConfigSchema,
-	assetToken: z.string(),
+// 配置响应 Schema（扁平化结构）
+export const ConfigResponseSchema = UserConfigSchema.extend({
 	updatedAt: z.string(),
 });
 
@@ -181,6 +179,7 @@ export type IScUserQueryToken = z.infer<typeof ScUserQueryToken>;
 export type IScUserCreateReq = z.infer<typeof ScUserCreateReq>;
 export type IScUserUpdateReq = z.infer<typeof ScUserUpdateReq>;
 export type IScUserAdminUpdateReq = z.infer<typeof ScUserAdminUpdateReq>;
+export type IConfigResponse = z.infer<typeof ConfigResponseSchema>;
 
 // 响应类型
 export type IScUserDetailResponse = z.infer<typeof ScUserDetailResponse>;

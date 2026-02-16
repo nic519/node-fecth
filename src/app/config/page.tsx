@@ -36,11 +36,6 @@ function UserConfigContent() {
 		);
 	}
 
-	let yamlString = '';
-	if (userConfigState.config?.config) {
-		yamlString = configToYaml(userConfigState.config.config);
-	}
-
 	return (
 		<div className="min-h-screen">
 			<Header
@@ -76,7 +71,7 @@ function UserConfigContent() {
 							<ConfigEditor
 								uid={uid}
 								token={token}
-								configContent={yamlString}
+								configContent={userConfigState.configContent}
 								validationErrors={userConfigState.validationErrors}
 								configPreview={userConfigState.configPreview}
 								onConfigContentChange={userConfigState.setConfigContent}

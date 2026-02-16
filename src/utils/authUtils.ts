@@ -25,6 +25,18 @@ export class AuthUtils {
 	}
 
 	/**
+	 * 验证 Super Admin Token
+	 */
+	static validateSuperToken(request: Request, env: Env): boolean {
+		const url = new URL(request.url);
+		const superToken = url.searchParams.get('superToken');
+		// 注意：OpenNext 中 process.env.SUPER_ADMIN_TOKEN 优于 env.SUPER_ADMIN_TOKEN
+		const envSuperToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+
+		return !!(superToken && envSuperToken && superToken === envSuperToken);
+	}
+
+	/**
 	 * 统一的身份验证方法
 	 * 支持 User Token 和 Super Admin Token
 	 * @param request HTTP请求对象
@@ -33,14 +45,10 @@ export class AuthUtils {
 	 * @returns 验证结果
 	 */
 	static async authenticate(request: Request, env: Env, uid?: string): Promise<ConfigResponse> {
-		const url = new URL(request.url);
-		const superToken = url.searchParams.get('superToken');
 		const accessToken = this.getAccessToken(request);
 
 		// 1. 优先检查 Super Admin Token
-		// 注意：OpenNext 中 process.env.SUPER_ADMIN_TOKEN 优于 env.SUPER_ADMIN_TOKEN
-		const envSuperToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
-		if (superToken && envSuperToken && superToken === envSuperToken) {
+		if (this.validateSuperToken(request, env)) {
 			// 如果是超级管理员，且提供了 uid，则直接获取用户信息并返回
 			if (uid) {
 				const userManager = new UserManager(env);

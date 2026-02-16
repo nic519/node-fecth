@@ -11,7 +11,7 @@ export class UserManager {
 	}
 
 	/**
-	 * 获取用户配置
+	 * 从数据库获取用户配置
 	 */
 	async getUserConfig(uid: string): Promise<ConfigResponse | null> {
 		try {
@@ -22,11 +22,23 @@ export class UserManager {
 				return null;
 			}
 
-			const config = JSON.parse(userRecord.config) as UserConfig;
+			// 解析基础配置
+			const partialConfig = JSON.parse(userRecord.config);
+
+			// 合并数据库字段到配置对象
+			// 优先使用数据库字段作为单一真理源
+			const config: UserConfig = {
+				...partialConfig,
+				accessToken: userRecord.accessToken,
+				// 如果数据库字段为空字符串，则在配置对象中视为 undefined (对应 optional)
+				requiredFilters: userRecord.requiredFilters || undefined,
+				ruleUrl: userRecord.ruleUrl || undefined,
+				fileName: userRecord.fileName || undefined,
+				appendSubList: userRecord.appendSubList || undefined,
+			};
 
 			return {
-				config,
-				assetToken: userRecord.accessToken,
+				...config,
 				updatedAt: userRecord.updatedAt,
 			};
 		} catch (error) {
@@ -46,28 +58,39 @@ export class UserManager {
 			const db = getDb(this.env);
 			const now = new Date().toISOString();
 
+			// 提取需要单独存储的字段
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ...restConfig } = config;
+
+			// 准备数据库记录
+			const userValues = {
+				accessToken: accessToken,
+				// 处理可选字段：如果为 undefined，则存储为空字符串（或使用数据库默认值）
+				requiredFilters: requiredFilters || '',
+				ruleUrl: ruleUrl || '',
+				// fileName 有默认值 'miho-cfg.yaml'，如果未提供则使用默认值
+				fileName: fileName || 'miho-cfg.yaml',
+				// appendSubList 有默认值 ''，如果未提供则使用默认值
+				appendSubList: appendSubList || '',
+				// config 字段只存储剩余的配置项，避免数据冗余
+				config: JSON.stringify(restConfig),
+				updatedAt: now
+			};
+
 			// 检查是否存在
 			const existing = await db.select().from(users).where(eq(users.id, uid)).get();
 
 			if (existing) {
 				await db.update(users)
-					.set({
-						config: JSON.stringify(config),
-						accessToken: config.accessToken,
-						requiredFilters: config.requiredFilters || '',
-						ruleUrl: config.ruleUrl || '',
-						updatedAt: now
-					})
+					.set(userValues)
 					.where(eq(users.id, uid))
 					.execute();
 			} else {
 				await db.insert(users)
 					.values({
 						id: uid,
-						config: JSON.stringify(config),
-						accessToken: config.accessToken,
+						...userValues,
 						createdAt: now,
-						updatedAt: now
 					})
 					.execute();
 			}
@@ -103,7 +126,7 @@ export class UserManager {
 				return null;
 			}
 
-			if (user.config.accessToken !== accessToken) {
+			if (user.accessToken !== accessToken) {
 				return null;
 			}
 

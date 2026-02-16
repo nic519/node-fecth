@@ -47,7 +47,7 @@ export class SuperAdminManager {
 					}
 
 					// 检查用户活跃度（有配置且订阅地址有效）
-					if (configResponse.config.subscribe && configResponse.config.accessToken) {
+					if (configResponse.subscribe && configResponse.accessToken) {
 						activeUsers++;
 					}
 				}
@@ -77,7 +77,7 @@ export class SuperAdminManager {
 
 			for (const uid of userList) {
 				const configResponse = await this.userManager.getUserConfig(uid);
-				const subscribeUrl = configResponse?.config.subscribe;
+				const subscribeUrl = configResponse?.subscribe;
 
 				// 获取流量信息（仅当有订阅地址时）
 				let trafficInfo: UserSummary['trafficInfo'] = undefined;
@@ -91,10 +91,10 @@ export class SuperAdminManager {
 
 				const summary: UserSummary = {
 					uid: uid,
-					token: configResponse?.config.accessToken || '',
+					token: configResponse?.accessToken || '',
 					hasConfig: !!configResponse,
 					lastModified: configResponse?.updatedAt || null,
-					isActive: !!(configResponse?.config.subscribe && configResponse?.config.accessToken),
+					isActive: !!(configResponse?.subscribe && configResponse?.accessToken),
 					subscribeUrl,
 					status: configResponse ? 'active' : 'inactive',
 					trafficInfo,
@@ -310,11 +310,11 @@ export class SuperAdminManager {
 	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<UserSummary['trafficInfo']> {
 		try {
 			const configResponse = await this.userManager.getUserConfig(uid);
-			if (!configResponse?.config.subscribe) {
+			if (!configResponse?.subscribe) {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
-			const trafficUtils = new ProxyFetch(configResponse.config.subscribe);
+			const trafficUtils = new ProxyFetch(configResponse.subscribe);
 			const { subInfo } = await trafficUtils.fetchClashContent();
 
 			if (!subInfo) {

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     // AuthUtils expects a Request and Env.
     const authConfig = await AuthUtils.authenticate(request as unknown as Request, env as unknown as Env, uid);
-    const innerUser = new InnerUser(authConfig.config);
+    const innerUser = new InnerUser(authConfig);
 
     if (!innerUser.subscribe) {
       return ResponseUtils.error(400, '用户配置中缺少订阅URL');

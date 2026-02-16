@@ -2,7 +2,6 @@ import { z } from 'zod';
 // 从用户模块导入用户相关 Schema
 import {
 	AreaCodeSchema,
-	ConfigResponseSchema,
 	SubConfigSchema,
 	UserConfigSchema,
 } from '@/types/schema.user';
@@ -93,16 +92,16 @@ export const SuperTokenQuerySchema = z.object({
 // 从用户模块导出用户相关类型
 export {
 	AreaCodeSchema,
-	ConfigResponseSchema,
 	SubConfigSchema,
 	UserConfigSchema,
+	ConfigResponseSchema,
 	type IScUserApiModel,
 	type IUserConfig as UserConfig,
+	type IConfigResponse as ConfigResponse,
 } from '@/types/schema.user';
 
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
 export type SubConfig = z.infer<typeof SubConfigSchema>;
-export type ConfigResponse = z.infer<typeof ConfigResponseSchema>;
 
 export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
 export type UserSummary = z.infer<typeof UserSummarySchema>;

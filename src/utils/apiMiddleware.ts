@@ -37,10 +37,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
     try {
       // 1. Admin Check
       if (options.adminOnly) {
-        const superToken = searchParams.get('superToken');
-        const envSuperToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
-
-        if (!superToken || !envSuperToken || superToken !== envSuperToken) {
+        if (!AuthUtils.validateSuperToken(request, env)) {
           return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
         }
       }

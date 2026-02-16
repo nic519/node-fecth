@@ -57,10 +57,13 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 
 			// 从响应结构中提取配置数据
 			const configData = response.data;
-			setConfig({ config: configData.config, assetToken: configData.assetToken, updatedAt: configData.updatedAt });
+			setConfig(configData);
 
 			// 将配置转换为 YAML 格式显示
-			const yamlContent = configToYaml(configData.config);
+			// 移除 updatedAt 等非配置字段后再转换
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { updatedAt, ...userConfig } = configData;
+			const yamlContent = configToYaml(userConfig);
 			setConfigContent(yamlContent);
 
 			// 验证配置
