@@ -24,6 +24,7 @@ export const UserConfigSchema = z.object({
 	multiPortMode: z.array(AreaCodeSchema).optional(),
 	appendSubList: z.array(SubConfigSchema).optional(),
 	excludeRegex: z.string().optional(),
+	ruleOverride: z.string().optional(),
 });
 
 // 配置响应 Schema（扁平化结构）

@@ -1,11 +1,11 @@
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { ClashProxy, ClashListener, ProxyAreaInfo } from '@/types/clash.types';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
-import { InnerUser } from '@/module/userManager/innerUserConfig';
+import { UserConfig } from '@/types/openapi-schemas';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiPort {
-	constructor(private preMergeInfo: PreMergeInfo, private userConfig: InnerUser) {}
+	constructor(private preMergeInfo: PreMergeInfo, private userConfig: UserConfig) { }
 
 	/// 创建listeners
 	createListeners(proxyList: ClashProxy[]): ClashListener[] {

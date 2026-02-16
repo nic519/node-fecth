@@ -1,4 +1,4 @@
-import { InnerUser } from '@/module/userManager/innerUserConfig';
+import { UserConfig } from '@/types/openapi-schemas';
 import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
 import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
 import { ClashProxy } from '@/types/clash.types';
@@ -7,7 +7,7 @@ import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
-	constructor(private ruleContent: string, private userConfig: InnerUser) {}
+    constructor(private ruleContent: string, private userConfig: UserConfig) { }
 
 	/// 取出所有proxy
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {

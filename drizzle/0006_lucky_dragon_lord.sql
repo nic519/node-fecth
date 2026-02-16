@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `rule_overwrite` text DEFAULT '';

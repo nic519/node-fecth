@@ -62,7 +62,7 @@ export const users = sqliteTable('users', {
 	appendSubList: text('append_sub_list').default(''),
 
 	// 覆写规则
-	// overwrite: text('overwrite').default(''),
+	ruleOverwrite: text('rule_overwrite').default(''),
 
 	// 时间戳
 	createdAt: text('created_at')

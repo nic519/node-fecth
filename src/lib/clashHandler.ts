@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { InnerUser } from '@/module/userManager/innerUserConfig';
+import { UserConfig } from '@/types/openapi-schemas';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
@@ -41,13 +41,13 @@ export class ClashHandler implements RouteHandler {
 
 	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
-		const innerUser: InnerUser = params!.innerUser;
+		const userConfig: UserConfig = params!.userConfig;
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 
 			// 开始构建配置文件
-			const yamlMerge = new YamlMergeFactory(innerUser);
+			const yamlMerge = new YamlMergeFactory(userConfig);
 			const { yamlContent, subInfo } = await yamlMerge.generate();
 
 			// 使用配置验证器验证格式
@@ -56,7 +56,7 @@ export class ClashHandler implements RouteHandler {
 
 			return new Response(yamlContent, {
 				status: 200,
-				headers: this._buildRespHeaders(subInfo, queryParams.download ? innerUser.fileName : undefined),
+				headers: this._buildRespHeaders(subInfo, queryParams.download ? userConfig.fileName : undefined),
 			});
 		} catch (error) {
 			console.error('Error:', error);

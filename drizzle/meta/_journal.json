@@ -43,6 +43,13 @@
       "when": 1771253939876,
       "tag": "0005_keen_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1771261002875,
+      "tag": "0006_lucky_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

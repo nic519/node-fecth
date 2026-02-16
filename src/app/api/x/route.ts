@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/lib/clashHandler';
-import { InnerUser } from '@/module/userManager/innerUserConfig';
 
 export async function GET(request: NextRequest) {
   const env = process.env as unknown as Env;
@@ -16,14 +15,13 @@ export async function GET(request: NextRequest) {
   try {
     // AuthUtils expects a Request and Env.
     const authConfig = await AuthUtils.authenticate(request as unknown as Request, env as unknown as Env, uid);
-    const innerUser = new InnerUser(authConfig);
 
-    if (!innerUser.subscribe) {
+    if (!authConfig.subscribe) {
       return ResponseUtils.error(400, '用户配置中缺少订阅URL');
     }
 
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { innerUser });
+    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig });
 
     if (!response) {
       return ResponseUtils.error(500, '配置生成失败');
