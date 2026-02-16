@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { UserConfig } from '@/types/user-config';
 import { UserConfigSchema } from '@/types/openapi-schemas';
 import { userService } from '@/services/userService';
+import { useRouter } from 'next/navigation';
 
 export interface UseUserConfigProps {
 	uid: string;
@@ -26,8 +27,10 @@ export interface UseUserConfigReturn {
 }
 
 export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfigReturn {
+	const router = useRouter();
 	const [config, setConfig] = useState<UserConfig | null>(null);
 	const [loading, setLoading] = useState(true);
+
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
@@ -92,6 +95,11 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 				setSaveSuccess(true);
 				setLastSaved(new Date());
 				setTimeout(() => setSaveSuccess(false), 3000);
+
+				// 如果修改了访问令牌，则刷新页面地址
+				if (config.accessToken && config.accessToken !== token) {
+					router.replace(`/config?uid=${uid}&token=${config.accessToken}`);
+				}
 			} else {
 				setError(response.msg || '保存配置失败');
 			}

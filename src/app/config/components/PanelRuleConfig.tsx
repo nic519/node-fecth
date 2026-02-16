@@ -167,6 +167,13 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                 <p className="text-sm text-muted-foreground">
                     可选。高级用户专用。可以覆盖生成的配置中的任意字段。
                 </p>
+                {config.ruleOverwrite && (
+                    <div className="mt-2 rounded-md border bg-muted p-4 overflow-x-auto max-h-96 overflow-y-auto">
+                        <pre className="text-xs font-mono">
+                            {config.ruleOverwrite}
+                        </pre>
+                    </div>
+                )}
             </div>
         </div>
     );

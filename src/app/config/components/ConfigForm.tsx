@@ -1,9 +1,8 @@
 import { UserConfig } from '@/types/openapi-schemas';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { PanelDynamicSync } from './PanelDynamicSync';
 import { PanelBasicConfig } from './PanelBasicConfig';
 import { PanelRuleConfig } from './PanelRuleConfig';
+import { PanelTokenConfig } from './PanelTokenConfig';
 
 export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'preview';
 
@@ -35,17 +34,7 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid 
             )}
 
             {activeTab === 'token' && (
-                <div className="space-y-2">
-                    <Label htmlFor="accessToken">访问令牌</Label>
-                    <Input
-                        id="accessToken"
-                        value={config.accessToken || ''}
-                        onChange={(e) => handleChange('accessToken', e.target.value)}
-                        placeholder="your-access-token"
-                        readOnly={readOnly}
-                    />
-                    <p className="text-sm text-muted-foreground">必填。用于访问配置的唯一令牌。</p>
-                </div>
+                <PanelTokenConfig config={config} onChange={onChange} readOnly={readOnly} />
             )}
         </div>
     );

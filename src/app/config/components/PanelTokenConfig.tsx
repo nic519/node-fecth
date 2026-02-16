@@ -1,0 +1,47 @@
+import { UserConfig } from '@/types/openapi-schemas';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+
+interface PanelTokenConfigProps {
+    config: UserConfig;
+    onChange: (newConfig: UserConfig) => void;
+    readOnly?: boolean;
+}
+
+export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfigProps) {
+
+    const handleChange = (key: keyof UserConfig, value: any) => {
+        onChange({ ...config, [key]: value });
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="space-y-1">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                    <Key className="w-5 h-5" />
+                    访问令牌
+                </h3>
+                <p className="text-sm text-muted-foreground">配置用于访问管理面板的安全令牌，更新后，地址会重定向</p>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="accessToken">Access Token</Label>
+                <div className="flex gap-2">
+                    <div className="relative flex-1">
+                        <Input
+                            id="accessToken"
+                            value={config.accessToken || ''}
+                            onChange={(e) => handleChange('accessToken', e.target.value)}
+                            placeholder="your-access-token"
+                            readOnly={readOnly}
+                            className="font-mono pr-10"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

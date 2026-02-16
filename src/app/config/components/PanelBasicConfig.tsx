@@ -6,7 +6,6 @@ import { Settings2, Link, FileText, Filter, ListPlus, Plus } from 'lucide-react'
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback } from 'react';
 import { SubConfigCard } from './SubConfigCard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 interface BasicConfigProps {
@@ -60,15 +59,15 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
     return (
         <div className="space-y-8">
             {/* Main Configuration Section */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+            <div className="space-y-6">
+                <div className="space-y-1">
+                    <h3 className="text-lg font-medium flex items-center gap-2">
                         <Settings2 className="w-5 h-5" />
                         基础设置
-                    </CardTitle>
-                    <CardDescription>配置主订阅链接和全局选项</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+                    </h3>
+                </div>
+
+                <div className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="subscribe" className="text-base flex items-center gap-2">
                             <Link className="w-4 h-4" />
@@ -123,8 +122,8 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                             </p>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             <Separator />
 
