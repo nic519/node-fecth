@@ -34,7 +34,8 @@ export class UserManager {
 				requiredFilters: userRecord.requiredFilters || undefined,
 				ruleUrl: userRecord.ruleUrl || undefined,
 				fileName: userRecord.fileName || undefined,
-				appendSubList: userRecord.appendSubList || undefined,
+				appendSubList: userRecord.appendSubList ? JSON.parse(userRecord.appendSubList) : undefined,
+				ruleOverwrite: userRecord.ruleOverwrite || undefined,
 			};
 
 			return {
@@ -60,7 +61,7 @@ export class UserManager {
 
 			// 提取需要单独存储的字段
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ...restConfig } = config;
+			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ruleOverwrite, ...restConfig } = config;
 
 			// 准备数据库记录
 			const userValues = {
@@ -71,7 +72,8 @@ export class UserManager {
 				// fileName 有默认值 'miho-cfg.yaml'，如果未提供则使用默认值
 				fileName: fileName || 'miho-cfg.yaml',
 				// appendSubList 有默认值 ''，如果未提供则使用默认值
-				appendSubList: appendSubList || '',
+				appendSubList: appendSubList ? JSON.stringify(appendSubList) : '',
+				ruleOverwrite: ruleOverwrite || '',
 				// config 字段只存储剩余的配置项，避免数据冗余
 				config: JSON.stringify(restConfig),
 				updatedAt: now

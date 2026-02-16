@@ -145,7 +145,7 @@ export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigPro
                             <div className={`flex-1 min-h-0 border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`}>
                                 <YamlEditor
                                     height="100%"
-                                    value={config.ruleOverride || ''}
+                                    value={config.ruleOverwrite || ''}
                                     onChange={(val) => handleYamlChange(val)}
                                     readOnly={readOnly}
                                 />

@@ -99,7 +99,7 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
 
     const handleYamlChange = (value: string | undefined) => {
         const newValue = value || '';
-        handleChange('ruleOverride', newValue);
+        handleChange('ruleOverwrite', newValue);
 
         if (!newValue.trim()) {
             setYamlError(null);

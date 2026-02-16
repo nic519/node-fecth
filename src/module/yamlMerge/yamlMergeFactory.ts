@@ -196,8 +196,8 @@ export class YamlMergeFactory {
 			}
 
 			// 应用覆写
-			if (this.userConfig.ruleOverride) {
-				result.yamlContent = this.applyOverride(result.yamlContent, this.userConfig.ruleOverride);
+			if (this.userConfig.ruleOverwrite) {
+				result.yamlContent = this.applyOverride(result.yamlContent, this.userConfig.ruleOverwrite);
 			}
 
 			console.log(`✅ YAML生成完成，内容长度: ${result.yamlContent.length}`);
