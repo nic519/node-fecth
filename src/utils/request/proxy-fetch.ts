@@ -127,11 +127,6 @@ export class ProxyFetch {
 				return null;
 			}
 
-			// 如果状态不是SUCCESS，视为无缓存
-			if (result.status !== 'SUCCESS') {
-				return null;
-			}
-
 			const { mb } = calculateSize(result.content);
 			logger.debug({ size: `${mb}MB`, id }, '读取缓存');
 
@@ -173,7 +168,6 @@ export class ProxyFetch {
 					url,
 					content: data.content,
 					traffic: data.subInfo,
-					status: 'SUCCESS',
 					updatedAt: data.fetchTime.toISOString(),
 				})
 				.onConflictDoUpdate({
@@ -181,7 +175,6 @@ export class ProxyFetch {
 					set: {
 						content: data.content,
 						traffic: data.subInfo,
-						status: 'SUCCESS',
 						updatedAt: data.fetchTime.toISOString(),
 					},
 				});
