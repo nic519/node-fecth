@@ -22,7 +22,7 @@ interface RuleConfigProps {
     readOnly?: boolean;
 }
 
-export function RuleConfig({ config, onChange, readOnly = false }: RuleConfigProps) {
+export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConfigProps) {
     const {
         filterOptions,
         loadingFilters,

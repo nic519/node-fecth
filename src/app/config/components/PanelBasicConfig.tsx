@@ -18,7 +18,7 @@ interface BasicConfigProps {
     readOnly?: boolean;
 }
 
-export function BasicConfig({ config, onChange, readOnly = false }: BasicConfigProps) {
+export function PanelBasicConfig({ config, onChange, readOnly = false }: BasicConfigProps) {
     const handleChange = (key: keyof UserConfig, value: any) => {
         onChange({ ...config, [key]: value });
     };

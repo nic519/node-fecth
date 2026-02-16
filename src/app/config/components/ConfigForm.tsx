@@ -1,9 +1,9 @@
 import { UserConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DynamicSyncPanel } from './DynamicSyncPanel';
-import { BasicConfig } from './BasicConfig';
-import { RuleConfig } from './RuleConfig';
+import { PanelDynamicSync } from './PanelDynamicSync';
+import { PanelBasicConfig } from './PanelBasicConfig';
+import { PanelRuleConfig } from './PanelRuleConfig';
 
 export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'preview';
 
@@ -22,15 +22,15 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab }: Co
     return (
         <div className="space-y-6 p-6">
             {activeTab === 'basic' && (
-                <BasicConfig config={config} onChange={onChange} readOnly={readOnly} />
+                <PanelBasicConfig config={config} onChange={onChange} readOnly={readOnly} />
             )}
 
             {activeTab === 'rules' && (
-                <RuleConfig config={config} onChange={onChange} readOnly={readOnly} />
+                <PanelRuleConfig config={config} onChange={onChange} readOnly={readOnly} />
             )}
 
             {activeTab === 'dynamic' && (
-                <DynamicSyncPanel config={config} />
+                <PanelDynamicSync config={config} />
             )}
 
             {activeTab === 'token' && (

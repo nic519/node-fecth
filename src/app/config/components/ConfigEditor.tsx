@@ -5,13 +5,11 @@ import { Separator } from '@/components/ui/separator';
 import { ValidationMessage } from './ValidationMessage';
 import { ConfigForm, ConfigTab } from './ConfigForm';
 import { UserConfig } from '@/types/openapi-schemas';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
-import { YamlEditor } from '@/components/YamlEditor';
-import { Loader2 } from 'lucide-react';
+import { PanelPreview } from './PanelPreview';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -31,36 +29,6 @@ export function ConfigEditor({
 	lastSaved,
 }: ConfigEditorProps) {
 	const [activeTab, setActiveTab] = useState<ConfigTab>('basic');
-	const [origin, setOrigin] = useState('');
-	const [previewContent, setPreviewContent] = useState('');
-	const [previewLoading, setPreviewLoading] = useState(false);
-	const [previewError, setPreviewError] = useState('');
-
-	useEffect(() => {
-		setOrigin(window.location.origin);
-	}, []);
-
-	const handlePreviewSubscribeURL = async () => {
-		if (origin) {
-			const subscribeURL = `${origin}/api/x?uid=${uid}&token=${token}`;
-			setActiveTab('preview');
-			setPreviewLoading(true);
-			setPreviewError('');
-			try {
-				const response = await fetch(subscribeURL);
-				if (!response.ok) {
-					throw new Error(`Failed to fetch: ${response.statusText}`);
-				}
-				const text = await response.text();
-				setPreviewContent(text);
-			} catch (error) {
-				console.error('Preview fetch error:', error);
-				setPreviewError('获取预览内容失败，请稍后重试。');
-			} finally {
-				setPreviewLoading(false);
-			}
-		}
-	};
 
 	if (!config) {
 		return <div className="p-6 text-center text-gray-500">正在加载配置...</div>;
@@ -124,7 +92,7 @@ export function ConfigEditor({
 					<Button
 						variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
 						className={cn('w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50', activeTab === 'preview' && 'bg-blue-50 text-blue-700')}
-						onClick={handlePreviewSubscribeURL}
+						onClick={() => setActiveTab('preview')}
 					>
 						👀 预览结果
 					</Button>
@@ -142,42 +110,7 @@ export function ConfigEditor({
 					{/* Form 编辑器区域 */}
 					<div className="flex-1 relative h-full overflow-auto">
 						{activeTab === 'preview' ? (
-							<div className="h-full flex flex-col p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-lg font-medium">配置预览</h3>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={handlePreviewSubscribeURL}
-										disabled={previewLoading}
-									>
-										{previewLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-										刷新
-									</Button>
-								</div>
-
-								{previewLoading ? (
-									<div className="flex-1 flex items-center justify-center border rounded-md bg-gray-50">
-										<div className="flex flex-col items-center gap-2 text-gray-500">
-											<Loader2 className="w-8 h-8 animate-spin" />
-											<span>正在生成配置...</span>
-										</div>
-									</div>
-								) : previewError ? (
-									<div className="flex-1 flex items-center justify-center border rounded-md bg-red-50 text-red-500">
-										<p>{previewError}</p>
-									</div>
-								) : (
-									<div className="flex-1 border rounded-md overflow-hidden">
-										<YamlEditor
-											value={previewContent}
-											onChange={() => { }}
-											readOnly={true}
-											height="100%"
-										/>
-									</div>
-								)}
-							</div>
+							<PanelPreview uid={uid} token={token} />
 						) : (
 							<ConfigForm config={config} onChange={onConfigChange} activeTab={activeTab} />
 						)}

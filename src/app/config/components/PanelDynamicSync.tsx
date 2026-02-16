@@ -22,7 +22,7 @@ interface DynamicInfo {
     updatedAt: string;
 }
 
-export function DynamicSyncPanel({ config }: DynamicSyncPanelProps) {
+export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
     const [statuses, setStatuses] = useState<Record<string, SyncStatus>>({});
     const [dynamicInfos, setDynamicInfos] = useState<Record<string, DynamicInfo>>({});
 
