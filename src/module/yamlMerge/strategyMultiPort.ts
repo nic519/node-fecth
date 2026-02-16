@@ -9,7 +9,7 @@ export class StrategyMultiPort {
 
 	/// 创建listeners
 	createListeners(proxyList: ClashProxy[]): ClashListener[] {
-		var startPort = 42000;
+		const startPort = 42000;
 		const listeners: ClashListener[] = [];
 
 		// 根据国家地区来分组，且需要固定顺序

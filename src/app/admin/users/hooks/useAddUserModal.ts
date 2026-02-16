@@ -1,6 +1,7 @@
 'use client';
 
 import type { UserConfig } from '@/types/user-config';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 
 export interface UseAddUserModalProps {

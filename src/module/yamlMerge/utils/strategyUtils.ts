@@ -27,7 +27,7 @@ export class StrategyUtils {
 		} else {
 			expireStr = '未知';
 		}
-		var powerEmoji = percent < 70 ? '🔋' : '🪫';
+		const powerEmoji = percent < 70 ? '🔋' : '🪫';
 		return `A${powerEmoji}消耗${percentStr}, 到期${expireStr}`;
 	}
 

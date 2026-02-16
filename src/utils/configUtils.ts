@@ -1,4 +1,5 @@
 import type { UserConfig } from '@/types/user-config';
+import { SubConfig } from '@/types/openapi-schemas';
 
 /**
  * 将配置对象转换为 YAML 字符串
@@ -17,7 +18,7 @@ export function configToYaml(config: UserConfig): string {
 
 	if (config.appendSubList && config.appendSubList.length > 0) {
 		yaml += `\nappendSubList:`;
-		config.appendSubList.forEach((sub: any) => {
+		config.appendSubList.forEach((sub: SubConfig) => {
 			yaml += `\n  - subscribe: "${sub.subscribe}"`;
 			yaml += `\n    flag: "${sub.flag}"`;
 			if (sub.includeArea && sub.includeArea.length > 0) {
@@ -85,7 +86,7 @@ export function yamlToConfig(yaml: string): UserConfig {
 /**
  * 验证 YAML 配置
  */
-export function validateConfig(yaml: string): { errors: string[]; configPreview: any | null } {
+export function validateConfig(yaml: string): { errors: string[]; configPreview: unknown | null } {
 	const errors: string[] = [];
 
 	try {
@@ -112,7 +113,7 @@ export function validateConfig(yaml: string): { errors: string[]; configPreview:
 
 		const configPreview = errors.length === 0 ? yamlToConfig(yaml) : null;
 		return { errors, configPreview };
-	} catch (err) {
+	} catch {
 		errors.push('YAML 格式错误');
 		return { errors, configPreview: null };
 	}

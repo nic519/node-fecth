@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { UserConfig } from '@/types/user-config';
 
 /**
@@ -112,7 +113,7 @@ export function validateConfig(yaml: string): { errors: string[]; configPreview:
 
 		const configPreview = errors.length === 0 ? yamlToConfig(yaml) : null;
 		return { errors, configPreview };
-	} catch (err) {
+	} catch {
 		errors.push('YAML 格式错误');
 		return { errors, configPreview: null };
 	}

@@ -38,7 +38,7 @@ export async function GET(
     }
 
     return new NextResponse(content, { headers });
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       error: 'Internal Server Error',
       message: '获取模板失败，请稍后重试',

@@ -32,36 +32,6 @@ async function hashUrl(message: string): Promise<string> {
 }
 
 /**
- * 安全的JSON解析，自动处理BOM和控制字符
- * @param jsonString JSON字符串
- * @param fallbackValue 解析失败时的默认值
- */
-function safeJsonParse<T>(jsonString: string, fallbackValue: T | null = null): T | null {
-	try {
-		// 清理不可见字符
-		const cleaned = jsonString
-			.replace(/^\uFEFF/, '') // 移除BOM
-			.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // 移除控制字符
-
-		if (!cleaned.trim()) {
-			throw new Error('JSON字符串为空');
-		}
-
-		return JSON.parse(cleaned);
-	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : String(error),
-				dataLength: jsonString.length,
-				preview: jsonString.substring(0, 200),
-			},
-			'JSON解析失败'
-		);
-		return fallbackValue;
-	}
-}
-
-/**
  * 计算数据大小
  */
 function calculateSize(data: string): { bytes: number; mb: string } {

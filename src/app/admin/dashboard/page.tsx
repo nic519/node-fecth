@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -26,6 +27,7 @@ function DashboardContent() {
 			return;
 		}
 		loadStats();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [superToken]);
 
 	const loadStats = async () => {

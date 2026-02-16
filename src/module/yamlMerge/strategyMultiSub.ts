@@ -13,7 +13,7 @@ export class StrategyMultiSub {
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
 		const allProxyList: ClashProxy[] = [];
 		/// 为了兼容回去而使用的
-		let preMergeInfo: PreMergeInfo = {
+		const preMergeInfo: PreMergeInfo = {
 			ruleContent: this.ruleContent,
 			clashContent: '',
 			subInfo: '',

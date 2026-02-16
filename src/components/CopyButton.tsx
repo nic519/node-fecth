@@ -32,7 +32,6 @@ export function CopyButton({
 	variant = 'default',
 	size = 'sm',
 	disabled = false,
-	color,
 	startContent,
 	endContent,
 	...props

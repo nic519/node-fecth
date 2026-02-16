@@ -2,6 +2,7 @@
 
 import { YamlEditor } from '@/components/YamlEditor';
 import { DocumentArrowDownIcon, LinkIcon } from '@heroicons/react/24/outline';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,7 +28,6 @@ interface TemplateEditorProps {
 	onSave: () => void;
 	onCopyConfigContent: () => void;
 	onCopyTemplateUrl: () => void;
-	loading: boolean;
 	saving: boolean;
 }
 
@@ -45,7 +45,6 @@ export function TemplateEditor({
 	onSave,
 	onCopyConfigContent,
 	onCopyTemplateUrl,
-	loading: _loading,
 	saving,
 }: TemplateEditorProps) {
 	if (!selectedTemplate) {

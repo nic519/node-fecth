@@ -29,9 +29,9 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
-	handleDeleteTemplate: (templateId: string, e?: any) => void;
+	handleDeleteTemplate: (templateId: string, e?: React.MouseEvent) => void;
 	confirmDeleteTemplate: () => void;
-	handleUpdateTemplate: (field: keyof TemplateItem, value: any) => void;
+	handleUpdateTemplate: (field: keyof TemplateItem, value: unknown) => void;
 	handleUpdateConfigContent: (content: string) => void;
 	handleSave: () => void;
 	handleReset: () => void;
@@ -67,13 +67,13 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
 	// 模态框状态
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 	const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
-    const openDeleteModal = () => setIsDeleteModalOpen(true);
-    const closeDeleteModal = () => setIsDeleteModalOpen(false);
-    const closeErrorModal = () => setIsErrorModalOpen(false);
+	const openDeleteModal = () => setIsDeleteModalOpen(true);
+	const closeDeleteModal = () => setIsDeleteModalOpen(false);
+	const closeErrorModal = () => setIsErrorModalOpen(false);
 
 	// 计算属性
 	const selectedTemplate = templates.find((t) => t.isSelected) || null;
@@ -85,6 +85,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 			return;
 		}
 		loadTemplates();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [superToken]);
 
 	const loadTemplates = async () => {

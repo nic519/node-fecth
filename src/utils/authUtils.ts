@@ -1,4 +1,3 @@
-import { Base64Utils } from './base64Utils';
 import { ConfigResponse } from '@/types/openapi-schemas';
 import { UserManager } from '@/module/userManager/userManager';
 
@@ -79,8 +78,8 @@ export class AuthUtils {
 	/**
 	 * 创建统一的成功响应
 	 */
-	static createSuccessResponse(data: any, contentType: string = 'application/json'): Response {
-		const body = contentType === 'application/json' ? JSON.stringify(data) : data;
+	static createSuccessResponse(data: unknown, contentType: string = 'application/json'): Response {
+		const body = contentType === 'application/json' ? JSON.stringify(data) : String(data);
 
 		return new Response(body, {
 			status: 200,

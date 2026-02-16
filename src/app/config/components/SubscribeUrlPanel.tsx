@@ -14,6 +14,7 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
     const [origin, setOrigin] = useState('');
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOrigin(window.location.origin);
     }, []);
 

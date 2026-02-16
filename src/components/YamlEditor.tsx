@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import Editor from '@monaco-editor/react';
@@ -24,7 +25,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 
 		// 添加自动补全
 		monaco.languages.registerCompletionItemProvider('yaml', {
-			provideCompletionItems: (_model: any, _position: any) => {
+			provideCompletionItems: () => {
 				const suggestions = [
 					{
 						label: 'port',

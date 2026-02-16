@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseCRUD } from '@/db/base-crud';
 import { ResponseCodes } from '@/types/openapi-schemas';
 

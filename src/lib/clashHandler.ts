@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { InnerUser } from '@/module/userManager/innerUserConfig';
 import { YamlValidator } from '@/module/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/module/yamlMerge/yamlMergeFactory';

@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDb } from '@/db';
 import { templates } from '@/db/schema';
+import { ResponseUtils } from '@/utils/responseUtils';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { desc } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,9 +29,8 @@ export async function GET(request: NextRequest) {
         templates: result
       }
     });
-  } catch (error) {
-    console.error('获取模板列表失败:', error);
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+  } catch (error: unknown) {
+    return ResponseUtils.handleApiError(error);
   }
 }
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json() as any;
+    const body = await request.json() as { name: string; description?: string; content: string };
     const { name, description, content } = body;
 
     if (!name || !content) {
@@ -71,8 +72,7 @@ export async function POST(request: NextRequest) {
       msg: 'success',
       data: newTemplate
     });
-  } catch (error) {
-    console.error('创建模板失败:', error);
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+  } catch (error: unknown) {
+    return ResponseUtils.handleApiError(error);
   }
 }

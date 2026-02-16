@@ -1,7 +1,13 @@
 'use client';
 
 import type { UserSummary } from '@/types/user-config';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+interface ApiResponse<T> {
+	code: number;
+	msg: string;
+	data: T;
+}
 
 export interface UseUserDataProps {
 	superToken: string;
@@ -22,26 +28,16 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// 初始化时获取用户列表
-	useEffect(() => {
-		if (!superToken) {
-			setError('缺少管理员令牌');
-			setLoading(false);
-			return;
-		}
-		fetchUsers();
-	}, [superToken]);
-
 	/**
 	 * 获取用户列表
 	 */
-	const fetchUsers = async () => {
+	const fetchUsers = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError(null);
 
 			const res = await fetch(`/api/admin/users?superToken=${superToken}`);
-			const response = await res.json() as any;
+			const response = await res.json() as ApiResponse<{ users: UserSummary[] }>;
 
 			// 检查业务响应码
 			if (response.code !== 0) {
@@ -52,7 +48,7 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 
 			// 从响应结构中提取用户列表数据
 			setUsers(
-				response.data.users.map((user: any) => ({
+				response.data.users.map((user: UserSummary) => ({
 					uid: user.uid,
 					token: user.token,
 					status: user.status,
@@ -70,7 +66,17 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [superToken]);
+
+	// 初始化时获取用户列表
+	useEffect(() => {
+		if (!superToken) {
+			setError('缺少管理员令牌');
+			setLoading(false);
+			return;
+		}
+		fetchUsers();
+	}, [superToken, fetchUsers]);
 
 	return {
 		users,

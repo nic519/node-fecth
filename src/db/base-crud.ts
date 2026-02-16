@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDb } from '@/db';
 import { eq } from 'drizzle-orm';
 

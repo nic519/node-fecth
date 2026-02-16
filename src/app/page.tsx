@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 function HomeContent() {
   const router = useRouter();
@@ -59,30 +58,30 @@ function HomeContent() {
       {/* Header */}
       <nav className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">N</span>
-                    </div>
-                    <div>
-                    <h1 className="text-xl font-bold text-gray-900">节点管理后台</h1>
-                    <p className="text-xs text-gray-500">专业的节点配置管理平台</p>
-                    </div>
-                </div>
-                <div className="hidden sm:flex gap-8 justify-center flex-1">
-                    <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-                    功能特性
-                    </Link>
-                    <Link href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-                    如何使用
-                    </Link>
-                </div>
-                <div className="flex justify-end">
-                    <Button asChild className="hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white">
-                        <Link href="#access">立即使用</Link>
-                    </Button>
-                </div>
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">N</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">节点管理后台</h1>
+                <p className="text-xs text-gray-500">专业的节点配置管理平台</p>
+              </div>
             </div>
+            <div className="hidden sm:flex gap-8 justify-center flex-1">
+              <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                功能特性
+              </Link>
+              <Link href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                如何使用
+              </Link>
+            </div>
+            <div className="flex justify-end">
+              <Button asChild className="hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white">
+                <Link href="#access">立即使用</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -133,9 +132,8 @@ function HomeContent() {
                     <button
                       key={index}
                       onClick={() => setCurrentFeature(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === currentFeature ? 'bg-blue-600 w-6' : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentFeature ? 'bg-blue-600 w-6' : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
                       aria-label={`Show feature ${index + 1}`}
                     />
                   ))}

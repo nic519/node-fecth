@@ -1,7 +1,7 @@
 'use client';
 
 import type { UserSummary } from '@/types/user-config';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export interface UseUserFiltersProps {
 	users: UserSummary[];
@@ -19,19 +19,10 @@ export interface UseUserFiltersReturn {
  * 用户过滤Hook - 处理搜索和过滤逻辑
  */
 export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersReturn => {
-	const [filteredUsers, setFilteredUsers] = useState<UserSummary[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('');
 
-	// 当用户列表或过滤条件变化时，重新过滤
-	useEffect(() => {
-		filterUsers();
-	}, [users, searchTerm, statusFilter]);
-
-	/**
-	 * 过滤用户列表
-	 */
-	const filterUsers = () => {
+	const filteredUsers = useMemo(() => {
 		let filtered = users;
 
 		// 根据搜索词过滤
@@ -48,8 +39,8 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 			}
 		}
 
-		setFilteredUsers(filtered);
-	};
+		return filtered;
+	}, [users, searchTerm, statusFilter]);
 
 	return {
 		filteredUsers,

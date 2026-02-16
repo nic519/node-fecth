@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 interface HelpSidebarProps {
 	showHelp: boolean;
@@ -94,9 +93,9 @@ export function HelpSidebar({ showHelp }: HelpSidebarProps) {
 									<CardContent className="p-3 text-[10px] font-mono text-amber-800/80">
 										appendSubList:
 										<br />
-										&nbsp;&nbsp;- subscribe: "https://..."
+										&nbsp;&nbsp;- subscribe: &quot;https://...&quot;
 										<br />
-										&nbsp;&nbsp;&nbsp;&nbsp;flag: "provider1"
+										&nbsp;&nbsp;&nbsp;&nbsp;flag: &quot;provider1&quot;
 										<br />
 										&nbsp;&nbsp;&nbsp;&nbsp;includeArea:
 										<br />

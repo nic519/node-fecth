@@ -20,6 +20,9 @@ function UserConfigContent() {
     const token = searchParams.get('token') || '';
     const uid = searchParams.get('uid') || '';
 
+	const userConfigState = useUserConfig({ uid, token });
+	const { showHelp, toggleHelp } = useHelpDisplay();
+
 	if (!uid) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
@@ -32,9 +35,6 @@ function UserConfigContent() {
 			</div>
 		);
 	}
-
-	const userConfigState = useUserConfig({ uid, token });
-	const { showHelp, toggleHelp } = useHelpDisplay();
 
 	let yamlString = '';
 	if (userConfigState.config?.config) {

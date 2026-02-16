@@ -1,5 +1,6 @@
 import { getDb } from '@/db';
 import { templates } from '@/db/schema';
+import { ResponseUtils } from '@/utils/responseUtils';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,7 +22,7 @@ export async function PUT(
   }
 
   try {
-    const body = await request.json() as any;
+    const body = await request.json() as { name: string; description?: string; content: string };
     const { name, description, content } = body;
 
     if (!name || !content) {
@@ -69,8 +70,7 @@ export async function DELETE(
       code: 0,
       msg: 'success'
     });
-  } catch (error) {
-    console.error('删除模板失败:', error);
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+  } catch (error: unknown) {
+    return ResponseUtils.handleApiError(error);
   }
 }

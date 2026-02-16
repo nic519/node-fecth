@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Edge Runtime compatible logger
 // Replaces pino with a lightweight console wrapper
 

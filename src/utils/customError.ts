@@ -13,6 +13,7 @@ export enum ErrorCode {
 	STATS_GENERATION_FAILED = 'STATS_GENERATION_FAILED',
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class CustomError extends Error {
 	constructor(public code: ErrorCode, message: string, public statusCode: number = 400, public details?: any) {
 		super(message);

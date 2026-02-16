@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SuperAdminManager } from '@/module/userManager/superAdminManager';
+import { ResponseUtils } from '@/utils/responseUtils';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { UserConfig } from '@/types/openapi-schemas';
 
 export const runtime = 'edge';
 
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
         users: users
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
   }
 }
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json() as any;
+    const body = await request.json() as { uid: string; config: UserConfig };
     const { uid, config } = body;
 
     if (!uid || !config) {
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
       code: 0,
       msg: 'success'
     });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { parse as yamlParse } from 'yaml';
 
 // 配置验证器类

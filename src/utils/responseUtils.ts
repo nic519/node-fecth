@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseResponseSchema } from '@/types/schema.base';
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { ResponseCodes, type ResponseCode } from '@/types/openapi-schemas';
 
 /**
  * 统一响应工具类
@@ -68,6 +69,24 @@ export class ResponseUtils {
 	 */
 	static jsonError(c: any, code: number, msg: string, data: any = null): Response {
 		return this.json(c, data, msg, code, code >= 400 ? code : 500);
+	}
+
+	/**
+	 * 统一处理 API 错误
+	 */
+	static handleApiError(error: unknown): Response {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error('API Error:', error);
+
+		let code: ResponseCode = ResponseCodes.INTERNAL_ERROR;
+
+		if (errorMessage.includes('Unauthorized') || errorMessage.includes('token') || errorMessage.includes('认证失败')) {
+			code = ResponseCodes.UNAUTHORIZED;
+		} else if (errorMessage.includes('Missing') || errorMessage.includes('缺少') || errorMessage.includes('无效')) {
+			code = ResponseCodes.INVALID_PARAMS;
+		}
+
+		return this.error(code, errorMessage);
 	}
 
 	/**
