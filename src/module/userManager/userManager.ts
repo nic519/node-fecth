@@ -54,6 +54,8 @@ export class UserManager {
 					.set({
 						config: JSON.stringify(config),
 						accessToken: config.accessToken,
+						requiredFilters: config.requiredFilters || '',
+						ruleUrl: config.ruleUrl || '',
 						updatedAt: now
 					})
 					.where(eq(users.id, uid))

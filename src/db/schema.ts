@@ -45,6 +45,18 @@ export const users = sqliteTable('users', {
 	// 访问令牌（从 config 中提取，用于快速查询）
 	accessToken: text('access_token').notNull(),
 
+	// 需要的过滤项
+	// 根据ruleUrl的proxy-groups得出，如 [单]-Facebook👥, [单]-LinkedIn👥, 用逗号隔开
+	// 默认为空，代表不进行过滤
+	requiredFilters: text('required_filters').default(''),
+
+	// 规则URL， clash格式的过滤表
+	// 如果为空，默认为：https://raw.githubusercontent.com/zzy333444/passwall_rule/refs/heads/main/miho-cfg.yaml
+	ruleUrl: text('rule_url').default(''),
+
+	// 文件名，默认值为：miho-cfg.yaml
+	fileName: text('file_name').notNull().default('miho-cfg.yaml'),
+
 	// 时间戳
 	createdAt: text('created_at')
 		.notNull()

@@ -35,43 +35,6 @@ export const UserSummarySchema = z.object({
 	trafficInfo: TrafficInfoSchema.optional(),
 });
 
-// 管理员统计 Schema
-export const AdminStatsSchema = z.object({
-	totalUsers: z.number(),
-	activeUsers: z.number(),
-	todayRequests: z.number(),
-	systemStatus: z.string(),
-	totalTraffic: z.string(),
-	todayTraffic: z.string(),
-	serverNodes: z.number(),
-	uptime: z.string(),
-});
-
-// 系统统计 Schema - 新增
-export const SystemStatsSchema = z.object({
-	cpu: z.number(),
-	memory: z.number(),
-	disk: z.number(),
-	network: z.number(),
-});
-
-// 系统信息 Schema - 新增
-export const SystemInfoSchema = z.object({
-	os: z.string(),
-	uptime: z.string(),
-	totalMemory: z.string(),
-	availableMemory: z.string(),
-	totalDisk: z.string(),
-	availableDisk: z.string(),
-});
-
-// 服务状态 Schema - 新增
-export const ServiceStatusSchema = z.object({
-	name: z.string(),
-	status: z.enum(['running', 'stopped', 'error', 'pending']),
-	description: z.string().optional(),
-});
-
 // 系统日志 Schema - 新增
 export const SystemLogSchema = z.object({
 	time: z.string(),
@@ -109,12 +72,6 @@ export const UsersListResponseSchema = z.object({
 	}),
 });
 
-// 管理员统计响应 Schema
-export const AdminStatsResponseSchema = z.object({
-	code: z.literal(ResponseCodes.SUCCESS),
-	msg: z.string(),
-	data: AdminStatsSchema,
-});
 
 // 配置模板列表响应 Schema
 // =============================================================================
@@ -149,18 +106,12 @@ export type ConfigResponse = z.infer<typeof ConfigResponseSchema>;
 
 export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
 export type UserSummary = z.infer<typeof UserSummarySchema>;
-export type AdminStats = z.infer<typeof AdminStatsSchema>;
-export type SystemStats = z.infer<typeof SystemStatsSchema>;
-export type SystemInfo = z.infer<typeof SystemInfoSchema>;
-export type ServiceStatus = z.infer<typeof ServiceStatusSchema>;
 export type SystemLog = z.infer<typeof SystemLogSchema>;
 // 导出响应代码类型
 export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
 
 // 导出响应类型
-// export type { BaseResponse } from '@/routes/modules/base/schema.base';
 export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
-export type AdminStatsResponse = z.infer<typeof AdminStatsResponseSchema>;
 export type AdminLogsResponse = z.infer<typeof AdminLogsResponseSchema>;
 export type RefreshTrafficResponse = z.infer<typeof RefreshTrafficResponseSchema>;
 
