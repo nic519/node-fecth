@@ -1,56 +1,41 @@
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { CloudArrowUpIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckCircle } from 'lucide-react';
 import { AcmeLogo } from '../../../components/NavigationBar';
-import { formatTime } from '../utils/configUtils';
 import { cn } from '@/lib/utils';
+import { SubscribeUrlPanel } from './SubscribeUrlPanel';
 
 interface HeaderProps {
-	uid: string;
-	connectionStatus: 'connected' | 'disconnected';
 	lastSaved: Date | null;
 	saving: boolean;
 	saveSuccess: boolean;
 	validationErrors: string[];
 	onSave: () => void;
+	uid: string;
+	token: string;
 }
 
-export function Header({ uid, connectionStatus, lastSaved, saving, saveSuccess, validationErrors, onSave }: HeaderProps) {
+export function Header({ lastSaved, saving, saveSuccess, validationErrors, onSave, uid, token }: HeaderProps) {
 	return (
 		<header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
-					<div className="flex items-center gap-2">
-						<AcmeLogo />
-						<h1 className="text-xl font-bold text-gray-900 tracking-tight">配置管理</h1>
-					</div>
-
-					<div className="hidden md:flex items-center gap-6 justify-center">
+					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-2">
-							<span className="text-sm text-gray-500 font-medium">用户ID</span>
-							<Badge variant="secondary" className="font-mono bg-gray-100 text-gray-700 hover:bg-gray-100">
-								{uid}
-							</Badge>
+							<AcmeLogo />
+							<h1 className="text-xl font-bold text-gray-900 tracking-tight">配置管理</h1>
 						</div>
-						<div>
-							<Badge
-								variant={connectionStatus === 'connected' ? 'outline' : 'destructive'}
-								className={cn(
-									"capitalize pl-1 pr-2 py-0.5 border-transparent font-normal",
-									connectionStatus === 'connected' ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''
-								)}
-							>
-								<span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-								{connectionStatus === 'connected' ? '已连接' : '连接失败'}
-							</Badge>
-						</div>
+						{validationErrors.length === 0 && (
+							<div className="hidden md:flex items-center text-xs font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-100">
+								<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
+								配置格式正确
+							</div>
+						)}
 					</div>
 
 					<div className="flex items-center gap-4 justify-end">
-						<div className="text-right hidden sm:block">
-							<div className="text-xs text-gray-500 font-medium">
-								{lastSaved ? `最后保存: ${formatTime(lastSaved)}` : '未保存'}
-							</div>
+						<div className="hidden md:block">
+							<SubscribeUrlPanel uid={uid} token={token} />
 						</div>
 						<div>
 							<Button

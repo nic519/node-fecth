@@ -16,12 +16,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from 'lucide-react';
 
@@ -103,9 +103,9 @@ function AdminUsersContent() {
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>确认删除用户</DialogTitle>
-                        <DialogDescription>
-                            确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！
-                        </DialogDescription>
+						<DialogDescription>
+							确定要删除用户 {deleteModal.userToDelete} 吗？此操作不可撤销！
+						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
 						<Button variant="secondary" onClick={deleteModal.close}>
@@ -126,30 +126,31 @@ function AdminUsersContent() {
 						<DialogTitle>添加新用户</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>用户ID</Label>
-                            <Input
-                                placeholder="请输入用户ID"
-                                value={addUserModal.form.uid}
-                                onChange={(e) => addUserModal.setUid(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>访问令牌</Label>
-                            <Input
-                                placeholder="请输入用户访问令牌"
-                                value={addUserModal.form.token}
-                                onChange={(e) => addUserModal.setToken(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>订阅链接</Label>
-                            <Input
-                                placeholder="请输入订阅链接"
-                                value={addUserModal.form.subscribe}
-                                onChange={(e) => addUserModal.setSubscribe(e.target.value)}
-                            />
-                        </div>
+						<div className="grid grid-cols-4 items-center gap-4">
+							<Label className="text-right">用户ID</Label>
+							<Input
+								className="col-span-3"
+								placeholder="请输入用户ID"
+								value={addUserModal.form.uid}
+								onChange={(e) => addUserModal.setUid(e.target.value)}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label>访问令牌</Label>
+							<Input
+								placeholder="请输入用户访问令牌"
+								value={addUserModal.form.token}
+								onChange={(e) => addUserModal.setToken(e.target.value)}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label>订阅链接</Label>
+							<Input
+								placeholder="请输入订阅链接"
+								value={addUserModal.form.subscribe}
+								onChange={(e) => addUserModal.setSubscribe(e.target.value)}
+							/>
+						</div>
 					</div>
 					<DialogFooter>
 						<Button variant="secondary" onClick={addUserModal.close}>
@@ -160,7 +161,7 @@ function AdminUsersContent() {
 							disabled={loading}
 							className="bg-blue-600 hover:bg-blue-700 text-white"
 						>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							添加
 						</Button>
 					</DialogFooter>
@@ -171,9 +172,9 @@ function AdminUsersContent() {
 }
 
 export default function AdminUsers() {
-    return (
-        <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-            <AdminUsersContent />
-        </Suspense>
-    );
+	return (
+		<Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+			<AdminUsersContent />
+		</Suspense>
+	);
 }

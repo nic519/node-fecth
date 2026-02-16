@@ -1,14 +1,13 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { SubscribeUrlPanel } from './SubscribeUrlPanel';
 import { ValidationMessage } from './ValidationMessage';
-import { CheckCircle } from 'lucide-react';
 import { ConfigForm, ConfigTab } from './ConfigForm';
 import { UserConfig } from '@/types/openapi-schemas';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 import { YamlEditor } from '@/components/YamlEditor';
@@ -20,6 +19,7 @@ interface ConfigEditorProps {
 	config: UserConfig | null;
 	validationErrors: string[];
 	onConfigChange: (config: UserConfig) => void;
+	lastSaved?: Date | null;
 }
 
 export function ConfigEditor({
@@ -28,6 +28,7 @@ export function ConfigEditor({
 	config,
 	validationErrors,
 	onConfigChange,
+	lastSaved,
 }: ConfigEditorProps) {
 	const [activeTab, setActiveTab] = useState<ConfigTab>('basic');
 	const [origin, setOrigin] = useState('');
@@ -67,23 +68,28 @@ export function ConfigEditor({
 
 	return (
 		<Card className="w-full flex flex-col shadow-sm border border-gray-200 bg-white rounded-xl overflow-hidden">
-			<CardHeader className="flex flex-row items-center justify-between px-6 py-4 bg-white space-y-0">
-				<div className="flex flex-row items-center gap-4">
-					<h3 className="text-lg font-bold text-gray-900">配置编辑器</h3>
-					{validationErrors.length === 0 && (
-						<div className="flex items-center text-xs font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-100">
-							<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
-							配置格式正确
-						</div>
-					)}
-				</div>
-				<SubscribeUrlPanel uid={uid} token={token} />
-			</CardHeader>
-			<Separator />
-
 			<CardContent className="flex flex-col md:flex-row min-h-[600px] p-0">
 				{/* Sidebar */}
 				<div className="w-full md:w-64 border-r border-gray-100 bg-gray-50/50 p-4 space-y-2">
+					<div className="mb-4 space-y-3 px-2">
+						<div className="flex flex-col gap-1">
+							<span className="text-xs text-gray-500 font-medium">用户ID</span>
+							<Badge variant="secondary" className="font-mono bg-white border border-gray-200 text-gray-700 w-fit">
+								{uid}
+							</Badge>
+						</div>
+
+						{lastSaved && (
+							<div className="flex flex-col gap-1">
+								<span className="text-xs text-gray-500 font-medium">最后保存时间</span>
+								<span className="text-xs text-gray-700 font-mono">
+									{lastSaved.toLocaleString('zh-CN')}
+								</span>
+							</div>
+						)}
+
+					</div>
+					<Separator className="mb-2" />
 					<Button
 						variant={activeTab === 'basic' ? 'secondary' : 'ghost'}
 						className={cn('w-full justify-start', activeTab === 'basic' && 'bg-white shadow-sm')}

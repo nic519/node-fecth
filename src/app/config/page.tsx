@@ -36,13 +36,13 @@ function UserConfigContent() {
 	return (
 		<div className="min-h-screen">
 			<Header
-				uid={uid}
-				connectionStatus={userConfigState.connectionStatus}
 				lastSaved={userConfigState.lastSaved}
 				saving={userConfigState.saving}
 				saveSuccess={userConfigState.saveSuccess}
 				validationErrors={userConfigState.validationErrors}
 				onSave={userConfigState.saveConfig}
+				uid={uid}
+				token={token}
 			/>
 
 			<main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -70,6 +70,7 @@ function UserConfigContent() {
 							config={userConfigState.config}
 							validationErrors={userConfigState.validationErrors}
 							onConfigChange={userConfigState.setConfig}
+							lastSaved={userConfigState.lastSaved}
 						/>
 					</div>
 				)}
