@@ -23,7 +23,7 @@ export class UserManager {
 			}
 
 			const config = JSON.parse(userRecord.config) as UserConfig;
-			
+
 			return {
 				config,
 				assetToken: userRecord.accessToken,
@@ -92,13 +92,34 @@ export class UserManager {
 	}
 
 	/**
+	 * 验证并获取用户
+	 */
+	async validateAndGetUser(uid: string, accessToken: string): Promise<ConfigResponse | null> {
+		try {
+			const user = await this.getUserConfig(uid);
+			if (!user) {
+				return null;
+			}
+
+			if (user.config.accessToken !== accessToken) {
+				return null;
+			}
+
+			return user;
+		} catch (error) {
+			console.error(`验证用户失败: ${uid}`, error);
+			return null;
+		}
+	}
+
+	/**
 	 * 获取所有用户列表
 	 */
 	async getAllUsers(): Promise<string[]> {
 		try {
 			const db = getDb(this.env);
 			const allUsers = await db.select({ id: users.id }).from(users).all();
-			return allUsers.map(u => u.id).sort();
+			return allUsers.map((u: { id: string }) => u.id).sort();
 		} catch (error) {
 			console.error('获取用户列表失败', error);
 			return [];
@@ -106,27 +127,13 @@ export class UserManager {
 	}
 
 	/**
-	 * 验证用户token并获取用户配置
+	 * 更新用户配置 (alias for saveUserConfig for compatibility)
 	 */
-	async validateAndGetUser(uid: string, accessToken: string): Promise<ConfigResponse | null> {
-		const configResponse = await this.getUserConfig(uid);
-		if (!configResponse) return null;
-
-		if (configResponse.config.accessToken !== accessToken) {
-			return null;
+	async updateUser(uid: string, body: { config: UserConfig }): Promise<ConfigResponse | null> {
+		const success = await this.saveUserConfig(uid, body.config);
+		if (success) {
+			return this.getUserConfig(uid);
 		}
-
-		return configResponse;
+		throw new Error('Update failed');
 	}
-    
-    /**
-     * 更新用户配置 (alias for saveUserConfig for compatibility)
-     */
-    async updateUser(uid: string, body: { config: UserConfig }): Promise<ConfigResponse | null> {
-        const success = await this.saveUserConfig(uid, body.config);
-        if (success) {
-            return this.getUserConfig(uid);
-        }
-        throw new Error('Update failed');
-    }
 }

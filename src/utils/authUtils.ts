@@ -26,14 +26,37 @@ export class AuthUtils {
 
 	/**
 	 * 统一的身份验证方法
+	 * 支持 User Token 和 Super Admin Token
 	 * @param request HTTP请求对象
 	 * @param env 环境变量
 	 * @param uid 可选的用户ID，如果不提供则只验证令牌存在
 	 * @returns 验证结果
 	 */
 	static async authenticate(request: Request, env: Env, uid?: string): Promise<ConfigResponse> {
-		// 验证访问令牌
+		const url = new URL(request.url);
+		const superToken = url.searchParams.get('superToken');
 		const accessToken = this.getAccessToken(request);
+
+		// 1. 优先检查 Super Admin Token
+		// 注意：OpenNext 中 process.env.SUPER_ADMIN_TOKEN 优于 env.SUPER_ADMIN_TOKEN
+		const envSuperToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+		if (superToken && envSuperToken && superToken === envSuperToken) {
+			// 如果是超级管理员，且提供了 uid，则直接获取用户信息并返回
+			if (uid) {
+				const userManager = new UserManager(env);
+				const user = await userManager.getUserConfig(uid);
+				if (!user) {
+					// 虽然是管理员，但用户不存在
+					throw new Error('User not found');
+				}
+				return user;
+			}
+			// 如果没有提供 uid，这里暂时无法返回 ConfigResponse，抛出错误或需要调整返回类型
+			// 但目前的用法 authenticate 通常都带 uid。
+			throw new Error('No user id provided for super admin');
+		}
+
+		// 2. 验证普通 User Access Token
 		if (!accessToken) {
 			throw Error('no access token');
 		}
@@ -44,11 +67,11 @@ export class AuthUtils {
 		if (uid) {
 			const user = await userManager.validateAndGetUser(uid, accessToken);
 			if (!user) {
-				throw Error(' Invalid access token');
+				throw Error('Invalid access token');
 			}
 			return user;
 		}
-		throw Error(' No user id');
+		throw Error('No user id');
 	}
 
 	/**
