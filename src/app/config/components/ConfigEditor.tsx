@@ -39,69 +39,71 @@ export function ConfigEditor({
 		<Card className="w-full flex flex-col shadow-sm border border-gray-200 bg-white rounded-xl overflow-hidden">
 			<CardContent className="flex flex-col md:flex-row min-h-[600px] p-0">
 				{/* Sidebar */}
-				<div className="w-full md:w-64 border-r border-gray-100 bg-gray-50/50 p-4 space-y-2">
-					<div className="mb-4 space-y-3 px-2">
-						<div className="flex flex-col gap-1">
-							<span className="text-xs text-gray-500 font-medium">用户ID</span>
-							<Badge variant="secondary" className="font-mono bg-white border border-gray-200 text-gray-700 w-fit">
-								{uid}
-							</Badge>
-						</div>
-
-						{lastSaved && (
+				<div className="w-full md:w-64 border-r border-gray-100 bg-gray-50/50">
+					<div className="p-4 space-y-2 md:sticky md:top-16">
+						<div className="mb-4 space-y-3 px-2">
 							<div className="flex flex-col gap-1">
-								<span className="text-xs text-gray-500 font-medium">最后保存时间</span>
-								<span className="text-xs text-gray-700 font-mono">
-									{lastSaved.toLocaleString('zh-CN')}
-								</span>
+								<span className="text-xs text-gray-500 font-medium">用户ID</span>
+								<Badge variant="secondary" className="font-mono bg-white border border-gray-200 text-gray-700 w-fit">
+									{uid}
+								</Badge>
 							</div>
-						)}
 
+							{lastSaved && (
+								<div className="flex flex-col gap-1">
+									<span className="text-xs text-gray-500 font-medium">最后保存时间</span>
+									<span className="text-xs text-gray-700 font-mono">
+										{lastSaved.toLocaleString('zh-CN')}
+									</span>
+								</div>
+							)}
+
+						</div>
+						<Separator className="mb-2" />
+						<Button
+							variant={activeTab === 'basic' ? 'secondary' : 'ghost'}
+							className={cn('w-full justify-start', activeTab === 'basic' && 'bg-white shadow-sm')}
+							onClick={() => setActiveTab('basic')}
+						>
+							<Settings className="w-4 h-4 mr-2" />
+							基础配置
+						</Button>
+						<Button
+							variant={activeTab === 'rules' ? 'secondary' : 'ghost'}
+							className={cn('w-full justify-start', activeTab === 'rules' && 'bg-white shadow-sm')}
+							onClick={() => setActiveTab('rules')}
+						>
+							<Shield className="w-4 h-4 mr-2" />
+							规则模板
+						</Button>
+						<Button
+							variant={activeTab === 'dynamic' ? 'secondary' : 'ghost'}
+							className={cn('w-full justify-start', activeTab === 'dynamic' && 'bg-white shadow-sm')}
+							onClick={() => setActiveTab('dynamic')}
+						>
+							<RefreshCw className="w-4 h-4 mr-2" />
+							订阅加载
+						</Button>
+						<Button
+							variant={activeTab === 'token' ? 'secondary' : 'ghost'}
+							className={cn('w-full justify-start', activeTab === 'token' && 'bg-white shadow-sm')}
+							onClick={() => setActiveTab('token')}
+						>
+							<Key className="w-4 h-4 mr-2" />
+							访问令牌
+						</Button>
+
+						<Separator className="my-2" />
+
+						<Button
+							variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
+							className={cn('w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50', activeTab === 'preview' && 'bg-blue-50 text-blue-700')}
+							onClick={() => setActiveTab('preview')}
+						>
+							<Eye className="w-4 h-4 mr-2" />
+							预览结果
+						</Button>
 					</div>
-					<Separator className="mb-2" />
-					<Button
-						variant={activeTab === 'basic' ? 'secondary' : 'ghost'}
-						className={cn('w-full justify-start', activeTab === 'basic' && 'bg-white shadow-sm')}
-						onClick={() => setActiveTab('basic')}
-					>
-						<Settings className="w-4 h-4 mr-2" />
-						基础配置
-					</Button>
-					<Button
-						variant={activeTab === 'rules' ? 'secondary' : 'ghost'}
-						className={cn('w-full justify-start', activeTab === 'rules' && 'bg-white shadow-sm')}
-						onClick={() => setActiveTab('rules')}
-					>
-						<Shield className="w-4 h-4 mr-2" />
-						规则模板
-					</Button>
-					<Button
-						variant={activeTab === 'dynamic' ? 'secondary' : 'ghost'}
-						className={cn('w-full justify-start', activeTab === 'dynamic' && 'bg-white shadow-sm')}
-						onClick={() => setActiveTab('dynamic')}
-					>
-						<RefreshCw className="w-4 h-4 mr-2" />
-						订阅加载
-					</Button>
-					<Button
-						variant={activeTab === 'token' ? 'secondary' : 'ghost'}
-						className={cn('w-full justify-start', activeTab === 'token' && 'bg-white shadow-sm')}
-						onClick={() => setActiveTab('token')}
-					>
-						<Key className="w-4 h-4 mr-2" />
-						访问令牌
-					</Button>
-
-					<Separator className="my-2" />
-
-					<Button
-						variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
-						className={cn('w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50', activeTab === 'preview' && 'bg-blue-50 text-blue-700')}
-						onClick={() => setActiveTab('preview')}
-					>
-						<Eye className="w-4 h-4 mr-2" />
-						预览结果
-					</Button>
 				</div>
 
 				{/* Right Content */}

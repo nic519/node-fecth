@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from './api-client';
 import type { ConfigResponse } from '@/types/user-config';
 
 export const userService = {

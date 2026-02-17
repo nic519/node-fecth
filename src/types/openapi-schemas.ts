@@ -4,23 +4,12 @@ import {
 	AreaCodeSchema,
 	SubConfigSchema,
 	UserConfigSchema,
-} from '@/types/schema.user';
+	TrafficInfoSchema,
+} from '@/modules/user/user.schema';
 
 // =============================================================================
 // 基础 Schemas - 作为单一真理源(Single Source of Truth)
 // =============================================================================
-
-// 流量信息 Schema
-export const TrafficInfoSchema = z.object({
-	upload: z.number(),
-	download: z.number(),
-	total: z.number(),
-	used: z.number(),
-	remaining: z.number(),
-	expire: z.number().optional(),
-	isExpired: z.boolean(),
-	usagePercent: z.number(),
-});
 
 // 系统日志 Schema - 新增
 export const SystemLogSchema = z.object({
@@ -45,9 +34,6 @@ export const ResponseCodes = {
 	INTERNAL_ERROR: 500,
 } as const;
 
-// 注意：用户相关的 Schema 已经迁移到 @/routes/modules/user/schema.user.ts
-// 这里保留旧的导入以兼容现有代码
-
 // 用户列表响应 Schema
 export const UsersListResponseSchema = z.object({
 	code: z.literal(ResponseCodes.SUCCESS),
@@ -60,7 +46,6 @@ export const UsersListResponseSchema = z.object({
 });
 
 
-// 配置模板列表响应 Schema
 // =============================================================================
 // 请求参数 Schemas
 // =============================================================================
@@ -84,16 +69,17 @@ export {
 	UserConfigSchema,
 	ConfigResponseSchema,
 	StoredUserConfigSchema,
+	TrafficInfoSchema,
 	type IUserConfig as UserConfig,
 	type IConfigResponse as ConfigResponse,
 	type IStoredUserConfig as StoredUserConfig,
-} from '@/types/schema.user';
+	type TrafficInfo,
+} from '@/modules/user/user.schema';
 
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
 export type SubConfig = z.infer<typeof SubConfigSchema>;
-
-export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
 export type SystemLog = z.infer<typeof SystemLogSchema>;
+
 // 导出响应代码类型
 export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
 

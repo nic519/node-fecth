@@ -170,3 +170,18 @@ export type IScUserGetResponse = z.infer<typeof ScUserGetResponse>;
 export type IScUserCreateResponse = z.infer<typeof ScUserCreateResponse>;
 export type IScUserAdminUpdateResponse = z.infer<typeof ScUserAdminUpdateResponse>;
 export type IScUserDeleteResponse = z.infer<typeof ScUserDeleteResponse>;
+
+// 流量信息 Schema
+export const TrafficInfoSchema = z.object({
+	upload: z.number(),
+	download: z.number(),
+	total: z.number(),
+	used: z.number(),
+	remaining: z.number(),
+	expire: z.number().optional(),
+	isExpired: z.boolean(),
+	usagePercent: z.number(),
+});
+
+export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
+

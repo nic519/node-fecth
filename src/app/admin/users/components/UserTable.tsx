@@ -1,7 +1,7 @@
 'use client';
 
 import Loading from '@/components/Loading';
-import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
+import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import {
 	Table,
 	TableBody,

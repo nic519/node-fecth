@@ -1,7 +1,7 @@
 'use client';
 
-import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
-import { adminService } from '@/services/adminService';
+import type { UserAdminConfig } from '@/modules/user/admin.schema';
+import { adminService } from '@/services/admin-api';
 import { useCallback, useEffect, useState } from 'react';
 
 export interface UseUserDataProps {

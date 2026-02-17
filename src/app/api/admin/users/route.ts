@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
-import { SuperAdminManager } from '@/module/userManager/superAdminManager';
+import { AdminService } from '@/modules/user/admin.service';
 import { UserConfig } from '@/types/openapi-schemas';
 import { withAuth } from '@/utils/apiMiddleware';
+import { getDb } from '@/db';
 
 /// 获取所有用户信息
 export const GET = withAuth(async () => {
   const env = process.env as unknown as Env;
 
   try {
-    const manager = new SuperAdminManager(env);
+    const db = getDb(env);
+    // Note: Assuming env.USERS_KV is available on process.env or global env
+    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
     const users = await manager.getUserSummaryList();
 
     return NextResponse.json({
@@ -35,8 +38,9 @@ export const POST = withAuth(async (request) => {
       return NextResponse.json({ code: 400, msg: 'Missing uid or config' }, { status: 400 });
     }
 
-    const manager = new SuperAdminManager(env);
-    await manager.createUser(uid, config, 'admin');
+    const db = getDb(env);
+    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
+    await manager.createUser(uid, config, 'admin'); // 'admin' is hardcoded adminId for now
 
     return NextResponse.json({
       code: 0,

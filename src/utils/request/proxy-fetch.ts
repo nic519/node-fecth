@@ -1,5 +1,5 @@
 import { logger } from './network.config';
-import { DynamicService, DynamicContent } from '@/services/DynamicService';
+import { DynamicService, DynamicContent } from '@/modules/dynamic/dynamic.service';
 
 // ==================== 常量定义 ====================
 

@@ -1,5 +1,6 @@
 import { ConfigResponse } from '@/types/openapi-schemas';
-import { UserManager } from '@/module/userManager/userManager';
+import { UserService } from '@/modules/user/user.service';
+import { getDb } from '@/db';
 
 /**
  * 统一的身份验证工具类
@@ -31,7 +32,8 @@ export class AuthUtils {
 		const url = new URL(request.url);
 		const superToken = url.searchParams.get('superToken');
 		// 注意：OpenNext 中 process.env.SUPER_ADMIN_TOKEN 优于 env.SUPER_ADMIN_TOKEN
-		const envSuperToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const envSuperToken = (process.env as any).SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
 
 		return !!(superToken && envSuperToken && superToken === envSuperToken);
 	}
@@ -47,12 +49,14 @@ export class AuthUtils {
 	static async authenticate(request: Request, env: Env, uid?: string): Promise<ConfigResponse> {
 		const accessToken = this.getAccessToken(request);
 
+		const db = getDb(env);
+		const userService = new UserService(db);
+
 		// 1. 优先检查 Super Admin Token
 		if (this.validateSuperToken(request, env)) {
 			// 如果是超级管理员，且提供了 uid，则直接获取用户信息并返回
 			if (uid) {
-				const userManager = new UserManager(env);
-				const user = await userManager.getUserConfig(uid);
+				const user = await userService.getUserConfig(uid);
 				if (!user) {
 					// 虽然是管理员，但用户不存在
 					throw new Error('User not found');
@@ -69,11 +73,9 @@ export class AuthUtils {
 			throw Error('no access token');
 		}
 
-		const userManager = new UserManager(env);
-
 		// 如果提供了uid，验证用户权限
 		if (uid) {
-			const user = await userManager.validateAndGetUser(uid, accessToken);
+			const user = await userService.validateAndGetUser(uid, accessToken);
 			if (!user) {
 				throw Error('Invalid access token');
 			}

@@ -1,6 +1,6 @@
-import { UserConfig } from "@/types/openapi-schemas";
+import { IUserConfig } from "./user.schema";
 
-export type UserAdminConfig = UserConfig & {
+export type UserAdminConfig = IUserConfig & {
 	uid: string;
 	updatedAt: string;
 };
@@ -19,7 +19,7 @@ export interface ConfigTemplate {
 	id: string;
 	name: string;
 	description: string;
-	template: Partial<UserConfig>;
+	template: Partial<IUserConfig>;
 	isDefault: boolean;
 	createdAt: string;
 	updatedAt: string;

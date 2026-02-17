@@ -1,27 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getDb } from '@/db';
 import { users } from '@/db/schema';
 import { desc } from 'drizzle-orm';
-import { AdminOperation, UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
-import { TrafficInfo, UserConfig } from '@/types/openapi-schemas';
+import { AdminOperation, UserAdminConfig } from './admin.schema';
+import { TrafficInfo, type IUserConfig } from './user.schema';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
-import { UserManager } from './userManager';
+import { UserService } from './user.service';
+import { DbInstance } from '@/db';
 
-export class SuperAdminManager {
-	private env: Env;
-	private userManager: UserManager;
+export class AdminService {
+	private userService: UserService;
 
-	constructor(env: Env) {
-		this.env = env;
-		this.userManager = new UserManager(env);
+	constructor(
+		private db: DbInstance,
+		private kv: KVNamespace,
+		private superAdminToken: string | undefined
+	) {
+		this.userService = new UserService(db);
 	}
 
 	/**
 	 * 验证超级管理员权限
 	 */
 	async validateSuperAdmin(token: string): Promise<boolean> {
-		const superAdminToken = this.env.SUPER_ADMIN_TOKEN;
-		console.log('superAdminToken', superAdminToken, token);
+		const superAdminToken = this.superAdminToken;
 		if (!superAdminToken) {
 			console.warn('SUPER_ADMIN_TOKEN 未配置');
 			return false;
@@ -34,9 +34,8 @@ export class SuperAdminManager {
 	 */
 	async getUserSummaryList(): Promise<UserAdminConfig[]> {
 		try {
-			const db = getDb(this.env);
 			// 直接从数据库获取所有用户，按更新时间倒序排序
-			const userList = await db.select().from(users).orderBy(desc(users.updatedAt)).all();
+			const userList = await this.db.select().from(users).orderBy(desc(users.updatedAt)).all();
 
 			const summaries: UserAdminConfig[] = [];
 
@@ -67,16 +66,16 @@ export class SuperAdminManager {
 	/**
 	 * 创建新用户
 	 */
-	async createUser(uid: string, config: UserConfig, adminId: string): Promise<void> {
+	async createUser(uid: string, config: IUserConfig, adminId: string): Promise<void> {
 		try {
 			// 检查用户是否已存在
-			const existingConfig = await this.userManager.getUserConfig(uid);
+			const existingConfig = await this.userService.getUserConfig(uid);
 			if (existingConfig) {
 				throw new Error(`用户 ${uid} 已存在`);
 			}
 
 			// 创建用户配置
-			await this.userManager.saveUserConfig(uid, config);
+			await this.userService.saveUserConfig(uid, config);
 
 			// 记录操作日志
 			await this.logAdminOperation({
@@ -110,7 +109,7 @@ export class SuperAdminManager {
 	async deleteUser(uid: string, adminId: string): Promise<void> {
 		try {
 			// 删除用户配置
-			await this.userManager.deleteUserConfig(uid);
+			await this.userService.deleteUserConfig(uid);
 
 			// 记录操作日志
 			await this.logAdminOperation({
@@ -157,7 +156,7 @@ export class SuperAdminManager {
 						break;
 					case 'disable':
 						// 暂时通过删除KV配置来禁用（简化实现）
-						await this.userManager.deleteUserConfig(uid);
+						await this.userService.deleteUserConfig(uid);
 						break;
 					case 'enable':
 						// 启用需要恢复默认配置（简化实现）
@@ -191,7 +190,7 @@ export class SuperAdminManager {
 			const logKey = `admin:logs:${date}`;
 
 			// 获取当日日志
-			const existingLogs = await this.env.USERS_KV.get(logKey);
+			const existingLogs = await this.kv.get(logKey);
 			const logs: AdminOperation[] = existingLogs ? JSON.parse(existingLogs) : [];
 
 			// 添加新日志
@@ -203,7 +202,7 @@ export class SuperAdminManager {
 			}
 
 			// 保存日志
-			await this.env.USERS_KV.put(logKey, JSON.stringify(logs));
+			await this.kv.put(logKey, JSON.stringify(logs));
 		} catch (error) {
 			console.error('记录操作日志失败:', error);
 		}
@@ -217,7 +216,7 @@ export class SuperAdminManager {
 			const targetDate = date || new Date().toISOString().split('T')[0];
 			const logKey = `admin:logs:${targetDate}`;
 
-			const logsData = await this.env.USERS_KV.get(logKey);
+			const logsData = await this.kv.get(logKey);
 			if (!logsData) {
 				return [];
 			}
@@ -237,7 +236,7 @@ export class SuperAdminManager {
 	 */
 	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<TrafficInfo | undefined> {
 		try {
-			const configResponse = await this.userManager.getUserConfig(uid);
+			const configResponse = await this.userService.getUserConfig(uid);
 			if (!configResponse?.subscribe) {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}

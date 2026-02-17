@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { UserConfig } from '@/types/user-config';
 import { UserConfigSchema } from '@/types/openapi-schemas';
-import { userService } from '@/services/userService';
+import { userService } from '@/services/user-api';
 import { useRouter } from 'next/navigation';
 
 export interface UseUserConfigProps {

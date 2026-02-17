@@ -1,5 +1,5 @@
-import { apiClient } from './apiClient';
-import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
+import { apiClient } from './api-client';
+import type { UserAdminConfig } from '@/modules/user/admin.schema';
 
 export const adminService = {
 	/**

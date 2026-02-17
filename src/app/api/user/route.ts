@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
-import { UserManager } from '@/module/userManager/userManager';
+import { UserService } from '@/modules/user/user.service';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { UserConfig } from '@/types/openapi-schemas';
+import { ScUserUpdateReq } from '@/modules/user/user.schema';
 import { withAuth } from '@/utils/apiMiddleware';
+import { getDb } from '@/db';
 
 // GET: 获取用户配置
 export const GET = withAuth(async (request) => {
-  return NextResponse.json({
-    code: 0,
-    msg: 'success',
-    data: request.auth,
-  });
+  return ResponseUtils.success(request.auth);
 }, { authenticateUser: true });
 
 // PUT: 更新用户配置
@@ -19,28 +16,30 @@ export const PUT = withAuth(async (request) => {
   const uid = request.uid!;
 
   try {
-    const userManager = new UserManager(env);
-    const body = await request.json() as { config: UserConfig };
+    const db = getDb(env);
+    const userService = new UserService(db);
 
-    // 更新配置
-    // 注意：这里需要根据实际的 UserManager.updateUserConfig 接口调整
-    // 假设 body 是部分更新
-    // 如果 UserManager.updateUser 还没实现，这里可能会报错。
-    // 根据上下文，可能需要使用 userManager.saveUserConfig
-    const updatedUser = await userManager.saveUserConfig(uid, body.config);
+    const body = await request.json();
 
-    if (!updatedUser) {
+    // 使用 Zod 验证请求体
+    const validationResult = ScUserUpdateReq.safeParse(body);
+    
+    if (!validationResult.success) {
+      return ResponseUtils.error(400, 'Invalid request body', validationResult.error.format());
+    }
+
+    const { config } = validationResult.data;
+
+    const success = await userService.saveUserConfig(uid, config);
+
+    if (!success) {
       throw new Error('Update failed');
     }
 
     // 重新获取以返回最新数据
-    const newUser = await userManager.getUserConfig(uid);
+    const newUser = await userService.getUserConfig(uid);
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success',
-      data: newUser,
-    });
+    return ResponseUtils.success(newUser);
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }

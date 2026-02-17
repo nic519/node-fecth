@@ -1,22 +1,17 @@
-import { getDb } from '@/db';
 import { users } from '@/db/schema';
-import { ConfigResponse, UserConfig, UserConfigSchema } from '@/types/openapi-schemas';
 import { eq } from 'drizzle-orm';
+import { DbInstance } from '@/db';
+import { UserConfigSchema, type IConfigResponse, type IUserConfig } from './user.schema';
 
-export class UserManager {
-	private env: Env;
-
-	constructor(env: Env) {
-		this.env = env;
-	}
+export class UserService {
+	constructor(private db: DbInstance) {}
 
 	/**
 	 * 从数据库获取用户配置
 	 */
-	async getUserConfig(uid: string): Promise<ConfigResponse | null> {
+	async getUserConfig(uid: string): Promise<IConfigResponse | null> {
 		try {
-			const db = getDb(this.env);
-			const userRecord = await db.select().from(users).where(eq(users.id, uid)).get();
+			const userRecord = await this.db.select().from(users).where(eq(users.id, uid)).get();
 
 			if (!userRecord) {
 				return null;
@@ -27,7 +22,7 @@ export class UserManager {
 
 			// 合并数据库字段到配置对象
 			// 优先使用数据库字段作为单一真理源
-			const config: UserConfig = {
+			const config: IUserConfig = {
 				...partialConfig,
 				accessToken: userRecord.accessToken,
 				// 如果数据库字段为空字符串，则在配置对象中视为 undefined (对应 optional)
@@ -51,12 +46,11 @@ export class UserManager {
 	/**
 	 * 保存用户配置
 	 */
-	async saveUserConfig(uid: string, config: UserConfig): Promise<boolean> {
+	async saveUserConfig(uid: string, config: IUserConfig): Promise<boolean> {
 		try {
 			// 验证配置
 			UserConfigSchema.parse(config);
 
-			const db = getDb(this.env);
 			const now = new Date().toISOString();
 
 			// 提取需要单独存储的字段
@@ -80,15 +74,15 @@ export class UserManager {
 			};
 
 			// 检查是否存在
-			const existing = await db.select().from(users).where(eq(users.id, uid)).get();
+			const existing = await this.db.select().from(users).where(eq(users.id, uid)).get();
 
 			if (existing) {
-				await db.update(users)
+				await this.db.update(users)
 					.set(userValues)
 					.where(eq(users.id, uid))
 					.execute();
 			} else {
-				await db.insert(users)
+				await this.db.insert(users)
 					.values({
 						id: uid,
 						...userValues,
@@ -109,8 +103,7 @@ export class UserManager {
 	 */
 	async deleteUserConfig(uid: string): Promise<boolean> {
 		try {
-			const db = getDb(this.env);
-			await db.delete(users).where(eq(users.id, uid)).execute();
+			await this.db.delete(users).where(eq(users.id, uid)).execute();
 			return true;
 		} catch (error) {
 			console.error(`删除用户配置失败: ${uid}`, error);
@@ -121,7 +114,7 @@ export class UserManager {
 	/**
 	 * 验证并获取用户
 	 */
-	async validateAndGetUser(uid: string, accessToken: string): Promise<ConfigResponse | null> {
+	async validateAndGetUser(uid: string, accessToken: string): Promise<IConfigResponse | null> {
 		try {
 			const user = await this.getUserConfig(uid);
 			if (!user) {
@@ -144,8 +137,7 @@ export class UserManager {
 	 */
 	async getAllUsers(): Promise<string[]> {
 		try {
-			const db = getDb(this.env);
-			const allUsers = await db.select({ id: users.id }).from(users).all();
+			const allUsers = await this.db.select({ id: users.id }).from(users).all();
 			return allUsers.map((u: { id: string }) => u.id).sort();
 		} catch (error) {
 			console.error('获取用户列表失败', error);
@@ -156,7 +148,7 @@ export class UserManager {
 	/**
 	 * 更新用户配置 (alias for saveUserConfig for compatibility)
 	 */
-	async updateUser(uid: string, body: { config: UserConfig }): Promise<ConfigResponse | null> {
+	async updateUser(uid: string, body: { config: IUserConfig }): Promise<IConfigResponse | null> {
 		const success = await this.saveUserConfig(uid, body.config);
 		if (success) {
 			return this.getUserConfig(uid);

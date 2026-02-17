@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserAdminConfig } from '@/module/userManager/types/supper-admin.types';
+import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import { useAddUserModal } from './useAddUserModal';
 import { useDeleteUserModal } from './useDeleteUserModal';
 import { useUserData } from './useUserData';

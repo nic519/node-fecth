@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SuperAdminManager } from '@/module/userManager/superAdminManager';
+import { AdminService } from '@/modules/user/admin.service';
+import { getDb } from '@/db';
 
 export async function DELETE(
   request: NextRequest,
@@ -15,7 +16,8 @@ export async function DELETE(
   }
 
   try {
-    const manager = new SuperAdminManager(env);
+    const db = getDb(env);
+    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
     await manager.deleteUser(uid, 'admin');
 
     return NextResponse.json({
