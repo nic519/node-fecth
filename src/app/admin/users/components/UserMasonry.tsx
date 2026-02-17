@@ -5,13 +5,10 @@ import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from '../utils/userUtils';
 import { UserActions } from './UserActions';
-import { Button } from '@/components/ui/button';
 import {
 	User,
-	Link as LinkIcon,
 	Activity,
 	Calendar,
-	Eye,
 } from 'lucide-react';
 
 export interface UserMasonryProps {
@@ -119,7 +116,6 @@ export function UserMasonry({ users, loading, error, onUserAction }: UserMasonry
 
 						<UserActions
 							uid={user.uid}
-							token={user.accessToken}
 							onUserAction={onUserAction}
 						/>
 					</div>

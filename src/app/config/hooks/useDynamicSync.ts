@@ -3,6 +3,8 @@ import { UserConfig } from '@/types/openapi-schemas';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
 
+export type { DynamicInfo };
+
 export interface SyncStatus {
     status: 'idle' | 'loading' | 'success' | 'error';
     message?: string;

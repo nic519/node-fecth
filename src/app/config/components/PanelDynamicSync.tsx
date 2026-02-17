@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, CheckCircle2, XCircle, Clock, Activity, Link as LinkIcon } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle2, Clock, Activity, Link as LinkIcon } from 'lucide-react';
 import { UserConfig } from '@/types/openapi-schemas';
 import { useDynamicSync, SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
 import { cn } from '@/lib/utils';

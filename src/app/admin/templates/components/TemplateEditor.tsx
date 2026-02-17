@@ -48,7 +48,6 @@ export function TemplateEditor({
 	onCopyConfigContent,
 	onCopyTemplateUrl,
 	saving,
-	loading,
 }: TemplateEditorProps) {
 	if (!selectedTemplate) {
 		return (

@@ -5,14 +5,13 @@ import { Trash2 } from 'lucide-react';
 
 export interface UserActionsProps {
 	uid: string;
-	token?: string;
 	onUserAction: (action: string, uid: string, token?: string) => Promise<void>;
 }
 
 /**
  * 用户操作按钮组件
  */
-export function UserActions({ uid, token, onUserAction }: UserActionsProps) {
+export function UserActions({ uid, onUserAction }: UserActionsProps) {
 	return (
 		<div className="flex justify-end">
 			<Button

@@ -1,5 +1,3 @@
-import { CommonUtils } from '@/utils/commonUtils';
-
 export interface GlobalConfigType {
 	isDev: boolean;
 	workerUrl: string;

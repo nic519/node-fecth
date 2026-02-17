@@ -54,7 +54,6 @@ export class UserService {
 			const now = new Date().toISOString();
 
 			// 提取需要单独存储的字段
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ruleOverwrite, ...restConfig } = config;
 
 			// 准备数据库记录

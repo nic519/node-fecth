@@ -15,10 +15,6 @@ interface ConfigFormProps {
 }
 
 export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid }: ConfigFormProps) {
-    const handleChange = (key: keyof UserConfig, value: any) => {
-        onChange({ ...config, [key]: value });
-    };
-
     return (
         <div className="space-y-6 p-6">
             {activeTab === 'basic' && (

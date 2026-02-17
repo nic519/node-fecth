@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { UserService } from '@/modules/user/user.service';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ScUserUpdateReq } from '@/modules/user/user.schema';

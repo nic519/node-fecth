@@ -20,12 +20,6 @@ export const GET = async (request: Request) => {
             return NextResponse.json({ code: 400, msg: 'URLs parameter is required' }, { status: 400 });
         }
 
-        return NextResponse.json({
-            code: 0,
-            msg: 'success',
-            data: [] // Placeholder, see below
-        });
-
     } catch (error: any) {
         console.error('Dynamic fetch error:', error);
         return NextResponse.json({ code: 500, msg: error.message || 'Internal Server Error' }, { status: 500 });

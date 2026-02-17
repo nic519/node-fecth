@@ -55,7 +55,6 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			const configData = response.data;
 
 			// 移除 updatedAt 等非配置字段
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { updatedAt, ...userConfig } = configData as any;
 			setConfig(userConfig);
 			if (updatedAt) {

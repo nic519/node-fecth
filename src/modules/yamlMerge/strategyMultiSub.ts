@@ -48,7 +48,7 @@ export class StrategyMultiSub {
 						if (appendProxyList.length === 0) {
 						}
 						return { proxyList: appendProxyList, subInfo, flag: sub.flag };
-					} catch (error) {
+					} catch {
 						return { proxyList: [], subInfo: '', flag: sub.flag };
 					}
 				});

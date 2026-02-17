@@ -1,6 +1,6 @@
 import { getDb } from '@/db';
 import { dynamic } from '@/db/schema';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { logger, REQUEST_TIMEOUT } from '@/utils/request/network.config';

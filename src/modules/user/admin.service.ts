@@ -6,7 +6,7 @@ import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserService } from './user.service';
 import { DbInstance } from '@/db';
 import { createLogService, LogService } from '@/services/log-service';
-import { LogLevel, LogType } from '@/types/log';
+import { LogLevel } from '@/types/log';
 
 export class AdminService {
 	private userService: UserService;

@@ -42,7 +42,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
 
   // Filters
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize] = useState(20);
   const [level, setLevel] = useState<LogLevel | 'all'>('all');
   const [type, setType] = useState<string>('');
   const [userId, setUserId] = useState<string>('');

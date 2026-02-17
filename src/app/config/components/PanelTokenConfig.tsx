@@ -1,9 +1,7 @@
 import { UserConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Key } from 'lucide-react';
 
 interface PanelTokenConfigProps {
     config: UserConfig;

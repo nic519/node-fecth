@@ -22,11 +22,11 @@ export function getDb(env?: any) {
   if (process.env.NODE_ENV === 'development' && !isEdge) {
     try {
       // 动态 require，避免构建工具打包进 Edge Bundle
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const path = require('path');
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { drizzle: drizzleBetterSqlite3 } = require('drizzle-orm/better-sqlite3');
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Database = require('better-sqlite3');
 
       // 定位本地 D1 数据库文件

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { CheckCircle, Settings, Shield, RefreshCw, Key, Eye } from 'lucide-react';
+import { Settings, Shield, RefreshCw, Key, Eye, CheckCircle } from 'lucide-react';
 import { AcmeLogo } from '../../../components/NavigationBar';
 import { ConfigTab } from './ConfigForm';
 import { Button } from '@/components/ui/button';
