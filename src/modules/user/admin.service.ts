@@ -1,6 +1,6 @@
-import { users, Log } from '@/db/schema';
-import { desc } from 'drizzle-orm';
-import { AdminOperation, UserAdminConfig } from './admin.schema';
+import { users, Log, dynamic } from '@/db/schema';
+import { desc, inArray, InferSelectModel } from 'drizzle-orm';
+import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schema';
 import { TrafficInfo, type IUserConfig } from './user.schema';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserService } from './user.service';
@@ -40,10 +40,70 @@ export class AdminService {
 			// 直接从数据库获取所有用户，按更新时间倒序排序
 			const userList = await this.db.select().from(users).orderBy(desc(users.updatedAt)).all();
 
+			// 收集所有订阅URL以进行批量查询
+			const allUrls = new Set<string>();
+			for (const user of userList) {
+				const config = user.config;
+				if (config.subscribe) {
+					allUrls.add(config.subscribe);
+				}
+				if (user.appendSubList) {
+					try {
+						const list = JSON.parse(user.appendSubList);
+						if (Array.isArray(list)) {
+							list.forEach((sub: any) => {
+								if (sub.subscribe) allUrls.add(sub.subscribe);
+							});
+						}
+					} catch (e) {
+						console.error('Failed to parse appendSubList', e);
+					}
+				}
+			}
+
+			// 查询动态表获取流量信息
+			const dynamicMap = new Map<string, InferSelectModel<typeof dynamic>>();
+			if (allUrls.size > 0) {
+				const dynamicData = await this.db.select().from(dynamic).where(inArray(dynamic.url, Array.from(allUrls))).all();
+				dynamicData.forEach((d: InferSelectModel<typeof dynamic>) => dynamicMap.set(d.url, d));
+			}
+
 			const summaries: UserAdminConfig[] = [];
 
 			for (const user of userList) {
 				const partialConfig = user.config;
+				const appendSubList = user.appendSubList ? JSON.parse(user.appendSubList) : undefined;
+
+				// 构建订阅统计信息
+				const subscriptionStats: SubscriptionStat[] = [];
+
+				// 主订阅
+				if (partialConfig.subscribe) {
+					const d = dynamicMap.get(partialConfig.subscribe);
+					subscriptionStats.push({
+						url: partialConfig.subscribe,
+						type: 'main',
+						name: '主订阅',
+						traffic: d?.traffic || undefined,
+						lastUpdated: d?.updatedAt || undefined
+					});
+				}
+
+				// 附加订阅
+				if (appendSubList && Array.isArray(appendSubList)) {
+					appendSubList.forEach((sub: any) => {
+						if (sub.subscribe) {
+							const d = dynamicMap.get(sub.subscribe);
+							subscriptionStats.push({
+								url: sub.subscribe,
+								type: 'append',
+								name: sub.flag || '附加订阅',
+								traffic: d?.traffic || undefined,
+								lastUpdated: d?.updatedAt || undefined
+							});
+						}
+					});
+				}
 
 				// 合并数据库字段到配置对象
 				const config: UserAdminConfig = {
@@ -54,7 +114,8 @@ export class AdminService {
 					requiredFilters: user.requiredFilters || undefined,
 					ruleUrl: user.ruleUrl || undefined,
 					fileName: user.fileName || undefined,
-					appendSubList: user.appendSubList ? JSON.parse(user.appendSubList) : undefined,
+					appendSubList: appendSubList,
+					subscriptionStats
 				};
 				summaries.push(config);
 			}

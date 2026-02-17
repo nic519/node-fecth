@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserAdminConfig } from '@/modules/user/admin.types';
+import { UserAdminConfig } from '@/modules/user/admin.schema';
 import { useMemo, useState } from 'react';
 
 export interface UseUserFiltersProps {
@@ -29,17 +29,6 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 		if (searchTerm) {
 			filtered = filtered.filter((user) => user.uid.toLowerCase().includes(searchTerm.toLowerCase()));
 		}
-
-		// 根据配置状态过滤 (暂时移除 hasConfig 过滤，因为所有用户都有配置)
-		/*
-		if (statusFilter) {
-			if (statusFilter === 'configured') {
-				filtered = filtered.filter((user) => user.hasConfig);
-			} else if (statusFilter === 'unconfigured') {
-				filtered = filtered.filter((user) => !user.hasConfig);
-			}
-		}
-		*/
 
 		return filtered;
 	}, [users, searchTerm, statusFilter]);

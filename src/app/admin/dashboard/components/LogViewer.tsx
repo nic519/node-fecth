@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LogEvent, LogLevel, LogType, ResourceType } from '@/types/log';
-import { ApiResponse } from '@/types/api';
+import { LogEvent, LogLevel } from '@/types/log';
+import { logApi } from '@/services/log-api';
 import {
   Table,
   TableBody,
@@ -24,6 +24,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface LogViewerProps {
   superToken: string;
@@ -40,30 +46,23 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const [level, setLevel] = useState<LogLevel | 'all'>('all');
   const [type, setType] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
 
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.append('superToken', superToken);
-      params.append('page', page.toString());
-      params.append('pageSize', pageSize.toString());
+      const response = await logApi.getLogs({
+        superToken,
+        page,
+        pageSize,
+        level: level === 'all' ? undefined : level,
+        type: type || undefined,
+        userId: userId || undefined,
+      });
 
-      if (level !== 'all') params.append('level', level);
-      if (type) params.append('type', type);
-      if (userId) params.append('userId', userId);
-
-      const res = await fetch(`/api/admin/logs?${params.toString()}`);
-      const data: ApiResponse<{
-        data: LogEvent[];
-        total: number;
-        page: number;
-        pageSize: number;
-      }> = await res.json();
-
-      if (data.code === 0) {
-        setLogs(data.data.data);
-        setTotal(data.data.total);
+      if (response.code === 0) {
+        setLogs(response.data.data);
+        setTotal(response.data.total);
       }
     } catch (error) {
       console.error('Failed to fetch logs:', error);
@@ -158,22 +157,28 @@ export function LogViewer({ superToken }: LogViewerProps) {
                 </TableRow>
               ) : (
                 logs.map((log) => (
-                  <TableRow key={log.id}>
+                  <TableRow
+                    key={log.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setSelectedLog(log)}
+                  >
                     <TableCell className="font-mono text-xs">
                       {new Date(log.createdAt).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Badge variant={
                         log.level === 'error' ? 'destructive' :
-                          log.level === 'warn' ? 'secondary' : // 'warning' variant might not exist, use secondary or default
+                          log.level === 'warn' ? 'secondary' :
                             log.level === 'audit' ? 'outline' : 'default'
                       }>
                         {log.level.toUpperCase()}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{log.type}</TableCell>
-                    <TableCell className="max-w-[300px] truncate" title={log.message}>
-                      {log.message}
+                    <TableCell className="max-w-[300px]">
+                      <div className="truncate" title={log.message}>
+                        {log.message}
+                      </div>
                       {log.meta && (
                         <div className="text-xs text-gray-400 mt-1 font-mono truncate">
                           {JSON.stringify(log.meta)}
@@ -211,6 +216,58 @@ export function LogViewer({ superToken }: LogViewerProps) {
           </Button>
         </div>
       </CardContent>
+
+      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>日志详情</DialogTitle>
+          </DialogHeader>
+          {selectedLog && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm text-gray-500">时间</h3>
+                  <p className="font-mono text-sm">{new Date(selectedLog.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm text-gray-500">级别</h3>
+                  <Badge variant={
+                    selectedLog.level === 'error' ? 'destructive' :
+                      selectedLog.level === 'warn' ? 'secondary' :
+                        selectedLog.level === 'audit' ? 'outline' : 'default'
+                  }>
+                    {selectedLog.level.toUpperCase()}
+                  </Badge>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm text-gray-500">类型</h3>
+                  <p className="font-mono text-sm">{selectedLog.type}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm text-gray-500">用户 ID</h3>
+                  <p className="font-mono text-sm">{selectedLog.userId || '-'}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-1 text-sm text-gray-500">消息</h3>
+                <div className="bg-muted p-4 rounded-md overflow-x-auto whitespace-pre-wrap font-mono text-sm">
+                  {selectedLog.message}
+                </div>
+              </div>
+
+              {selectedLog.meta && (
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm text-gray-500">元数据</h3>
+                  <pre className="bg-muted p-4 rounded-md overflow-x-auto font-mono text-sm">
+                    {JSON.stringify(selectedLog.meta, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

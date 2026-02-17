@@ -34,7 +34,7 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 						<TableRow>
 							<TableHead className="w-[250px] font-medium text-xs uppercase tracking-wider h-12 text-gray-500">用户ID / 订阅链接</TableHead>
 							<TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">配置状态</TableHead>
-							{/* <TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">流量使用情况</TableHead> */}
+							<TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">流量使用情况</TableHead>
 							<TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500">最后修改</TableHead>
 							<TableHead className="font-medium text-xs uppercase tracking-wider h-12 text-gray-500 text-right">操作</TableHead>
 						</TableRow>
@@ -81,27 +81,38 @@ export function UserTable({ users, loading, error, onUserAction }: UserTableProp
 											已配置
 										</Badge>
 									</TableCell>
-									{/* <TableCell>
-										{user.trafficInfo ? (
-											<div className="space-y-1.5 min-w-[160px]">
-												<div className="flex justify-between text-xs font-medium text-gray-600">
-													<span>{formatTraffic(user.trafficInfo.used)}</span>
-                                                    <span className="text-gray-400">/ {formatTraffic(user.trafficInfo.total)}</span>
-												</div>
-												<div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-													<div
-														className={`h-1.5 rounded-full transition-all duration-500 ${getTrafficBarColor(user.trafficInfo.usagePercent)}`}
-														style={{ width: `${Math.min(user.trafficInfo.usagePercent, 100)}%` }}
-													/>
-												</div>
-                                                <div className="text-[10px] text-right text-gray-400">
-                                                    已用 {user.trafficInfo.usagePercent.toFixed(1)}%
-                                                </div>
+									<TableCell>
+										{user.subscriptionStats && user.subscriptionStats.length > 0 ? (
+											<div className="space-y-2 max-w-[300px]">
+												{user.subscriptionStats.map((stat, idx) => (
+													<div key={idx} className="bg-gray-50 rounded p-2 text-xs border border-gray-100">
+														<div className="flex items-center gap-1.5 mb-1.5">
+															<Badge variant={stat.type === 'main' ? 'default' : 'secondary'} className="h-4 px-1 text-[10px]">
+																{stat.name || (stat.type === 'main' ? '主' : '附')}
+															</Badge>
+															<span className="text-gray-500 truncate" title={stat.url}>
+																{stat.url}
+															</span>
+														</div>
+														<div className="flex justify-between items-center text-gray-600">
+															<span>
+																{stat.traffic ? (
+																	<span className="font-mono font-medium">{stat.traffic}</span>
+																) : (
+																	<span className="text-gray-400">无数据</span>
+																)}
+															</span>
+															<span className="text-[10px] text-gray-400">
+																{stat.lastUpdated ? new Date(stat.lastUpdated).toLocaleDateString() : ''}
+															</span>
+														</div>
+													</div>
+												))}
 											</div>
 										) : (
-											<span className="text-xs text-gray-400">-</span>
+											<span className="text-xs text-gray-400">无订阅数据</span>
 										)}
-									</TableCell> */}
+									</TableCell>
 									<TableCell>
 										<div className="text-xs text-gray-500">
 											{user.updatedAt ? formatDateTime(user.updatedAt) : '-'}

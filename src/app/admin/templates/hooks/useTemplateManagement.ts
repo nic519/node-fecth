@@ -3,6 +3,7 @@ import { useToastContext } from '@/providers/toast-provider';
 import type { ConfigTemplate } from '@/types/user-config';
 import { useEffect, useState } from 'react';
 import type { TemplateItem } from '../components/TemplateList';
+import { templateService } from '@/services/template-api';
 
 export interface UseTemplateManagementProps {
 	superToken: string;
@@ -29,7 +30,7 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
-	handleDeleteTemplate: (templateId: string, e?: React.MouseEvent) => void;
+	handleDeleteTemplate: (templateId: string, e?: unknown) => void;
 	confirmDeleteTemplate: () => void;
 	handleUpdateTemplate: (field: keyof TemplateItem, value: unknown) => void;
 	handleUpdateConfigContent: (content: string) => void;
@@ -92,25 +93,18 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		console.log('loadTemplates called');
 		try {
 			setLoading(true);
-			const apiUrl = `/api/admin/templates?superToken=${superToken}`;
-			console.log('Fetching templates from:', apiUrl);
-			const response = await fetch(apiUrl);
-			console.log('Response status:', response.status);
+			console.log('Fetching templates from API');
+			const response = await templateService.getTemplates(superToken);
+			console.log('API response:', response);
 
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
-			const result = await response.json() as any;
-			console.log('API response:', result);
-
-			if (result.code === 0) {
+			if (response.code === 0) {
 				const currentTemplates = templates;
-				const templateItems: TemplateItem[] = result.data.templates.map((t: ConfigTemplate) => ({
+				const templateItems: TemplateItem[] = response.data.templates.map((t: ConfigTemplate) => ({
 					...t,
 					configContent: t.content || '',
 					isSelected:
 						currentTemplates.length === 0
-							? t.id === result.data.templates[0]?.id
+							? t.id === response.data.templates[0]?.id
 							: currentTemplates.some((x) => x.id === t.id && x.isSelected),
 				}));
 				// 确保至少有一个选中的模板
@@ -120,7 +114,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 				console.log('Setting templates:', templateItems);
 				setTemplates(templateItems);
 			} else {
-				throw new Error(result.msg || '获取模板失败');
+				throw new Error(response.msg || '获取模板失败');
 			}
 			setError(null);
 		} catch (err) {
@@ -149,36 +143,24 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 	const handleCreateTemplate = async () => {
 		try {
 			setLoading(true);
-			const response = await fetch(`/api/admin/templates?superToken=${superToken}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: '新配置模板',
-					description: '新创建的配置模板',
-					type: 'clash',
-					content: `# 新配置模板
+			const response = await templateService.createTemplate(superToken, {
+				name: '新配置模板',
+				description: '新创建的配置模板',
+				content: `# 新配置模板
 # 请在此处编辑您的配置`,
-				}),
 			});
 
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
-
-			const result = await response.json() as any;
-			if (result.code === 0) {
+			if (response.code === 0) {
 				const newTemplate: TemplateItem = {
-					...result.data,
-					configContent: result.data.content || '',
+					...response.data.template,
+					configContent: response.data.template.content || '',
 					isSelected: true,
 				};
 
 				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat({ ...newTemplate, isSelected: true }));
 				setIsEditing(true);
 			} else {
-				throw new Error(result.msg || '创建模板失败');
+				throw new Error(response.msg || '创建模板失败');
 			}
 		} catch (err) {
 			showToast('创建模板失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
@@ -187,9 +169,9 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
-	const handleDeleteTemplate = async (templateId: string, e?: any) => {
-		if (e && typeof e.stopPropagation === 'function') {
-			e.stopPropagation();
+	const handleDeleteTemplate = (templateId: string, e?: unknown) => {
+		if (e && typeof (e as any).stopPropagation === 'function') {
+			(e as any).stopPropagation();
 		}
 		if (templates.length <= 1) {
 			showToast('至少需要保留一个模板', 'error');
@@ -205,16 +187,9 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 
 		try {
 			setLoading(true);
-			const response = await fetch(`/api/admin/templates/${templateToDelete}?superToken=${superToken}`, {
-				method: 'DELETE',
-			});
+			const response = await templateService.deleteTemplate(superToken, templateToDelete);
 
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
-
-			const result = await response.json() as any;
-			if (result.code === 0) {
+			if (response.code === 0) {
 				setTemplates((prev) => {
 					const newTemplates = prev.filter((t) => String(t.id) !== templateToDelete);
 					if (newTemplates.length > 0 && !newTemplates.some((t) => t.isSelected)) {
@@ -225,7 +200,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 				setIsEditing(false);
 				closeDeleteModal();
 			} else {
-				throw new Error(result.msg || '删除模板失败');
+				throw new Error(response.msg || '删除模板失败');
 			}
 		} catch (err) {
 			showToast('删除模板失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
@@ -235,7 +210,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
-	const handleUpdateTemplate = (field: keyof TemplateItem, value: any) => {
+	const handleUpdateTemplate = (field: keyof TemplateItem, value: unknown) => {
 		if (!selectedTemplate) return;
 
 		setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? { ...template, [field]: value } : template)));
@@ -255,34 +230,29 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		try {
 			setSaving(true);
 
-			const response = await fetch(`/api/admin/templates/${selectedTemplate.id}?superToken=${superToken}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: selectedTemplate.name,
-					description: selectedTemplate.description || '配置模板',
-					content: selectedTemplate.configContent,
-				}),
+			const response = await templateService.updateTemplate(superToken, String(selectedTemplate.id), {
+				name: selectedTemplate.name,
+				description: selectedTemplate.description || '配置模板',
+				content: selectedTemplate.configContent,
 			});
 
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-			}
+			if (response.code === 0) {
+				// 如果后端没有返回完整的 template，我们至少知道更新成功了
+				// 可以从 selectedTemplate 和请求数据构造更新
+				// 或者假设后端返回了 { template: ... }
+				const updatedData = response.data.template || {};
 
-			const result = await response.json() as any;
-			if (result.code === 0) {
-				const updatedTemplate = {
+				const updatedTemplate: TemplateItem = {
 					...selectedTemplate,
-					...result.data,
+					...updatedData,
+					configContent: updatedData.content || selectedTemplate.configContent,
 				};
 
 				setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
 				setIsEditing(false);
 				showToast('模板保存成功！', 'success');
 			} else {
-				throw new Error(result.msg || '保存失败');
+				throw new Error(response.msg || '保存失败');
 			}
 		} catch (err) {
 			showToast('保存失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');

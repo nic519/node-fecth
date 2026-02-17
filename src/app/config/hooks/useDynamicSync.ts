@@ -1,20 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ApiResponse } from '@/types/api';
 import { UserConfig } from '@/types/openapi-schemas';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
+import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
 
 export interface SyncStatus {
     status: 'idle' | 'loading' | 'success' | 'error';
     message?: string;
 }
 
-export interface DynamicInfo {
-    id: string;
-    url: string;
-    traffic: string | null;
-    updatedAt: string;
-}
-
+// DynamicInfo 已经在 service 中定义，这里移除
 export interface SyncItemData {
     url: string;
     source: string;
@@ -38,13 +32,12 @@ export function useDynamicSync(config: UserConfig) {
             if (items.length === 0) return;
 
             try {
-                const urls = items.map(item => item.url).join(',');
-                const res = await fetch(`/api/dynamic/sync?urls=${encodeURIComponent(urls)}`);
-                const data = (await res.json()) as ApiResponse<DynamicInfo[]>;
+                const urls = items.map(item => item.url);
+                const response = await dynamicService.syncUrls(urls);
 
-                if (isMounted && data.code === 0 && Array.isArray(data.data)) {
+                if (isMounted && response.code === 0 && Array.isArray(response.data)) {
                     const infoMap: Record<string, DynamicInfo> = {};
-                    data.data.forEach(info => {
+                    response.data.forEach((info: DynamicInfo) => {
                         infoMap[info.url] = info;
                     });
                     setDynamicInfos(infoMap);
@@ -59,7 +52,7 @@ export function useDynamicSync(config: UserConfig) {
         return () => {
             isMounted = false;
         };
-    }, [config.subscribe, config.appendSubList]);
+    }, [items]);
 
     const syncUrl = useCallback(async (url: string) => {
         if (!url) return;
@@ -69,31 +62,21 @@ export function useDynamicSync(config: UserConfig) {
         const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         try {
-            const res = await fetch('/api/dynamic/sync', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
-                signal: controller.signal,
-            });
+            const response = await dynamicService.syncUrl(url, controller.signal);
             clearTimeout(timeoutId);
-            const data = (await res.json()) as ApiResponse;
 
-            if (data.code === 0) {
+            if (response.code === 0) {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));
 
                 // Update dynamic info
-                const updatedInfo = data.data as unknown as DynamicInfo;
-                // Since POST might return partial info, we merge carefully
-                // Assuming data.data contains the traffic info directly as per previous code observation
-                // (data.data as any).traffic was used. Let's try to be safer.
-                const responseData = data.data as any;
+                const updatedInfo = response.data;
 
                 setDynamicInfos(prev => ({
                     ...prev,
                     [url]: {
                         ...(prev[url] || { id: '', url, traffic: null, updatedAt: '' }), // fallback if not exists
-                        traffic: responseData.traffic,
-                        updatedAt: responseData.updatedAt || new Date().toISOString()
+                        traffic: updatedInfo.traffic,
+                        updatedAt: updatedInfo.updatedAt || new Date().toISOString()
                     }
                 }));
 
@@ -108,10 +91,10 @@ export function useDynamicSync(config: UserConfig) {
                 }, 3000);
 
             } else {
-                setStatuses(prev => ({ ...prev, [url]: { status: 'error', message: data.msg || '失败' } }));
+                setStatuses(prev => ({ ...prev, [url]: { status: 'error', message: response.msg || '失败' } }));
             }
-        } catch (error: any) {
-            const message = error.name === 'AbortError' ? '请求超时' : '网络错误';
+        } catch (error: unknown) {
+            const message = error instanceof Error && error.name === 'AbortError' ? '请求超时' : '网络错误';
             setStatuses(prev => ({ ...prev, [url]: { status: 'error', message } }));
         }
     }, []);

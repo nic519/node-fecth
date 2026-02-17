@@ -1,26 +1,17 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
+import { Layers, Shield, Globe, ArrowRight, Settings2 } from 'lucide-react';
 
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [currentFeature, setCurrentFeature] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % 3);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 检查是否有管理员 token
+  // Check for admin token
   useEffect(() => {
     const superToken = searchParams.get('superToken');
     if (superToken) {
@@ -28,416 +19,132 @@ function HomeContent() {
     }
   }, [searchParams, router]);
 
-  const features = [
-    {
-      icon: '⚡',
-      title: '智能配置管理',
-      description: '支持多端口模式，智能节点过滤，让您的网络配置更加高效',
-    },
-    {
-      icon: '🔒',
-      title: '安全访问控制',
-      description: '基于访问令牌的身份验证，确保您的配置数据安全可靠',
-    },
-    {
-      icon: '📱',
-      title: '现代化界面',
-      description: '响应式设计，支持桌面和移动端，随时随地管理您的配置',
-    },
-  ];
-
-  const configExamples = [
-    { label: '订阅地址', field: 'subscribe', type: '必需', description: '您的节点订阅链接' },
-    { label: '访问令牌', field: 'accessToken', type: '必需', description: '用于身份验证的令牌' },
-    { label: '多端口模式', field: 'multiPortMode', type: '可选', description: '支持 TW、SG、JP、HK、US、VN' },
-    { label: '规则模板', field: 'ruleUrl', type: '可选', description: '自定义规则配置文件地址' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      <nav className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-lg border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">N</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">节点管理后台</h1>
-                <p className="text-xs text-gray-500">专业的节点配置管理平台</p>
-              </div>
+    <div className="min-h-screen bg-slate-50 selection:bg-blue-100">
+      {/* Navigation */}
+      <nav className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+              N
             </div>
-            <div className="hidden sm:flex gap-8 justify-center flex-1">
-              <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-                功能特性
-              </Link>
-              <Link href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-                如何使用
-              </Link>
-            </div>
-            <div className="flex justify-end">
-              <Button asChild className="hidden sm:flex bg-blue-600 hover:bg-blue-700 text-white">
-                <Link href="#access">立即使用</Link>
-              </Button>
-            </div>
+            <span className="font-bold text-slate-900 text-lg tracking-tight">NodeFetch</span>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600">
+              <Link href="#features">特性</Link>
+            </Button>
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              <Link href="/admin">进入后台</Link>
+            </Button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              智能节点配置
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">管理平台</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              提供专业的节点配置解决方案，支持多订阅源管理、智能节点过滤、 实时配置编辑等强大功能，让您的网络配置管理变得简单高效。
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                asChild
-                size="lg"
-                className="text-lg font-semibold px-8 py-6 h-auto bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-              >
-                <Link href="#access">🚀 开始使用</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="text-lg font-semibold px-8 py-6 h-auto rounded-lg"
-              >
-                <Link href="#features">📋 了解功能</Link>
-              </Button>
+      <main className="pt-32 pb-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6 border border-blue-100">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            新一代订阅管理工具
+          </div>
+
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
+            化繁为简，
+            <span className="text-blue-600">掌控</span>
+            您的节点订阅
+          </h1>
+
+          <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+            专为多订阅场景设计。智能聚合、精准过滤、多端适配。
+            <br className="hidden md:block" />
+            让复杂的节点配置管理变得前所未有的简单。
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button asChild size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 rounded-full transition-transform hover:scale-105">
+              <Link href="/admin">
+                立即开始管理 <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-full">
+              <Link href="https://github.com/vpei/node-fecth" target="_blank">
+                查看文档
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Core Features Grid */}
+        <div id="features" className="max-w-6xl mx-auto mt-24 grid md:grid-cols-3 gap-8">
+          <FeatureCard
+            icon={<Layers className="w-6 h-6 text-blue-600" />}
+            title="多订阅聚合"
+            description="不再为分散的订阅链接烦恼。支持无限制合并多个订阅源，自动去重与统一管理，一键生成最终配置。"
+          />
+          <FeatureCard
+            icon={<Settings2 className="w-6 h-6 text-indigo-600" />}
+            title="智能过滤规则"
+            description="强大的正则匹配与地区筛选功能。轻松剔除无效节点，只保留您真正需要的优质线路。"
+          />
+          <FeatureCard
+            icon={<Globe className="w-6 h-6 text-emerald-600" />}
+            title="多端口模式"
+            description="针对不同地区（HK, US, JP...）自动生成独立端口配置。实现精细化的分流策略，优化网络体验。"
+          />
+        </div>
+
+        {/* Secondary Features */}
+        <div className="max-w-6xl mx-auto mt-16 pt-16 border-t border-slate-200">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold text-slate-900">为什么选择 NodeFetch？</h2>
+              <div className="space-y-4">
+                <CheckItem text="极简配置：基于 YAML 的可视化编辑，直观易懂" />
+                <CheckItem text="云端同步：基于 Cloudflare KV，配置实时云端保存" />
+                <CheckItem text="安全可靠：访问令牌机制，保护您的私有订阅信息" />
+                <CheckItem text="高性能：边缘计算驱动，毫秒级响应速度" />
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="font-medium text-slate-900">订阅源 A</div>
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">已启用</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="font-medium text-slate-900">订阅源 B (备用)</div>
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">已启用</span>
+                </div>
+                <div className="flex items-center justify-center py-2">
+                  <ArrowRight className="text-slate-400 transform rotate-90" />
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center">
+                  <div className="font-semibold text-blue-600">统一聚合订阅</div>
+                  <div className="text-xs text-slate-500 mt-1">自动去重 • 地区过滤 • 规则优化</div>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Dynamic Feature Showcase */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <Card className="bg-white/80 backdrop-blur-lg border border-gray-200/50 shadow-xl">
-              <CardContent className="p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-3xl">
-                    {features[currentFeature].icon}
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{features[currentFeature].title}</h3>
-                  <p className="text-gray-600 text-lg">{features[currentFeature].description}</p>
-                </div>
-                <div className="flex justify-center gap-2">
-                  {features.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentFeature(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentFeature ? 'bg-blue-600 w-6' : 'bg-gray-300 hover:bg-gray-400'
-                        }`}
-                      aria-label={`Show feature ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">核心功能特性</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">为用户提供专业的节点配置管理解决方案</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* 用户配置管理 */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">⚙️</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">配置管理</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 支持 YAML 格式配置编辑</li>
-                  <li>• 实时配置验证和语法检查</li>
-                  <li>• 基于访问令牌的安全认证</li>
-                  <li>• 配置历史记录和回滚</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* 多端口模式 */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">🌐</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">多端口模式</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 支持多地区出口配置</li>
-                  <li>• 智能节点过滤和分组</li>
-                  <li>• 正则表达式过滤支持</li>
-                  <li>• 自动负载均衡优化</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* 订阅管理 */}
-            <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">📡</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">订阅管理</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 多订阅源聚合管理</li>
-                  <li>• 订阅源标识和分组</li>
-                  <li>• 地区过滤和包含设置</li>
-                  <li>• 订阅状态监控</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* 安全保障 */}
-            <Card className="bg-gradient-to-br from-red-50 to-rose-50 border-red-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">🔐</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">安全保障</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 基于令牌的身份验证</li>
-                  <li>• 权限分级管理</li>
-                  <li>• 数据加密存储</li>
-                  <li>• 配置备份恢复</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* 现代化设计 */}
-            <Card className="bg-gradient-to-br from-gray-50 to-slate-50 border-gray-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">🎨</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">现代化界面</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 响应式设计，支持移动端</li>
-                  <li>• 直观的用户界面</li>
-                  <li>• 实时数据更新</li>
-                  <li>• 深色模式支持</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* 高级功能 */}
-            <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-100 hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xl">⚡</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">高级功能</h3>
-                <ul className="text-gray-600 space-y-2">
-                  <li>• 智能节点选择算法</li>
-                  <li>• 配置模板系统</li>
-                  <li>• 批量配置操作</li>
-                  <li>• 实时状态监控</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">配置字段说明</h2>
-            <p className="text-xl text-gray-600">了解各个配置字段的作用和使用方法</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {configExamples.map((example, index) => (
-              <Card key={index} className="p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                <CardContent className="p-0">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <Badge
-                        variant={example.type === '必需' ? 'destructive' : 'default'}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold p-0 ${example.type === '必需' ? '' : 'bg-blue-600 hover:bg-blue-700'}`}
-                      >
-                        {index + 1}
-                      </Badge>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <code className="text-sm bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono">
-                          {example.field}
-                        </code>
-                        <Badge
-                          variant={example.type === '必需' ? 'destructive' : 'secondary'}
-                          className="font-normal"
-                        >
-                          {example.type}
-                        </Badge>
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-1">{example.label}</h4>
-                      <p className="text-gray-600 text-sm">{example.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* 配置示例 */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <Card className="shadow-lg border border-gray-200 overflow-hidden">
-              <CardHeader className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">完整配置示例</h3>
-              </CardHeader>
-              <CardContent className="p-6">
-                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm leading-relaxed">
-                  {`# 基础配置
-subscribe: "https://example.com/subscribe"
-accessToken: "your-access-token"
-ruleUrl: "https://example.com/rules.yaml"
-fileName: "config.yaml"
-
-# 多端口模式
-multiPortMode:
-  - TW
-  - HK
-  - SG
-
-# 节点过滤
-excludeRegex: "(?i)(test|trial|expire)"
-
-# 追加订阅
-appendSubList:
-  - subscribe: "https://backup.example.com"
-    flag: "backup"
-    includeArea:
-      - US
-      - JP`}
-                </pre>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Access Section */}
-      <section id="access" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">开始使用</h2>
-            <p className="text-xl text-gray-600">选择适合您的访问方式</p>
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            {/* 用户配置 */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-white text-2xl">👤</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">用户配置管理</h3>
-                  <p className="text-gray-600">管理您的个人节点配置</p>
-                </div>
-                <div className="space-y-4">
-                  <Card className="bg-white/60">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2">访问地址格式</h4>
-                      <code className="bg-gray-800 text-green-400 px-3 py-2 rounded text-sm block overflow-x-auto font-mono">
-                        /config/用户ID?token=访问令牌
-                      </code>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/60">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2">示例</h4>
-                      <code className="bg-gray-800 text-green-400 px-3 py-2 rounded text-sm block overflow-x-auto font-mono">
-                        /config/user123?token=your-access-token
-                      </code>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/60">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2">功能特点</h4>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• 直观的 YAML 配置编辑器</li>
-                        <li>• 实时配置验证和错误提示</li>
-                        <li>• 安全的令牌身份验证</li>
-                        <li>• 一键保存和应用配置</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 快速开始按钮 */}
-          <div className="text-center mt-12">
-            <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 max-w-2xl mx-auto">
-              <CardContent className="p-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">需要帮助？</h3>
-                <p className="text-gray-600 mb-6">如果您需要获取访问令牌或遇到其他问题，请联系系统管理员或查看帮助文档。</p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button className="font-semibold bg-blue-600 hover:bg-blue-700 text-white">
-                    📖 查看文档
-                  </Button>
-                  <Button variant="outline" className="font-semibold">
-                    💬 联系支持
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">N</span>
-                </div>
-                <span className="font-bold text-lg">节点管理后台</span>
-              </div>
-              <p className="text-gray-400 text-sm">专业的节点配置管理平台，让配置管理变得简单高效。</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">功能特性</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>配置管理</li>
-                <li>多端口模式</li>
-                <li>订阅管理</li>
-                <li>安全保障</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">技术栈</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>Cloudflare Workers</li>
-                <li>TypeScript</li>
-                <li>React</li>
-                <li>TailwindCSS</li>
-              </ul>
-            </div>
-          </div>
-          <Separator className="my-8 bg-gray-800" />
-          <div className="text-center text-sm text-gray-400">
-            <p>&copy; 2024 节点管理后台. 专业的节点配置管理平台。</p>
+      <footer className="bg-white border-t border-slate-200 py-12 mt-12">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-slate-500 text-sm">
+            © {new Date().getFullYear()} NodeFetch. All rights reserved.
+          </p>
+          <div className="flex gap-6">
+            <a href="#" className="text-slate-400 hover:text-slate-600 transition-colors">
+              <span className="sr-only">GitHub</span>
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+              </svg>
+            </a>
           </div>
         </div>
       </footer>
@@ -445,9 +152,34 @@ appendSubList:
   );
 }
 
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <Card className="border-0 shadow-none bg-transparent hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 rounded-2xl p-2">
+      <CardContent className="p-6">
+        <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
+        <p className="text-slate-600 leading-relaxed">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CheckItem({ text }: { text: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+        <Shield className="w-3 h-3 text-blue-600" />
+      </div>
+      <span className="text-slate-700">{text}</span>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <HomeContent />
     </Suspense>
   );

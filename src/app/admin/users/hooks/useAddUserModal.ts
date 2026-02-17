@@ -1,7 +1,8 @@
 'use client';
 
 import type { UserConfig } from '@/types/user-config';
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { adminService } from '@/services/admin-api';
+
 import { useState } from 'react';
 
 export interface UseAddUserModalProps {
@@ -61,15 +62,7 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 				accessToken: newUserToken.trim(),
 			};
 
-			const res = await fetch(`/api/admin/users?superToken=${superToken}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ uid: newUserUid.trim(), config: userConfig }),
-			});
-
-			const response = await res.json() as any;
+			const response = await adminService.addUser(superToken, { uid: newUserUid.trim(), config: userConfig });
 
 			if (response.code === 0) {
 				showToast(`用户 ${newUserUid} 创建成功`, 'success');

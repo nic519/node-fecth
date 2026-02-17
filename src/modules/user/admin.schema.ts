@@ -1,8 +1,17 @@
 import { IUserConfig } from "./user.schema";
 
+export interface SubscriptionStat {
+	url: string;
+	type: 'main' | 'append';
+	name?: string; // For appendSubList flag
+	traffic?: string; // Raw traffic string from DB
+	lastUpdated?: string; // From dynamic table
+}
+
 export type UserAdminConfig = IUserConfig & {
 	uid: string;
 	updatedAt: string;
+	subscriptionStats?: SubscriptionStat[];
 };
 
 export interface AdminOperation {

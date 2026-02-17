@@ -1,6 +1,6 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { adminService } from '@/services/admin-api';
 import { useState } from 'react';
 
 export interface UseDeleteUserModalProps {
@@ -42,10 +42,7 @@ export const useDeleteUserModal = ({ superToken, showToast, onSuccess }: UseDele
 		if (!userToDelete) return;
 
 		try {
-			const res = await fetch(`/api/admin/users/${userToDelete}?superToken=${superToken}`, {
-				method: 'DELETE',
-			});
-			const response = await res.json() as any;
+			const response = await adminService.deleteUser(superToken, userToDelete);
 
 			if (response.code === 0) {
 				showToast(`用户 ${userToDelete} 删除成功`, 'success');
