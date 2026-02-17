@@ -4,13 +4,11 @@ import { AreaCode } from '@/types/openapi-schemas';
 import { parse as yamlParse } from 'yaml';
 
 export class StrategyUtils {
-	/// 根据代理名称，获取代理所属的地区信息
 	static getProxyArea(proxyName: string): ProxyAreaInfo | null {
 		const proxyMatchKey = ProxyAreaObjects.find((area) => new RegExp(area.regex, 'i').test(proxyName));
 		return proxyMatchKey ?? null;
 	}
 
-	/// 根据clash的订阅情况信息格式，调整成可视的信息
 	static formatSubInfo(subInfo: string): string {
 		const subInfoObj = Object.fromEntries(
 			subInfo.split(';').map((pair) => {
@@ -31,23 +29,20 @@ export class StrategyUtils {
 		return `A${powerEmoji}消耗${percentStr}, 到期${expireStr}`;
 	}
 
-	/// 根据clashContent提取proxyList
 	static getProxyList(options: {
 		clashContent: string;
 		flag?: string;
 		includeArea?: AreaCode[];
-		excludeRegex?: string; // 排除匹配的
+		excludeRegex?: string;
 	}): ClashProxy[] {
 		const { clashContent, flag, includeArea, excludeRegex } = options;
 
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']
 			.filter((proxy: ClashProxy) => {
-				// 排除匹配 excludeRegex 的
 				if (excludeRegex && new RegExp(excludeRegex, 'i').test(proxy.name)) {
 					return false;
 				}
-				// 检查地区包含
 				if (includeArea && includeArea.length > 0) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
 					return proxyArea && includeArea.includes(proxyArea.code);

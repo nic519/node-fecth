@@ -1,6 +1,6 @@
 import { UserConfig } from '@/types/openapi-schemas';
-import { StrategyMultiPort } from '@/module/yamlMerge/strategyMultiPort';
-import { StrategyUtils } from '@/module/yamlMerge/utils/strategyUtils';
+import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
+import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
 import { ClashProxy } from '@/types/clash.types';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
@@ -10,29 +10,22 @@ import { DEFAULT_SUB_FLAG } from '@/config/constants';
 export class StrategyMultiSub {
     constructor(private ruleContent: string, private userConfig: UserConfig) { }
 
-	/// 取出所有proxy
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
 		const allProxyList: ClashProxy[] = [];
-		/// 为了兼容回去而使用的
 		const preMergeInfo: PreMergeInfo = {
 			ruleContent: this.ruleContent,
 			clashContent: '',
 			subInfo: '',
 		};
 
-		// 获取追加订阅的clash内容
 		const appendSubList = this.userConfig.appendSubList;
 
 		if (appendSubList && appendSubList.length > 0) {
-			// 把主订阅链接，拼接在这里一起获取
 			appendSubList.push({
 				subscribe: this.userConfig.subscribe,
 				flag: DEFAULT_SUB_FLAG,
 			});
 
-			console.log(`📡 开始处理 ${appendSubList.length} 个追加订阅`);
-
-			// 限制并发请求数量，避免资源过载
 			const MAX_CONCURRENT = 3;
 			const results: Array<{ proxyList: ClashProxy[]; subInfo: string; flag: string }> = [];
 
@@ -52,18 +45,10 @@ export class StrategyMultiSub {
 							includeArea: sub.includeArea,
 							excludeRegex: this.userConfig.excludeRegex,
 						});
-						console.log(`✅ 成功处理追加订阅 ${sub.flag}，总计获得 ${appendProxyList.length} 个代理`);
 						if (appendProxyList.length === 0) {
-							console.log(
-								`❌ 追加订阅 ${sub.flag} 没有获取到代理, clashContent=${clashContent.length}, subInfo=${subInfo}, ${clashContent.substring(
-									0,
-									500
-								)}`
-							);
 						}
 						return { proxyList: appendProxyList, subInfo, flag: sub.flag };
 					} catch (error) {
-						console.error(`❌ 获取追加订阅 ${sub.flag} 失败:`, error);
 						return { proxyList: [], subInfo: '', flag: sub.flag };
 					}
 				});
@@ -71,15 +56,12 @@ export class StrategyMultiSub {
 				const batchResults = await Promise.all(batchPromises);
 				results.push(...batchResults);
 
-				// 在批次之间短暂延迟，减少资源压力
 				if (i + MAX_CONCURRENT < appendSubList.length) {
 					await new Promise((resolve) => setTimeout(resolve, 100));
 				}
 			}
 
-			// 添加流量信息和代理列表
 			for (const { proxyList, subInfo, flag } of results) {
-				// 添加流量信息proxy
 				if (subInfo) {
 					allProxyList.push({
 						name: `${flag}-${StrategyUtils.formatSubInfo(subInfo)}`,
@@ -91,20 +73,15 @@ export class StrategyMultiSub {
 				}
 				allProxyList.push(...proxyList);
 			}
-
-			console.log(`✅ 成功处理追加订阅，总计获得 ${allProxyList.length} 个代理`);
 		}
 
 		return { allProxyList, preMergeInfo };
 	}
 
-	/// 取出所有proxy-provider
 	async generate(): Promise<{ yamlContent: string; subInfo: string }> {
-		// 1.删除proxy-providers
 		const yamlObj = yamlParse(this.ruleContent);
 		delete yamlObj['proxy-providers'];
 
-		// 2.添加proxy
 		const { allProxyList, preMergeInfo } = await this.getProxyList();
 		if (yamlObj['proxies']) {
 			yamlObj['proxies'].push(...allProxyList);
@@ -112,7 +89,6 @@ export class StrategyMultiSub {
 			yamlObj['proxies'] = allProxyList;
 		}
 
-		// 3. 检查是否支持多出口模式
 		if (this.userConfig.multiPortMode) {
 			const strategyMultiPort = new StrategyMultiPort(preMergeInfo, this.userConfig);
 			yamlObj['listeners'] = strategyMultiPort.createListeners(yamlObj['proxies']);

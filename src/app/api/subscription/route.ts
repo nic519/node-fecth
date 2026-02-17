@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { ClashHandler } from '@/lib/clashHandler';
+import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
 
 export async function GET(request: NextRequest) {
   const env = process.env as unknown as Env;

@@ -1,4 +1,4 @@
-import { logger, REQUEST_TIMEOUT } from './network.config';
+import { logger, REQUEST_TIMEOUT } from '@/utils/request/network.config';
 
 // ==================== 日志记录器 ====================
 

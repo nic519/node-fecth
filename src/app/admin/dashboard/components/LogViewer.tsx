@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { LogEvent, LogLevel, LogType, ResourceType } from '@/types/log';
+import { ApiResponse } from '@/types/api';
 import {
   Table,
   TableBody,
@@ -32,7 +33,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const [logs, setLogs] = useState<LogEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  
+
   // Filters
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -47,14 +48,19 @@ export function LogViewer({ superToken }: LogViewerProps) {
       params.append('superToken', superToken);
       params.append('page', page.toString());
       params.append('pageSize', pageSize.toString());
-      
+
       if (level !== 'all') params.append('level', level);
       if (type) params.append('type', type);
       if (userId) params.append('userId', userId);
 
       const res = await fetch(`/api/admin/logs?${params.toString()}`);
-      const data = await res.json();
-      
+      const data: ApiResponse<{
+        data: LogEvent[];
+        total: number;
+        page: number;
+        pageSize: number;
+      }> = await res.json();
+
       if (data.code === 0) {
         setLogs(data.data.data);
         setTotal(data.data.total);
@@ -105,18 +111,18 @@ export function LogViewer({ superToken }: LogViewerProps) {
           </div>
 
           <div className="w-[150px]">
-             <Input 
-              placeholder="事件类型" 
-              value={type} 
+            <Input
+              placeholder="事件类型"
+              value={type}
               onChange={(e) => setType(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
 
           <div className="w-[150px]">
-            <Input 
-              placeholder="用户ID" 
-              value={userId} 
+            <Input
+              placeholder="用户ID"
+              value={userId}
               onChange={(e) => setUserId(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -158,9 +164,9 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     </TableCell>
                     <TableCell>
                       <Badge variant={
-                        log.level === 'error' ? 'destructive' : 
-                        log.level === 'warn' ? 'secondary' : // 'warning' variant might not exist, use secondary or default
-                        log.level === 'audit' ? 'outline' : 'default'
+                        log.level === 'error' ? 'destructive' :
+                          log.level === 'warn' ? 'secondary' : // 'warning' variant might not exist, use secondary or default
+                            log.level === 'audit' ? 'outline' : 'default'
                       }>
                         {log.level.toUpperCase()}
                       </Badge>

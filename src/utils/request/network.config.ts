@@ -1,10 +1,67 @@
-import { createModuleLogger } from '@/utils/logger';
+import { createLogService } from '@/services/log-service';
+import type { LogLevel } from '@/types/log';
 
-// ==================== 日志记录器 ====================
+export const REQUEST_TIMEOUT = 15000;
 
-export const logger = createModuleLogger('ProxyFetch');
+type LogMeta = Record<string, unknown>;
 
-// ==================== 常量定义 ====================
+const logService = createLogService();
 
-/** 请求超时时间：20秒 */
-export const REQUEST_TIMEOUT = 20000;
+function writeLog(level: LogLevel, message: string, meta?: LogMeta) {
+    try {
+        if (level === 'error' || level === 'warn') {
+            void logService.log({
+                level,
+                type: 'network',
+                message,
+                meta,
+            });
+        }
+    } catch {
+    }
+}
+
+function toMetaAndMessage(metaOrMessage: LogMeta | string, maybeMessage?: string): { meta?: LogMeta; message: string } {
+    if (typeof metaOrMessage === 'string') {
+        return { message: metaOrMessage };
+    }
+    return { meta: metaOrMessage, message: maybeMessage || '' };
+}
+
+export const logger = {
+    info(metaOrMessage: LogMeta | string, maybeMessage?: string) {
+        const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
+        if (meta) {
+            console.info(message, meta);
+        } else {
+            console.info(message);
+        }
+    },
+    warn(metaOrMessage: LogMeta | string, maybeMessage?: string) {
+        const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
+        if (meta) {
+            console.warn(message, meta);
+        } else {
+            console.warn(message);
+        }
+        writeLog('warn', message, meta);
+    },
+    error(metaOrMessage: LogMeta | string, maybeMessage?: string) {
+        const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
+        if (meta) {
+            console.error(message, meta);
+        } else {
+            console.error(message);
+        }
+        writeLog('error', message, meta);
+    },
+    debug(metaOrMessage: LogMeta | string, maybeMessage?: string) {
+        const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
+        if (meta) {
+            console.debug(message, meta);
+        } else {
+            console.debug(message);
+        }
+    },
+};
+
