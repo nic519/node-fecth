@@ -111,7 +111,7 @@ export const logs = sqliteTable('logs', {
 	requestId: text('request_id'),       // 请求ID，用于链路追踪
 
 	// 详细上下文（JSON格式）
-	meta: text('meta', { mode: 'json' }).$type<Record<string, any>>(),
+	meta: text('meta', { mode: 'json' }).$type<Record<string, unknown>>(),
 
 	// 时间戳
 	createdAt: text('created_at')

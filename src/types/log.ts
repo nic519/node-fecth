@@ -31,7 +31,7 @@ export interface LogEvent {
   message: string;
   userId?: string;
   requestId?: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   createdAt: string;
 }
 

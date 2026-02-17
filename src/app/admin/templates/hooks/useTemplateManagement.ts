@@ -30,7 +30,7 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
-	handleDeleteTemplate: (templateId: string, e?: unknown) => void;
+	handleDeleteTemplate: (templateId: string) => void;
 	confirmDeleteTemplate: () => void;
 	handleUpdateTemplate: (field: keyof TemplateItem, value: unknown) => void;
 	handleUpdateConfigContent: (content: string) => void;
@@ -169,10 +169,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 		}
 	};
 
-	const handleDeleteTemplate = (templateId: string, e?: unknown) => {
-		if (e && typeof (e as any).stopPropagation === 'function') {
-			(e as any).stopPropagation();
-		}
+	const handleDeleteTemplate = (templateId: string) => {
 		if (templates.length <= 1) {
 			showToast('至少需要保留一个模板', 'error');
 			return;

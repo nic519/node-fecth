@@ -5,6 +5,8 @@ import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { logger, REQUEST_TIMEOUT } from '@/utils/request/network.config';
 
+type DynamicRow = typeof dynamic.$inferSelect;
+
 export interface DynamicContent {
 	id: string;
 	url: string;
@@ -114,7 +116,7 @@ export class DynamicService {
 
 			const results = await this.db.select().from(dynamic).where(inArray(dynamic.url, urls));
 
-			return results.map((r: any) => ({
+			return results.map((r: DynamicRow) => ({
 				id: r.id,
 				url: r.url,
 				content: r.content,

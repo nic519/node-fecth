@@ -49,9 +49,10 @@ export class AdminService {
 				}
 				if (user.appendSubList) {
 					try {
-						const list = JSON.parse(user.appendSubList);
+						type AppendSubItem = { subscribe?: string; flag?: string };
+						const list = JSON.parse(user.appendSubList) as AppendSubItem[];
 						if (Array.isArray(list)) {
-							list.forEach((sub: any) => {
+							list.forEach((sub) => {
 								if (sub.subscribe) allUrls.add(sub.subscribe);
 							});
 						}
@@ -91,7 +92,7 @@ export class AdminService {
 
 				// 附加订阅
 				if (appendSubList && Array.isArray(appendSubList)) {
-					appendSubList.forEach((sub: any) => {
+					appendSubList.forEach((sub) => {
 						if (sub.subscribe) {
 							const d = dynamicMap.get(sub.subscribe);
 							subscriptionStats.push({
@@ -272,7 +273,7 @@ export class AdminService {
 		});
 
 		return logs.data.map((log: Log) => {
-			const meta = (log.meta as Record<string, any>) || {};
+			const meta = (log.meta as Record<string, unknown>) || {};
 			return {
 				timestamp: log.createdAt,
 				operation: log.type,
@@ -337,7 +338,7 @@ export class AdminService {
 	 */
 	private parseSubInfo(subInfo: string): TrafficInfo | undefined {
 		try {
-			const info: any = {};
+			const info: Record<string, number> = {};
 
 			// 解析键值对
 			subInfo.split(';').forEach((pair) => {

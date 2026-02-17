@@ -53,7 +53,7 @@ class ApiClient {
 
             // 处理非 JSON 响应（如果是空的或纯文本）
             const contentType = response.headers.get('content-type');
-            let data: any;
+            let data: unknown;
 
             if (contentType && contentType.includes('application/json')) {
                 data = await response.json();
@@ -69,7 +69,14 @@ class ApiClient {
             }
 
             if (!response.ok) {
-                throw new Error(data.msg || `请求失败: ${response.status}`);
+                let message = `请求失败: ${response.status}`;
+                if (data && typeof data === 'object' && 'msg' in data) {
+                    const msg = (data as { msg?: unknown }).msg;
+                    if (typeof msg === 'string') {
+                        message = msg;
+                    }
+                }
+                throw new Error(message);
             }
 
             return data as ApiResponse<T>;
@@ -90,7 +97,7 @@ class ApiClient {
     /**
      * POST 请求
      */
-    async post<T>(endpoint: string, body: any, params?: RequestParams, options?: RequestInit): Promise<ApiResponse<T>> {
+    async post<T>(endpoint: string, body: unknown, params?: RequestParams, options?: RequestInit): Promise<ApiResponse<T>> {
         const url = this.buildUrl(endpoint, params);
         return this.request<T>(url, {
             ...options,
@@ -102,7 +109,7 @@ class ApiClient {
     /**
      * PUT 请求
      */
-    async put<T>(endpoint: string, body: any, params?: RequestParams, options?: RequestInit): Promise<ApiResponse<T>> {
+    async put<T>(endpoint: string, body: unknown, params?: RequestParams, options?: RequestInit): Promise<ApiResponse<T>> {
         const url = this.buildUrl(endpoint, params);
         return this.request<T>(url, {
             ...options,

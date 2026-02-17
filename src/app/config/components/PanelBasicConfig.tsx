@@ -1,4 +1,4 @@
-import { UserConfig, SubConfig } from '@/types/openapi-schemas';
+import { AreaCode, UserConfig, SubConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ interface BasicConfigProps {
 }
 
 export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
-    const handleChange = useCallback((key: keyof UserConfig, value: any) => {
+    const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
     }, [config, onChange]);
 
@@ -36,22 +36,22 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
         handleChange('appendSubList', newList);
     }, [config.appendSubList, handleChange]);
 
-    const handleAppendSubListUpdate = useCallback((index: number, field: keyof SubConfig, value: any) => {
+    const handleAppendSubListUpdate = useCallback(<K extends keyof SubConfig>(index: number, field: K, value: SubConfig[K]) => {
         const currentList = config.appendSubList || [];
         const newList = [...currentList];
         newList[index] = { ...newList[index], [field]: value };
         handleChange('appendSubList', newList);
     }, [config.appendSubList, handleChange]);
 
-    const handleAppendSubListAreaChange = useCallback((index: number, area: string, checked: boolean) => {
+    const handleAppendSubListAreaChange = useCallback((index: number, area: AreaCode, checked: boolean) => {
         const currentList = config.appendSubList || [];
         const item = currentList[index];
         const currentAreas = item.includeArea || [];
-        let newAreas;
+        let newAreas: AreaCode[];
         if (checked) {
             newAreas = [...currentAreas, area];
         } else {
-            newAreas = currentAreas.filter((a: string) => a !== area);
+            newAreas = currentAreas.filter((a) => a !== area);
         }
         handleAppendSubListUpdate(index, 'includeArea', newAreas);
     }, [config.appendSubList, handleAppendSubListUpdate]);

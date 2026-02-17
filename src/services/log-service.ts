@@ -9,13 +9,13 @@ export interface LogEventParams {
   message: string;
   userId?: string;
   requestId?: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export class LogService {
   private db;
 
-  constructor(env?: any) {
+  constructor(env?: Env) {
     this.db = getDb(env);
   }
 
@@ -37,7 +37,7 @@ export class LogService {
 
     try {
       await this.db.insert(logs).values(newLog).execute();
-      
+
       // 概率性触发清理 (1% 概率)
       // 使用 waitUntil 如果在 Worker 环境，或者是 fire-and-forget
       if (Math.random() < 0.01) {
@@ -46,7 +46,7 @@ export class LogService {
         // 这里只是简单的异步调用
         this.cleanupOldLogs(30).catch(e => console.error('Auto cleanup failed:', e));
       }
-      
+
       return newLog;
     } catch (error) {
       console.error('Failed to write log to DB:', error);
@@ -82,7 +82,7 @@ export class LogService {
     if (level) conditions.push(eq(logs.level, level));
     if (type) conditions.push(eq(logs.type, type));
     if (userId) conditions.push(eq(logs.userId, userId));
-    
+
     if (startTime) {
       conditions.push(sql`${logs.createdAt} >= ${startTime.toISOString()}`);
     }
@@ -95,28 +95,25 @@ export class LogService {
     // 获取总数
     let total = 0;
     try {
-        const countResult = await this.db.select({ value: count() }).from(logs).where(whereClause);
-        total = countResult[0]?.value || 0;
+      const countResult = await this.db.select({ value: count() }).from(logs).where(whereClause);
+      total = countResult[0]?.value || 0;
     } catch (e) {
-        console.warn('Failed to count logs:', e);
+      console.warn('Failed to count logs:', e);
     }
 
     // 获取数据
-    // @ts-ignore
     let dataQuery = this.db.select().from(logs);
     if (whereClause) {
-        // @ts-ignore
-        dataQuery = dataQuery.where(whereClause);
+      dataQuery = dataQuery.where(whereClause);
     }
-    
-    // @ts-ignore
+
     const data = await dataQuery.orderBy(desc(logs.createdAt)).limit(limit).offset(offset);
 
     return {
-        data,
-        total,
-        page: Math.floor(offset / limit) + 1,
-        pageSize: limit
+      data,
+      total,
+      page: Math.floor(offset / limit) + 1,
+      pageSize: limit
     };
   }
 
@@ -127,9 +124,9 @@ export class LogService {
   async cleanupOldLogs(daysRetention: number = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysRetention);
-    
+
     console.log(`Cleaning up logs older than ${cutoffDate.toISOString()}`);
-    
+
     await this.db.delete(logs)
       .where(sql`${logs.createdAt} < ${cutoffDate.toISOString()}`)
       .execute();
@@ -137,4 +134,4 @@ export class LogService {
 }
 
 // Export a factory function
-export const createLogService = (env?: any) => new LogService(env);
+export const createLogService = (env?: Env) => new LogService(env);

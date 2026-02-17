@@ -1,13 +1,13 @@
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
-import { withAuth } from '@/utils/apiMiddleware';
+import { withAuth, type AuthenticatedRequest } from '@/utils/apiMiddleware';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
 
-export const GET = withAuth(async (request) => {
+export const GET = withAuth(async (request: AuthenticatedRequest) => {
   const env = process.env as unknown as Env;
   const logger = createLogService(env);
-  const uid = (request as any).uid as string | undefined;
+  const uid = request.uid;
 
   try {
     const authConfig = request.auth;

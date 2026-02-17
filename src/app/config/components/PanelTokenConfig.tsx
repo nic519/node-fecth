@@ -11,7 +11,7 @@ interface PanelTokenConfigProps {
 
 export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfigProps) {
 
-    const handleChange = (key: keyof UserConfig, value: any) => {
+    const handleChange = <K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
     };
 

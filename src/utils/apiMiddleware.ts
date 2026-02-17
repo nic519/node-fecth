@@ -10,7 +10,7 @@ export interface AuthenticatedRequest extends NextRequest {
 
 type ApiHandler = (
   req: AuthenticatedRequest,
-  context: { params: Promise<any> }
+  context: { params: Promise<Record<string, string>> }
 ) => Promise<NextResponse | Response> | NextResponse | Response;
 
 interface AuthOptions {
@@ -30,7 +30,7 @@ interface AuthOptions {
 }
 
 export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
-  return async (request: NextRequest, context: { params: Promise<any> }) => {
+  return async (request: NextRequest, context: { params: Promise<Record<string, string>> }) => {
     const env = process.env as unknown as Env;
     const searchParams = request.nextUrl.searchParams;
 

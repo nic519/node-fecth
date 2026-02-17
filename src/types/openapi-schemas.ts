@@ -4,6 +4,7 @@ import {
 	AreaCodeSchema,
 	SubscribeSchema,
 	UserConfigSchema,
+	type IUserConfig,
 } from '@/modules/user/user.schema';
 
 // =============================================================================
@@ -79,3 +80,4 @@ export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
 
 // 导出响应类型
 export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
+export type ConfigResponse = IUserConfig;

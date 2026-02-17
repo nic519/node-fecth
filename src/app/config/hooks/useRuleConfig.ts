@@ -17,7 +17,7 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
     const [enableCustomFilters, setEnableCustomFilters] = useState(!!config.requiredFilters);
     const [yamlError, setYamlError] = useState<string | null>(null);
 
-    const handleChange = (key: keyof UserConfig, value: any) => {
+    const handleChange = <K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
     };
 
@@ -45,7 +45,7 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
                 handleChange('requiredFilters', newFilters.join(','));
             }
         }
-    }, [enableCustomFilters, filterOptions, config.requiredFilters]);
+    }, [enableCustomFilters, filterOptions, config.requiredFilters, handleChange]);
 
     // Fetch filters
     useEffect(() => {
@@ -57,19 +57,21 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('获取规则失败');
                 const text = await response.text();
-                const data = yaml.load(text) as any;
+                const data = yaml.load(text) as unknown;
 
-                if (data && data['proxy-groups'] && Array.isArray(data['proxy-groups'])) {
-                    const options = data['proxy-groups']
-                        .map((g: any) => g.name)
-                        .filter((n: string) => n);
+                if (data && typeof data === 'object' && 'proxy-groups' in data && Array.isArray((data as { ['proxy-groups']?: unknown })['proxy-groups'])) {
+                    const proxyGroups = (data as { ['proxy-groups']?: { name?: string }[] })['proxy-groups'] ?? [];
+                    const options = proxyGroups
+                        .map((g) => g.name)
+                        .filter((n): n is string => !!n);
                     // Remove duplicates just in case
                     setFilterOptions([...new Set(options)] as string[]);
                 } else {
                     setFilterError('YAML 格式错误: 缺少 proxy-groups');
                 }
-            } catch (err: any) {
-                setFilterError(err.message || '加载过滤选项出错');
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : '加载过滤选项出错';
+                setFilterError(message);
                 console.error(err);
             } finally {
                 setLoadingFilters(false);
@@ -109,8 +111,9 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
         try {
             yaml.load(newValue);
             setYamlError(null);
-        } catch (err: any) {
-            setYamlError(err.message || '无效的 YAML 格式');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : '无效的 YAML 格式';
+            setYamlError(message);
         }
     };
 

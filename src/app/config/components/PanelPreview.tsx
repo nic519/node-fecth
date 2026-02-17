@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { YamlEditor } from '@/components/YamlEditor';
@@ -18,33 +18,32 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 		setOrigin(window.location.origin);
 	}, []);
 
-	const handlePreviewSubscribeURL = async () => {
-		if (origin) {
-			const subscribeURL = `${origin}/api/x?uid=${uid}&token=${token}`;
-			setPreviewLoading(true);
-			setPreviewError('');
-			try {
-				const response = await fetch(subscribeURL);
-				if (!response.ok) {
-					throw new Error(`Failed to fetch: ${response.statusText}`);
-				}
-				const text = await response.text();
-				setPreviewContent(text);
-			} catch (error) {
-				console.error('Preview fetch error:', error);
-				setPreviewError('获取预览内容失败，请稍后重试。');
-			} finally {
-				setPreviewLoading(false);
+	const handlePreviewSubscribeURL = useCallback(async () => {
+		if (!origin) return;
+		const subscribeURL = `${origin}/api/x?uid=${uid}&token=${token}`;
+		setPreviewLoading(true);
+		setPreviewError('');
+		try {
+			const response = await fetch(subscribeURL);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch: ${response.statusText}`);
 			}
+			const text = await response.text();
+			setPreviewContent(text);
+		} catch (error) {
+			console.error('Preview fetch error:', error);
+			setPreviewError('获取预览内容失败，请稍后重试。');
+		} finally {
+			setPreviewLoading(false);
 		}
-	};
+	}, [origin, uid, token]);
 
 	// Initial load when origin is ready
 	useEffect(() => {
 		if (origin) {
-			handlePreviewSubscribeURL();
+			void handlePreviewSubscribeURL();
 		}
-	}, [origin, uid, token]);
+	}, [origin, handlePreviewSubscribeURL]);
 
 	return (
 		<div className="h-full flex flex-col">

@@ -20,9 +20,10 @@ export const GET = async (request: Request) => {
             return NextResponse.json({ code: 400, msg: 'URLs parameter is required' }, { status: 400 });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Dynamic fetch error:', error);
-        return NextResponse.json({ code: 500, msg: error.message || 'Internal Server Error' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        return NextResponse.json({ code: 500, msg: message }, { status: 500 });
     }
 };
 
@@ -42,8 +43,9 @@ export const POST = async (request: Request) => {
             data: result
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Dynamic sync error:', error);
-        return NextResponse.json({ code: 500, msg: error.message || 'Internal Server Error' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        return NextResponse.json({ code: 500, msg: message }, { status: 500 });
     }
 };

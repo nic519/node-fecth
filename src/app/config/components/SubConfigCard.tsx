@@ -1,4 +1,4 @@
-import { SubConfig } from '@/types/openapi-schemas';
+import { AreaCode, SubConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,9 +12,9 @@ interface SubConfigCardProps {
     index: number;
     item: SubConfig;
     readOnly?: boolean;
-    onUpdate: (index: number, field: keyof SubConfig, value: any) => void;
+    onUpdate: <K extends keyof SubConfig>(index: number, field: K, value: SubConfig[K]) => void;
     onRemove: (index: number) => void;
-    onAreaChange: (index: number, area: string, checked: boolean) => void;
+    onAreaChange: (index: number, area: AreaCode, checked: boolean) => void;
 }
 
 export const SubConfigCard = memo(function SubConfigCard({
@@ -86,8 +86,8 @@ export const SubConfigCard = memo(function SubConfigCard({
                                 包含地区 (Include Areas)
                             </Label>
                             <div className="flex flex-wrap gap-2 pt-2">
-                                {AREA_CODES.map((area) => {
-                                    const isChecked = item.includeArea?.includes(area as any) || false;
+                            {AREA_CODES.map((area: AreaCode) => {
+                                    const isChecked = item.includeArea?.includes(area) || false;
                                     return (
                                         <div key={`${index}-${area}`} className="flex items-center space-x-2">
                                             <Checkbox

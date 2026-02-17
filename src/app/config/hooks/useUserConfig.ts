@@ -52,10 +52,11 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			}
 
 			// 从响应结构中提取配置数据
-			const configData = response.data;
+			type ApiUserConfig = UserConfig & { updatedAt?: string | null };
+			const configData = response.data as ApiUserConfig;
 
 			// 移除 updatedAt 等非配置字段
-			const { updatedAt, ...userConfig } = configData as any;
+			const { updatedAt, ...userConfig } = configData;
 			setConfig(userConfig);
 			if (updatedAt) {
 				setLastSaved(new Date(updatedAt));

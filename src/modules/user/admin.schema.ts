@@ -15,6 +15,7 @@ export type UserAdminConfig = IUserConfig & {
 };
 
 export interface AdminOperation {
+	[key: string]: unknown;
 	timestamp: string;
 	operation: string;
 	targetUserId?: string;
