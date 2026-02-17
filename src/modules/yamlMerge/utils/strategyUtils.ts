@@ -33,16 +33,12 @@ export class StrategyUtils {
 		clashContent: string;
 		flag?: string;
 		includeArea?: AreaCode[];
-		excludeRegex?: string;
 	}): ClashProxy[] {
-		const { clashContent, flag, includeArea, excludeRegex } = options;
+		const { clashContent, flag, includeArea } = options;
 
 		const yamlObj = yamlParse(clashContent);
 		return yamlObj['proxies']
 			.filter((proxy: ClashProxy) => {
-				if (excludeRegex && new RegExp(excludeRegex, 'i').test(proxy.name)) {
-					return false;
-				}
 				if (includeArea && includeArea.length > 0) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);
 					return proxyArea && includeArea.includes(proxyArea.code);

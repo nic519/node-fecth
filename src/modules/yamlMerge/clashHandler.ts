@@ -7,6 +7,7 @@ import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { RouteHandler } from '@/types/routes.types';
 import { ClashRuleFilter } from '@/modules/yamlMerge/utils/clashRuleFilter';
 import { ClashRuleOverride } from '@/modules/yamlMerge/utils/clashRuleOverride';
+import { ClashProxyFilter } from '@/modules/yamlMerge/utils/clashProxyFilter';
 import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
 
 const RESPONSE_HEADERS: Record<string, string> = {
@@ -74,6 +75,16 @@ export class ClashHandler implements RouteHandler {
 
 		if (config.ruleOverwrite) {
 			ClashRuleOverride.applyRuleOverwrite(yamlObj, config.ruleOverwrite);
+		}
+
+		if (config.excludeRegex) {
+			ClashProxyFilter.filterByRegex(yamlObj, config.excludeRegex);
+		}
+
+		// 检查 User-Agent 是否包含 stash，如果是则过滤掉 anytls 类型的节点
+		const userAgent = request.headers.get('User-Agent');
+		if (userAgent && /stash/i.test(userAgent)) {
+			ClashProxyFilter.filterByType(yamlObj, 'anytls');
 		}
 
 		let newContent = yaml.dump(yamlObj);

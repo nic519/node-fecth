@@ -110,7 +110,7 @@ export class YamlMergeFactory {
 		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
 		const yamlStrategy = new StrategyDirectly(baseInfo);
 		return {
-			yamlContent: yamlStrategy.generate(this.userConfig.subscribe),
+			yamlContent: yamlStrategy.generate(),
 			subInfo: baseInfo.subInfo,
 		};
 	}

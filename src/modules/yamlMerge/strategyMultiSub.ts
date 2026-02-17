@@ -8,7 +8,7 @@ import { PreMergeInfo } from './clash-merge.types';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
 
 export class StrategyMultiSub {
-    constructor(private ruleContent: string, private userConfig: UserConfig) { }
+	constructor(private ruleContent: string, private userConfig: UserConfig) { }
 
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
 		const allProxyList: ClashProxy[] = [];
@@ -43,7 +43,6 @@ export class StrategyMultiSub {
 							clashContent,
 							flag: sub.flag,
 							includeArea: sub.includeArea,
-							excludeRegex: this.userConfig.excludeRegex,
 						});
 						if (appendProxyList.length === 0) {
 						}

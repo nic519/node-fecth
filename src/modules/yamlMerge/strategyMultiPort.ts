@@ -48,7 +48,6 @@ export class StrategyMultiPort {
 
 		const proxyList = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
-			excludeRegex: this.userConfig.excludeRegex,
 		});
 		if (yamlObj['proxies']) {
 			yamlObj['proxies'].push(...proxyList);

@@ -4,12 +4,11 @@ import { PreMergeInfo } from './clash-merge.types';
 import { StrategyUtils } from './utils/strategyUtils';
 
 export class StrategyDirectly {
-	constructor(private preMergeInfo: PreMergeInfo) {}
+	constructor(private preMergeInfo: PreMergeInfo) { }
 
-	generate(excludeRegex: string | undefined): string {
+	generate(): string {
 		const proxyList: ClashProxy[] = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
-			excludeRegex: excludeRegex,
 		});
 
 		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
