@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig });
+    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig, uid });
 
     if (!response) {
       return NextResponse.json({

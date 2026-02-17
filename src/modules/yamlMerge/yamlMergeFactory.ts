@@ -35,12 +35,9 @@ export class YamlMergeFactory {
 		if (this.shouldUseInternalTemplate(ruleUrl)) {
 			const templateId = this.extractTemplateIdFromUrl(ruleUrl);
 			ruleContent = await this.getTemplateFromDB(templateId);
-		} else if (ruleUrl.startsWith('http')) {
-			ruleContent = await NetworkUtils.fetchRawContent(ruleUrl);
 		} else {
-			ruleContent = await this.getTemplateFromDB(ruleUrl);
+			ruleContent = await NetworkUtils.fetchRawContent(ruleUrl);
 		}
-
 		return ruleContent;
 	}
 

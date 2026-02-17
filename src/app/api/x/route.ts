@@ -16,10 +16,6 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
       return ResponseUtils.error(500, '用户配置加载失败');
     }
 
-    if (!authConfig.subscribe) {
-      return ResponseUtils.error(400, '用户配置中缺少订阅URL');
-    }
-
     void logger.log({
       level: 'info',
       type: LogType.SUBSCRIPTION_ACCESS,
@@ -29,13 +25,12 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
         url: request.url,
         method: request.method,
         subscribe: authConfig.subscribe,
-        userAgent: request.headers.get('user-agent') || undefined,
-        ip: request.headers.get('x-forwarded-for') || undefined,
+        headers: Object.fromEntries(request.headers.entries()),
       },
     });
 
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig });
+    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig, uid });
 
     if (!response) {
       return ResponseUtils.error(500, '配置生成失败');
@@ -51,6 +46,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
       meta: {
         url: request.url,
         method: request.method,
+        headers: Object.fromEntries(request.headers.entries()),
         error: error instanceof Error ? error.message : String(error),
       },
     });
