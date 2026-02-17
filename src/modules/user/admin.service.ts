@@ -11,7 +11,6 @@ export class AdminService {
 
 	constructor(
 		private db: DbInstance,
-		private kv: KVNamespace,
 		private superAdminToken: string | undefined
 	) {
 		this.userService = new UserService(db);
@@ -185,50 +184,17 @@ export class AdminService {
 	 * 记录管理员操作日志
 	 */
 	private async logAdminOperation(operation: AdminOperation): Promise<void> {
-		try {
-			const date = new Date().toISOString().split('T')[0];
-			const logKey = `admin:logs:${date}`;
-
-			// 获取当日日志
-			const existingLogs = await this.kv.get(logKey);
-			const logs: AdminOperation[] = existingLogs ? JSON.parse(existingLogs) : [];
-
-			// 添加新日志
-			logs.push(operation);
-
-			// 限制单日日志数量（最多1000条）
-			if (logs.length > 1000) {
-				logs.shift();
-			}
-
-			// 保存日志
-			await this.kv.put(logKey, JSON.stringify(logs));
-		} catch (error) {
-			console.error('记录操作日志失败:', error);
-		}
+		// KV 已移除，暂时只打印日志
+		console.log('Admin Operation:', JSON.stringify(operation));
 	}
 
 	/**
 	 * 获取操作日志
 	 */
 	async getAdminLogs(date?: string, limit: number = 100): Promise<AdminOperation[]> {
-		try {
-			const targetDate = date || new Date().toISOString().split('T')[0];
-			const logKey = `admin:logs:${targetDate}`;
-
-			const logsData = await this.kv.get(logKey);
-			if (!logsData) {
-				return [];
-			}
-
-			const logs: AdminOperation[] = JSON.parse(logsData);
-
-			// 返回最新的日志（限制数量）
-			return logs.slice(-limit).reverse();
-		} catch (error) {
-			console.error('获取操作日志失败:', error);
-			return [];
-		}
+		// KV 已移除，暂时返回空数组
+		console.warn('getAdminLogs: Logging storage (KV) has been removed.');
+		return [];
 	}
 
 	/**

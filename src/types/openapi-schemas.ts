@@ -67,11 +67,9 @@ export {
 	AreaCodeSchema,
 	SubConfigSchema,
 	UserConfigSchema,
-	ConfigResponseSchema,
 	StoredUserConfigSchema,
 	TrafficInfoSchema,
 	type IUserConfig as UserConfig,
-	type IConfigResponse as ConfigResponse,
 	type IStoredUserConfig as StoredUserConfig,
 	type TrafficInfo,
 } from '@/modules/user/user.schema';

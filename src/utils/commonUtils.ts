@@ -18,6 +18,6 @@ export class CommonUtils {
 			return uri;
 		}
 		console.warn('⚠️  生产worker URL未配置或转发功能未启用');
-		throw new Error('生产worker URL未配置，无法转发KV操作');
+		throw new Error('生产worker URL未配置，无法转发操作');
 	}
 }

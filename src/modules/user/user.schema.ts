@@ -26,6 +26,7 @@ export const UserConfigSchema = z.object({
 	appendSubList: z.array(SubConfigSchema).optional(),
 	excludeRegex: z.string().optional(),
 	ruleOverwrite: z.string().optional(),
+	updatedAt: z.string().datetime().optional(),
 });
 
 /**
@@ -41,10 +42,6 @@ export const StoredUserConfigSchema = UserConfigSchema.omit({
 	ruleOverwrite: true,
 });
 
-// 配置响应 Schema（扁平化结构）
-export const ConfigResponseSchema = UserConfigSchema.extend({
-	updatedAt: z.string(),
-});
 
 export const SubscribeParamsSchema = z.object({
 	download: z.string().optional(),
@@ -160,7 +157,6 @@ export type IScUserQueryToken = z.infer<typeof ScUserQueryToken>;
 
 // 请求体类型 
 export type IScUserUpdateReq = z.infer<typeof ScUserUpdateReq>;
-export type IConfigResponse = z.infer<typeof ConfigResponseSchema>;
 
 // 响应类型
 export type IScUserDetailResponse = z.infer<typeof ScUserDetailResponse>;

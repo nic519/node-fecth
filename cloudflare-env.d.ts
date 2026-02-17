@@ -3,8 +3,6 @@
 // Runtime types generated with workerd@1.20260212.0 2025-05-05 nodejs_compat
 declare namespace Cloudflare {
 	interface Env {
-		KV_BINDING: KVNamespace;
-		USERS_KV: KVNamespace;
 		DB: D1Database;
 		ASSETS: Fetcher;
 		DB_USER: "{}";

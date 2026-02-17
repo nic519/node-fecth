@@ -1,15 +1,15 @@
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { DbInstance } from '@/db';
-import { UserConfigSchema, type IConfigResponse, type IUserConfig } from './user.schema';
+import { UserConfigSchema, type IUserConfig } from './user.schema';
 
 export class UserService {
-	constructor(private db: DbInstance) {}
+	constructor(private db: DbInstance) { }
 
 	/**
 	 * 从数据库获取用户配置
 	 */
-	async getUserConfig(uid: string): Promise<IConfigResponse | null> {
+	async getUserConfig(uid: string): Promise<IUserConfig | null> {
 		try {
 			const userRecord = await this.db.select().from(users).where(eq(users.id, uid)).get();
 
@@ -114,7 +114,7 @@ export class UserService {
 	/**
 	 * 验证并获取用户
 	 */
-	async validateAndGetUser(uid: string, accessToken: string): Promise<IConfigResponse | null> {
+	async validateAndGetUser(uid: string, accessToken: string): Promise<IUserConfig | null> {
 		try {
 			const user = await this.getUserConfig(uid);
 			if (!user) {
@@ -148,7 +148,7 @@ export class UserService {
 	/**
 	 * 更新用户配置 (alias for saveUserConfig for compatibility)
 	 */
-	async updateUser(uid: string, body: { config: IUserConfig }): Promise<IConfigResponse | null> {
+	async updateUser(uid: string, body: { config: IUserConfig }): Promise<IUserConfig | null> {
 		const success = await this.saveUserConfig(uid, body.config);
 		if (success) {
 			return this.getUserConfig(uid);

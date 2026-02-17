@@ -19,7 +19,7 @@ interface ClashContent {
 
 /**
  * Clash订阅流量管理工具
- * 提供订阅内容获取、KV缓存管理等功能
+ * 提供订阅内容获取、缓存管理等功能
  */
 export class ProxyFetch {
 	constructor(private readonly clashSubUrl: string) { }
@@ -34,7 +34,7 @@ export class ProxyFetch {
 		logger.info({ url: this.clashSubUrl }, '获取Clash订阅');
 
 		// 1. 尝试从缓存获取
-		const cached: ClashContent | null = await this.fetchFromKV();
+		const cached: ClashContent | null = await this.fetchFromCache();
 
 		if (cached && !this.isExpired(cached)) {
 			logger.info({ url: this.clashSubUrl }, '使用有效期的缓存数据');
@@ -46,10 +46,10 @@ export class ProxyFetch {
 	}
 
 	/**
-	 * 直接从KV获取缓存内容（不检查过期）
+	 * 直接从缓存获取内容（不检查过期）
 	 * 用于管理后台等场景，只需要读取缓存数据
 	 */
-	async fetchFromKV(): Promise<ClashContent | null> {
+	async fetchFromCache(): Promise<ClashContent | null> {
 		try {
 			const result = await DynamicService.getByUrl(this.clashSubUrl);
 			if (!result) {

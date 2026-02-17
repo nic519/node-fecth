@@ -11,7 +11,7 @@ export const GET = withAuth(async () => {
   try {
     const db = getDb(env);
     // Note: Assuming env.USERS_KV is available on process.env or global env
-    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
+    const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
     const users = await manager.getUserSummaryList();
 
     return NextResponse.json({
@@ -39,7 +39,7 @@ export const POST = withAuth(async (request) => {
     }
 
     const db = getDb(env);
-    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
+    const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
     await manager.createUser(uid, config, 'admin'); // 'admin' is hardcoded adminId for now
 
     return NextResponse.json({

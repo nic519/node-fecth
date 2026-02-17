@@ -36,25 +36,25 @@ export class YamlMergeFactory {
 
 		// 智能判断：检测URL域名是否与worker域名相同，避免循环访问
 		if (this.shouldUseInternalTemplate(ruleUrl)) {
-			// 如果是同域名，从本地KV获取模板内容
+			// 如果是同域名，从本地数据库获取模板内容
 			const templateId = this.extractTemplateIdFromUrl(ruleUrl);
 			console.log(`🔄 检测到同域名访问，自动切换到内部 D1 获取模板: ${templateId}`);
-			ruleContent = await this.getTemplateFromKV(templateId);
+			ruleContent = await this.getTemplateFromDB(templateId);
 		} else if (ruleUrl.startsWith('http')) {
 			// 如果是外部URL，使用fetch获取内容
 			console.log(`📡 从外部URL获取规则内容: ${ruleUrl}`);
 			ruleContent = await NetworkUtils.fetchRawContent(ruleUrl);
 		} else {
-			// 如果是模板ID，从本地KV获取
-			console.log(`🔑 从本地KV获取模板内容: ${ruleUrl}`);
-			ruleContent = await this.getTemplateFromKV(ruleUrl);
+			// 如果是模板ID，从本地数据库获取
+			console.log(`🔑 从本地数据库获取模板内容: ${ruleUrl}`);
+			ruleContent = await this.getTemplateFromDB(ruleUrl);
 		}
 
 		return ruleContent;
 	}
 
 	// 从本地 D1 数据库获取模板内容
-	private async getTemplateFromKV(templateId: string): Promise<string> {
+	private async getTemplateFromDB(templateId: string): Promise<string> {
 		try {
 			const env = GlobalConfig.env;
 			if (!env) {
