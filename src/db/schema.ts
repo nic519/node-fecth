@@ -90,7 +90,39 @@ export const dynamic = sqliteTable('dynamic', {
 });
 
 /**
+ * 日志表
+ * 存储系统运行日志和业务审计日志
+ */
+export const logs = sqliteTable('logs', {
+	// 主键：UUID
+	id: text('id').primaryKey(),
+
+	// 日志级别：info, warn, error, audit
+	level: text('level').notNull(),
+
+	// 事件类型：user_login, subscription_update, system_error 等
+	type: text('type').notNull(),
+
+	// 简短描述
+	message: text('message').notNull(),
+
+	// 关联信息
+	userId: text('user_id'),           // 关联用户ID
+	requestId: text('request_id'),       // 请求ID，用于链路追踪
+
+	// 详细上下文（JSON格式）
+	meta: text('meta', { mode: 'json' }).$type<Record<string, any>>(),
+
+	// 时间戳
+	createdAt: text('created_at')
+		.notNull()
+		.default(sql`(datetime('now'))`),
+});
+
+/**
  * 类型导出：用于 TypeScript 类型推导
  */
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Log = typeof logs.$inferSelect;
+export type NewLog = typeof logs.$inferInsert;

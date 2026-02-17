@@ -5,6 +5,7 @@ import { NavigationBar } from '@/components/NavigationBar';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { LogViewer } from './components/LogViewer';
 
 function DashboardContent() {
 	// 设置页面标题
@@ -31,13 +32,15 @@ function DashboardContent() {
 
 			{/* 主内容 */}
 			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-				<div className="px-4 py-6 sm:px-0">
+				<div className="px-4 py-6 sm:px-0 space-y-6">
 					<div className="bg-white rounded-lg shadow p-6">
 						<h2 className="text-2xl font-bold text-gray-900 mb-4">欢迎来到管理控制台</h2>
 						<p className="text-gray-600">
 							这是您的管理仪表板。您可以在此管理用户和查看系统状态。
 						</p>
 					</div>
+                    
+                    <LogViewer superToken={superToken} />
 				</div>
 			</main>
 		</div>

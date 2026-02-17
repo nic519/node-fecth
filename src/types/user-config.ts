@@ -4,14 +4,11 @@
 
 // 从后端核心类型定义导入所有类型
 export type {
-	AdminLogsResponse,
 	// 基础类型
 	AreaCode,
 	// API响应类型
-	// BaseResponse, // Removed as it was removed from openapi-schemas
-	ConfigResponse,
-	// 请求类型
-	RefreshTrafficResponse,
+	// BaseResponse, // Removed as it was removed from openapi-schemas 
+	// 请求类型 
 	ResponseCodes,
 	SubConfig,
 	SystemLog,

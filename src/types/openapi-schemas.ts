@@ -4,7 +4,6 @@ import {
 	AreaCodeSchema,
 	SubscribeSchema,
 	UserConfigSchema,
-	TrafficInfoSchema,
 } from '@/modules/user/user.schema';
 
 // =============================================================================
@@ -67,7 +66,6 @@ export {
 	AreaCodeSchema,
 	SubscribeSchema as SubConfigSchema,
 	UserConfigSchema,
-	TrafficInfoSchema,
 	type IUserConfig as UserConfig,
 	type TrafficInfo,
 } from '@/modules/user/user.schema';
@@ -81,86 +79,3 @@ export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
 
 // 导出响应类型
 export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
-export type AdminLogsResponse = z.infer<typeof AdminLogsResponseSchema>;
-export type RefreshTrafficResponse = z.infer<typeof RefreshTrafficResponseSchema>;
-
-// =============================================================================
-// 管理员API 额外 Schemas
-// =============================================================================
-
-// 用户详情 Schema（使用顶部导入的 UserConfigSchema
-export const UserDetailsSchema = z.object({
-	uid: z.string().describe('用户ID'),
-	config: UserConfigSchema.describe('用户配置'),
-	trafficInfo: TrafficInfoSchema.optional().describe('流量信息'),
-});
-
-// 批量操作请求 Schema
-export const BatchOperationRequestSchema = z.object({
-	userIds: z.array(z.string()).describe('用户ID列表'),
-	operation: z.enum(['delete', 'disable', 'enable']).describe('操作类型'),
-});
-
-// 批量操作结果 Schema
-export const BatchOperationResultSchema = z.object({
-	success: z.number().describe('成功数量'),
-	failed: z.number().describe('失败数量'),
-	details: z
-		.array(
-			z.object({
-				uid: z.string(),
-				success: z.boolean(),
-				error: z.string().optional(),
-			})
-		)
-		.describe('详细结果'),
-});
-
-// 应用模板请求 Schema
-export const ApplyTemplateRequestSchema = z.object({
-	uid: z.string().describe('目标用户ID'),
-});
-
-// 管理员日志 Schema
-export const AdminLogSchema = z.object({
-	id: z.string().describe('日志ID'),
-	adminId: z.string().describe('管理员ID'),
-	action: z.string().describe('操作类型'),
-	targetId: z.string().optional().describe('目标对象ID'),
-	details: z.string().optional().describe('操作详情'),
-	timestamp: z.string().describe('操作时间'),
-	ip: z.string().optional().describe('操作IP'),
-});
-
-// 操作日志响应 Schema
-export const AdminLogsResponseSchema = z.object({
-	code: z.literal(ResponseCodes.SUCCESS),
-	msg: z.string(),
-	data: z.object({
-		logs: z.array(AdminLogSchema),
-	}),
-});
-
-// 刷新用户流量响应 Schema
-export const RefreshTrafficResponseSchema = z.object({
-	code: z.literal(ResponseCodes.SUCCESS),
-	msg: z.string(),
-	data: z.object({
-		message: z.string(),
-		uid: z.string(),
-		trafficInfo: TrafficInfoSchema,
-	}),
-});
-
-// 管理员健康状态 Schema - 重命名避免冲突
-export const AdminHealthCheckSchema = z.object({
-	status: z.enum(['healthy', 'warning', 'error']).describe('健康状态'),
-	timestamp: z.string().describe('检查时间'),
-	stats: z
-		.object({
-			totalUsers: z.number(),
-			activeUsers: z.number(),
-			configCompleteRate: z.number(),
-		})
-		.describe('系统统计'),
-});

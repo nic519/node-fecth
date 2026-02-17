@@ -1,19 +1,23 @@
-import { users } from '@/db/schema';
+import { users, Log } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import { AdminOperation, UserAdminConfig } from './admin.schema';
 import { TrafficInfo, type IUserConfig } from './user.schema';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserService } from './user.service';
 import { DbInstance } from '@/db';
+import { createLogService, LogService } from '@/services/log-service';
+import { LogLevel, LogType } from '@/types/log';
 
 export class AdminService {
 	private userService: UserService;
+	private logService: LogService;
 
 	constructor(
 		private db: DbInstance,
 		private superAdminToken: string | undefined
 	) {
 		this.userService = new UserService(db);
+		this.logService = createLogService();
 	}
 
 	/**
@@ -184,17 +188,39 @@ export class AdminService {
 	 * 记录管理员操作日志
 	 */
 	private async logAdminOperation(operation: AdminOperation): Promise<void> {
-		// KV 已移除，暂时只打印日志
-		console.log('Admin Operation:', JSON.stringify(operation));
+		const level: LogLevel = operation.result === 'error' ? 'error' : 'audit';
+
+		await this.logService.log({
+			level,
+			type: operation.operation,
+			message: operation.details || operation.operation,
+			userId: operation.adminId,
+			meta: operation
+		});
 	}
 
 	/**
 	 * 获取操作日志
 	 */
 	async getAdminLogs(date?: string, limit: number = 100): Promise<AdminOperation[]> {
-		// KV 已移除，暂时返回空数组
-		console.warn('getAdminLogs: Logging storage (KV) has been removed.');
-		return [];
+		// 适配 LogService 查询
+		const logs = await this.logService.queryLogs({
+			limit,
+			level: 'audit',
+			startTime: date ? new Date(date) : undefined
+		});
+
+		return logs.data.map((log: Log) => {
+			const meta = (log.meta as Record<string, any>) || {};
+			return {
+				timestamp: log.createdAt,
+				operation: log.type,
+				adminId: log.userId || '',
+				result: log.level === 'error' ? 'error' : 'success',
+				details: log.message,
+				...meta
+			} as AdminOperation;
+		});
 	}
 
 	/**
