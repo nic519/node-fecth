@@ -13,7 +13,3 @@ export const GlobalConfig: GlobalConfigType = {
 	ruleUrl: 'https://node.1024.hair/api/subscription/template/1759313797591',
 };
 
-export function initGlobalConfig(request: Request, env: Env) {
-	GlobalConfig.isDev = CommonUtils.isLocalEnv(request);
-	GlobalConfig.env = env;
-}
