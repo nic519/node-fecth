@@ -17,7 +17,7 @@ export async function DELETE(
 
   try {
     const db = getDb(env);
-    const manager = new AdminService(db, env.USERS_KV, env.SUPER_ADMIN_TOKEN);
+    const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
     await manager.deleteUser(uid, 'admin');
 
     return NextResponse.json({

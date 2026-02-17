@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Filter, RefreshCw, UserPlus } from 'lucide-react';
+import { Loader2, Search, Filter, RefreshCw, UserPlus, Download, Upload } from 'lucide-react';
 
 export interface UserFiltersProps {
     searchTerm: string;
@@ -10,6 +10,8 @@ export interface UserFiltersProps {
     onSearchTermChange: (term: string) => void;
     onRefresh: () => void;
     onAddUser?: () => void;
+    onExport?: () => void;
+    onImport?: () => void;
 }
 
 /**
@@ -21,6 +23,8 @@ export function UserFilters({
     onSearchTermChange,
     onRefresh,
     onAddUser,
+    onExport,
+    onImport,
 }: UserFiltersProps) {
     return (
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
@@ -69,6 +73,33 @@ export function UserFilters({
                         >
                             <UserPlus className="mr-2 h-4 w-4" />
                             添加新用户
+                        </Button>
+                    )}
+                </div>
+
+                <div className="space-y-3 pt-4 border-t border-gray-100">
+                    <label className="text-sm font-medium text-gray-700">数据迁移</label>
+                    {onExport && (
+                        <Button
+                            onClick={onExport}
+                            disabled={loading}
+                            variant="outline"
+                            className="w-full justify-start text-gray-600 hover:text-green-600 hover:border-green-200 hover:bg-green-50"
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            导出配置
+                        </Button>
+                    )}
+
+                    {onImport && (
+                        <Button
+                            onClick={onImport}
+                            disabled={loading}
+                            variant="outline"
+                            className="w-full justify-start text-gray-600 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50"
+                        >
+                            <Upload className="mr-2 h-4 w-4" />
+                            导入配置
                         </Button>
                     )}
                 </div>
