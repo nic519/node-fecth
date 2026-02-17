@@ -2,83 +2,73 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Loader2, Plus, Search } from 'lucide-react';
+import { Loader2, Search, Filter, RefreshCw, UserPlus } from 'lucide-react';
 
 export interface UserFiltersProps {
     searchTerm: string;
-    statusFilter: string;
     loading: boolean;
     onSearchTermChange: (term: string) => void;
-    onStatusFilterChange: (filter: string) => void;
     onRefresh: () => void;
     onAddUser?: () => void;
 }
 
 /**
- * 用户过滤器组件 - 搜索和筛选控件
+ * 用户过滤器组件 - 侧边栏搜索和操作
  */
 export function UserFilters({
     searchTerm,
-    statusFilter,
     loading,
     onSearchTermChange,
-    onStatusFilterChange,
     onRefresh,
     onAddUser,
 }: UserFiltersProps) {
     return (
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-                <div className="flex-1 w-full relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                        type="text"
-                        placeholder="搜索用户ID..."
-                        value={searchTerm}
-                        onChange={(e) => onSearchTermChange(e.target.value)}
-                        className="pl-9"
-                    />
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center gap-2 mb-6">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                    <Filter className="h-5 w-5 text-blue-600" />
                 </div>
-                <div className="flex gap-3 w-full sm:w-auto items-center">
-                    <Select
-                        value={statusFilter || "all"}
-                        onValueChange={(value) => onStatusFilterChange(value === "all" ? "" : value)}
-                    >
-                        <SelectTrigger className="w-full sm:w-40">
-                            <SelectValue placeholder="所有状态" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">所有状态</SelectItem>
-                            <SelectItem value="configured">已配置</SelectItem>
-                            <SelectItem value="unconfigured">未配置</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <h2 className="font-semibold text-gray-900">筛选与操作</h2>
+            </div>
 
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">搜索用户</label>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                            type="text"
+                            placeholder="输入用户ID..."
+                            value={searchTerm}
+                            onChange={(e) => onSearchTermChange(e.target.value)}
+                            className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-3 pt-4 border-t border-gray-100">
+                    <label className="text-sm font-medium text-gray-700">快捷操作</label>
                     <Button
                         onClick={onRefresh}
                         disabled={loading}
-                        variant="secondary"
-                        className="min-w-20"
+                        variant="outline"
+                        className="w-full justify-start text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50"
                     >
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        刷新
+                        {loading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                        )}
+                        刷新列表
                     </Button>
 
                     {onAddUser && (
                         <Button
                             onClick={onAddUser}
-                            variant="default"
-                            className="bg-blue-600 hover:bg-blue-700 text-white min-w-28 gap-2"
+                            className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                         >
-                            <Plus className="h-4 w-4" />
-                            添加用户
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            添加新用户
                         </Button>
                     )}
                 </div>

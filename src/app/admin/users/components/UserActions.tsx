@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 
 export interface UserActionsProps {
 	uid: string;
@@ -13,30 +14,18 @@ export interface UserActionsProps {
  */
 export function UserActions({ uid, token, onUserAction }: UserActionsProps) {
 	return (
-		<div className="flex gap-2 justify-end">
+		<div className="flex justify-end">
 			<Button
-				size="sm"
-				variant="default"
-				className="bg-blue-600 text-white hover:bg-blue-700 whitespace-nowrap"
-				onClick={() => onUserAction('view', uid, token)}
+				size="icon"
+				variant="ghost"
+				className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+				onClick={(e) => {
+					e.stopPropagation();
+					onUserAction('delete', uid);
+				}}
+				title="删除用户"
 			>
-				查看
-			</Button>
-			<Button
-				size="sm"
-				variant="default"
-				className="bg-green-600 text-white hover:bg-green-700 whitespace-nowrap"
-				onClick={() => onUserAction('refresh', uid)}
-			>
-				刷新
-			</Button>
-			<Button
-				size="sm"
-				variant="destructive"
-				className="whitespace-nowrap"
-				onClick={() => onUserAction('delete', uid)}
-			>
-				删除
+				<Trash2 className="h-4 w-4" />
 			</Button>
 		</div>
 	);

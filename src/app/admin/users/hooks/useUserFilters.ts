@@ -10,9 +10,7 @@ export interface UseUserFiltersProps {
 export interface UseUserFiltersReturn {
 	filteredUsers: UserAdminConfig[];
 	searchTerm: string;
-	statusFilter: string;
 	setSearchTerm: (term: string) => void;
-	setStatusFilter: (filter: string) => void;
 }
 
 /**
@@ -20,7 +18,6 @@ export interface UseUserFiltersReturn {
  */
 export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersReturn => {
 	const [searchTerm, setSearchTerm] = useState('');
-	const [statusFilter, setStatusFilter] = useState('');
 
 	const filteredUsers = useMemo(() => {
 		let filtered = users;
@@ -31,13 +28,11 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 		}
 
 		return filtered;
-	}, [users, searchTerm, statusFilter]);
+	}, [users, searchTerm]);
 
 	return {
 		filteredUsers,
 		searchTerm,
-		statusFilter,
 		setSearchTerm,
-		setStatusFilter,
 	};
 };
