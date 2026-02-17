@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { LayoutDashboard, Users, FileText, Home } from 'lucide-react';
 
 export interface NavigationBarProps {
 	superToken: string;
@@ -35,43 +36,59 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 		<nav className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-3">
 						<AcmeLogo />
-						<p className="font-bold text-gray-900 text-lg tracking-tight">{pageTitle}</p>
+						<div className="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
+						<p className="font-bold text-gray-900 text-lg tracking-tight hidden sm:block">{pageTitle}</p>
 					</div>
-					
-					<div className="hidden sm:flex items-center gap-6 justify-center flex-1">
-						<Link 
-                            href={`/admin/dashboard?superToken=${superToken}`} 
-                            className={cn(
-                                "text-sm font-medium transition-colors",
-                                currentPage === 'dashboard' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
-                            )}
-                        >
-							控制台
+
+					<div className="flex items-center gap-1 sm:gap-6 justify-center flex-1">
+						<Link
+							href={`/admin/dashboard?superToken=${superToken}`}
+							className={cn(
+								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+								currentPage === 'dashboard'
+									? 'text-blue-600 bg-blue-50'
+									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+							)}
+						>
+							<LayoutDashboard className="w-4 h-4" />
+							<span>控制台</span>
 						</Link>
-						<Link 
-                            href={`/admin/users?superToken=${superToken}`} 
-                            className={cn(
-                                "text-sm font-medium transition-colors",
-                                currentPage === 'users' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
-                            )}
-                        >
-							用户管理
+						<Link
+							href={`/admin/users?superToken=${superToken}`}
+							className={cn(
+								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+								currentPage === 'users'
+									? 'text-blue-600 bg-blue-50'
+									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+							)}
+						>
+							<Users className="w-4 h-4" />
+							<span>用户管理</span>
 						</Link>
-						<Link 
-                            href={`/admin/templates?superToken=${superToken}`} 
-                            className={cn(
-                                "text-sm font-medium transition-colors",
-                                currentPage === 'templates' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'
-                            )}
-                        >
-							配置模板
+						<Link
+							href={`/admin/templates?superToken=${superToken}`}
+							className={cn(
+								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+								currentPage === 'templates'
+									? 'text-blue-600 bg-blue-50'
+									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+							)}
+						>
+							<FileText className="w-4 h-4" />
+							<span>配置模板</span>
 						</Link>
 					</div>
 
-					<div className="hidden lg:flex items-center justify-end">
-						<Link href="/" className="text-sm text-gray-500 hover:text-gray-900">返回首页</Link>
+					<div className="flex items-center justify-end">
+						<Link
+							href="/"
+							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+						>
+							<Home className="w-4 h-4" />
+							<span className="hidden sm:inline">返回首页</span>
+						</Link>
 					</div>
 				</div>
 			</div>

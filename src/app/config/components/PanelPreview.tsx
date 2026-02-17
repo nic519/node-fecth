@@ -47,7 +47,7 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 	}, [origin, uid, token]);
 
 	return (
-		<div className="h-full flex flex-col p-6">
+		<div className="h-full flex flex-col">
 			<div className="flex items-center justify-between mb-4">
 				<h3 className="text-lg font-medium">配置预览</h3>
 				<Button
@@ -62,10 +62,10 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 			</div>
 
 			{previewLoading && !previewContent ? (
-				<div className="flex-1 flex items-center justify-center border rounded-md bg-gray-50">
-					<div className="flex flex-col items-center gap-2 text-gray-500">
+				<div className="flex-1 flex items-center justify-center border rounded-md bg-gray-50 p-8">
+					<div className="flex flex-col items-center gap-4 text-gray-500">
 						<Loader2 className="w-8 h-8 animate-spin" />
-						<span>正在生成配置...</span>
+						<span className="font-medium">正在生成配置...</span>
 					</div>
 				</div>
 			) : previewError ? (
@@ -76,8 +76,10 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 				<div className="flex-1 border rounded-md overflow-hidden relative">
 					{/* Add a loading overlay if reloading */}
 					{previewLoading && (
-						<div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
-							<Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+						<div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center backdrop-blur-[1px] rounded-md">
+							<div className="bg-white/80 p-4 rounded-full shadow-sm">
+								<Loader2 className="w-6 h-6 animate-spin text-primary" />
+							</div>
 						</div>
 					)}
 					<YamlEditor

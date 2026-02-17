@@ -1,7 +1,7 @@
 import { createLogService } from '@/services/log-service';
 import type { LogLevel } from '@/types/log';
 
-export const REQUEST_TIMEOUT = 15000;
+export const REQUEST_TIMEOUT = 30000;
 
 type LogMeta = Record<string, unknown>;
 

@@ -3,7 +3,7 @@ import { dynamic } from '@/db/schema';
 import { eq, inArray, sql } from 'drizzle-orm';
 import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
-import { logger } from '@/utils/request/network.config';
+import { logger, REQUEST_TIMEOUT } from '@/utils/request/network.config';
 
 export interface DynamicContent {
 	id: string;
@@ -19,52 +19,63 @@ export class DynamicService {
 	/**
 	 * Fetch content from source URL and save to database
 	 */
-	static async fetchAndSave(url: string): Promise<DynamicContent> {
-		try {
-			logger.info({ url }, 'Start fetching dynamic content from source');
+	static async fetchAndSave(url: string, retries = 3): Promise<DynamicContent> {
+		let lastError: unknown;
 
-			const response = await fetch(url, {
-				headers: { 'User-Agent': 'clash.meta' },
-			});
+		for (let i = 0; i < retries; i++) {
+			try {
+				logger.info({ url, attempt: i + 1 }, 'Start fetching dynamic content from source');
 
-			if (!response.ok) {
-				throw new Error(`Failed to fetch URL: ${response.statusText}`);
-			}
+				const response = await fetch(url, {
+					headers: { 'User-Agent': 'clash.meta' },
+					signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+				});
 
-			const content = await response.text();
-			const traffic = response.headers.get('Subscription-Userinfo') || null;
-			const id = await hashUrl(url);
-			const now = new Date();
-			const formattedDate = formatDate(now);
+				if (!response.ok) {
+					throw new Error(`Failed to fetch URL: ${response.statusText}`);
+				}
 
-			await this.db.insert(dynamic).values({
-				id,
-				url,
-				content,
-				traffic,
-				updatedAt: formattedDate,
-			}).onConflictDoUpdate({
-				target: dynamic.id,
-				set: {
+				const content = await response.text();
+				const traffic = response.headers.get('Subscription-Userinfo') || null;
+				const id = await hashUrl(url);
+				const now = new Date();
+				const formattedDate = formatDate(now);
+
+				await this.db.insert(dynamic).values({
+					id,
+					url,
 					content,
 					traffic,
 					updatedAt: formattedDate,
-				},
-			});
+				}).onConflictDoUpdate({
+					target: dynamic.id,
+					set: {
+						content,
+						traffic,
+						updatedAt: formattedDate,
+					},
+				});
 
-			logger.info({ id, url }, 'Dynamic content saved to database');
+				logger.info({ id, url }, 'Dynamic content saved to database');
 
-			return {
-				id,
-				url,
-				content,
-				traffic,
-				updatedAt: formattedDate,
-			};
-		} catch (error) {
-			logger.error({ url, error }, 'Failed to fetch and save dynamic content');
-			throw error;
+				return {
+					id,
+					url,
+					content,
+					traffic,
+					updatedAt: formattedDate,
+				};
+			} catch (error) {
+				lastError = error;
+				logger.warn({ url, error, attempt: i + 1 }, 'Fetch attempt failed, retrying...');
+				if (i < retries - 1) {
+					await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+				}
+			}
 		}
+
+		logger.error({ url, error: lastError }, 'Failed to fetch and save dynamic content after retries');
+		throw lastError;
 	}
 
 	/**

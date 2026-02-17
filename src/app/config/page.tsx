@@ -6,10 +6,11 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { ConfigEditor } from './components/ConfigEditor';
 import { Header } from './components/Header';
 import { useUserConfig } from './hooks/useUserConfig';
+import { ConfigTab } from './components/ConfigForm';
 
 function UserConfigContent() {
 	usePageTitle('配置订阅');
@@ -19,6 +20,7 @@ function UserConfigContent() {
 	const uid = searchParams.get('uid') || '';
 
 	const userConfigState = useUserConfig({ uid, token });
+	const [activeTab, setActiveTab] = useState<ConfigTab>('basic');
 
 	if (!uid) {
 		return (
@@ -36,13 +38,7 @@ function UserConfigContent() {
 	return (
 		<div className="min-h-screen">
 			<Header
-				lastSaved={userConfigState.lastSaved}
-				saving={userConfigState.saving}
-				saveSuccess={userConfigState.saveSuccess}
 				validationErrors={userConfigState.validationErrors}
-				onSave={userConfigState.saveConfig}
-				uid={uid}
-				token={token}
 			/>
 
 			<main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -71,6 +67,11 @@ function UserConfigContent() {
 							validationErrors={userConfigState.validationErrors}
 							onConfigChange={userConfigState.setConfig}
 							lastSaved={userConfigState.lastSaved}
+							activeTab={activeTab}
+							onTabChange={setActiveTab}
+							onSave={userConfigState.saveConfig}
+							saving={userConfigState.saving}
+							saveSuccess={userConfigState.saveSuccess}
 						/>
 					</div>
 				)}
