@@ -30,11 +30,13 @@ export const PUT = withAuth(async (request, { params }) => {
       .execute();
 
     return ResponseUtils.success({
-      id: templateId,
-      name,
-      description,
-      content,
-      updatedAt: now
+      template: {
+        id: templateId,
+        name,
+        description,
+        content,
+        updatedAt: now
+      }
     });
   } catch (error) {
     console.error('更新模板失败:', error);

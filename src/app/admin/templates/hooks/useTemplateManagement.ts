@@ -240,7 +240,7 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 				// 如果后端没有返回完整的 template，我们至少知道更新成功了
 				// 可以从 selectedTemplate 和请求数据构造更新
 				// 或者假设后端返回了 { template: ... }
-				const updatedData = response.data.template || {};
+				const updatedData = response.data.template || ({} as Partial<ConfigTemplate>);
 
 				const updatedTemplate: TemplateItem = {
 					...selectedTemplate,

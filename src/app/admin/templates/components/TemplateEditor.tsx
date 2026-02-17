@@ -1,12 +1,13 @@
 'use client';
 
 import { YamlEditor } from '@/components/YamlEditor';
-import { DocumentArrowDownIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon, LinkIcon, ClipboardDocumentIcon, PencilIcon } from '@heroicons/react/24/outline';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import type { ConfigTemplate } from '@/types/user-config';
 
@@ -72,28 +73,113 @@ export function TemplateEditor({
 
 	return (
 		<Card className="flex flex-col h-full bg-white overflow-hidden">
-			{/* 头部 - 编辑按钮 */}
-			{!isEditing && (
-				<CardHeader className="px-6 py-3 border-b border-gray-200 flex flex-row justify-end space-y-0">
-					<Button onClick={onStartEdit} size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
-						开始编辑
+			{/* 头部 - 标题与操作按钮 */}
+			<CardHeader className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-16">
+				{/* 左侧 - 标题/编辑框 */}
+				<div className="flex-1 mr-4">
+					{isEditing ? (
+						<Input
+							value={selectedTemplate.name}
+							onChange={(e) => onUpdateTemplate('name', e.target.value)}
+							className="max-w-md font-medium text-lg h-9"
+							placeholder="输入模板名称"
+						/>
+					) : (
+						<h3 className="text-lg font-medium text-gray-900 truncate" title={selectedTemplate.name}>
+							{selectedTemplate.name}
+						</h3>
+					)}
+				</div>
+
+				{/* 右侧 - 操作按钮 */}
+				<div className="flex items-center gap-1">
+					{!isEditing && (
+						<>
+							<Button
+								onClick={onStartEdit}
+								size="sm"
+								className="bg-blue-600 text-white hover:bg-blue-700 mr-2"
+							>
+								<PencilIcon className="w-4 h-4 mr-2" />
+								编辑
+							</Button>
+							<div className="w-px h-6 bg-gray-200 mx-2" />
+						</>
+					)}
+
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={onDownloadTemplate}
+						title="下载配置"
+						className="text-gray-500 hover:text-gray-900"
+					>
+						<DocumentArrowDownIcon className="w-5 h-5" />
 					</Button>
-				</CardHeader>
-			)}
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={onCopyConfigContent}
+						title="复制配置"
+						className="text-gray-500 hover:text-gray-900"
+					>
+						<ClipboardDocumentIcon className="w-5 h-5" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={onCopyTemplateUrl}
+						title="复制链接"
+						className="text-gray-500 hover:text-gray-900"
+					>
+						<LinkIcon className="w-5 h-5" />
+					</Button>
+
+					{isEditing && (
+						<>
+							<div className="w-px h-6 bg-gray-200 mx-2" />
+							<Button onClick={onReset} variant="secondary" size="sm">
+								取消
+							</Button>
+							<Button
+								onClick={onSave}
+								disabled={saving || validationErrors.length > 0}
+								size="sm"
+								className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+							>
+								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+								保存配置
+							</Button>
+						</>
+					)}
+				</div>
+			</CardHeader>
 
 			{/* 编辑器区域 */}
-			<CardContent className="flex-1 flex flex-col p-6 overflow-hidden">
-				{isEditing && (
-					<div className="mb-4 space-y-3">
+			<CardContent className="flex-1 flex flex-col px-6 pb-6 pt-0 overflow-hidden">
+				{/* 描述编辑区域 */}
+				<div className="mb-4">
+					{isEditing ? (
 						<div className="space-y-1.5">
-							<Label>模板名称</Label>
-							<Input
-								value={selectedTemplate.name}
-								onChange={(e) => onUpdateTemplate('name', e.target.value)}
+							<Label className="text-xs text-gray-500">模板描述</Label>
+							<Textarea
+								value={selectedTemplate.description || ''}
+								onChange={(e) => onUpdateTemplate('description', e.target.value)}
+								placeholder="请输入模板描述..."
+								rows={2}
+								className="resize-none text-sm"
 							/>
 						</div>
-					</div>
-				)}
+					) : (
+						selectedTemplate.description && (
+							<div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+								<p className="text-sm text-gray-600 leading-relaxed">
+									{selectedTemplate.description}
+								</p>
+							</div>
+						)
+					)}
+				</div>
 
 				{/* 语法错误提示 */}
 				{validationErrors.length > 0 && (
@@ -137,47 +223,7 @@ export function TemplateEditor({
 				)}
 
 				{/* 操作按钮 */}
-				<div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-					<div className="flex gap-2">
-						<Button
-							onClick={onDownloadTemplate}
-							size="sm"
-							variant="default"
-							className="bg-blue-600 text-white hover:bg-blue-700"
-						>
-							<DocumentArrowDownIcon className="w-4 h-4 mr-2" />
-							下载配置
-						</Button>
-						<Button size="sm" variant="secondary" onClick={onCopyConfigContent}>
-							复制配置
-						</Button>
-						<Button
-							size="sm"
-							variant="default"
-							className="bg-green-600 text-white hover:bg-green-700"
-							onClick={onCopyTemplateUrl}
-						>
-							<LinkIcon className="w-4 h-4 mr-2" />
-							复制链接
-						</Button>
-					</div>
-					{isEditing && (
-						<div className="flex gap-2">
-							<Button onClick={onReset} variant="secondary" size="sm">
-								取消
-							</Button>
-							<Button
-								onClick={onSave}
-								disabled={saving || validationErrors.length > 0}
-								size="sm"
-								className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
-							>
-								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-								保存配置
-							</Button>
-						</div>
-					)}
-				</div>
+				{/* 底部操作栏已移至顶部 */}
 			</CardContent>
 		</Card>
 	);

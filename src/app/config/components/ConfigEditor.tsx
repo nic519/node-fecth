@@ -6,7 +6,7 @@ import { ValidationMessage } from './ValidationMessage';
 import { ConfigForm, ConfigTab } from './ConfigForm';
 import { UserConfig } from '@/types/openapi-schemas';
 import { PanelPreview } from './PanelPreview';
-import { User, Clock, Settings, Shield, RefreshCw, Key, Eye, CloudUpload, CheckCircle2, Loader2 } from 'lucide-react';
+import { User, Clock, CloudUpload, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
@@ -19,7 +19,6 @@ interface ConfigEditorProps {
 	onConfigChange: (config: UserConfig) => void;
 	lastSaved?: Date | null;
 	activeTab: ConfigTab;
-	onTabChange: (tab: ConfigTab) => void;
 	onSave: () => void;
 	saving: boolean;
 	saveSuccess: boolean;
@@ -33,7 +32,6 @@ export function ConfigEditor({
 	onConfigChange,
 	lastSaved,
 	activeTab,
-	onTabChange,
 	onSave,
 	saving,
 	saveSuccess,
@@ -110,57 +108,6 @@ export function ConfigEditor({
 							</div>
 						</div>
 					</CardContent>
-				</Card>
-
-				<Card className="shadow-sm border border-gray-200 overflow-hidden">
-					<div className="p-2 space-y-1">
-						<Button
-							variant={activeTab === 'basic' ? 'secondary' : 'ghost'}
-							className={cn('w-full justify-start', activeTab === 'basic' && 'bg-gray-100 text-gray-900 font-medium')}
-							onClick={() => onTabChange('basic')}
-						>
-							<Settings className="w-4 h-4 mr-2" />
-							基础配置
-						</Button>
-						<Button
-							variant={activeTab === 'rules' ? 'secondary' : 'ghost'}
-							className={cn('w-full justify-start', activeTab === 'rules' && 'bg-gray-100 text-gray-900 font-medium')}
-							onClick={() => onTabChange('rules')}
-						>
-							<Shield className="w-4 h-4 mr-2" />
-							规则模板
-						</Button>
-						<Button
-							variant={activeTab === 'dynamic' ? 'secondary' : 'ghost'}
-							className={cn('w-full justify-start', activeTab === 'dynamic' && 'bg-gray-100 text-gray-900 font-medium')}
-							onClick={() => onTabChange('dynamic')}
-						>
-							<RefreshCw className="w-4 h-4 mr-2" />
-							订阅加载
-						</Button>
-						<Button
-							variant={activeTab === 'token' ? 'secondary' : 'ghost'}
-							className={cn('w-full justify-start', activeTab === 'token' && 'bg-gray-100 text-gray-900 font-medium')}
-							onClick={() => onTabChange('token')}
-						>
-							<Key className="w-4 h-4 mr-2" />
-							访问令牌
-						</Button>
-
-						<Separator className="my-2" />
-
-						<Button
-							variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
-							className={cn(
-								'w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-								activeTab === 'preview' && 'bg-blue-50 text-blue-700 font-medium'
-							)}
-							onClick={() => onTabChange('preview')}
-						>
-							<Eye className="w-4 h-4 mr-2" />
-							预览结果
-						</Button>
-					</div>
 				</Card>
 			</div>
 

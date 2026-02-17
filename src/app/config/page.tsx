@@ -39,6 +39,8 @@ function UserConfigContent() {
 		<div className="min-h-screen">
 			<Header
 				validationErrors={userConfigState.validationErrors}
+				activeTab={activeTab}
+				onTabChange={setActiveTab}
 			/>
 
 			<main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -68,7 +70,6 @@ function UserConfigContent() {
 							onConfigChange={userConfigState.setConfig}
 							lastSaved={userConfigState.lastSaved}
 							activeTab={activeTab}
-							onTabChange={setActiveTab}
 							onSave={userConfigState.saveConfig}
 							saving={userConfigState.saving}
 							saveSuccess={userConfigState.saveSuccess}

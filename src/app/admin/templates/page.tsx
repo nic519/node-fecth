@@ -84,9 +84,9 @@ function AdminTemplatesContent() {
 										onClick={handleCreateTemplate}
 										size="sm"
 										variant="default"
-                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+										className="bg-blue-600 hover:bg-blue-700 text-white"
 									>
-                                        <PlusIcon className="w-4 h-4 mr-2" />
+										<PlusIcon className="w-4 h-4 mr-2" />
 										新建模板
 									</Button>
 								</div>
@@ -94,6 +94,7 @@ function AdminTemplatesContent() {
 									templates={templates}
 									onSelectTemplate={handleSelectTemplate}
 									onDeleteTemplate={handleDeleteTemplate}
+									onStartEdit={handleStartEdit}
 								/>
 							</div>
 

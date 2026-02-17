@@ -4,7 +4,7 @@ import type { ConfigTemplate } from '@/types/user-config';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export interface TemplateItem extends ConfigTemplate {
     configContent?: string;
@@ -15,9 +15,10 @@ interface TemplateListProps {
 	templates: TemplateItem[];
 	onSelectTemplate: (id: string) => void;
 	onDeleteTemplate: (id: string) => void;
+	onStartEdit: () => void;
 }
 
-export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate }: TemplateListProps) {
+export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, onStartEdit }: TemplateListProps) {
 	if (templates.length === 0) {
 		return (
 			<Card className="bg-white rounded-lg shadow-sm">
@@ -49,6 +50,18 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate }: 
 									{template.description || '无描述'}
 								</p>
 							</div>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity absolute right-12 top-2"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectTemplate(String(template.id));
+                                    onStartEdit();
+                                }}
+                            >
+                                <PencilIcon className="h-4 w-4" />
+                            </Button>
 							<Button
                                 size="icon"
                                 variant="ghost"

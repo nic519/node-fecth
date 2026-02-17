@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: 0,
       msg: 'success',
-      data: newTemplate
+      data: {
+        template: newTemplate
+      }
     });
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);

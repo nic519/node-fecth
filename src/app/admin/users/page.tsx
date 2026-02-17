@@ -23,7 +23,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, Key, Link as LinkIcon, Dices } from 'lucide-react';
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -124,48 +124,85 @@ function AdminUsersContent() {
 
 			{/* 添加用户模态框 */}
 			<Dialog open={addUserModal.isOpen} onOpenChange={(open) => !open && addUserModal.close()}>
-				<DialogContent>
+				<DialogContent className="sm:max-w-[500px]">
 					<DialogHeader>
-						<DialogTitle>添加新用户</DialogTitle>
+						<DialogTitle className="text-2xl font-bold text-center">添加新用户</DialogTitle>
+						<DialogDescription className="text-center">
+							请输入新用户的详细信息以创建账号
+						</DialogDescription>
 					</DialogHeader>
-					<div className="space-y-4 py-4">
-						<div className="grid grid-cols-4 items-center gap-4">
-							<Label className="text-right">用户ID</Label>
-							<Input
-								className="col-span-3"
-								placeholder="请输入用户ID"
-								value={addUserModal.form.uid}
-								onChange={(e) => addUserModal.setUid(e.target.value)}
-							/>
-						</div>
+					<div className="space-y-6 py-4">
 						<div className="space-y-2">
-							<Label>访问令牌</Label>
-							<Input
-								placeholder="请输入用户访问令牌"
-								value={addUserModal.form.token}
-								onChange={(e) => addUserModal.setToken(e.target.value)}
-							/>
+							<Label htmlFor="uid" className="text-sm font-medium">用户ID</Label>
+							<div className="relative">
+								<User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+								<Input
+									id="uid"
+									className="pl-9"
+									placeholder="请输入用户ID"
+									value={addUserModal.form.uid}
+									onChange={(e) => addUserModal.setUid(e.target.value)}
+								/>
+							</div>
 						</div>
+
 						<div className="space-y-2">
-							<Label>订阅链接</Label>
-							<Input
-								placeholder="请输入订阅链接"
-								value={addUserModal.form.subscribe}
-								onChange={(e) => addUserModal.setSubscribe(e.target.value)}
-							/>
+							<Label htmlFor="token" className="text-sm font-medium">访问令牌</Label>
+							<div className="flex gap-2">
+								<div className="relative flex-1">
+									<Key className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+									<Input
+										id="token"
+										className="pl-9"
+										placeholder="请输入用户访问令牌"
+										value={addUserModal.form.token}
+										onChange={(e) => addUserModal.setToken(e.target.value)}
+									/>
+								</div>
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={() => {
+										const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+										let result = '';
+										for (let i = 0; i < 16; i++) {
+											result += chars.charAt(Math.floor(Math.random() * chars.length));
+										}
+										addUserModal.setToken(result);
+									}}
+									title="生成随机令牌"
+									className="shrink-0"
+								>
+									<Dices className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="subscribe" className="text-sm font-medium">订阅链接</Label>
+							<div className="relative">
+								<LinkIcon className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+								<Input
+									id="subscribe"
+									className="pl-9"
+									placeholder="请输入订阅链接"
+									value={addUserModal.form.subscribe}
+									onChange={(e) => addUserModal.setSubscribe(e.target.value)}
+								/>
+							</div>
 						</div>
 					</div>
-					<DialogFooter>
-						<Button variant="secondary" onClick={addUserModal.close}>
+					<DialogFooter className="sm:justify-between">
+						<Button variant="ghost" onClick={addUserModal.close}>
 							取消
 						</Button>
 						<Button
 							onClick={addUserModal.confirm}
 							disabled={loading}
-							className="bg-blue-600 hover:bg-blue-700 text-white"
+							className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
 						>
 							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							添加
+							添加用户
 						</Button>
 					</DialogFooter>
 				</DialogContent>

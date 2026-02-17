@@ -39,9 +39,18 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 	const [newUserToken, setNewUserToken] = useState('');
 	const [newUserSubscribe, setNewUserSubscribe] = useState('');
 
+	const generateRandomToken = (length: number = 16) => {
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let result = '';
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	};
+
 	const openAddUserModal = () => {
 		setNewUserUid('');
-		setNewUserToken('');
+		setNewUserToken(generateRandomToken());
 		setNewUserSubscribe('');
 		setShowAddUserModal(true);
 	};
