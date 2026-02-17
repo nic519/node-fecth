@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import yaml from 'js-yaml';
 import { UserConfig } from '@/types/openapi-schemas';
 
@@ -17,9 +17,9 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
     const [enableCustomFilters, setEnableCustomFilters] = useState(!!config.requiredFilters);
     const [yamlError, setYamlError] = useState<string | null>(null);
 
-    const handleChange = <K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
+    const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
-    };
+    }, [config, onChange]);
 
     const isMandatory = (option: string) => {
         return MANDATORY_KEYWORDS.some(keyword => option.includes(keyword));

@@ -15,6 +15,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".turbo/**",
     "dist/**",
+    // 项目生成产物
+    ".open-next/**",
+    "drizzle/**",
   ]),
 ]);
 

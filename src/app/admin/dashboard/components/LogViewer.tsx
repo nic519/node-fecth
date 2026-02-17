@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LogEvent, LogLevel } from '@/types/log';
 import { logApi } from '@/services/log-api';
 import {
@@ -48,7 +48,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const [userId, setUserId] = useState<string>('');
   const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
       const response = await logApi.getLogs({
@@ -69,11 +69,11 @@ export function LogViewer({ superToken }: LogViewerProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [superToken, page, pageSize, level, type, userId]);
 
   useEffect(() => {
     fetchLogs();
-  }, [page, pageSize, level]); // Auto refresh when these change
+  }, [fetchLogs]);
 
   const handleSearch = () => {
     setPage(1);
