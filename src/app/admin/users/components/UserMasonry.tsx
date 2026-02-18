@@ -92,13 +92,16 @@ export function UserMasonry({ users, loading, error, onUserAction }: UserMasonry
 												<div className="space-y-1.5 border-t border-border/40 pt-2 mt-1">
 													<div className="flex items-center justify-between text-muted-foreground">
 														<span className="flex items-center gap-1">
-															<span className="text-muted-foreground/70">已用</span>
+
 															{trafficInfo ? (
 																<span className="font-mono font-medium text-foreground">
+																	<span className="text-muted-foreground/70">已用 </span>
 																	{formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
 																</span>
-															) : stat.traffic ? (
-																<span className="font-mono font-medium text-foreground">{stat.traffic}</span>
+															) : stat.lastUpdated ? (stat.traffic ? (
+																<span className="font-mono font-medium text-foreground">{stat.traffic}</span>) : (
+																<span className="text-muted-foreground/70">无流量数据</span>
+															)
 															) : (
 																<span className="text-muted-foreground/70">无数据</span>
 															)}
@@ -122,7 +125,9 @@ export function UserMasonry({ users, loading, error, onUserAction }: UserMasonry
 																: ''}
 														</span>
 														<span>
-															{stat.lastUpdated ? new Date(stat.lastUpdated).toLocaleDateString() : ''}
+															{stat.lastUpdated ? <span>⏰ 操作 {new Date(stat.lastUpdated).toLocaleString(
+
+															)}</span> : ''}
 														</span>
 													</div>
 												</div>
