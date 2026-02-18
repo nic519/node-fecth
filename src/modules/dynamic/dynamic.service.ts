@@ -1,11 +1,13 @@
 import { getDb } from '@/db';
 import { dynamic } from '@/db/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { logger } from '@/utils/request/network.config';
 import { httpClient } from '@/utils/http/client';
 import { safeError, safeString } from '@/utils/logHelper';
+
+import { CommonUtils } from '@/utils/commonUtils';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -25,25 +27,26 @@ export class DynamicService {
 	 * 使用 ky 库进行增强的网络请求，包含自动重试和超时控制
 	 */
 	static async fetchAndSave(url: string, retries = 3): Promise<DynamicContent> {
+		const cleanUrl = CommonUtils.normalizeUrl(url);
 		try {
-			logger.info({ url }, 'Start fetching dynamic content from source');
+			logger.info({ url: cleanUrl }, 'Start fetching dynamic content from source');
 
 			// 使用统一的 HTTP 客户端发起请求
 			// ky 会自动处理重试 (默认3次) 和超时 (默认15秒)
 			// 如果需要覆盖默认重试次数，可以在这里配置
-			const response = await httpClient.get(url, {
+			const response = await httpClient.get(cleanUrl, {
 				retry: retries
 			});
 
 			const content = await response.text();
 			const traffic = response.headers.get('Subscription-Userinfo') || null;
-			const id = await hashUrl(url);
+			const id = await hashUrl(cleanUrl);
 			const now = new Date();
 			const formattedDate = formatDate(now);
 
 			await this.db.insert(dynamic).values({
 				id,
-				url,
+				url: cleanUrl,
 				content,
 				traffic,
 				updatedAt: formattedDate,
@@ -56,11 +59,11 @@ export class DynamicService {
 				},
 			});
 
-			logger.info({ id, url }, 'Dynamic content saved to database');
+			logger.info({ id, url: cleanUrl }, 'Dynamic content saved to database');
 
 			return {
 				id,
-				url,
+				url: cleanUrl,
 				content,
 				traffic,
 				updatedAt: formattedDate,
@@ -70,7 +73,7 @@ export class DynamicService {
 			const safeMsg = safeError(error);
 			const stack = error instanceof Error ? error.stack : undefined;
 			const safeStack = safeString(stack || '', 2048);
-			logger.error({ url, error: safeMsg, stack: safeStack }, 'Failed to fetch and save dynamic content');
+			logger.error({ url: cleanUrl, error: safeMsg, stack: safeStack }, 'Failed to fetch and save dynamic content');
 			throw error;
 		}
 	}
@@ -80,8 +83,17 @@ export class DynamicService {
 	 */
 	static async getByUrl(url: string): Promise<DynamicContent | null> {
 		try {
-			const id = await hashUrl(url);
-			const [result] = await this.db.select().from(dynamic).where(eq(dynamic.id, id)).limit(1);
+			// 尝试原始 URL
+			const id1 = await hashUrl(url);
+
+			// 尝试清理后的 URL
+			const cleanUrl = CommonUtils.normalizeUrl(url);
+			const id2 = await hashUrl(cleanUrl);
+
+			// 查询 ID 为 id1 或 id2 的记录
+			const [result] = await this.db.select().from(dynamic)
+				.where(inArray(dynamic.id, [id1, id2]))
+				.limit(1);
 
 			if (!result) return null;
 
@@ -103,18 +115,22 @@ export class DynamicService {
 	 */
 	static async getByUrls(urls: string[]): Promise<DynamicContent[]> {
 		try {
-			// Note: This query is not efficient if we want to query by URL string directly if not indexed or if we need ID.
-			// However, the table stores `url` column, so we can query by it.
-			// But wait, the table primary key is ID (hash).
-			// If we query by `url` column, it might be slow without index, but for now it's fine.
-			// Or we can compute hashes for all URLs.
+			// 构造查询集合：包含原始 URL 和清理后的 URL
+			const searchUrls = new Set<string>();
+			urls.forEach(u => {
+				if (u) {
+					searchUrls.add(u);
+					const clean = CommonUtils.normalizeUrl(u);
+					if (clean) searchUrls.add(clean);
+				}
+			});
 
-			const results = await this.db.select().from(dynamic).where(inArray(dynamic.url, urls));
+			const results = await this.db.select().from(dynamic)
+				.where(inArray(dynamic.url, Array.from(searchUrls)));
 
 			return results.map((r: DynamicRow) => ({
 				id: r.id,
 				url: r.url,
-				content: r.content,
 				traffic: r.traffic,
 				updatedAt: r.updatedAt,
 			}));
@@ -129,9 +145,13 @@ export class DynamicService {
 	 */
 	static async deleteByUrl(url: string): Promise<void> {
 		try {
-			const id = await hashUrl(url);
-			await this.db.delete(dynamic).where(eq(dynamic.id, id));
-			logger.info({ id, url }, 'Dynamic content deleted');
+			// 尝试删除原始 URL 和清理后的 URL 对应的记录
+			const id1 = await hashUrl(url);
+			const cleanUrl = CommonUtils.normalizeUrl(url);
+			const id2 = await hashUrl(cleanUrl);
+
+			await this.db.delete(dynamic).where(inArray(dynamic.id, [id1, id2]));
+			logger.info({ url }, 'Dynamic content deleted');
 		} catch (error) {
 			logger.error({ url, error }, 'Failed to delete dynamic content');
 			throw error;
