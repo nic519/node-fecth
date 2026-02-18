@@ -54,7 +54,7 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
             setFilterError(null);
             try {
                 const url = config.ruleUrl || DEFAULT_RULE_URL;
-                const response = await fetch(url);
+                const response = await fetch(url, { cache: 'no-store' });
                 if (!response.ok) throw new Error('获取规则失败');
                 const text = await response.text();
                 const data = yaml.load(text) as unknown;

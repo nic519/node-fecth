@@ -19,7 +19,7 @@ export const SubscribeSchema = z.object({
 export const UserConfigSchema = z.object({
 	subscribe: z.url('订阅链接必须是有效的URL'),
 	accessToken: z.string().min(1, '访问令牌不能为空'),
-	ruleUrl: z.url().optional(),
+	ruleUrl: z.union([z.string().url(), z.literal('')]).optional(),
 	requiredFilters: z.string().optional(),
 	fileName: z.string().optional(),
 	multiPortMode: z.array(AreaCodeSchema).optional(),
