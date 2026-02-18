@@ -6,6 +6,8 @@ import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import yaml from 'js-yaml';
 import { PreMergeInfo } from './clash-merge.types';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
+import { createConcurrencyLimit } from '@/utils/http/client';
+import { logger } from '@/utils/request/network.config';
 
 export class StrategyMultiSub {
 	constructor(private ruleContent: string, private userConfig: UserConfig) { }
@@ -26,39 +28,34 @@ export class StrategyMultiSub {
 				flag: DEFAULT_SUB_FLAG,
 			});
 
-			const MAX_CONCURRENT = 3;
-			const results: Array<{ proxyList: ClashProxy[]; subInfo: string; flag: string }> = [];
+			// 使用并发控制，最大并发数 5
+			// 相比于原来的分批处理，这种方式更高效，能充分利用网络带宽
+			const limit = createConcurrencyLimit(5);
 
-			for (let i = 0; i < appendSubList.length; i += MAX_CONCURRENT) {
-				const batch = appendSubList.slice(i, i + MAX_CONCURRENT);
+			const tasks = appendSubList.map(sub => limit(async () => {
+				try {
+					const trafficUtils = new ProxyFetch(sub.subscribe);
+					const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
 
-				const batchPromises = batch.map(async (sub) => {
-					try {
-						const trafficUtils = new ProxyFetch(sub.subscribe);
-						const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
+					// 注意：这里会有多个订阅覆盖 preMergeInfo.clashContent 的情况
+					// 但为了保持兼容性，暂时保留此逻辑
+					preMergeInfo.clashContent = clashContent;
 
-						preMergeInfo.clashContent = clashContent;
+					const appendProxyList = StrategyUtils.getProxyList({
+						clashContent,
+						flag: sub.flag,
+						includeArea: sub.includeArea,
+					});
 
-						const appendProxyList = StrategyUtils.getProxyList({
-							clashContent,
-							flag: sub.flag,
-							includeArea: sub.includeArea,
-						});
-						if (appendProxyList.length === 0) {
-						}
-						return { proxyList: appendProxyList, subInfo, flag: sub.flag };
-					} catch {
-						return { proxyList: [], subInfo: '', flag: sub.flag };
-					}
-				});
-
-				const batchResults = await Promise.all(batchPromises);
-				results.push(...batchResults);
-
-				if (i + MAX_CONCURRENT < appendSubList.length) {
-					await new Promise((resolve) => setTimeout(resolve, 100));
+					return { proxyList: appendProxyList, subInfo, flag: sub.flag };
+				} catch (error) {
+					logger.error({ url: sub.subscribe, error }, 'Failed to fetch subscription in strategy');
+					// 失败时不中断整体流程，返回空列表
+					return { proxyList: [], subInfo: '', flag: sub.flag };
 				}
-			}
+			}));
+
+			const results = await Promise.all(tasks);
 
 			for (const { proxyList, subInfo, flag } of results) {
 				if (subInfo) {
@@ -68,6 +65,7 @@ export class StrategyMultiSub {
 						port: 1443,
 						type: 'http',
 					});
+					// 这里的赋值也可能被覆盖，逻辑同上
 					preMergeInfo.subInfo = subInfo;
 				}
 				allProxyList.push(...proxyList);
@@ -79,7 +77,7 @@ export class StrategyMultiSub {
 
 	async generate(): Promise<{ yamlContent: Record<string, any>; subInfo: string }> {
 		const yamlObj = (yaml.load(this.ruleContent) || {}) as Record<string, any>;
-		
+
 		if (typeof yamlObj !== 'object') {
 			return { yamlContent: yamlObj, subInfo: '' };
 		}
@@ -87,7 +85,7 @@ export class StrategyMultiSub {
 		delete yamlObj['proxy-providers'];
 
 		const { allProxyList, preMergeInfo } = await this.getProxyList();
-		
+
 		if (!Array.isArray(yamlObj['proxies'])) {
 			yamlObj['proxies'] = [];
 		}

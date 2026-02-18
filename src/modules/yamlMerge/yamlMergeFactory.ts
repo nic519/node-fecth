@@ -6,7 +6,7 @@ import { UserConfig } from '@/types/openapi-schemas';
 import { PreMergeInfo } from '@/modules/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/modules/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
-import { NetworkUtils } from '@/utils/request/network-utils';
+import { fetchRawContent } from '@/utils/http/client';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { StrategyMultiSub } from './strategyMultiSub';
 import yaml from 'js-yaml';
@@ -48,7 +48,7 @@ export class YamlMergeFactory {
 			const templateId = this.extractTemplateIdFromUrl(ruleUrl);
 			ruleContent = await this.getTemplateFromDB(templateId);
 		} else {
-			ruleContent = await NetworkUtils.fetchRawContent(ruleUrl);
+			ruleContent = await fetchRawContent(ruleUrl);
 		}
 		return ruleContent;
 	}

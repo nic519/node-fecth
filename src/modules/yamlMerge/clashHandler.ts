@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import yaml from 'js-yaml';
 import { UserConfig } from '@/types/openapi-schemas';
-import { YamlValidator } from '@/modules/yamlMerge/utils/yamlValidator';
 import { YamlMergeFactory } from '@/modules/yamlMerge/yamlMergeFactory';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { RouteHandler } from '@/types/routes.types';
@@ -10,7 +9,6 @@ import { ClashRuleOverride } from '@/modules/yamlMerge/utils/clashRuleOverride';
 import { ClashProxyFilter } from '@/modules/yamlMerge/utils/clashProxyFilter';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
-import { ResponseUtils } from '@/utils/responseUtils';
 
 const RESPONSE_HEADERS: Record<string, string> = {
 	'Content-Type': 'text/yaml; charset=utf-8',
@@ -47,11 +45,7 @@ export class ClashHandler implements RouteHandler {
 			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
 
 			// 处理用户干预（过滤、覆盖等），直接操作对象
-			this._processUserIntervention(yamlObj, userConfig, request);
-
-			// 验证对象结构（可选，视 YamlValidator 实现而定，这里假设校验字符串更稳妥，或者跳过对象校验）
-			// const yamlValidator = new YamlValidator();
-			// yamlValidator.validateYaml(yamlObj);
+			this._processUserIntervention(yamlObj, userConfig, request); 
 
 			// 将最终对象转储为 YAML 字符串
 			let finalYamlString = yaml.dump(yamlObj);

@@ -3,7 +3,8 @@ import { dynamic } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
-import { logger, REQUEST_TIMEOUT } from '@/utils/request/network.config';
+import { logger } from '@/utils/request/network.config';
+import { httpClient } from '@/utils/http/client';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -20,64 +21,54 @@ export class DynamicService {
 
 	/**
 	 * Fetch content from source URL and save to database
+	 * 使用 ky 库进行增强的网络请求，包含自动重试和超时控制
 	 */
 	static async fetchAndSave(url: string, retries = 3): Promise<DynamicContent> {
-		let lastError: unknown;
+		try {
+			logger.info({ url }, 'Start fetching dynamic content from source');
 
-		for (let i = 0; i < retries; i++) {
-			try {
-				logger.info({ url, attempt: i + 1 }, 'Start fetching dynamic content from source');
+			// 使用统一的 HTTP 客户端发起请求
+			// ky 会自动处理重试 (默认3次) 和超时 (默认15秒)
+			// 如果需要覆盖默认重试次数，可以在这里配置
+			const response = await httpClient.get(url, {
+				retry: retries
+			});
 
-				const response = await fetch(url, {
-					headers: { 'User-Agent': 'clash.meta' },
-					signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-				});
+			const content = await response.text();
+			const traffic = response.headers.get('Subscription-Userinfo') || null;
+			const id = await hashUrl(url);
+			const now = new Date();
+			const formattedDate = formatDate(now);
 
-				if (!response.ok) {
-					throw new Error(`Failed to fetch URL: ${response.statusText}`);
-				}
-
-				const content = await response.text();
-				const traffic = response.headers.get('Subscription-Userinfo') || null;
-				const id = await hashUrl(url);
-				const now = new Date();
-				const formattedDate = formatDate(now);
-
-				await this.db.insert(dynamic).values({
-					id,
-					url,
+			await this.db.insert(dynamic).values({
+				id,
+				url,
+				content,
+				traffic,
+				updatedAt: formattedDate,
+			}).onConflictDoUpdate({
+				target: dynamic.id,
+				set: {
 					content,
 					traffic,
 					updatedAt: formattedDate,
-				}).onConflictDoUpdate({
-					target: dynamic.id,
-					set: {
-						content,
-						traffic,
-						updatedAt: formattedDate,
-					},
-				});
+				},
+			});
 
-				logger.info({ id, url }, 'Dynamic content saved to database');
+			logger.info({ id, url }, 'Dynamic content saved to database');
 
-				return {
-					id,
-					url,
-					content,
-					traffic,
-					updatedAt: formattedDate,
-				};
-			} catch (error) {
-				lastError = error;
-				logger.warn({ url, error, attempt: i + 1 }, 'Fetch attempt failed, retrying...');
-				if (i < retries - 1) {
-					await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-				}
-			}
+			return {
+				id,
+				url,
+				content,
+				traffic,
+				updatedAt: formattedDate,
+			};
+		} catch (error: any) {
+			// ky 抛出的错误包含了详细信息
+			logger.error({ url, error: error.message, stack: error.stack }, 'Failed to fetch and save dynamic content');
+			throw error;
 		}
-
-		logger.error({ url, error: lastError }, 'Failed to fetch and save dynamic content after retries');
-		throw lastError;
 	}
 
 	/**
