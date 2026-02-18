@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { safeError } from '@/utils/logHelper';
 
-/// 获取订阅链接的动态内容
-/// @param urls 订阅链接列表，逗号分隔
-/// @returns 动态内容列表
+/**
+ * 批量获取本地数据库中已缓存的订阅信息
+ * 注意：此接口仅读取数据库，不会发起网络请求更新订阅内容
+ * @param urls 订阅链接列表，逗号分隔
+ * @returns 数据库中存储的动态内容列表
+ */
 export const GET = async (request: Request) => {
     try {
         const { searchParams } = new URL(request.url);
@@ -28,6 +31,12 @@ export const GET = async (request: Request) => {
     }
 };
 
+/**
+ * 触发单个订阅链接的实时同步
+ * 注意：此接口会发起真实的网络请求获取最新订阅内容，并更新到数据库
+ * @param url 需要同步的订阅链接
+ * @returns 更新后的订阅信息
+ */
 export const POST = async (request: Request) => {
     try {
         const { url } = await request.json() as { url: string };

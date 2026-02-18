@@ -26,36 +26,6 @@ export function useDynamicSync(config: UserConfig) {
         ...(config.appendSubList || []).map(sub => ({ url: sub.subscribe, source: '追加订阅', flag: sub.flag }))
     ].filter(item => item.url), [config.subscribe, config.appendSubList]);
 
-    // Initial fetch
-    useEffect(() => {
-        let isMounted = true;
-
-        const fetchDynamicInfos = async () => {
-            if (items.length === 0) return;
-
-            try {
-                const urls = items.map(item => item.url);
-                const response = await dynamicService.syncUrls(urls);
-
-                if (isMounted && response.code === 0 && Array.isArray(response.data)) {
-                    const infoMap: Record<string, DynamicInfo> = {};
-                    response.data.forEach((info: DynamicInfo) => {
-                        infoMap[info.url] = info;
-                    });
-                    setDynamicInfos(infoMap);
-                }
-            } catch (error) {
-                console.error('Failed to fetch dynamic infos:', error);
-            }
-        };
-
-        fetchDynamicInfos();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [items]);
-
     const syncUrl = useCallback(async (url: string) => {
         if (!url) return;
         setStatuses(prev => ({ ...prev, [url]: { status: 'loading', message: undefined } }));
@@ -106,6 +76,36 @@ export function useDynamicSync(config: UserConfig) {
             await syncUrl(item.url);
         }
     }, [items, syncUrl]);
+
+    // Initial fetch
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchDynamicInfos = async () => {
+            if (items.length === 0) return;
+
+            try {
+                const urls = items.map(item => item.url);
+                const response = await dynamicService.syncUrls(urls);
+
+                if (isMounted && response.code === 0 && Array.isArray(response.data)) {
+                    const infoMap: Record<string, DynamicInfo> = {};
+                    response.data.forEach((info: DynamicInfo) => {
+                        infoMap[info.url] = info;
+                    });
+                    setDynamicInfos(infoMap);
+                }
+            } catch (error) {
+                console.error('Failed to fetch dynamic infos:', error);
+            }
+        };
+
+        fetchDynamicInfos();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [items]);
 
     return {
         items,
