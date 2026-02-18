@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import yaml from 'js-yaml';
 import { UserConfig } from '@/types/openapi-schemas';
+import { DEFAULT_RULE_URL } from '@/config/constants';
 
-const DEFAULT_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/refs/heads/main/miho-cfg.yaml';
 const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "自动"];
 
 interface UseRuleConfigProps {

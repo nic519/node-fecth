@@ -1,3 +1,5 @@
+import { DEFAULT_RULE_URL } from "./constants";
+
 export interface GlobalConfigType {
 	isDev: boolean;
 	workerUrl: string;
@@ -8,6 +10,6 @@ export interface GlobalConfigType {
 export const GlobalConfig: GlobalConfigType = {
 	isDev: false,
 	workerUrl: 'https://node.1024.hair',
-	ruleUrl: 'https://node.1024.hair/api/subscription/template/1759313797591',
+	ruleUrl: DEFAULT_RULE_URL,
 };
 
