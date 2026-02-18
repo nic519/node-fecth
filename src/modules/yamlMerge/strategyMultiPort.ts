@@ -1,4 +1,4 @@
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import yaml from 'js-yaml';
 import { ClashProxy, ClashListener, ProxyAreaInfo } from '@/types/clash.types';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
 import { UserConfig } from '@/types/openapi-schemas';
@@ -42,22 +42,27 @@ export class StrategyMultiPort {
 		return listeners;
 	}
 
-	generate(): string {
-		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
+	generate(): Record<string, any> {
+		const yamlObj = (yaml.load(this.preMergeInfo.ruleContent) || {}) as Record<string, any>;
+		
+		if (typeof yamlObj !== 'object') {
+			return yamlObj;
+		}
+
 		delete yamlObj['proxy-providers'];
 
 		const proxyList = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
 		});
-		if (yamlObj['proxies']) {
-			yamlObj['proxies'].push(...proxyList);
-		} else {
-			yamlObj['proxies'] = proxyList;
+		
+		if (!Array.isArray(yamlObj['proxies'])) {
+			yamlObj['proxies'] = [];
 		}
+		yamlObj['proxies'].push(...proxyList);
 
 		const listeners = this.createListeners(proxyList);
 		yamlObj['listeners'] = listeners;
 
-		return yamlStringify(yamlObj);
+		return yamlObj;
 	}
 }

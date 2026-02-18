@@ -1,7 +1,7 @@
 import { ProxyAreaObjects } from '@/config/proxy-area.config';
 import { ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
 import { AreaCode } from '@/types/openapi-schemas';
-import { parse as yamlParse } from 'yaml';
+import yaml from 'js-yaml';
 
 export class StrategyUtils {
 	static getProxyArea(proxyName: string): ProxyAreaInfo | null {
@@ -36,8 +36,8 @@ export class StrategyUtils {
 	}): ClashProxy[] {
 		const { clashContent, flag, includeArea } = options;
 
-		const yamlObj = yamlParse(clashContent);
-		return yamlObj['proxies']
+		const yamlObj = yaml.load(clashContent) as { proxies: ClashProxy[] };
+		return (yamlObj?.['proxies'] || [])
 			.filter((proxy: ClashProxy) => {
 				if (includeArea && includeArea.length > 0) {
 					const proxyArea = StrategyUtils.getProxyArea(proxy.name);

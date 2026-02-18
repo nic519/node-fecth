@@ -1,4 +1,4 @@
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import yaml from 'js-yaml';
 import { ClashProxy } from '@/types/clash.types';
 import { PreMergeInfo } from './clash-merge.types';
 import { StrategyUtils } from './utils/strategyUtils';
@@ -6,19 +6,22 @@ import { StrategyUtils } from './utils/strategyUtils';
 export class StrategyDirectly {
 	constructor(private preMergeInfo: PreMergeInfo) { }
 
-	generate(): string {
+	generate(): Record<string, any> {
 		const proxyList: ClashProxy[] = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
 		});
 
-		const yamlObj = yamlParse(this.preMergeInfo.ruleContent);
-		delete yamlObj['proxy-providers'];
+		const yamlObj = (yaml.load(this.preMergeInfo.ruleContent) || {}) as Record<string, any>;
 
-		if (yamlObj['proxies']) {
+		if (typeof yamlObj === 'object') {
+			delete yamlObj['proxy-providers'];
+
+			if (!Array.isArray(yamlObj['proxies'])) {
+				yamlObj['proxies'] = [];
+			}
 			yamlObj['proxies'].push(...proxyList);
-		} else {
-			yamlObj['proxies'] = proxyList;
 		}
-		return yamlStringify(yamlObj);
+
+		return yamlObj;
 	}
 }
