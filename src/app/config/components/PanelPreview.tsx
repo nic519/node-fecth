@@ -61,22 +61,25 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 			</div>
 
 			{previewLoading && !previewContent ? (
-				<div className="flex-1 flex items-center justify-center border rounded-md bg-gray-50 p-8">
-					<div className="flex flex-col items-center gap-4 text-gray-500">
-						<Loader2 className="w-8 h-8 animate-spin" />
-						<span className="font-medium">正在生成配置...</span>
+				<div className="flex-1 flex items-center justify-center border border-border/60 rounded-xl bg-muted/30 p-8 backdrop-blur-sm">
+					<div className="flex flex-col items-center gap-4 text-muted-foreground">
+						<Loader2 className="w-8 h-8 animate-spin text-primary" />
+						<span className="font-medium animate-pulse">正在生成配置...</span>
 					</div>
 				</div>
 			) : previewError ? (
-				<div className="flex-1 flex items-center justify-center border rounded-md bg-red-50 text-red-500">
-					<p>{previewError}</p>
+				<div className="flex-1 flex items-center justify-center border border-destructive/20 rounded-xl bg-destructive/5 text-destructive p-8">
+					<div className="flex flex-col items-center gap-2">
+						<span className="font-medium">生成失败</span>
+						<p className="text-sm opacity-90">{previewError}</p>
+					</div>
 				</div>
 			) : (
-				<div className="flex-1 border rounded-md overflow-hidden relative">
+				<div className="flex-1 border border-border/60 rounded-xl overflow-hidden relative shadow-sm">
 					{/* Add a loading overlay if reloading */}
 					{previewLoading && (
-						<div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center backdrop-blur-[1px] rounded-md">
-							<div className="bg-white/80 p-4 rounded-full shadow-sm">
+						<div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center backdrop-blur-[2px] rounded-xl transition-all duration-300">
+							<div className="bg-background/80 p-4 rounded-full shadow-lg border border-border/40">
 								<Loader2 className="w-6 h-6 animate-spin text-primary" />
 							</div>
 						</div>

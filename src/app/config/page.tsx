@@ -37,14 +37,17 @@ function UserConfigContent() {
 	}
 
 	return (
-		<div className="min-h-screen">
+		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+			{/* Decorative background gradient */}
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
+
 			<Header
 				validationErrors={userConfigState.validationErrors}
 				activeTab={activeTab}
 				onTabChange={setActiveTab}
 			/>
 
-			<main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				{userConfigState.loading ? (
 					<div className="flex items-center justify-center py-20">
 						<Loading message="加载配置中..." />

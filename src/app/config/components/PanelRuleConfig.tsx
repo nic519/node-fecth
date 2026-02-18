@@ -52,7 +52,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     readOnly={readOnly}
                 />
                 <p className="text-sm text-muted-foreground">
-                    不填写时默认使用：<a href={DEFAULT_RULE_URL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                    不填写时默认使用：<a href={DEFAULT_RULE_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                         {DEFAULT_RULE_URL}
                     </a>
                 </p>

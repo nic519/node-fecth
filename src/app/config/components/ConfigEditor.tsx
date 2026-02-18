@@ -44,31 +44,32 @@ export function ConfigEditor({
 		<div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
 			{/* Sidebar - Fixed Left Panel */}
 			<div className="w-full md:col-span-1 sticky top-24 space-y-4">
-				<Card className="shadow-sm border border-gray-200">
+				<Card className="shadow-lg shadow-primary/5 border border-border/60 overflow-hidden relative">
+					<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-violet-400" />
 					<CardHeader className="pb-3">
 
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="flex items-center gap-3">
-							<div className="p-2 bg-blue-50 rounded-lg">
-								<User className="h-5 w-5 text-blue-600" />
+							<div className="p-2.5 bg-primary/10 rounded-xl">
+								<User className="h-5 w-5 text-primary" />
 							</div>
 							<div className="flex flex-col">
-								<span className="text-xs text-gray-500">用户ID</span>
-								<span className="font-mono font-medium text-gray-900">{uid}</span>
+								<span className="text-xs font-medium text-muted-foreground">用户ID</span>
+								<span className="font-mono font-medium text-foreground tracking-tight">{uid}</span>
 							</div>
 						</div>
 
 						{lastSaved && (
 							<>
-								<Separator />
+								<Separator className="bg-border/60" />
 								<div className="flex items-center gap-3">
-									<div className="p-2 bg-green-50 rounded-lg">
-										<Clock className="h-5 w-5 text-green-600" />
+									<div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+										<Clock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
 									</div>
 									<div className="flex flex-col">
-										<span className="text-xs text-gray-500">最后保存</span>
-										<span className="text-xs font-mono text-gray-900">
+										<span className="text-xs font-medium text-muted-foreground">最后保存</span>
+										<span className="text-xs font-mono text-foreground">
 											{lastSaved.toLocaleString('zh-CN', {
 												year: 'numeric',
 												month: 'numeric',
@@ -82,13 +83,15 @@ export function ConfigEditor({
 							</>
 						)}
 
-						<div className="space-y-3">
+						<div className="space-y-3 pt-2">
 							<Button
 								onClick={onSave}
 								disabled={saving || validationErrors.length > 0}
 								className={cn(
-									"w-full font-medium shadow-sm transition-all",
-									saveSuccess ? "bg-green-600 hover:bg-green-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"
+									"w-full font-medium shadow-md transition-all duration-300",
+									saveSuccess 
+										? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20" 
+										: "bg-gradient-to-r from-primary to-violet-600 hover:to-violet-700 text-white shadow-primary/25 hover:shadow-primary/40"
 								)}
 							>
 								{saving ? (
@@ -111,7 +114,7 @@ export function ConfigEditor({
 
 			{/* Right Content */}
 			<div className="md:col-span-3 min-h-[600px] h-full">
-				<Card className="shadow-sm border border-gray-200 h-full flex flex-col">
+				<Card className="shadow-sm border border-border/60 h-full flex flex-col bg-card/50 backdrop-blur-sm">
 					<CardContent className="p-6 flex-1 flex flex-col min-h-0">
 						{/* 验证消息 */}
 						{validationErrors.length > 0 && (
