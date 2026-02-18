@@ -8,6 +8,7 @@ import { httpClient } from '@/utils/http/client';
 import { safeError, safeString } from '@/utils/logHelper';
 
 import { CommonUtils } from '@/utils/commonUtils';
+import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -38,7 +39,19 @@ export class DynamicService {
 				retry: retries
 			});
 
-			const content = await response.text();
+			let content = await response.text();
+
+			// Auto-convert SSR subscription format to Clash YAML
+			if (SSRToClashConverter.isSSR(content)) {
+				logger.info({ url: cleanUrl }, 'Detected SSR content, converting to Clash format');
+				try {
+					content = SSRToClashConverter.convert(content);
+				} catch (e) {
+					logger.error({ url: cleanUrl, error: safeError(e) }, 'Failed to convert SSR content to Clash format');
+					// Keep original content if conversion fails
+				}
+			}
+
 			const traffic = response.headers.get('Subscription-Userinfo') || null;
 			const id = await hashUrl(cleanUrl);
 			const now = new Date();

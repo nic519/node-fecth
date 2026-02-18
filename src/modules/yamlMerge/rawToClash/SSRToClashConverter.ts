@@ -3,6 +3,21 @@ import { Base64Helper } from './Base64Helper';
 import { ClashProxy, ClashConfig } from './types';
 
 export class SSRToClashConverter {
+    static isSSR(content: string): boolean {
+        try {
+            // Remove whitespace to get the clean base64 string
+            const base64Content = content.replace(/\s/g, '');
+
+            // Attempt to decode
+            const decodedBody = Base64Helper.safeDecode(base64Content);
+
+            // Check if it contains ssr:// links
+            return decodedBody.includes('ssr://');
+        } catch (error) {
+            return false;
+        }
+    }
+
     static convert(fileContent: string): string {
         // Remove whitespace to get the clean base64 string
         const base64Content = fileContent.replace(/\s/g, '');
