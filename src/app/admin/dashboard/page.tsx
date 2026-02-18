@@ -25,13 +25,16 @@ function DashboardContent() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-100">
+		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+			{/* Decorative background gradient */}
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
+
 			{/* 顶部导航 */}
 			<NavigationBar superToken={superToken} currentPage="dashboard" />
 
 			{/* 主内容 */}
-			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-				<div className="px-4 py-6 sm:px-0 space-y-6">
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+				<div className="space-y-6">
 					<LogViewer superToken={superToken} />
 				</div>
 			</main>

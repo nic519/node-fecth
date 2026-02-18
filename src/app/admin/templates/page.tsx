@@ -55,16 +55,19 @@ function AdminTemplatesContent() {
 	} = useTemplateManagement({ superToken });
 
 	return (
-		<div className="min-h-screen bg-gray-100">
+		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+			{/* Decorative background gradient */}
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
+
 			{/* 导航栏 */}
 			<NavigationBar superToken={superToken} currentPage="templates" />
 
-			<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				<div className="px-4 py-6 sm:px-0">
 					{/* 错误信息 */}
 					{error && (
-						<div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-							<div className="text-red-800">{error}</div>
+						<div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
+							<div className="text-destructive font-medium">{error}</div>
 						</div>
 					)}
 
@@ -78,13 +81,13 @@ function AdminTemplatesContent() {
 						<div className="flex flex-col lg:flex-row gap-6" style={{ minHeight: '700px' }}>
 							{/* 左侧 - 模板列表 */}
 							<div className="w-full lg:w-96 flex flex-col">
-								<div className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center">
-									<h2 className="text-lg font-semibold text-gray-900">模板列表</h2>
+								<div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm p-4 mb-4 flex justify-between items-center">
+									<h2 className="text-lg font-bold text-foreground bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">模板列表</h2>
 									<Button
 										onClick={handleCreateTemplate}
 										size="sm"
 										variant="default"
-										className="bg-blue-600 hover:bg-blue-700 text-white"
+										className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
 									>
 										<PlusIcon className="w-4 h-4 mr-2" />
 										新建模板

@@ -21,8 +21,8 @@ interface TemplateListProps {
 export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, onStartEdit }: TemplateListProps) {
 	if (templates.length === 0) {
 		return (
-			<Card className="bg-white rounded-lg shadow-sm">
-				<CardContent className="p-8 text-center text-gray-500">
+			<Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl shadow-sm border border-border/60">
+				<CardContent className="p-8 text-center text-muted-foreground">
 					暂无模板
 				</CardContent>
 			</Card>
@@ -35,25 +35,27 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, on
 				<Card
 					key={template.id}
 					className={cn(
-						"cursor-pointer transition-all border relative group hover:shadow-md bg-white",
-                        template.isSelected ? "border-blue-500 ring-1 ring-blue-500 shadow-md" : "border-gray-200 hover:border-blue-300"
+						"cursor-pointer transition-all border relative group hover:shadow-lg backdrop-blur-sm rounded-xl",
+                        template.isSelected 
+							? "bg-white dark:bg-slate-800 border-primary/50 ring-1 ring-primary/20 shadow-md" 
+							: "bg-white/60 dark:bg-slate-900/60 border-border/60 hover:border-primary/30 hover:bg-white/80 dark:hover:bg-slate-800/80"
 					)}
                     onClick={() => onSelectTemplate(String(template.id))}
 				>
 					<CardContent className="p-4">
 						<div className="flex justify-between items-start">
-							<div>
-								<h3 className={cn("font-medium line-clamp-1", template.isSelected ? "text-blue-700" : "text-gray-900")}>
+							<div className="flex-1 mr-8">
+								<h3 className={cn("font-medium line-clamp-1 transition-colors", template.isSelected ? "text-primary" : "text-foreground group-hover:text-primary/80")}>
                                     {template.name}
                                 </h3>
-								<p className="text-xs text-gray-500 mt-1 line-clamp-2">
+								<p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
 									{template.description || '无描述'}
 								</p>
 							</div>
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity absolute right-12 top-2"
+                                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 transition-all absolute right-10 top-2"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onSelectTemplate(String(template.id));
@@ -65,7 +67,7 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, on
 							<Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-2"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all absolute right-2 top-2"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onDeleteTemplate(String(template.id));
@@ -75,11 +77,11 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, on
                             </Button>
 						</div>
 						<div className="mt-3 flex items-center gap-2">
-							<div className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">
+							<div className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono border border-border/40">
 								ID: {template.id}
 							</div>
                             {template.isSelected && (
-                                <div className="text-[10px] bg-blue-100 px-2 py-0.5 rounded text-blue-600 font-medium">
+                                <div className="text-[10px] bg-primary/10 px-2 py-0.5 rounded text-primary font-medium border border-primary/20">
                                     编辑中
                                 </div>
                             )}

@@ -27,36 +27,36 @@ export function UserFilters({
     onImport,
 }: UserFiltersProps) {
     return (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-5 rounded-xl shadow-sm border border-border/60">
             <div className="flex items-center gap-2 mb-6">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                    <Filter className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                    <Filter className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="font-semibold text-gray-900">筛选与操作</h2>
+                <h2 className="font-semibold text-foreground">筛选与操作</h2>
             </div>
 
             <div className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">搜索用户</label>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <label className="text-sm font-medium text-muted-foreground">搜索用户</label>
+                    <div className="relative group">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
                             type="text"
                             placeholder="输入用户ID..."
                             value={searchTerm}
                             onChange={(e) => onSearchTermChange(e.target.value)}
-                            className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                            className="pl-9 bg-muted/30 border-border/60 focus:bg-background focus-visible:ring-primary/20 transition-all"
                         />
                     </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <label className="text-sm font-medium text-gray-700">快捷操作</label>
+                <div className="space-y-3 pt-4 border-t border-border/60">
+                    <label className="text-sm font-medium text-muted-foreground">快捷操作</label>
                     <Button
                         onClick={onRefresh}
                         disabled={loading}
                         variant="outline"
-                        className="w-full justify-start text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50"
+                        className="w-full justify-start text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all"
                     >
                         {loading ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -69,7 +69,7 @@ export function UserFilters({
                     {onAddUser && (
                         <Button
                             onClick={onAddUser}
-                            className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                            className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
                         >
                             <UserPlus className="mr-2 h-4 w-4" />
                             添加新用户
@@ -77,14 +77,14 @@ export function UserFilters({
                     )}
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-gray-100">
-                     <label className="text-sm font-medium text-gray-700">数据迁移</label>
+                <div className="space-y-3 pt-4 border-t border-border/60">
+                     <label className="text-sm font-medium text-muted-foreground">数据迁移</label>
                      {onExport && (
                         <Button
                             onClick={onExport}
                             disabled={loading}
                             variant="outline"
-                            className="w-full justify-start text-gray-600 hover:text-green-600 hover:border-green-200 hover:bg-green-50"
+                            className="w-full justify-start text-muted-foreground hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 dark:hover:border-emerald-800 transition-all"
                         >
                             <Download className="mr-2 h-4 w-4" />
                             导出配置
@@ -96,7 +96,7 @@ export function UserFilters({
                             onClick={onImport}
                             disabled={loading}
                             variant="outline"
-                            className="w-full justify-start text-gray-600 hover:text-orange-600 hover:border-orange-200 hover:bg-orange-50"
+                            className="w-full justify-start text-muted-foreground hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/30 dark:hover:border-amber-800 transition-all"
                         >
                             <Upload className="mr-2 h-4 w-4" />
                             导入配置
