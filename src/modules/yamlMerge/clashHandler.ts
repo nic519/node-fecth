@@ -9,6 +9,7 @@ import { ClashRuleOverride } from '@/modules/yamlMerge/utils/clashRuleOverride';
 import { ClashProxyFilter } from '@/modules/yamlMerge/utils/clashProxyFilter';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
+import { safeError } from '@/utils/logHelper';
 
 const RESPONSE_HEADERS: Record<string, string> = {
 	'Content-Type': 'text/yaml; charset=utf-8',
@@ -45,7 +46,7 @@ export class ClashHandler implements RouteHandler {
 			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
 
 			// 处理用户干预（过滤、覆盖等），直接操作对象
-			this._processUserIntervention(yamlObj, userConfig, request); 
+			this._processUserIntervention(yamlObj, userConfig, request);
 
 			// 将最终对象转储为 YAML 字符串
 			let finalYamlString = yaml.dump(yamlObj);
@@ -76,8 +77,8 @@ export class ClashHandler implements RouteHandler {
 				status: 200,
 				headers: this._buildRespHeaders(subInfo, queryParams.download ? userConfig.fileName : undefined),
 			});
-		} catch (error) {
-			console.error('ClashHandler handle error:', error);
+		} catch (error: unknown) {
+			console.error('ClashHandler handle error:', safeError(error));
 
 			void logger.log({
 				level: 'error',
@@ -86,7 +87,7 @@ export class ClashHandler implements RouteHandler {
 				userId: uid,
 				meta: {
 					url: request.url,
-					error: error instanceof Error ? error.message : String(error),
+					error: safeError(error),
 					timings: {
 						total: Date.now() - startTime
 					}

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseResponseSchema } from '@/types/schema.base';
 import { ResponseCodes, type ResponseCode } from '@/types/openapi-schemas';
+import { safeError } from '@/utils/logHelper';
 
 /**
  * 统一响应工具类
@@ -76,7 +77,7 @@ export class ResponseUtils {
 	 */
 	static handleApiError(error: unknown): Response {
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.error('API Error:', error);
+		console.error('API Error:', safeError(error));
 
 		let code: ResponseCode = ResponseCodes.INTERNAL_ERROR;
 

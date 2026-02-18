@@ -1,5 +1,6 @@
 import { createLogService } from '@/services/log-service';
 import type { LogLevel } from '@/types/log';
+import { safeMeta, safeError } from '@/utils/logHelper';
 
 export const REQUEST_TIMEOUT = 30000;
 
@@ -10,11 +11,12 @@ const logService = createLogService();
 function writeLog(level: LogLevel, message: string, meta?: LogMeta) {
     try {
         if (level === 'error' || level === 'warn') {
+            const safe = meta ? safeMeta(meta) : undefined;
             void logService.log({
                 level,
                 type: 'network',
                 message,
-                meta,
+                meta: safe,
             });
         }
     } catch {
@@ -39,26 +41,29 @@ export const logger = {
     },
     warn(metaOrMessage: LogMeta | string, maybeMessage?: string) {
         const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
-        if (meta) {
-            console.warn(message, meta);
+        const safe = meta ? safeMeta(meta) : undefined;
+        if (safe) {
+            console.warn(message, safe);
         } else {
             console.warn(message);
         }
-        writeLog('warn', message, meta);
+        writeLog('warn', message, safe);
     },
     error(metaOrMessage: LogMeta | string, maybeMessage?: string) {
         const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
-        if (meta) {
-            console.error(message, meta);
+        const safe = meta ? safeMeta(meta) : undefined;
+        if (safe) {
+            console.error(message, safe);
         } else {
             console.error(message);
         }
-        writeLog('error', message, meta);
+        writeLog('error', message, safe);
     },
     debug(metaOrMessage: LogMeta | string, maybeMessage?: string) {
         const { meta, message } = toMetaAndMessage(metaOrMessage, maybeMessage);
-        if (meta) {
-            console.debug(message, meta);
+        const safe = meta ? safeMeta(meta) : undefined;
+        if (safe) {
+            console.debug(message, safe);
         } else {
             console.debug(message);
         }

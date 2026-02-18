@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
+import { safeError } from '@/utils/logHelper';
 
 /// 获取订阅链接的动态内容
 /// @param urls 订阅链接列表，逗号分隔
@@ -21,7 +22,7 @@ export const GET = async (request: Request) => {
         }
 
     } catch (error: unknown) {
-        console.error('Dynamic fetch error:', error);
+        console.error('Dynamic fetch error:', safeError(error));
         const message = error instanceof Error ? error.message : 'Internal Server Error';
         return NextResponse.json({ code: 500, msg: message }, { status: 500 });
     }
@@ -44,7 +45,7 @@ export const POST = async (request: Request) => {
         });
 
     } catch (error: unknown) {
-        console.error('Dynamic sync error:', error);
+        console.error('Dynamic sync error:', safeError(error));
         const message = error instanceof Error ? error.message : 'Internal Server Error';
         return NextResponse.json({ code: 500, msg: message }, { status: 500 });
     }

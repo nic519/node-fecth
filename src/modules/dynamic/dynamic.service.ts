@@ -5,6 +5,7 @@ import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { logger } from '@/utils/request/network.config';
 import { httpClient } from '@/utils/http/client';
+import { safeError, safeString } from '@/utils/logHelper';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -66,7 +67,9 @@ export class DynamicService {
 			};
 		} catch (error: any) {
 			// ky 抛出的错误包含了详细信息
-			logger.error({ url, error: error.message, stack: error.stack }, 'Failed to fetch and save dynamic content');
+			const safeMsg = safeError(error);
+			const safeStack = safeString(error?.stack || '', 2048);
+			logger.error({ url, error: safeMsg, stack: safeStack }, 'Failed to fetch and save dynamic content');
 			throw error;
 		}
 	}

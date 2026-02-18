@@ -8,7 +8,7 @@ import { logger } from '@/utils/request/network.config';
  * 基于 ky 库，提供自动重试、超时控制和统一的错误处理
  */
 export const httpClient = ky.create({
-    timeout: 10000, // 默认 10 秒超时，适应 Worker 环境
+    timeout: 13000, // 设置默认秒超时，适应 Worker 环境
     retry: {
         limit: 2, // 默认重试 1 次，快速失败
         methods: ['get'], // 只对 GET 请求重试
