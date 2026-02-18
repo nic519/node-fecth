@@ -13,11 +13,12 @@ import { useUserConfig } from './hooks/useUserConfig';
 import { ConfigTab } from './components/ConfigForm';
 
 function UserConfigContent() {
-	usePageTitle('配置订阅');
 
 	const searchParams = useSearchParams();
 	const token = searchParams.get('token') || '';
 	const uid = searchParams.get('uid') || '';
+
+	usePageTitle(`${uid} - 配置订阅`, '');
 
 	const userConfigState = useUserConfig({ uid, token });
 	const [activeTab, setActiveTab] = useState<ConfigTab>('basic');

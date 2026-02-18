@@ -10,9 +10,10 @@ import { useEffect } from 'react';
 export function usePageTitle(title?: string, suffix = '节点管理后台') {
 	useEffect(() => {
 		if (title) {
-			document.title = `${title} - ${suffix}`;
-		} else {
-			document.title = suffix;
+			document.title = `${title}`;
+		}
+		if (suffix) {
+			document.title += ` - ${suffix}`;
 		}
 
 		// 组件卸载时恢复默认标题

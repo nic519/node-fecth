@@ -25,12 +25,12 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
     return (
         <div className="flex items-center gap-2">
             <div className="bg-muted/50 p-2 rounded-md text-xs font-mono text-muted-foreground cursor-help select-all max-w-[300px] sm:max-w-[400px]">
-                <div className="line-clamp-2 break-all">
+                <div className="line-clamp-3 break-all">
                     {subscribeURL}
                 </div>
             </div>
             <CopyButton text={subscribeURL} size="sm" variant="outline" className="h-8">
-                复制链接
+                复制
             </CopyButton>
         </div>
     );

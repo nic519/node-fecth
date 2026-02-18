@@ -46,7 +46,7 @@ export function ConfigEditor({
 			<div className="w-full md:col-span-1 sticky top-24 space-y-4">
 				<Card className="shadow-sm border border-gray-200">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">用户信息</CardTitle>
+
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="flex items-center gap-3">
@@ -70,6 +70,7 @@ export function ConfigEditor({
 										<span className="text-xs text-gray-500">最后保存</span>
 										<span className="text-xs font-mono text-gray-900">
 											{lastSaved.toLocaleString('zh-CN', {
+												year: 'numeric',
 												month: 'numeric',
 												day: 'numeric',
 												hour: 'numeric',
@@ -80,8 +81,6 @@ export function ConfigEditor({
 								</div>
 							</>
 						)}
-
-						<Separator />
 
 						<div className="space-y-3">
 							<Button

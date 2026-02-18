@@ -18,7 +18,7 @@ interface DynamicSyncPanelProps {
 }
 
 export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
-    const { items, statuses, dynamicInfos, syncUrl, syncAll } = useDynamicSync(config);
+    const { items, statuses, dynamicInfos, syncUrl } = useDynamicSync(config);
 
     const isAnyLoading = items.some(item => statuses[item.url]?.status === 'loading');
 
@@ -34,15 +34,6 @@ export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
                         - 当订阅较多的时候，才需要关心此面板，绝大多数情况请直接忽略
                     </p>
                 </div>
-                <Button
-                    onClick={syncAll}
-                    variant="outline"
-                    disabled={items.length === 0 || isAnyLoading}
-                    className="min-w-[100px]"
-                >
-                    <RefreshCw className={cn("w-4 h-4 mr-2", isAnyLoading && "animate-spin")} />
-                    全部更新
-                </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

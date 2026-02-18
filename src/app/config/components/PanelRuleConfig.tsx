@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { YamlEditor } from '@/components/YamlEditor';
 import { useRuleConfig } from '../hooks/useRuleConfig';
+import { DEFAULT_RULE_URL } from '@/config/constants';
 
 interface RuleConfigProps {
     config: UserConfig;
@@ -47,11 +48,13 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     id="ruleUrl"
                     value={config.ruleUrl || ''}
                     onChange={(e) => handleChange('ruleUrl', e.target.value)}
-                    placeholder="https://raw.githubusercontent.com/..."
+                    placeholder='可选。Clash 格式的过滤规则文件 URL。'
                     readOnly={readOnly}
                 />
                 <p className="text-sm text-muted-foreground">
-                    可选。Clash 格式的过滤规则文件 URL。默认为 miho-cfg.yaml 的规则。
+                    不填写时默认使用：<a href={DEFAULT_RULE_URL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {DEFAULT_RULE_URL}
+                    </a>
                 </p>
             </div>
 

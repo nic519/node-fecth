@@ -71,11 +71,6 @@ export function useDynamicSync(config: UserConfig) {
         }
     }, []);
 
-    const syncAll = useCallback(async () => {
-        for (const item of items) {
-            await syncUrl(item.url);
-        }
-    }, [items, syncUrl]);
 
     // Initial fetch
     useEffect(() => {
@@ -112,6 +107,5 @@ export function useDynamicSync(config: UserConfig) {
         statuses,
         dynamicInfos,
         syncUrl,
-        syncAll
     };
 }
