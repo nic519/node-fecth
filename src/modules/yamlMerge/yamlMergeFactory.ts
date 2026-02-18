@@ -1,5 +1,6 @@
 import { GlobalConfig } from '@/config/global-config';
 import { BaseCRUD } from '@/db/base-crud';
+import { getRuntimeEnv } from '@/db';
 import { templates, type Template } from '@/db/schema';
 import { UserConfig } from '@/types/openapi-schemas';
 import { PreMergeInfo } from '@/modules/yamlMerge/clash-merge.types';
@@ -43,7 +44,7 @@ export class YamlMergeFactory {
 
 	private async getTemplateFromDB(templateId: string): Promise<string> {
 		try {
-			const env = GlobalConfig.env;
+			const env = GlobalConfig.env || getRuntimeEnv();
 			if (!env) {
 				throw new Error('环境变量未初始化');
 			}
