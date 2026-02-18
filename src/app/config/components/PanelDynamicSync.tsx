@@ -11,7 +11,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/app/admin/users/utils/userUtils';
+import { formatTraffic, getTrafficBarColor, parseTrafficInfo, formatDateTime } from '@/app/admin/users/utils/userUtils';
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
@@ -119,7 +119,7 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">
                                     <Clock className="w-3.5 h-3.5 shrink-0" />
                                     <span className="truncate">
-                                        {new Date(info.updatedAt).toLocaleString()}
+                                        {formatDateTime(info.updatedAt)}
                                     </span>
                                 </div>
                                 {info.traffic && (

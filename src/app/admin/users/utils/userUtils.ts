@@ -22,7 +22,16 @@ export const formatTraffic = (bytes: number): string => {
  */
 export const formatDateTime = (dateStr: string | null): string => {
 	if (!dateStr) return '从未';
-	return new Date(dateStr).toLocaleString('zh-CN');
+	// 如果已经是格式化好的字符串（比如从 formatDate 生成的），直接返回，或者按需美化
+	// 这里假设 dateStr 是 ISO 字符串或者 YYYY-MM-DD HH:mm:ss
+	// 如果是 YYYY-MM-DD HH:mm:ss 且已经被 formatDate 强制转为 UTC+8，
+	// 那么前端直接展示即可，不需要再 new Date() 转本地，否则在非 UTC+8 环境下会乱。
+
+	// 简单判断：如果包含 'T' (ISO) 则解析，否则直接展示（假设已经是目标格式）
+	if (dateStr.includes('T')) {
+		return new Date(dateStr).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+	}
+	return dateStr;
 };
 
 /**

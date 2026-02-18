@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LogEvent, LogLevel } from '@/types/log';
+import { formatDateTime } from '@/app/admin/users/utils/userUtils';
 import { logApi } from '@/services/log-api';
 import {
   Table,
@@ -208,7 +209,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                         onClick={() => setSelectedLog(log)}
                       >
                         <TableCell className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                          {new Date(log.createdAt).toLocaleString()}
+                          {formatDateTime(log.createdAt)}
                         </TableCell>
                         <TableCell>
                           <Badge variant={
@@ -278,7 +279,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <h3 className="font-medium text-xs uppercase tracking-wider text-muted-foreground">时间</h3>
-                  <p className="font-mono text-sm bg-muted/50 p-2 rounded-md border border-border/40">{new Date(selectedLog.createdAt).toLocaleString()}</p>
+                  <p className="font-mono text-sm bg-muted/50 p-2 rounded-md border border-border/40">{formatDateTime(selectedLog.createdAt)}</p>
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="font-medium text-xs uppercase tracking-wider text-muted-foreground">级别</h3>

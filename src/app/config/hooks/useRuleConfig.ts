@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import { UserConfig } from '@/types/openapi-schemas';
 import { DEFAULT_RULE_URL } from '@/config/constants';
 
-const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "自动"];
+const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
 
 interface UseRuleConfigProps {
     config: UserConfig;
