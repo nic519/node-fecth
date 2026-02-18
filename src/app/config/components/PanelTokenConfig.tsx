@@ -22,7 +22,7 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
                     <Key className="w-5 h-5" />
                     访问令牌
                 </h3>
-                <p className="text-sm text-muted-foreground">配置用于访问管理面板的安全令牌，更新后，地址会重定向</p>
+                <p className="text-sm text-muted-foreground">- 配置用于访问管理面板的安全令牌，且**订阅地址链接也会变**</p>
             </div>
 
             <div className="space-y-2">
