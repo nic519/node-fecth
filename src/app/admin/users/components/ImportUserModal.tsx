@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface ImportUserModalProps {
     isOpen: boolean;
@@ -32,8 +32,8 @@ export function ImportUserModal({
     importProgress,
     importErrors,
 }: ImportUserModalProps) {
-    const progressPercentage = importProgress.total > 0 
-        ? Math.round((importProgress.current / importProgress.total) * 100) 
+    const progressPercentage = importProgress.total > 0
+        ? Math.round((importProgress.current / importProgress.total) * 100)
         : 0;
 
     return (
@@ -45,7 +45,7 @@ export function ImportUserModal({
                         请粘贴 JSON 数组格式的用户配置。如果用户 ID (uid) 已存在，将自动跳过。
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="flex-1 py-4 overflow-y-auto min-h-[300px]">
                     {!isImporting && importErrors.length === 0 ? (
                         <div className="space-y-2 h-full">
@@ -67,14 +67,14 @@ export function ImportUserModal({
                                         <span>{importProgress.current} / {importProgress.total}</span>
                                     </div>
                                     <div className="h-2 w-full bg-secondary overflow-hidden rounded-full">
-                                        <div 
-                                            className="h-full bg-primary transition-all duration-300 ease-in-out" 
+                                        <div
+                                            className="h-full bg-primary transition-all duration-300 ease-in-out"
                                             style={{ width: `${progressPercentage}%` }}
                                         />
                                     </div>
                                 </div>
                             )}
-                            
+
                             {importErrors.length > 0 && (
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-red-600 font-medium">
@@ -110,7 +110,7 @@ export function ImportUserModal({
                             关闭
                         </Button>
                     ) : (
-                         <div className="flex gap-2">
+                        <div className="flex gap-2">
                             <Button variant="outline" onClick={onClose} disabled={isImporting}>
                                 取消
                             </Button>

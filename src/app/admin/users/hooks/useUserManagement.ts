@@ -114,12 +114,15 @@ export const useUserManagement = ({ superToken, showToast }: UseUserManagementPr
 			// 创建一个纯净的用户配置数组，去掉不必要的字段（可选，这里直接导出完整数据以便迁移）
 			const dataToExport = userData.users.map(user => ({
 				uid: user.uid,
-				config: {  
+				config: {
 					...user
 				}
 			})).map(item => {
 				// 清理一下结构，使其符合导入格式 { uid: string, config: UserConfig }
-				const { uid, updatedAt, subscriptionStats, ...config } = item.config;
+				const config = { ...item.config } as Record<string, unknown>;
+				delete config.uid;
+				delete config.updatedAt;
+				delete config.subscriptionStats;
 				return {
 					uid: item.uid,
 					config: config

@@ -42,28 +42,31 @@ export const useImportUserModal = ({
                 return;
             }
 
-            let parsedData: any[];
+            const parsedData = JSON.parse(jsonContent) as unknown;
             try {
-                parsedData = JSON.parse(jsonContent);
                 if (!Array.isArray(parsedData)) {
                     throw new Error('JSON必须是数组格式');
                 }
-            } catch (e) {
+            } catch {
                 showToast('无效的JSON格式', 'error');
                 return;
             }
+            const parsedArray = parsedData as unknown[];
 
             setIsImporting(true);
             setImportErrors([]);
-            
+
             // 过滤掉已存在的用户
             const existingUids = new Set(existingUsers.map(u => u.uid));
-            const usersToImport = parsedData.filter(user => {
-                if (!user.uid || !user.config) return false;
-                return !existingUids.has(user.uid);
+            const usersToImport = parsedArray.filter((user): user is { uid: string; config: UserConfig } => {
+                if (!user || typeof user !== 'object') return false;
+                const record = user as Record<string, unknown>;
+                if (typeof record.uid !== 'string') return false;
+                if (!record.config || typeof record.config !== 'object') return false;
+                return !existingUids.has(record.uid);
             });
 
-            const skippedCount = parsedData.length - usersToImport.length;
+            const skippedCount = parsedArray.length - usersToImport.length;
             setImportProgress({ current: 0, total: usersToImport.length });
 
             const errors: string[] = [];
@@ -88,7 +91,7 @@ export const useImportUserModal = ({
             }
 
             setImportErrors(errors);
-            
+
             if (successCount > 0) {
                 showToast(`导入完成: 成功 ${successCount} 个, 跳过 ${skippedCount} 个, 失败 ${errors.length} 个`, errors.length > 0 ? 'info' : 'success');
                 onSuccess();
@@ -96,8 +99,8 @@ export const useImportUserModal = ({
                     close();
                 }
             } else if (skippedCount > 0 && errors.length === 0) {
-                 showToast(`导入完成: 所有用户 (${skippedCount} 个) 已存在，无需导入`, 'info');
-                 close();
+                showToast(`导入完成: 所有用户 (${skippedCount} 个) 已存在，无需导入`, 'info');
+                close();
             } else {
                 showToast(`导入失败: ${errors.length} 个错误`, 'error');
             }
