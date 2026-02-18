@@ -1,14 +1,9 @@
 {
-  "name": "node-fetch",
+  "name": "node-fetch-worker",
   "compatibility_date": "2025-05-05",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "assets": {
-    "directory": "public",
-    "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
-  },
   "d1_databases": [
     {
       "binding": "DB",

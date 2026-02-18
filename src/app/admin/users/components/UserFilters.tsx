@@ -78,8 +78,8 @@ export function UserFilters({
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <label className="text-sm font-medium text-gray-700">数据迁移</label>
-                    {onExport && (
+                     <label className="text-sm font-medium text-gray-700">数据迁移</label>
+                     {onExport && (
                         <Button
                             onClick={onExport}
                             disabled={loading}
@@ -89,9 +89,9 @@ export function UserFilters({
                             <Download className="mr-2 h-4 w-4" />
                             导出配置
                         </Button>
-                    )}
-
-                    {onImport && (
+                     )}
+                     
+                     {onImport && (
                         <Button
                             onClick={onImport}
                             disabled={loading}
@@ -101,7 +101,7 @@ export function UserFilters({
                             <Upload className="mr-2 h-4 w-4" />
                             导入配置
                         </Button>
-                    )}
+                     )}
                 </div>
             </div>
         </div>

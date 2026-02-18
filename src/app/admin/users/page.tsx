@@ -41,17 +41,17 @@ function AdminUsersContent() {
 	const { showToast } = useToastContext();
 
 	// 使用用户管理Hook
-	const {
-		users,
-		loading,
-		error,
-		fetchUsers,
-		handleUserAction,
-		handleExport,
-		deleteModal,
-		addUserModal,
-		importModal
-	} = useUserManagement({
+	const { 
+        users, 
+        loading, 
+        error, 
+        fetchUsers, 
+        handleUserAction, 
+        handleExport,
+        deleteModal, 
+        addUserModal,
+        importModal 
+    } = useUserManagement({
 		superToken,
 		showToast,
 	});
@@ -76,8 +76,8 @@ function AdminUsersContent() {
 							onSearchTermChange={setSearchTerm}
 							onRefresh={fetchUsers}
 							onAddUser={addUserModal.open}
-							onExport={handleExport}
-							onImport={importModal.open}
+                            onExport={handleExport}
+                            onImport={importModal.open}
 						/>
 					</div>
 
@@ -221,17 +221,17 @@ function AdminUsersContent() {
 				</DialogContent>
 			</Dialog>
 
-			{/* 导入用户模态框 */}
-			<ImportUserModal
-				isOpen={importModal.isOpen}
-				onClose={importModal.close}
-				onImport={importModal.handleImport}
-				jsonContent={importModal.jsonContent}
-				onJsonContentChange={importModal.setJsonContent}
-				isImporting={importModal.isImporting}
-				importProgress={importModal.importProgress}
-				importErrors={importModal.importErrors}
-			/>
+            {/* 导入用户模态框 */}
+            <ImportUserModal 
+                isOpen={importModal.isOpen}
+                onClose={importModal.close}
+                onImport={importModal.handleImport}
+                jsonContent={importModal.jsonContent}
+                onJsonContentChange={importModal.setJsonContent}
+                isImporting={importModal.isImporting}
+                importProgress={importModal.importProgress}
+                importErrors={importModal.importErrors}
+            />
 		</div>
 	);
 }
