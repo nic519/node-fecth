@@ -1,5 +1,6 @@
 import yaml from 'js-yaml';
 import { ClashProxy, ClashListener, ProxyAreaInfo } from '@/types/clash.types';
+import type { YamlObject, YamlValue } from '@/modules/yamlMerge/utils/yamlTypes';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
 import { UserConfig } from '@/types/openapi-schemas';
 import { PreMergeInfo } from './clash-merge.types';
@@ -42,26 +43,23 @@ export class StrategyMultiPort {
 		return listeners;
 	}
 
-	generate(): Record<string, any> {
-		const yamlObj = (yaml.load(this.preMergeInfo.ruleContent) || {}) as Record<string, any>;
-		
-		if (typeof yamlObj !== 'object') {
-			return yamlObj;
-		}
+	generate(): YamlObject {
+		const loaded = yaml.load(this.preMergeInfo.ruleContent);
+		const yamlObj: YamlObject = (loaded && typeof loaded === 'object' && !Array.isArray(loaded) ? loaded : {}) as YamlObject;
 
 		delete yamlObj['proxy-providers'];
 
 		const proxyList = StrategyUtils.getProxyList({
 			clashContent: this.preMergeInfo.clashContent,
 		});
-		
+
 		if (!Array.isArray(yamlObj['proxies'])) {
-			yamlObj['proxies'] = [];
+			yamlObj['proxies'] = [] as YamlValue[];
 		}
-		yamlObj['proxies'].push(...proxyList);
+		(yamlObj['proxies'] as unknown as ClashProxy[]).push(...proxyList);
 
 		const listeners = this.createListeners(proxyList);
-		yamlObj['listeners'] = listeners;
+		yamlObj['listeners'] = listeners as unknown as YamlValue;
 
 		return yamlObj;
 	}

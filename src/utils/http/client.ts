@@ -50,11 +50,12 @@ export async function fetchWithRetry(url: string, options?: Options) {
         }, '网络请求成功');
 
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         const duration = Date.now() - startTime;
+        const message = error instanceof Error ? error.message : String(error);
         logger.error({
             url,
-            error: error.message,
+            error: message,
             duration: `${duration}ms`
         }, '网络请求失败');
         throw error;
@@ -81,7 +82,7 @@ export function createConcurrencyLimit(concurrency: number) {
     };
 
     const run = async <T>(fn: () => Promise<T>): Promise<T> => {
-        const execute = async (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => {
+        const execute = async (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: unknown) => void) => {
             activeCount++;
             try {
                 const result = await fn();
@@ -129,8 +130,9 @@ export async function fetchRawContent(url: string, retries = 1): Promise<string>
 
         const content = await response.text();
         return content;
-    } catch (error: any) {
-        logger.error({ url, error: error.message }, '获取原始内容失败');
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error({ url, error: message }, '获取原始内容失败');
         throw error;
     }
 }

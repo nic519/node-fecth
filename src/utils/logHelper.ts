@@ -46,7 +46,7 @@ export function safeMeta(meta: Record<string, unknown>): Record<string, unknown>
                 safe[key] = value;
             }
         }
-    } catch (e) {
+    } catch {
         safe['log_error'] = 'Failed to sanitize meta';
     }
     return safe;

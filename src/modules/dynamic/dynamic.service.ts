@@ -65,10 +65,11 @@ export class DynamicService {
 				traffic,
 				updatedAt: formattedDate,
 			};
-		} catch (error: any) {
+		} catch (error: unknown) {
 			// ky 抛出的错误包含了详细信息
 			const safeMsg = safeError(error);
-			const safeStack = safeString(error?.stack || '', 2048);
+			const stack = error instanceof Error ? error.stack : undefined;
+			const safeStack = safeString(stack || '', 2048);
 			logger.error({ url, error: safeMsg, stack: safeStack }, 'Failed to fetch and save dynamic content');
 			throw error;
 		}

@@ -10,6 +10,7 @@ import { fetchRawContent } from '@/utils/http/client';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { StrategyMultiSub } from './strategyMultiSub';
 import yaml from 'js-yaml';
+import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
 
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
@@ -118,7 +119,7 @@ export class YamlMergeFactory {
 		}
 	}
 
-	async fastStrategy(): Promise<{ yamlContent: Record<string, any>; subInfo: string }> {
+	async fastStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const baseInfo: PreMergeInfo = await this.fetchPreMergeInfo();
 		const yamlStrategy = new StrategyDirectly(baseInfo);
 		return {
@@ -127,7 +128,7 @@ export class YamlMergeFactory {
 		};
 	}
 
-	async multiPortStrategy(): Promise<{ yamlContent: Record<string, any>; subInfo: string }> {
+	async multiPortStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const baseInfo = await this.fetchPreMergeInfo();
 		const yamlStrategy = new StrategyMultiPort(baseInfo, this.userConfig);
 		return {
@@ -136,19 +137,23 @@ export class YamlMergeFactory {
 		};
 	}
 
-	async multiSubStrategy(): Promise<{ yamlContent: Record<string, any>; subInfo: string }> {
+	async multiSubStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const ruleContent = await this.measure('fetch_rule_content', () => this.fetchRuleContent());
 		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig);
 		const { yamlContent, subInfo } = await yamlStrategy.generate();
 		return { yamlContent, subInfo };
 	}
 
-	private applyOverride(content: Record<string, any>, override: string): Record<string, any> {
+	private applyOverride(content: YamlObject, override: string): YamlObject {
 		if (!override || !override.trim()) return content;
 
 		try {
-			const overrideObj = (yaml.load(override) || {}) as Record<string, any>;
-			const merged = { ...content, ...overrideObj };
+			const loaded = yaml.load(override);
+			if (!loaded || typeof loaded !== 'object' || Array.isArray(loaded)) {
+				return content;
+			}
+			const overrideObj = loaded as YamlObject;
+			const merged: YamlObject = { ...content, ...overrideObj };
 			return merged;
 		} catch (error) {
 			console.error('applyOverride error:', error);
@@ -156,9 +161,9 @@ export class YamlMergeFactory {
 		}
 	}
 
-	async generate(): Promise<{ yamlContent: Record<string, any>; subInfo: string; timings: Record<string, number> }> {
+	async generate(): Promise<{ yamlContent: YamlObject; subInfo: string; timings: Record<string, number> }> {
 		try {
-			let result: { yamlContent: Record<string, any>; subInfo: string };
+			let result: { yamlContent: YamlObject; subInfo: string };
 
 			if (this.userConfig.appendSubList) {
 				result = await this.measure('strategy_multi_sub', () => this.multiSubStrategy());

@@ -20,8 +20,6 @@ interface DynamicSyncPanelProps {
 export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
     const { items, statuses, dynamicInfos, syncUrl } = useDynamicSync(config);
 
-    const isAnyLoading = items.some(item => statuses[item.url]?.status === 'loading');
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">

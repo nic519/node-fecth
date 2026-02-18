@@ -1,6 +1,6 @@
 import { createLogService } from '@/services/log-service';
 import type { LogLevel } from '@/types/log';
-import { safeMeta, safeError } from '@/utils/logHelper';
+import { safeMeta } from '@/utils/logHelper';
 
 export const REQUEST_TIMEOUT = 30000;
 
@@ -69,4 +69,3 @@ export const logger = {
         }
     },
 };
-
