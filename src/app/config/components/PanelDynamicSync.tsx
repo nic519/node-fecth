@@ -11,6 +11,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/app/admin/users/utils/userUtils';
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
@@ -79,6 +80,8 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
     const isLoading = status.status === 'loading';
     const isSuccess = status.status === 'success';
     const isError = status.status === 'error';
+    const trafficInfo = info?.traffic ? parseTrafficInfo(info.traffic) : null;
+    const usagePercent = trafficInfo ? Math.min(100, Math.max(0, trafficInfo.usagePercent)) : 0;
 
     return (
         <Card className="overflow-hidden transition-all hover:shadow-md">
@@ -131,11 +134,32 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
                                     </span>
                                 </div>
                                 {info.traffic && (
-                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="流量信息">
-                                        <Activity className="w-3.5 h-3.5 shrink-0" />
-                                        <span className="truncate font-medium">
-                                            {info.traffic}
-                                        </span>
+                                    <div className="space-y-1.5" title="流量信息">
+                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                            <div className="flex items-center gap-1.5">
+                                                <Activity className="w-3.5 h-3.5 shrink-0" />
+                                                {trafficInfo ? (
+                                                    <span className="truncate font-medium">
+                                                        {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="truncate font-mono">
+                                                        {info.traffic}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {trafficInfo ? `${trafficInfo.usagePercent.toFixed(1)}%` : ''}
+                                            </span>
+                                        </div>
+                                        {trafficInfo && (
+                                            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                <div
+                                                    className={cn("h-full transition-all", getTrafficBarColor(usagePercent))}
+                                                    style={{ width: `${usagePercent}%` }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </>

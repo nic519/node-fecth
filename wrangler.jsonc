@@ -1,5 +1,5 @@
 {
-  "name": "node-fetch-worker",
+  "name": "node-fetch",
   "main": ".open-next/worker.js",
   "assets": {
     "directory": ".open-next/assets"
@@ -20,15 +20,5 @@
     "logs": {
       "enabled": true
     }
-  },
-  "routes": [
-    {
-      "pattern": "world.1024.hair",
-      "zone_name": "1024.hair",
-      "custom_domain": true
-    }
-  ],
-  "vars": {
-    "SUPER_ADMIN_TOKEN": "123"
   }
 }

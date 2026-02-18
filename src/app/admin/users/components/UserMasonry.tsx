@@ -3,7 +3,7 @@
 import Loading from '@/components/Loading';
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import { Badge } from "@/components/ui/badge";
-import { formatDateTime } from '../utils/userUtils';
+import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '../utils/userUtils';
 import { UserActions } from './UserActions';
 import {
 	User,
@@ -84,19 +84,50 @@ export function UserMasonry({ users, loading, error, onUserAction }: UserMasonry
 												</span>
 											</div>
 										</div>
-										<div className="flex justify-between items-center text-gray-600 border-t border-gray-100 pt-2 mt-1">
-											<span className="flex items-center gap-1">
-												<span className="text-gray-400">已用:</span>
-												{stat.traffic ? (
-													<span className="font-mono font-medium text-gray-900">{stat.traffic}</span>
-												) : (
-													<span className="text-gray-400">无数据</span>
-												)}
-											</span>
-											<span className="text-[10px] text-gray-400">
-												{stat.lastUpdated ? new Date(stat.lastUpdated).toLocaleDateString() : ''}
-											</span>
-										</div>
+										{(() => {
+											const trafficInfo = parseTrafficInfo(stat.traffic || null);
+											const usagePercent = trafficInfo ? Math.min(100, Math.max(0, trafficInfo.usagePercent)) : 0;
+
+											return (
+												<div className="space-y-1.5 border-t border-gray-100 pt-2 mt-1">
+													<div className="flex items-center justify-between text-gray-600">
+														<span className="flex items-center gap-1">
+															<span className="text-gray-400">已用</span>
+															{trafficInfo ? (
+																<span className="font-mono font-medium text-gray-900">
+																	{formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
+																</span>
+															) : stat.traffic ? (
+																<span className="font-mono font-medium text-gray-900">{stat.traffic}</span>
+															) : (
+																<span className="text-gray-400">无数据</span>
+															)}
+														</span>
+														<span className="text-[10px] text-gray-400">
+															{trafficInfo ? `${trafficInfo.usagePercent.toFixed(1)}%` : ''}
+														</span>
+													</div>
+													{trafficInfo && (
+														<div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+															<div
+																className={`h-full ${getTrafficBarColor(usagePercent)}`}
+																style={{ width: `${usagePercent}%` }}
+															/>
+														</div>
+													)}
+													<div className="flex justify-between items-center text-[10px] text-gray-400">
+														<span>
+															{trafficInfo && trafficInfo.expire
+																? `到期 ${new Date(trafficInfo.expire * 1000).toLocaleDateString()}`
+																: ''}
+														</span>
+														<span>
+															{stat.lastUpdated ? new Date(stat.lastUpdated).toLocaleDateString() : ''}
+														</span>
+													</div>
+												</div>
+											);
+										})()}
 									</div>
 								))}
 							</div>
