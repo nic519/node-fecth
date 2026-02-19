@@ -152,9 +152,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
         content={
           <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm min-h-[600px] flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 pb-4">
-              <CardTitle className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                系统日志列表
-              </CardTitle>
+
               <div className="text-xs text-muted-foreground font-mono">
                 共 {total} 条记录
               </div>

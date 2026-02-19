@@ -10,7 +10,7 @@ interface AdminTwoColumnLayoutProps {
 export function AdminTwoColumnLayout({ sidebar, content, className }: AdminTwoColumnLayoutProps) {
   return (
     <div className={cn("grid grid-cols-1 lg:grid-cols-4 gap-6 items-start", className)}>
-      <div className="lg:col-span-1">
+      <div className="lg:col-span-1 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-hide">
         {sidebar}
       </div>
       <div className="lg:col-span-3 min-w-0">
