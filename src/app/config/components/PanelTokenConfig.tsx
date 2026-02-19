@@ -2,6 +2,7 @@ import { UserConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Key } from 'lucide-react';
+import { PanelTopBar } from './PanelTopBar';
 
 interface PanelTokenConfigProps {
     config: UserConfig;
@@ -17,17 +18,7 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
 
     return (
         <div className="space-y-6">
-            <div className="space-y-1">
-                <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
-                    <div className="p-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                        <Key className="w-5 h-5" />
-                    </div>
-                    访问令牌
-                </h3>
-                <p className="text-sm text-muted-foreground ml-9">
-                    配置用于访问管理面板的安全令牌，且<span className="font-bold text-destructive">订阅地址链接也会变</span>
-                </p>
-            </div>
+            <PanelTopBar description={<>用于访问管理面板的安全令牌；修改后<span className="font-bold text-destructive">订阅地址会变化</span>。</>} />
 
             <div className="space-y-2 group">
                 <Label htmlFor="accessToken" className="text-base flex items-center gap-2 group-focus-within:text-primary transition-colors">

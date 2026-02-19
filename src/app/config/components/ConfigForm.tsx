@@ -16,7 +16,7 @@ interface ConfigFormProps {
 
 export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid }: ConfigFormProps) {
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6">
             {activeTab === 'basic' && (
                 <PanelBasicConfig config={config} onChange={onChange} readOnly={readOnly} uid={uid} />
             )}

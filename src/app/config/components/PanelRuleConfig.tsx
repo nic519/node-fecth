@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { YamlEditor } from '@/components/YamlEditor';
 import { useRuleConfig } from '../hooks/useRuleConfig';
 import { DEFAULT_RULE_URL } from '@/config/constants';
+import { PanelTopBar } from './PanelTopBar';
 
 interface RuleConfigProps {
     config: UserConfig;
@@ -39,6 +40,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
 
     return (
         <div className="space-y-6">
+            <PanelTopBar description="选择规则模板与过滤项；可选规则覆写（高级）。" />
             <div className="space-y-2 group">
                 <Label htmlFor="ruleUrl" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
                     <div className="p-1 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">

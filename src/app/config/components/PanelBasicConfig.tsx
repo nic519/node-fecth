@@ -2,11 +2,12 @@ import { AreaCode, UserConfig, SubConfig } from '@/types/openapi-schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Settings2, Link, FileText, Filter, ListPlus, Plus } from 'lucide-react';
+import { Link, FileText, Filter, ListPlus, Plus } from 'lucide-react';
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
+import { PanelTopBar } from './PanelTopBar';
 
 interface BasicConfigProps {
     config: UserConfig;
@@ -60,14 +61,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
         <div className="space-y-8">
             {/* Main Configuration Section */}
             <div className="space-y-6">
-                <div className="space-y-1">
-                    <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
-                        <div className="p-1.5 rounded-md bg-primary/10 text-primary">
-                            <Settings2 className="w-5 h-5" />
-                        </div>
-                        基础设置
-                    </h3>
-                </div>
+                <PanelTopBar description="填写主订阅与生成配置的基础信息。" />
 
                 <div className="space-y-6">
                     <div className="space-y-2 group">

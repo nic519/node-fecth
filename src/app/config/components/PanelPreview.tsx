@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Eye, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { YamlEditor } from '@/components/YamlEditor';
+import { PanelTopBar } from './PanelTopBar';
 
 interface PreviewPanelProps {
 	uid: string;
@@ -47,28 +48,26 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 
 	return (
 		<div className="h-full flex flex-col">
-			<div className="flex items-center justify-between mb-4 px-1">
-				<div className="flex items-center gap-2">
-					<div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary">
-						<Eye className="h-4 w-4" />
-					</div>
-					<h3 className="text-lg font-semibold tracking-tight">配置预览</h3>
-				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handlePreviewSubscribeURL}
-					disabled={previewLoading}
-					className="h-8 gap-2 bg-background hover:bg-accent hover:text-accent-foreground transition-all"
-				>
-					{previewLoading ? (
-						<Loader2 className="w-3.5 h-3.5 animate-spin" />
-					) : (
-						<RefreshCw className="w-3.5 h-3.5" />
-					)}
-					刷新
-				</Button>
-			</div>
+			<PanelTopBar
+				className="mb-4"
+				description="查看最终生成的 YAML 输出。"
+				right={
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handlePreviewSubscribeURL}
+						disabled={previewLoading}
+						className="h-8 gap-2 bg-background hover:bg-accent hover:text-accent-foreground transition-all"
+					>
+						{previewLoading ? (
+							<Loader2 className="w-3.5 h-3.5 animate-spin" />
+						) : (
+							<RefreshCw className="w-3.5 h-3.5" />
+						)}
+						刷新
+					</Button>
+				}
+			/>
 
 			{previewLoading && !previewContent ? (
 				<div className="flex-1 flex items-center justify-center rounded-xl bg-muted/10 p-8">

@@ -12,6 +12,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatTraffic, getTrafficBarColor, parseTrafficInfo, formatDateTime } from '@/app/admin/users/utils/userUtils';
+import { PanelTopBar } from './PanelTopBar';
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
@@ -22,17 +23,14 @@ export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-medium">订阅加载管理</h3>
-                    <p className="text-sm text-muted-foreground">
-                        - 共 {items.length} 个订阅源。可以单独预更新
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        - 当订阅较多的时候，才需要关心此面板，绝大多数情况请直接忽略
-                    </p>
-                </div>
-            </div>
+            <PanelTopBar
+                description={
+                    <div className="space-y-1">
+                        <div>共 {items.length} 个订阅源，可单独预更新。</div>
+                        <div>订阅源较多时再使用，绝大多数情况可忽略。</div>
+                    </div>
+                }
+            />
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {items.length === 0 && (
