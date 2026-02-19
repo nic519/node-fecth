@@ -76,6 +76,8 @@ function AdminUsersContent() {
 						<UserFilters
 							searchTerm={searchTerm}
 							loading={loading}
+							totalUsers={users.length}
+							filteredCount={filteredUsers.length}
 							onSearchTermChange={setSearchTerm}
 							onRefresh={fetchUsers}
 							onAddUser={addUserModal.open}
