@@ -203,17 +203,19 @@ export function TemplateEditor({
 
 				{/* YAML 编辑器 - 无边框，透明背景 */}
 				<div className="flex-1 min-h-0 relative">
-					<YamlEditor
-						key={selectedTemplate?.id}
-						value={currentConfigContent}
-						onChange={onUpdateConfigContent}
-						height="100%"
-						readOnly={!isEditing}
-						onValidate={onValidate}
-						bordered={false}
-						transparent={true}
-						className="bg-transparent"
-					/>
+					<div className="absolute inset-0">
+						<YamlEditor
+							key={selectedTemplate?.id}
+							value={currentConfigContent}
+							onChange={onUpdateConfigContent}
+							height="100%"
+							readOnly={!isEditing}
+							onValidate={onValidate}
+							bordered={false}
+							transparent={true}
+							className="bg-transparent"
+						/>
+					</div>
 				</div>
 
 				{/* 验证错误详情 - 底部抽屉式 */}

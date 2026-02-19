@@ -103,7 +103,7 @@ function AdminTemplatesContent() {
 							</AdminSidePanel>
 						}
 						content={
-							<div className="min-h-[70vh] overflow-hidden flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm">
+							<div className="h-[calc(100vh-8rem)] overflow-hidden flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm">
 								<TemplateEditor
 									selectedTemplate={selectedTemplate}
 									isEditing={isEditing}

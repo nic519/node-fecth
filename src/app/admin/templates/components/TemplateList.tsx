@@ -25,26 +25,30 @@ export function TemplateList({ templates, onSelectTemplate }: TemplateListProps)
 	}
 
 	return (
-		<div className="space-y-1">
+		<div className="space-y-0.5">
 			{templates.map((template) => (
 				<div
 					key={template.id}
 					className={cn(
-						"cursor-pointer transition-all relative group px-3 py-2 rounded-md",
+						"cursor-pointer transition-colors relative group px-2 py-1.5 rounded-sm select-none",
 						template.isSelected
-							? "bg-accent text-accent-foreground"
-							: "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+							? "bg-accent/80 text-accent-foreground font-medium"
+							: "hover:bg-accent/40 text-muted-foreground hover:text-foreground"
 					)}
 					onClick={() => onSelectTemplate(String(template.id))}
 				>
-					<div className="flex justify-between items-center gap-2">
-						<div className="flex-1 min-w-0">
-							<div className="flex items-center gap-2">
-								<h3 className={cn("text-sm font-medium truncate transition-colors", template.isSelected ? "text-primary" : "text-foreground")}>
-									{template.name}
-								</h3>
-							</div>
+					<div className="flex flex-col gap-0.5 min-w-0">
+						<div className="flex items-center justify-between gap-2">
+							<span className="text-sm truncate leading-none">
+								{template.name}
+							</span>
 						</div>
+						<p className={cn(
+							"text-xs truncate transition-colors",
+							template.isSelected ? "text-accent-foreground/70" : "text-muted-foreground/60 group-hover:text-muted-foreground/80"
+						)}>
+							{template.description || '无描述'}
+						</p>
 					</div>
 				</div>
 			))}
