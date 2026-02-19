@@ -73,7 +73,7 @@ export function TemplateEditor({
 	return (
 		<Card className="flex flex-col h-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-border/60 shadow-sm rounded-xl overflow-hidden">
 			{/* 头部 - 标题与操作按钮 */}
-			<CardHeader className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-16 border-b border-border/40">
+			<CardHeader className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-16 border-b border-border/40 shrink-0">
 				{/* 左侧 - 标题/编辑框 */}
 				<div className="flex-1 mr-4">
 					{isEditing ? (
@@ -157,7 +157,7 @@ export function TemplateEditor({
 			{/* 编辑器区域 */}
 			<CardContent className="flex-1 flex flex-col px-6 pb-6 pt-6 overflow-hidden">
 				{/* 描述编辑区域 */}
-				<div className="mb-4">
+				<div className="mb-4 shrink-0">
 					{isEditing ? (
 						<div className="space-y-1.5">
 							<Label className="text-xs font-medium text-muted-foreground">模板描述</Label>
@@ -182,7 +182,7 @@ export function TemplateEditor({
 
 				{/* 语法错误提示 */}
 				{validationErrors.length > 0 && (
-					<div className="mb-3 flex items-center text-sm text-destructive font-medium animate-pulse">
+					<div className="mb-3 flex items-center text-sm text-destructive font-medium animate-pulse shrink-0">
 						<svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fillRule="evenodd"
@@ -195,7 +195,7 @@ export function TemplateEditor({
 				)}
 
 				{/* YAML 编辑器 - 占据剩余空间 */}
-				<div className="flex-1 min-h-[300px] border border-border/60 rounded-xl overflow-hidden shadow-inner">
+				<div className="flex-1 min-h-[200px] border border-border/60 rounded-xl overflow-hidden shadow-inner">
 					<YamlEditor
 						key={selectedTemplate?.id}
 						value={currentConfigContent}
@@ -208,7 +208,7 @@ export function TemplateEditor({
 
 				{/* 验证错误详情 */}
 				{validationErrors.length > 0 && (
-					<div className="mt-4 p-3 bg-destructive/5 border border-destructive/20 rounded-lg">
+					<div className="mt-4 p-3 bg-destructive/5 border border-destructive/20 rounded-lg shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
 						<h4 className="text-sm font-medium text-destructive mb-2">语法错误：</h4>
 						<ul className="text-sm text-destructive/80 space-y-1">
 							{validationErrors.map((error, index) => (
@@ -220,9 +220,6 @@ export function TemplateEditor({
 						</ul>
 					</div>
 				)}
-
-				{/* 操作按钮 */}
-				{/* 底部操作栏已移至顶部 */}
 			</CardContent>
 		</Card>
 	);

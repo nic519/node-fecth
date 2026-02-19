@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, Users, FileText, Home } from 'lucide-react';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export interface NavigationBarProps {
 	superToken: string;
@@ -33,13 +34,13 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 					: '管理员控制台');
 
 	return (
-		<nav className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
+		<nav className="sticky top-0 z-40 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-border/40 shadow-sm">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-3">
 						<AcmeLogo />
-						<div className="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
-						<p className="font-bold text-gray-900 text-lg tracking-tight hidden sm:block">{pageTitle}</p>
+						<div className="h-6 w-px bg-border/60 mx-1 hidden sm:block"></div>
+						<p className="font-bold text-foreground text-lg tracking-tight hidden sm:block">{pageTitle}</p>
 					</div>
 
 					<div className="flex items-center gap-1 sm:gap-6 justify-center flex-1">
@@ -48,8 +49,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'dashboard'
-									? 'text-blue-600 bg-blue-50'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+									? 'text-primary bg-primary/10'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
 							)}
 						>
 							<LayoutDashboard className="w-4 h-4" />
@@ -60,8 +61,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'users'
-									? 'text-blue-600 bg-blue-50'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+									? 'text-primary bg-primary/10'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
 							)}
 						>
 							<Users className="w-4 h-4" />
@@ -72,8 +73,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'templates'
-									? 'text-blue-600 bg-blue-50'
-									: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+									? 'text-primary bg-primary/10'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
 							)}
 						>
 							<FileText className="w-4 h-4" />
@@ -81,14 +82,15 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 						</Link>
 					</div>
 
-					<div className="flex items-center justify-end">
+					<div className="flex items-center justify-end gap-2">
 						<Link
 							href="/"
-							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
 						>
 							<Home className="w-4 h-4" />
 							<span className="hidden sm:inline">返回首页</span>
 						</Link>
+						<ModeToggle />
 					</div>
 				</div>
 			</div>

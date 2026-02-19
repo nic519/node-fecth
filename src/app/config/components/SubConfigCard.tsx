@@ -7,6 +7,7 @@ import { AREA_CODES } from '@/config/proxy-area.config';
 import { Checkbox } from '@/components/ui/checkbox';
 import { memo } from 'react';
 import { Link, Flag, Globe, Trash2 } from 'lucide-react';
+import CountryFlag from 'react-world-flags';
 
 interface SubConfigCardProps {
     index: number;
@@ -86,7 +87,7 @@ export const SubConfigCard = memo(function SubConfigCard({
                                 包含地区 (Include Areas)
                             </Label>
                             <div className="flex flex-wrap gap-2 pt-2">
-                            {AREA_CODES.map((area: AreaCode) => {
+                                {AREA_CODES.map((area: AreaCode) => {
                                     const isChecked = item.includeArea?.includes(area) || false;
                                     return (
                                         <div key={`${index}-${area}`} className="flex items-center space-x-2">
@@ -98,9 +99,10 @@ export const SubConfigCard = memo(function SubConfigCard({
                                             />
                                             <Label
                                                 htmlFor={`sub-${index}-area-${area}`}
-                                                className="text-sm font-normal cursor-pointer"
+                                                className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
                                             >
-                                                {area}
+                                                <CountryFlag code={area} className="h-3 w-4 rounded-[2px] object-cover shadow-sm" />
+                                                <span>{area}</span>
                                             </Label>
                                         </div>
                                     );

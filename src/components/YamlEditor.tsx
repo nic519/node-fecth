@@ -6,6 +6,7 @@ import * as monaco from 'monaco-editor';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
+import { useTheme } from 'next-themes';
 
 interface YamlEditorProps {
 	value: string;
@@ -16,9 +17,10 @@ interface YamlEditorProps {
 	onValidate?: (errors: string[]) => void;
 }
 
-export function YamlEditor({ value, onChange, height = '500px', theme = 'light', readOnly = false, onValidate }: YamlEditorProps) {
+export function YamlEditor({ value, onChange, height = '500px', theme, readOnly = false, onValidate }: YamlEditorProps) {
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
+	const { resolvedTheme } = useTheme();
 
 	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
 		editorRef.current = editor;
@@ -170,6 +172,9 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 		}
 	}, [isFullscreen]);
 
+	const isDarkMode = (theme && (theme === 'dark' || theme === 'vs-dark')) || (!theme && resolvedTheme === 'dark');
+	const monacoTheme = isDarkMode ? 'vs-dark' : 'vs';
+
 	// 渲染编辑器内容
 	const renderEditor = (isFullscreenMode: boolean) => (
 		<>
@@ -178,7 +183,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 				language="yaml"
 				value={value}
 				onChange={(value) => onChange(value || '')}
-				theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+				theme={monacoTheme}
 				options={{
 					readOnly,
 					minimap: { enabled: false },
@@ -212,15 +217,13 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 				onMount={handleEditorDidMount}
 			/>
 
-			{/* 工具栏 */}
 			<div className={`absolute flex gap-2 z-[100] ${isFullscreenMode ? 'top-4 right-4' : 'top-2 right-6'}`}>
 				<button
 					onClick={toggleFullscreen}
-					className={`flex items-center justify-center backdrop-blur-sm border rounded transition-all ${
-						isFullscreenMode
-							? 'w-10 h-10 bg-white/95 border-gray-400 shadow-lg hover:bg-gray-100 hover:shadow-xl'
-							: 'px-3 py-1 text-xs bg-white/90 border-gray-300 shadow-sm hover:bg-gray-50'
-					}`}
+					className={`flex items-center justify-center backdrop-blur-sm border rounded transition-all ${isFullscreenMode
+							? 'w-10 h-10 bg-background/95 border-border/70 shadow-lg hover:bg-accent hover:shadow-xl text-foreground'
+							: 'px-3 py-1 text-xs bg-background/90 border-border/60 shadow-sm hover:bg-accent text-foreground'
+						}`}
 					title={isFullscreenMode ? '退出全屏 (Esc)' : '全屏编辑'}
 				>
 					{isFullscreenMode ? (
@@ -244,13 +247,18 @@ export function YamlEditor({ value, onChange, height = '500px', theme = 'light',
 
 	return (
 		<>
-			{/* 正常模式 */}
-			{!isFullscreen && <div className="relative border border-gray-300 rounded-lg overflow-hidden h-full">{renderEditor(false)}</div>}
+			{!isFullscreen && (
+				<div className="relative border border-border/60 rounded-lg overflow-hidden h-full bg-background">
+					{renderEditor(false)}
+				</div>
+			)}
 
-			{/* 全屏模式 - 使用 Portal 渲染到 body */}
 			{isFullscreen &&
 				createPortal(
-					<div className="fixed inset-0 w-screen h-screen bg-white overflow-hidden" style={{ zIndex: 9999, margin: 0, padding: 0 }}>
+					<div
+						className="fixed inset-0 w-screen h-screen bg-background overflow-hidden"
+						style={{ zIndex: 9999, margin: 0, padding: 0 }}
+					>
 						{renderEditor(true)}
 					</div>,
 					document.body,

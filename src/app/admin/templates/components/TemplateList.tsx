@@ -30,67 +30,70 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, on
 	}
 
 	return (
-		<div className="space-y-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+		<div className="flex flex-col divide-y divide-border/40">
 			{templates.map((template) => (
-				<Card
+				<div
 					key={template.id}
 					className={cn(
-						"cursor-pointer transition-all border relative group hover:shadow-lg backdrop-blur-sm rounded-xl overflow-hidden",
-                        template.isSelected 
-							? "bg-white dark:bg-slate-800 border-primary/50 ring-1 ring-primary/20 shadow-md" 
-							: "bg-white/80 dark:bg-slate-900/80 border-border/60 hover:border-primary/30 hover:bg-white dark:hover:bg-slate-800/80"
+						"cursor-pointer transition-all relative group px-4 py-3 hover:bg-muted/50",
+						template.isSelected 
+							? "bg-primary/5 dark:bg-primary/10" 
+							: "bg-transparent"
 					)}
-                    onClick={() => onSelectTemplate(String(template.id))}
+					onClick={() => onSelectTemplate(String(template.id))}
 				>
                     {template.isSelected && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-violet-600" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                     )}
-					<CardContent className="p-4">
-						<div className="flex justify-between items-start">
-							<div className="flex-1 mr-8">
-								<h3 className={cn("font-medium line-clamp-1 transition-colors", template.isSelected ? "text-primary" : "text-foreground group-hover:text-primary/80")}>
-                                    {template.name}
-                                </h3>
-								<p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-									{template.description || '无描述'}
-								</p>
-							</div>
+					<div className="flex justify-between items-start">
+						<div className="flex-1 mr-8">
+							<h3 className={cn("text-sm font-medium line-clamp-1 transition-colors", template.isSelected ? "text-primary" : "text-foreground")}>
+                                {template.name}
+                            </h3>
+							<p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+								{template.description || '无描述'}
+							</p>
+						</div>
+                        <div className="flex items-center gap-1 absolute right-2 top-2">
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 transition-all absolute right-10 top-2"
+                                className={cn(
+                                    "h-7 w-7 transition-all",
+                                    template.isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+                                    "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                                )}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onSelectTemplate(String(template.id));
                                     onStartEdit();
                                 }}
                             >
-                                <PencilIcon className="h-4 w-4" />
+                                <PencilIcon className="h-3.5 w-3.5" />
                             </Button>
-							<Button
+                            <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all absolute right-2 top-2"
+                                className={cn(
+                                    "h-7 w-7 transition-all",
+                                    template.isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+                                    "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                )}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onDeleteTemplate(String(template.id));
                                 }}
                             >
-                                <TrashIcon className="h-4 w-4" />
+                                <TrashIcon className="h-3.5 w-3.5" />
                             </Button>
-						</div>
-						<div className="mt-3 flex items-center gap-2">
-							<div className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono border border-border/40">
-								ID: {template.id}
-							</div>
-                            {template.isSelected && (
-                                <div className="text-[10px] bg-primary/10 px-2 py-0.5 rounded text-primary font-medium border border-primary/20">
-                                    编辑中
-                                </div>
-                            )}
-						</div>
-					</CardContent>
-				</Card>
+                        </div>
+					</div>
+					<div className="mt-1.5 flex items-center gap-2">
+						<span className="text-[10px] text-muted-foreground/60 font-mono">
+							#{template.id.substring(0, 8)}
+						</span>
+					</div>
+				</div>
 			))}
 		</div>
 	);

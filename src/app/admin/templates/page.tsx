@@ -79,34 +79,35 @@ function AdminTemplatesContent() {
 					</div>
 				) : (
 					/* 主要内容区域 - 左右布局 */
-					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start" style={{ minHeight: '700px' }}>
+					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start" style={{ height: 'calc(100vh - 140px)', minHeight: '600px' }}>
 						{/* 左侧 - 模板列表 */}
 						<AdminSidePanel
 							title="模板列表"
 							icon={FileText}
-							className="lg:col-span-1 h-fit"
+							className="lg:col-span-1 h-full flex flex-col"
 							action={
 								<Button
 									onClick={handleCreateTemplate}
 									size="sm"
-									variant="default"
-									className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-md transition-all duration-300"
+									className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-sm transition-all duration-300 h-8"
 								>
-									<PlusIcon className="w-4 h-4 mr-2" />
-									新建模板
+									<PlusIcon className="w-3.5 h-3.5 mr-1.5" />
+									新建
 								</Button>
 							}
 						>
-							<TemplateList
-								templates={templates}
-								onSelectTemplate={handleSelectTemplate}
-								onDeleteTemplate={handleDeleteTemplate}
-								onStartEdit={handleStartEdit}
-							/>
+							<div className="flex-1 overflow-hidden -mx-5 -my-6">
+								<TemplateList
+									templates={templates}
+									onSelectTemplate={handleSelectTemplate}
+									onDeleteTemplate={handleDeleteTemplate}
+									onStartEdit={handleStartEdit}
+								/>
+							</div>
 						</AdminSidePanel>
 
 						{/* 右侧 - 配置编辑器 */}
-						<div className="lg:col-span-3 flex flex-col">
+						<div className="lg:col-span-3 h-full overflow-hidden flex flex-col">
 							<TemplateEditor
 								selectedTemplate={selectedTemplate}
 								isEditing={isEditing}
