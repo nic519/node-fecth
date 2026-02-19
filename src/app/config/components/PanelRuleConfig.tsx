@@ -39,9 +39,11 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
-                <Label htmlFor="ruleUrl" className="flex items-center gap-2">
-                    <Link className="w-4 h-4" />
+            <div className="space-y-2 group">
+                <Label htmlFor="ruleUrl" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                    <div className="p-1 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                        <Link className="w-3.5 h-3.5" />
+                    </div>
                     规则模板 URL
                 </Label>
                 <Input
@@ -50,6 +52,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     onChange={(e) => handleChange('ruleUrl', e.target.value)}
                     placeholder='可选。Clash 格式的过滤规则文件 URL。'
                     readOnly={readOnly}
+                    className="transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                 />
                 <p className="text-sm text-muted-foreground">
                     不填写时默认使用：<a href={DEFAULT_RULE_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
@@ -61,7 +64,9 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <Label htmlFor="requiredFilters" className="text-base flex items-center gap-2">
-                        <ListFilter className="w-4 h-4" />
+                        <div className="p-1 rounded bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400">
+                            <ListFilter className="w-3.5 h-3.5" />
+                        </div>
                         需要的过滤项
                     </Label>
                     <div className="flex items-center space-x-2">
@@ -70,6 +75,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                             checked={enableCustomFilters}
                             onCheckedChange={handleFilterToggle}
                             disabled={readOnly}
+                            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-teal-500 data-[state=checked]:to-emerald-500"
                         />
                         <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground">
                             {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有'}
@@ -78,48 +84,58 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                 </div>
 
                 {enableCustomFilters ? (
-                    <div className="border rounded-md p-4 space-y-4 bg-background">
+                    <div className="border border-border/60 rounded-xl p-4 space-y-4 bg-muted/10 backdrop-blur-sm">
                         {loadingFilters ? (
                             <div className="flex items-center justify-center py-4 text-muted-foreground">
                                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
                                 正在加载过滤选项...
                             </div>
                         ) : filterError ? (
-                            <div className="text-destructive text-sm">
-                                加载失败: {filterError}
+                            <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                                <div className="font-semibold mb-1">加载失败</div>
+                                {filterError}
                                 <br />
-                                <span className="text-xs text-muted-foreground">请检查规则 URL 是否正确且允许跨域访问。</span>
+                                <span className="text-xs text-muted-foreground mt-1 block">请检查规则 URL 是否正确且允许跨域访问。</span>
                             </div>
                         ) : filterOptions.length === 0 ? (
                             <div className="text-muted-foreground text-sm">未找到可用的过滤选项。</div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-60 overflow-y-auto pr-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {filterOptions.map((option) => {
                                         const mandatory = isMandatory(option);
                                         const isChecked = mandatory || config.requiredFilters?.split(',').map(s => s.trim()).includes(option);
 
                                         return (
-                                            <div key={option} className="flex items-center space-x-2">
+                                            <div 
+                                                key={option} 
+                                                className={`flex items-center space-x-2 p-3 rounded-lg border transition-all duration-200 ${
+                                                    isChecked 
+                                                        ? 'bg-primary/5 border-primary/30 shadow-sm' 
+                                                        : 'bg-card border-border/40 hover:border-border/80 hover:bg-accent/50'
+                                                }`}
+                                            >
                                                 <Checkbox
                                                     id={`filter-${option}`}
                                                     checked={isChecked}
                                                     onCheckedChange={(checked) => !mandatory && handleFilterSelection(option, checked as boolean)}
                                                     disabled={readOnly || mandatory}
+                                                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                                 />
                                                 <Label
                                                     htmlFor={`filter-${option}`}
-                                                    className={`text-sm font-normal cursor-pointer ${mandatory ? 'text-muted-foreground' : ''}`}
+                                                    className={`text-sm font-medium cursor-pointer flex-1 ${mandatory ? 'text-muted-foreground' : ''}`}
                                                 >
                                                     {option}
-                                                    {mandatory && <span className="ml-1 text-xs text-primary">(必选)</span>}
+                                                    {mandatory && <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full border border-border/50">必选</span>}
                                                 </Label>
                                             </div>
                                         );
                                     })}
                                 </div>
                                 {(!config.requiredFilters || config.requiredFilters.length === 0) && (
-                                    <p className="text-sm text-destructive font-medium">
+                                    <p className="text-sm text-amber-600 dark:text-amber-500 font-medium bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md border border-amber-200 dark:border-amber-900/50 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                                         请至少选择一项，否则将无法生效 (视为未启用)。
                                     </p>
                                 )}
@@ -127,7 +143,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                         )}
                     </div>
                 ) : (
-                    <p className="text-sm text-muted-foreground border border-dashed rounded-lg p-4 text-center">
+                    <p className="text-sm text-muted-foreground border border-dashed border-border/60 rounded-xl p-6 text-center bg-muted/5">
                         未启用自定义过滤，将保留规则文件中的所有策略组。
                     </p>
                 )}
@@ -135,11 +151,20 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <Label>规则覆写</Label>
+                    <Label className="flex items-center gap-2">
+                        <div className="p-1 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+                            <Edit className="w-3.5 h-3.5" />
+                        </div>
+                        规则覆写
+                    </Label>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" disabled={readOnly}>
-                                <Edit className="w-4 h-4 mr-2" />
+                            <Button 
+                                size="sm" 
+                                disabled={readOnly}
+                                className="bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                            >
+                                <Edit className="w-3.5 h-3.5 mr-2" />
                                 编辑规则
                             </Button>
                         </DialogTrigger>

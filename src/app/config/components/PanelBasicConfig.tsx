@@ -61,16 +61,20 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
             {/* Main Configuration Section */}
             <div className="space-y-6">
                 <div className="space-y-1">
-                    <h3 className="text-lg font-medium flex items-center gap-2">
-                        <Settings2 className="w-5 h-5" />
+                    <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
+                        <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                            <Settings2 className="w-5 h-5" />
+                        </div>
                         基础设置
                     </h3>
                 </div>
 
                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="subscribe" className="text-base flex items-center gap-2">
-                            <Link className="w-4 h-4" />
+                    <div className="space-y-2 group">
+                        <Label htmlFor="subscribe" className="text-base flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                            <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                <Link className="w-3.5 h-3.5" />
+                            </div>
                             主订阅地址
                         </Label>
                         <Input
@@ -79,7 +83,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                             onChange={(e) => handleChange('subscribe', e.target.value)}
                             placeholder="https://example.com/subscription"
                             readOnly={readOnly}
-                            className="font-mono"
+                            className="font-mono transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                         />
                         <p className="text-sm text-muted-foreground">
                             必填。您的主要机场订阅链接，将作为配置的基础。
@@ -87,9 +91,11 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="fileName" className="flex items-center gap-2">
-                                <FileText className="w-4 h-4" />
+                        <div className="space-y-2 group">
+                            <Label htmlFor="fileName" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                <div className="p-1 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+                                    <FileText className="w-3.5 h-3.5" />
+                                </div>
                                 配置显示名
                             </Label>
                             <Input
@@ -98,15 +104,18 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                                 onChange={(e) => handleChange('fileName', e.target.value)}
                                 placeholder={uid ? `${uid}.yaml` : 'miho-cfg.yaml'}
                                 readOnly={readOnly}
+                                className="transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                             />
                             <p className="text-xs text-muted-foreground">
                                 生成的配置文件名 (默认为 {uid ? `${uid}.yaml` : 'miho-cfg.yaml'})
                             </p>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="excludeRegex" className="flex items-center gap-2">
-                                <Filter className="w-4 h-4" />
+                        <div className="space-y-2 group">
+                            <Label htmlFor="excludeRegex" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                <div className="p-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
+                                    <Filter className="w-3.5 h-3.5" />
+                                </div>
                                 节点排除正则
                             </Label>
                             <Input
@@ -115,7 +124,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                                 onChange={(e) => handleChange('excludeRegex', e.target.value)}
                                 placeholder="Standard|3.0x|2.0x"
                                 readOnly={readOnly}
-                                className="font-mono"
+                                className="font-mono transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                             />
                             <p className="text-xs text-muted-foreground">
                                 使用正则表达式排除不需要的节点
@@ -125,26 +134,27 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                 </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-border/60" />
 
             {/* Append Subscription Section */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-medium flex items-center gap-2">
-                            <ListPlus className="w-5 h-5" />
+                        <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
+                            <div className="p-1.5 rounded-md bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+                                <ListPlus className="w-5 h-5" />
+                            </div>
                             追加订阅列表
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mt-1 ml-9">
                             合并其他机场订阅，支持自定义筛选地区
                         </p>
                     </div>
                     <Button
-                        variant="outline"
                         size="sm"
                         onClick={handleAppendSubListAdd}
                         disabled={readOnly}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                     >
                         <Plus className="w-4 h-4" />
                         添加订阅源

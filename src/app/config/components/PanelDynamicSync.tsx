@@ -171,22 +171,26 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
 
                     <Button
                         size="sm"
-                        variant={isError ? "destructive" : "secondary"}
+                        variant="ghost"
                         onClick={onSync}
                         disabled={isLoading}
                         className={cn(
-                            "h-8 w-8 p-0 shrink-0 rounded-full transition-all",
-                            isSuccess && "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400"
+                            "h-8 w-8 p-0 shrink-0 rounded-full transition-all shadow-sm",
+                            isError 
+                                ? "bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 hover:scale-110"
+                                : isSuccess
+                                    ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                    : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-900/40 dark:hover:to-blue-800/40 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 active:scale-95"
                         )}
                     >
                         {isLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
                         ) : isSuccess ? (
                             <CheckCircle2 className="w-4 h-4" />
                         ) : isError ? (
-                            <RefreshCw className="w-4 h-4" /> // Show refresh icon on error to retry
+                            <RefreshCw className="w-4 h-4" />
                         ) : (
-                            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                            <RefreshCw className="w-4 h-4" />
                         )}
                     </Button>
                 </div>

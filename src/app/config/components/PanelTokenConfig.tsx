@@ -16,17 +16,26 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="space-y-1">
-                <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Key className="w-5 h-5" />
+                <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
+                    <div className="p-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                        <Key className="w-5 h-5" />
+                    </div>
                     访问令牌
                 </h3>
-                <p className="text-sm text-muted-foreground">- 配置用于访问管理面板的安全令牌，且**订阅地址链接也会变**</p>
+                <p className="text-sm text-muted-foreground ml-9">
+                    配置用于访问管理面板的安全令牌，且<span className="font-bold text-destructive">订阅地址链接也会变</span>
+                </p>
             </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="accessToken">Access Token</Label>
+            <div className="space-y-2 group">
+                <Label htmlFor="accessToken" className="text-base flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                    <div className="p-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                        <Key className="w-3.5 h-3.5" />
+                    </div>
+                    Access Token
+                </Label>
                 <div className="flex gap-2">
                     <div className="relative flex-1">
                         <Input
@@ -35,7 +44,7 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
                             onChange={(e) => handleChange('accessToken', e.target.value)}
                             placeholder="your-access-token"
                             readOnly={readOnly}
-                            className="font-mono pr-10"
+                            className="font-mono pr-10 transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                         />
                     </div>
                 </div>

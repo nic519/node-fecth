@@ -3,6 +3,7 @@ import { AcmeLogo } from '../../../components/NavigationBar';
 import { ConfigTab } from './ConfigForm';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 interface HeaderProps {
 	validationErrors: string[];
@@ -25,14 +26,14 @@ export function Header({ validationErrors, activeTab, onTabChange }: HeaderProps
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-3">
-							<div className="bg-primary/10 p-1.5 rounded-lg">
+							<div className="bg-gradient-to-br from-primary/20 to-violet-500/20 p-1.5 rounded-lg border border-primary/10">
 								<AcmeLogo className="w-6 h-6 text-primary" />
 							</div>
-							<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight">配置管理</h1>
+							<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-400 tracking-tight">配置管理</h1>
 						</div>
 						{validationErrors.length === 0 && (
-							<div className="hidden md:flex items-center text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-900/50">
-								<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-emerald-600 dark:text-emerald-500" />
+							<div className="hidden md:flex items-center text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm shadow-emerald-500/10">
+								<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-emerald-600 dark:text-emerald-500 animate-[pulse_3s_ease-in-out_infinite]" />
 								配置格式正确
 							</div>
 						)}
@@ -47,8 +48,8 @@ export function Header({ validationErrors, activeTab, onTabChange }: HeaderProps
 								onClick={() => onTabChange(item.id)}
 								className={cn(
 									"gap-2 transition-all duration-300 ease-in-out rounded-lg",
-									activeTab === item.id 
-										? "bg-white dark:bg-slate-800 text-primary font-semibold shadow-sm ring-1 ring-black/5 dark:ring-white/10" 
+									activeTab === item.id
+										? "bg-white dark:bg-slate-800 text-primary font-semibold shadow-sm ring-1 ring-black/5 dark:ring-white/10"
 										: "text-muted-foreground hover:text-foreground hover:bg-transparent"
 								)}
 							>
@@ -57,6 +58,10 @@ export function Header({ validationErrors, activeTab, onTabChange }: HeaderProps
 							</Button>
 						))}
 					</nav>
+
+					<div className="flex items-center gap-2">
+						<ModeToggle />
+					</div>
 				</div>
 			</div>
 		</header>

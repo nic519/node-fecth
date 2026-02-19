@@ -88,10 +88,10 @@ export function ConfigEditor({
 								onClick={onSave}
 								disabled={saving || validationErrors.length > 0}
 								className={cn(
-									"w-full font-medium shadow-md transition-all duration-300",
+									"w-full font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]",
 									saveSuccess 
-										? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20" 
-										: "bg-gradient-to-r from-primary to-violet-600 hover:to-violet-700 text-white shadow-primary/25 hover:shadow-primary/40"
+										? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/25" 
+										: "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 text-white shadow-indigo-500/25 hover:shadow-indigo-500/40"
 								)}
 							>
 								{saving ? (
