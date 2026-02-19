@@ -35,13 +35,16 @@ export function TemplateList({ templates, onSelectTemplate, onDeleteTemplate, on
 				<Card
 					key={template.id}
 					className={cn(
-						"cursor-pointer transition-all border relative group hover:shadow-lg backdrop-blur-sm rounded-xl",
+						"cursor-pointer transition-all border relative group hover:shadow-lg backdrop-blur-sm rounded-xl overflow-hidden",
                         template.isSelected 
 							? "bg-white dark:bg-slate-800 border-primary/50 ring-1 ring-primary/20 shadow-md" 
-							: "bg-white/60 dark:bg-slate-900/60 border-border/60 hover:border-primary/30 hover:bg-white/80 dark:hover:bg-slate-800/80"
+							: "bg-white/80 dark:bg-slate-900/80 border-border/60 hover:border-primary/30 hover:bg-white dark:hover:bg-slate-800/80"
 					)}
                     onClick={() => onSelectTemplate(String(template.id))}
 				>
+                    {template.isSelected && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-violet-600" />
+                    )}
 					<CardContent className="p-4">
 						<div className="flex justify-between items-start">
 							<div className="flex-1 mr-8">

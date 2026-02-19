@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, Filter, RefreshCw, UserPlus, Download, Upload } from 'lucide-react';
 
+import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
+
 export interface UserFiltersProps {
     searchTerm: string;
     loading: boolean;
@@ -27,14 +29,7 @@ export function UserFilters({
     onImport,
 }: UserFiltersProps) {
     return (
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-5 rounded-xl shadow-sm border border-border/60">
-            <div className="flex items-center gap-2 mb-6">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                    <Filter className="h-5 w-5 text-primary" />
-                </div>
-                <h2 className="font-semibold text-foreground">筛选与操作</h2>
-            </div>
-
+        <AdminSidePanel title="筛选与操作" icon={Filter} className="h-fit">
             <div className="space-y-6">
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">搜索用户</label>
@@ -69,7 +64,7 @@ export function UserFilters({
                     {onAddUser && (
                         <Button
                             onClick={onAddUser}
-                            className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
+                            className="w-full justify-start bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-md transition-all duration-300"
                         >
                             <UserPlus className="mr-2 h-4 w-4" />
                             添加新用户
@@ -78,8 +73,8 @@ export function UserFilters({
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-border/60">
-                     <label className="text-sm font-medium text-muted-foreground">数据迁移</label>
-                     {onExport && (
+                    <label className="text-sm font-medium text-muted-foreground">数据迁移</label>
+                    {onExport && (
                         <Button
                             onClick={onExport}
                             disabled={loading}
@@ -89,9 +84,9 @@ export function UserFilters({
                             <Download className="mr-2 h-4 w-4" />
                             导出配置
                         </Button>
-                     )}
-                     
-                     {onImport && (
+                    )}
+
+                    {onImport && (
                         <Button
                             onClick={onImport}
                             disabled={loading}
@@ -101,9 +96,9 @@ export function UserFilters({
                             <Upload className="mr-2 h-4 w-4" />
                             导入配置
                         </Button>
-                     )}
+                    )}
                 </div>
             </div>
-        </div>
+        </AdminSidePanel>
     );
 }

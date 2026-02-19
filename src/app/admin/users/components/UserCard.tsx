@@ -110,8 +110,8 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
         onClick={() => onUserAction('view', user.uid, user.accessToken)}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-            <User className="h-5 w-5 text-primary" />
+          <div className="p-2 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg shadow-sm group-hover:shadow-md transition-all">
+            <User className="h-5 w-5 text-white" />
           </div>
           <div>
             <div className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">

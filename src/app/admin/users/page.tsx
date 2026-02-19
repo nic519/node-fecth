@@ -72,17 +72,15 @@ function AdminUsersContent() {
 			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 					{/* 左侧：筛选和操作 */}
-					<div className="lg:col-span-1 sticky top-24 z-10">
-						<UserFilters
-							searchTerm={searchTerm}
-							loading={loading}
-							onSearchTermChange={setSearchTerm}
-							onRefresh={fetchUsers}
-							onAddUser={addUserModal.open}
-                            onExport={handleExport}
-                            onImport={importModal.open}
-						/>
-					</div>
+					<UserFilters
+						searchTerm={searchTerm}
+						loading={loading}
+						onSearchTermChange={setSearchTerm}
+						onRefresh={fetchUsers}
+						onAddUser={addUserModal.open}
+						onExport={handleExport}
+						onImport={importModal.open}
+					/>
 
 					{/* 右侧：列表和数据 */}
 					<div className="lg:col-span-3 space-y-6">

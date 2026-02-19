@@ -24,7 +24,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import {
   Dialog,
   DialogContent,
@@ -86,75 +87,65 @@ export function LogViewer({ superToken }: LogViewerProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
       {/* Left Sidebar - Filters */}
-      <div className="lg:col-span-1 sticky top-24 z-10">
-        <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-          <CardHeader className="border-b border-border/40 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <RefreshCw className="h-5 w-5 text-primary" />
-              </div>
-              <CardTitle className="text-lg font-semibold text-foreground">日志筛选</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">日志级别</label>
-              <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
-                <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
-                  <SelectValue placeholder="日志级别" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部级别</SelectItem>
-                  <SelectItem value="info">Info</SelectItem>
-                  <SelectItem value="warn">Warn</SelectItem>
-                  <SelectItem value="error">Error</SelectItem>
-                  <SelectItem value="audit">Audit</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <AdminSidePanel title="日志筛选" icon={Filter} className="lg:col-span-1 h-fit">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">日志级别</label>
+            <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
+              <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
+                <SelectValue placeholder="日志级别" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部级别</SelectItem>
+                <SelectItem value="info">Info</SelectItem>
+                <SelectItem value="warn">Warn</SelectItem>
+                <SelectItem value="error">Error</SelectItem>
+                <SelectItem value="audit">Audit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">事件类型</label>
-              <Input
-                placeholder="输入事件类型..."
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">事件类型</label>
+            <Input
+              placeholder="输入事件类型..."
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">用户ID</label>
-              <Input
-                placeholder="输入用户ID..."
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">用户ID</label>
+            <Input
+              placeholder="输入用户ID..."
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
+            />
+          </div>
 
-            <div className="pt-4 space-y-3 border-t border-border/40">
-              <Button
-                onClick={handleSearch}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
-              >
-                搜索日志
-              </Button>
-              <Button
-                variant="outline"
-                onClick={fetchLogs}
-                disabled={loading}
-                className="w-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                刷新列表
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="pt-4 space-y-3 border-t border-border/40">
+            <Button
+              onClick={handleSearch}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
+            >
+              搜索日志
+            </Button>
+            <Button
+              variant="outline"
+              onClick={fetchLogs}
+              disabled={loading}
+              className="w-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              刷新列表
+            </Button>
+          </div>
+        </div>
+      </AdminSidePanel>
 
       {/* Right Content - Table */}
       <div className="lg:col-span-3">
