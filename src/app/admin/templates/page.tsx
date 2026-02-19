@@ -57,14 +57,11 @@ function AdminTemplatesContent() {
 	} = useTemplateManagement({ superToken });
 
 	return (
-		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
-			{/* Decorative background gradient */}
-			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
-
+		<div className="min-h-screen bg-background">
 			{/* 导航栏 */}
 			<NavigationBar superToken={superToken} currentPage="templates" />
 
-			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+			<main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8 h-[calc(100vh-64px)]">
 				{/* 错误信息 */}
 				{error && (
 					<div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
@@ -74,40 +71,42 @@ function AdminTemplatesContent() {
 
 				{/* 加载状态 */}
 				{loading && !templates.length ? (
-					<div className="flex items-center justify-center" style={{ height: 'calc(100vh - 180px)', minHeight: '700px' }}>
+					<div className="flex items-center justify-center h-full">
 						<Loading message="加载中..." />
 					</div>
 				) : (
 					/* 主要内容区域 - 左右布局 */
-					<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start" style={{ height: 'calc(100vh - 140px)', minHeight: '600px' }}>
+					<div className="grid grid-cols-12 gap-6 h-full">
 						{/* 左侧 - 模板列表 */}
-						<AdminSidePanel
-							title="模板列表"
-							icon={FileText}
-							className="lg:col-span-1 h-full flex flex-col"
-							action={
-								<Button
-									onClick={handleCreateTemplate}
-									size="sm"
-									className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-sm transition-all duration-300 h-8"
-								>
-									<PlusIcon className="w-3.5 h-3.5 mr-1.5" />
-									新建
-								</Button>
-							}
-						>
-							<div className="flex-1 overflow-hidden -mx-5 -my-6">
-								<TemplateList
-									templates={templates}
-									onSelectTemplate={handleSelectTemplate}
-									onDeleteTemplate={handleDeleteTemplate}
-									onStartEdit={handleStartEdit}
-								/>
-							</div>
-						</AdminSidePanel>
+						<div className="col-span-12 lg:col-span-3 flex flex-col h-full">
+							<AdminSidePanel
+								title="模板列表"
+								icon={FileText}
+								className="h-full flex flex-col border-none shadow-none bg-transparent p-0"
+								action={
+									<Button
+										onClick={handleCreateTemplate}
+										size="sm"
+										className="h-8 px-3 text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
+									>
+										<PlusIcon className="w-3.5 h-3.5 mr-1.5" />
+										新建
+									</Button>
+								}
+							>
+								<div className="flex-1 overflow-y-auto pr-2 -mr-2">
+									<TemplateList
+										templates={templates}
+										onSelectTemplate={handleSelectTemplate}
+										onDeleteTemplate={handleDeleteTemplate}
+										onStartEdit={handleStartEdit}
+									/>
+								</div>
+							</AdminSidePanel>
+						</div>
 
 						{/* 右侧 - 配置编辑器 */}
-						<div className="lg:col-span-3 h-full overflow-hidden flex flex-col">
+						<div className="col-span-12 lg:col-span-9 h-full overflow-hidden flex flex-col bg-card rounded-xl border shadow-sm">
 							<TemplateEditor
 								selectedTemplate={selectedTemplate}
 								isEditing={isEditing}

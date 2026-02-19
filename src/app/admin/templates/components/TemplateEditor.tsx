@@ -71,22 +71,29 @@ export function TemplateEditor({
 	}
 
 	return (
-		<Card className="flex flex-col h-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-border/60 shadow-sm rounded-xl overflow-hidden">
+		<div className="flex flex-col h-full bg-transparent">
 			{/* 头部 - 标题与操作按钮 */}
-			<CardHeader className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-16 border-b border-border/40 shrink-0">
+			<div className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-14 border-b border-border/40 shrink-0">
 				{/* 左侧 - 标题/编辑框 */}
 				<div className="flex-1 mr-4">
 					{isEditing ? (
 						<Input
 							value={selectedTemplate.name}
 							onChange={(e) => onUpdateTemplate('name', e.target.value)}
-							className="max-w-md font-medium text-lg h-9 bg-muted/30 border-border/60 focus:bg-background focus-visible:ring-primary/20"
+							className="max-w-md font-medium text-lg h-9 bg-transparent border-transparent hover:bg-muted/50 focus:bg-background focus:border-border transition-all px-2 -ml-2"
 							placeholder="输入模板名称"
 						/>
 					) : (
-						<h3 className="text-lg font-bold text-foreground truncate bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600" title={selectedTemplate.name}>
-							{selectedTemplate.name}
-						</h3>
+						<div className="flex flex-col">
+							<h3 className="text-lg font-bold text-foreground truncate" title={selectedTemplate.name}>
+								{selectedTemplate.name}
+							</h3>
+							{selectedTemplate.description && (
+								<p className="text-xs text-muted-foreground truncate max-w-xl">
+									{selectedTemplate.description}
+								</p>
+							)}
+						</div>
 					)}
 				</div>
 
@@ -97,12 +104,12 @@ export function TemplateEditor({
 							<Button
 								onClick={onStartEdit}
 								size="sm"
-								className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm mr-2 transition-all"
+								className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-none mr-2"
 							>
-								<PencilIcon className="w-4 h-4 mr-2" />
+								<PencilIcon className="w-3.5 h-3.5 mr-1.5" />
 								编辑
 							</Button>
-							<div className="w-px h-6 bg-border/60 mx-2" />
+							<div className="w-px h-4 bg-border/60 mx-1" />
 						</>
 					)}
 
@@ -111,79 +118,69 @@ export function TemplateEditor({
 						size="icon"
 						onClick={onDownloadTemplate}
 						title="下载配置"
-						className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<DocumentArrowDownIcon className="w-5 h-5" />
+						<DocumentArrowDownIcon className="w-4 h-4" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
 						onClick={onCopyConfigContent}
 						title="复制配置"
-						className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<ClipboardDocumentIcon className="w-5 h-5" />
+						<ClipboardDocumentIcon className="w-4 h-4" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
 						onClick={onCopyTemplateUrl}
 						title="复制链接"
-						className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<LinkIcon className="w-5 h-5" />
+						<LinkIcon className="w-4 h-4" />
 					</Button>
 
 					{isEditing && (
 						<>
-							<div className="w-px h-6 bg-border/60 mx-2" />
-							<Button onClick={onReset} variant="secondary" size="sm" className="hover:bg-muted/80">
+							<div className="w-px h-4 bg-border/60 mx-1" />
+							<Button onClick={onReset} variant="ghost" size="sm" className="h-8 hover:bg-muted/80">
 								取消
 							</Button>
 							<Button
 								onClick={onSave}
 								disabled={saving || validationErrors.length > 0}
 								size="sm"
-								className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm disabled:opacity-50 transition-all"
+								className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-none disabled:opacity-50"
 							>
-								{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-								保存配置
+								{saving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+								保存
 							</Button>
 						</>
 					)}
 				</div>
-			</CardHeader>
+			</div>
 
 			{/* 编辑器区域 */}
-			<CardContent className="flex-1 flex flex-col px-6 pb-6 pt-6 overflow-hidden">
-				{/* 描述编辑区域 */}
-				<div className="mb-4 shrink-0">
-					{isEditing ? (
-						<div className="space-y-1.5">
-							<Label className="text-xs font-medium text-muted-foreground">模板描述</Label>
-							<Textarea
-								value={selectedTemplate.description || ''}
-								onChange={(e) => onUpdateTemplate('description', e.target.value)}
-								placeholder="请输入模板描述..."
-								rows={2}
-								className="resize-none text-sm bg-muted/30 border-border/60 focus:bg-background focus-visible:ring-primary/20"
-							/>
-						</div>
-					) : (
-						selectedTemplate.description && (
-							<div className="bg-muted/30 p-3 rounded-lg border border-border/40">
-								<p className="text-sm text-muted-foreground leading-relaxed">
-									{selectedTemplate.description}
-								</p>
-							</div>
-						)
-					)}
-				</div>
+			<div className="flex-1 flex flex-col overflow-hidden relative group">
+				{/* 描述编辑区域 (仅编辑模式显示) */}
+				{isEditing && (
+					<div className="px-6 py-4 border-b border-border/40 bg-muted/10 shrink-0">
+						<Label className="text-xs font-medium text-muted-foreground mb-1.5 block">模板描述</Label>
+						<Textarea
+							value={selectedTemplate.description || ''}
+							onChange={(e) => onUpdateTemplate('description', e.target.value)}
+							placeholder="请输入模板描述..."
+							rows={1}
+							className="resize-none text-sm min-h-[38px] bg-transparent border-border/40 focus:bg-background focus:border-primary/50 transition-all"
+						/>
+					</div>
+				)}
 
-				{/* 语法错误提示 */}
+				{/* 语法错误提示 - 浮动在编辑器上方 */}
 				{validationErrors.length > 0 && (
-					<div className="mb-3 flex items-center text-sm text-destructive font-medium animate-pulse shrink-0">
-						<svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+					<div className="absolute top-2 right-4 z-20 bg-destructive/90 text-destructive-foreground text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm animate-in fade-in slide-in-from-top-2 flex items-center">
+						<svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fillRule="evenodd"
 								d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -194,8 +191,8 @@ export function TemplateEditor({
 					</div>
 				)}
 
-				{/* YAML 编辑器 - 占据剩余空间 */}
-				<div className="flex-1 min-h-[200px] border border-border/60 rounded-xl overflow-hidden shadow-inner">
+				{/* YAML 编辑器 - 无边框，透明背景 */}
+				<div className="flex-1 min-h-0 relative">
 					<YamlEditor
 						key={selectedTemplate?.id}
 						value={currentConfigContent}
@@ -203,24 +200,27 @@ export function TemplateEditor({
 						height="100%"
 						readOnly={!isEditing}
 						onValidate={onValidate}
+						bordered={false}
+						transparent={true}
+						className="bg-transparent"
 					/>
 				</div>
 
-				{/* 验证错误详情 */}
+				{/* 验证错误详情 - 底部抽屉式 */}
 				{validationErrors.length > 0 && (
-					<div className="mt-4 p-3 bg-destructive/5 border border-destructive/20 rounded-lg shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
-						<h4 className="text-sm font-medium text-destructive mb-2">语法错误：</h4>
-						<ul className="text-sm text-destructive/80 space-y-1">
+					<div className="absolute bottom-0 left-0 right-0 bg-destructive/10 border-t border-destructive/20 backdrop-blur-md p-3 max-h-[150px] overflow-y-auto z-10">
+						<h4 className="text-xs font-medium text-destructive mb-1.5">语法错误详情：</h4>
+						<ul className="text-xs text-destructive/90 space-y-1 font-mono">
 							{validationErrors.map((error, index) => (
 								<li key={index} className="flex items-start">
-									<span className="mr-2">•</span>
+									<span className="mr-2 opacity-70">•</span>
 									<span>{error}</span>
 								</li>
 							))}
 						</ul>
 					</div>
 				)}
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }

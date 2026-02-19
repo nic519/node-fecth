@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
 import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 
 interface YamlEditorProps {
 	value: string;
@@ -15,9 +16,22 @@ interface YamlEditorProps {
 	theme?: 'light' | 'dark' | 'vs-dark';
 	readOnly?: boolean;
 	onValidate?: (errors: string[]) => void;
+	bordered?: boolean;
+	className?: string;
+	transparent?: boolean;
 }
 
-export function YamlEditor({ value, onChange, height = '500px', theme, readOnly = false, onValidate }: YamlEditorProps) {
+export function YamlEditor({
+	value,
+	onChange,
+	height = '500px',
+	theme,
+	readOnly = false,
+	onValidate,
+	bordered = true,
+	className = '',
+	transparent = false
+}: YamlEditorProps) {
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { resolvedTheme } = useTheme();
@@ -172,8 +186,31 @@ export function YamlEditor({ value, onChange, height = '500px', theme, readOnly 
 		}
 	}, [isFullscreen]);
 
+	const handleBeforeMount = (monaco: any) => {
+		if (transparent) {
+			monaco.editor.defineTheme('transparent-dark', {
+				base: 'vs-dark',
+				inherit: true,
+				rules: [],
+				colors: {
+					'editor.background': '#00000000',
+				},
+			});
+			monaco.editor.defineTheme('transparent-light', {
+				base: 'vs',
+				inherit: true,
+				rules: [],
+				colors: {
+					'editor.background': '#00000000',
+				},
+			});
+		}
+	};
+
 	const isDarkMode = (theme && (theme === 'dark' || theme === 'vs-dark')) || (!theme && resolvedTheme === 'dark');
-	const monacoTheme = isDarkMode ? 'vs-dark' : 'vs';
+	const monacoTheme = transparent
+		? (isDarkMode ? 'transparent-dark' : 'transparent-light')
+		: (isDarkMode ? 'vs-dark' : 'vs');
 
 	// 渲染编辑器内容
 	const renderEditor = (isFullscreenMode: boolean) => (
@@ -184,6 +221,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme, readOnly 
 				value={value}
 				onChange={(value) => onChange(value || '')}
 				theme={monacoTheme}
+				beforeMount={handleBeforeMount}
 				options={{
 					readOnly,
 					minimap: { enabled: false },
@@ -221,8 +259,8 @@ export function YamlEditor({ value, onChange, height = '500px', theme, readOnly 
 				<button
 					onClick={toggleFullscreen}
 					className={`flex items-center justify-center backdrop-blur-sm border rounded transition-all ${isFullscreenMode
-							? 'w-10 h-10 bg-background/95 border-border/70 shadow-lg hover:bg-accent hover:shadow-xl text-foreground'
-							: 'px-3 py-1 text-xs bg-background/90 border-border/60 shadow-sm hover:bg-accent text-foreground'
+						? 'w-10 h-10 bg-background/95 border-border/70 shadow-lg hover:bg-accent hover:shadow-xl text-foreground'
+						: 'px-3 py-1 text-xs bg-background/90 border-border/60 shadow-sm hover:bg-accent text-foreground'
 						}`}
 					title={isFullscreenMode ? '退出全屏 (Esc)' : '全屏编辑'}
 				>
@@ -248,7 +286,7 @@ export function YamlEditor({ value, onChange, height = '500px', theme, readOnly 
 	return (
 		<>
 			{!isFullscreen && (
-				<div className="relative border border-border/60 rounded-lg overflow-hidden h-full bg-background">
+				<div className={cn("relative h-full overflow-hidden", bordered && "border border-border/60 rounded-lg bg-background", className)}>
 					{renderEditor(false)}
 				</div>
 			)}

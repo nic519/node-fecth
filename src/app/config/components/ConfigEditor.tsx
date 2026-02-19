@@ -5,7 +5,7 @@ import { ValidationMessage } from './ValidationMessage';
 import { ConfigForm, ConfigTab } from './ConfigForm';
 import { UserConfig } from '@/types/openapi-schemas';
 import { PanelPreview } from './PanelPreview';
-import { User, Clock, CloudUpload, CheckCircle2, Loader2 } from 'lucide-react';
+import { User, Clock, CloudUpload, CheckCircle2, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
@@ -60,6 +60,21 @@ export function ConfigEditor({
 							</div>
 						</div>
 
+						{validationErrors.length === 0 && (
+							<>
+								<Separator className="bg-border/60" />
+								<div className="flex items-center gap-3">
+									<div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+										<CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-500 animate-[pulse_3s_ease-in-out_infinite]" />
+									</div>
+									<div className="flex flex-col">
+										<span className="text-xs font-medium text-muted-foreground">配置状态</span>
+										<span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">格式正确</span>
+									</div>
+								</div>
+							</>
+						)}
+
 						{lastSaved && (
 							<>
 								<Separator className="bg-border/60" />
@@ -89,8 +104,8 @@ export function ConfigEditor({
 								disabled={saving || validationErrors.length > 0}
 								className={cn(
 									"w-full font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]",
-									saveSuccess 
-										? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/25" 
+									saveSuccess
+										? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/25"
 										: "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 text-white shadow-indigo-500/25 hover:shadow-indigo-500/40"
 								)}
 							>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, RefreshCw } from 'lucide-react';
 import { YamlEditor } from '@/components/YamlEditor';
 
 interface PreviewPanelProps {
@@ -47,21 +47,31 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 
 	return (
 		<div className="h-full flex flex-col">
-			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-lg font-medium">配置预览</h3>
+			<div className="flex items-center justify-between mb-4 px-1">
+				<div className="flex items-center gap-2">
+					<div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary">
+						<Eye className="h-4 w-4" />
+					</div>
+					<h3 className="text-lg font-semibold tracking-tight">配置预览</h3>
+				</div>
 				<Button
 					variant="outline"
 					size="sm"
 					onClick={handlePreviewSubscribeURL}
 					disabled={previewLoading}
+					className="h-8 gap-2 bg-background hover:bg-accent hover:text-accent-foreground transition-all"
 				>
-					{previewLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+					{previewLoading ? (
+						<Loader2 className="w-3.5 h-3.5 animate-spin" />
+					) : (
+						<RefreshCw className="w-3.5 h-3.5" />
+					)}
 					刷新
 				</Button>
 			</div>
 
 			{previewLoading && !previewContent ? (
-				<div className="flex-1 flex items-center justify-center border border-border/60 rounded-xl bg-muted/30 p-8 backdrop-blur-sm">
+				<div className="flex-1 flex items-center justify-center rounded-xl bg-muted/10 p-8">
 					<div className="flex flex-col items-center gap-4 text-muted-foreground">
 						<Loader2 className="w-8 h-8 animate-spin text-primary" />
 						<span className="font-medium animate-pulse">正在生成配置...</span>
@@ -75,12 +85,12 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 					</div>
 				</div>
 			) : (
-				<div className="flex-1 border border-border/60 rounded-xl overflow-hidden relative shadow-sm">
+				<div className="flex-1 overflow-hidden relative">
 					{/* Add a loading overlay if reloading */}
 					{previewLoading && (
-						<div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center backdrop-blur-[2px] rounded-xl transition-all duration-300">
-							<div className="bg-background/80 p-4 rounded-full shadow-lg border border-border/40">
-								<Loader2 className="w-6 h-6 animate-spin text-primary" />
+						<div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px] transition-all duration-300">
+							<div className="bg-background/80 p-3 rounded-full shadow-lg border border-border/40">
+								<Loader2 className="w-5 h-5 animate-spin text-primary" />
 							</div>
 						</div>
 					)}
@@ -89,6 +99,9 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 						onChange={() => { }}
 						readOnly={true}
 						height="100%"
+						transparent={true}
+						bordered={false}
+						className="bg-transparent"
 					/>
 				</div>
 			)}

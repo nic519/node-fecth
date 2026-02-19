@@ -12,17 +12,17 @@ interface AdminSidePanelProps {
 
 export function AdminSidePanel({ title, icon: Icon, children, action, className }: AdminSidePanelProps) {
   return (
-    <div className={cn("bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-5 rounded-xl shadow-sm border border-border/60 sticky top-24 z-10", className)}>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-gradient-to-br from-primary to-violet-600 rounded-lg shadow-md">
-            <Icon className="h-5 w-5 text-white" />
+    <div className={cn("flex flex-col", className)}>
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
           </div>
-          <h2 className="font-semibold text-foreground">{title}</h2>
+          <h2 className="font-semibold text-lg text-foreground tracking-tight">{title}</h2>
         </div>
         {action && <div>{action}</div>}
       </div>
-      <div className="space-y-6">
+      <div className="flex-1 min-h-0">
         {children}
       </div>
     </div>

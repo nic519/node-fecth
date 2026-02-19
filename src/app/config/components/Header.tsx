@@ -1,4 +1,4 @@
-import { Settings, Shield, RefreshCw, Key, Eye, CheckCircle } from 'lucide-react';
+import { Settings, Shield, RefreshCw, Key, Eye } from 'lucide-react';
 import { AcmeLogo } from '../../../components/NavigationBar';
 import { ConfigTab } from './ConfigForm';
 import { Button } from '@/components/ui/button';
@@ -31,12 +31,6 @@ export function Header({ validationErrors, activeTab, onTabChange }: HeaderProps
 							</div>
 							<h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-400 tracking-tight">配置管理</h1>
 						</div>
-						{validationErrors.length === 0 && (
-							<div className="hidden md:flex items-center text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-sm shadow-emerald-500/10">
-								<CheckCircle className="w-3.5 h-3.5 mr-1.5 text-emerald-600 dark:text-emerald-500 animate-[pulse_3s_ease-in-out_infinite]" />
-								配置格式正确
-							</div>
-						)}
 					</div>
 
 					<nav className="hidden md:flex items-center gap-1 p-1 bg-muted/50 rounded-xl border border-border/50">
