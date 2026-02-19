@@ -1,10 +1,18 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+	Activity,
+	Bell,
+	Calendar,
+	Compass,
 	Crown,
+	FileText,
 	Fingerprint,
 	Globe,
+	Heart,
 	Key,
+	MessageCircle,
 	Rocket,
+	Settings,
 	Shield,
 	Sparkles,
 	Star,
@@ -39,6 +47,21 @@ const AVATAR_GRADIENTS = [
 	'bg-gradient-to-br from-lime-500 to-green-600',
 	'bg-gradient-to-br from-cyan-500 to-blue-600',
 	'bg-gradient-to-br from-slate-600 to-zinc-700',
+	'bg-gradient-to-br from-red-500 to-yellow-500',
+	'bg-gradient-to-br from-sky-500 to-cyan-500',
+	'bg-gradient-to-br from-teal-500 to-emerald-600',
+	'bg-gradient-to-br from-orange-500 to-red-600',
+	'bg-gradient-to-br from-pink-500 to-rose-600',
+	'bg-gradient-to-br from-purple-500 to-indigo-600',
+	'bg-gradient-to-br from-green-500 to-emerald-600',
+	'bg-gradient-to-br from-yellow-400 to-amber-500',
+	'bg-gradient-to-br from-slate-500 to-slate-700',
+	'bg-gradient-to-br from-zinc-500 to-neutral-700',
+	'bg-gradient-to-br from-blue-600 to-sky-500',
+	'bg-gradient-to-br from-indigo-600 to-violet-700',
+	'bg-gradient-to-br from-emerald-600 to-lime-500',
+	'bg-gradient-to-br from-cyan-500 to-teal-600',
+	'bg-gradient-to-br from-rose-500 to-orange-500',
 ] as const;
 
 const AVATAR_ICONS: readonly LucideIcon[] = [
@@ -52,6 +75,14 @@ const AVATAR_ICONS: readonly LucideIcon[] = [
 	Fingerprint,
 	Zap,
 	Star,
+	Heart,
+	Bell,
+	Calendar,
+	Compass,
+	FileText,
+	Activity,
+	MessageCircle,
+	Settings,
 ] as const;
 
 export function getUserAvatarPreset(uid: string): { gradientClass: string; Icon: LucideIcon } {

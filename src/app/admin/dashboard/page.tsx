@@ -8,7 +8,7 @@ import { LogViewer } from './components/LogViewer';
 
 function DashboardContent() {
 	// 设置页面标题
-	usePageTitle('控制台');
+	usePageTitle('日志管理');
 
 	const searchParams = useSearchParams();
 	const superToken = searchParams.get('superToken') || '';

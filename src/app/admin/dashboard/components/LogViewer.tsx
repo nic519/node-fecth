@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
@@ -89,8 +89,33 @@ export function LogViewer({ superToken }: LogViewerProps) {
     <>
       <AdminTwoColumnLayout
         sidebar={
-          <AdminSidePanel title="日志筛选" icon={Filter} className="h-fit">
+          <AdminSidePanel
+            title="日志筛选"
+            icon={Filter}
+            className="h-fit"
+            action={
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={fetchLogs}
+                disabled={loading}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+                title="刷新列表"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+            }
+          >
             <div className="space-y-4">
+              <div className="bg-muted/30 border border-border/50 rounded-lg p-3 text-center">
+                <div className="text-xs text-muted-foreground font-medium mb-1">总记录数</div>
+                <div className="text-xl font-bold text-foreground">{total}</div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">日志级别</label>
                 <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
@@ -136,38 +161,23 @@ export function LogViewer({ superToken }: LogViewerProps) {
                 >
                   搜索日志
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={fetchLogs}
-                  disabled={loading}
-                  className="w-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  刷新列表
-                </Button>
               </div>
             </div>
           </AdminSidePanel>
         }
         content={
           <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm min-h-[600px] flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 pb-4">
-
-              <div className="text-xs text-muted-foreground font-mono">
-                共 {total} 条记录
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 flex-1 flex flex-col">
+            <CardContent className="pt-4 flex-1 flex flex-col">
               {/* Table */}
               <div className="flex-1 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-border/60">
-                      <TableHead className="w-[180px] font-semibold text-muted-foreground">时间</TableHead>
-                      <TableHead className="w-[100px] font-semibold text-muted-foreground">级别</TableHead>
-                      <TableHead className="w-[150px] font-semibold text-muted-foreground">类型</TableHead>
-                      <TableHead className="font-semibold text-muted-foreground">消息</TableHead>
-                      <TableHead className="w-[120px] font-semibold text-muted-foreground">用户</TableHead>
+                      <TableHead className="w-[180px] font-semibold text-muted-foreground py-2">时间</TableHead>
+                      <TableHead className="w-[100px] font-semibold text-muted-foreground py-2">级别</TableHead>
+                      <TableHead className="w-[150px] font-semibold text-muted-foreground py-2">类型</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground py-2">消息</TableHead>
+                      <TableHead className="w-[120px] font-semibold text-muted-foreground py-2">用户</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -198,10 +208,10 @@ export function LogViewer({ superToken }: LogViewerProps) {
                           className="cursor-pointer hover:bg-muted/50 transition-colors border-border/40 group"
                           onClick={() => setSelectedLog(log)}
                         >
-                          <TableCell className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                          <TableCell className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors py-2">
                             {formatDateTime(log.createdAt)}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="py-2">
                             <Badge variant={
                               log.level === 'error' ? 'destructive' :
                                 log.level === 'warn' ? 'secondary' :
@@ -210,8 +220,8 @@ export function LogViewer({ superToken }: LogViewerProps) {
                               {log.level.toUpperCase()}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-mono text-xs font-medium text-foreground">{log.type}</TableCell>
-                          <TableCell className="max-w-[300px]">
+                          <TableCell className="font-mono text-xs font-medium text-foreground py-2">{log.type}</TableCell>
+                          <TableCell className="max-w-[300px] py-2">
                             <div className="truncate text-sm text-foreground/80 group-hover:text-foreground transition-colors" title={log.message}>
                               {log.message}
                             </div>
@@ -221,7 +231,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                               </div>
                             )}
                           </TableCell>
-                          <TableCell className="font-mono text-xs text-muted-foreground">{log.userId || '-'}</TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground py-2">{log.userId || '-'}</TableCell>
                         </TableRow>
                       ))
                     )}
