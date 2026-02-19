@@ -43,14 +43,10 @@ function UserConfigInner({ uid, token }: { uid: string; token: string }) {
 	);
 
 	return (
-		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
-			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
+		<div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950">
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#09090b_40%,#1e1b4b_100%)] opacity-20 pointer-events-none" />
 
-			<Header
-				validationErrors={userConfigState.validationErrors}
-				activeTab={activeTab}
-				onTabChange={(tab) => setStoredTab(storageKey, tab)}
-			/>
+			<Header />
 
 			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				{userConfigState.loading ? (
@@ -79,6 +75,7 @@ function UserConfigInner({ uid, token }: { uid: string; token: string }) {
 							onConfigChange={userConfigState.setConfig}
 							lastSaved={userConfigState.lastSaved}
 							activeTab={activeTab}
+							onTabChange={(tab) => setStoredTab(storageKey, tab)}
 							onSave={userConfigState.saveConfig}
 							saving={userConfigState.saving}
 							saveSuccess={userConfigState.saveSuccess}

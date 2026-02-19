@@ -87,12 +87,12 @@ export function LogDetailsDialog({ log, open, onOpenChange, onCopy }: LogDetails
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={getLevelVariant(log.level)} className="rounded-md px-2.5 py-0.5">
-                  {log.level.toUpperCase()}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {formatDateTime(log.createdAt)}
-                </span>
+                  <Badge variant={getLevelVariant(log.level)} className="rounded-md px-2.5 py-0.5">
+                    {log.level.toUpperCase()}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDateTime(log.createdAt)}
+                  </span>
                 </div>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -129,24 +129,6 @@ export function LogDetailsDialog({ log, open, onOpenChange, onCopy }: LogDetails
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">消息</div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-muted-foreground hover:text-foreground"
-                        onClick={() => onCopy(log.message, '消息已复制到剪贴板')}
-                      >
-                        <Copy className="h-4 w-4 mr-2" />
-                        复制
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>复制消息内容</TooltipContent>
-                  </Tooltip>
-                </div>
                 <div className="rounded-md bg-muted/30 px-3 py-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/90">
                   {log.message}
                 </div>
