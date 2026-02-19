@@ -1,10 +1,9 @@
 'use client';
 
 import { YamlEditor } from '@/components/YamlEditor';
-import { DocumentArrowDownIcon, LinkIcon, ClipboardDocumentIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon, LinkIcon, ClipboardDocumentIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +20,7 @@ interface TemplateEditorProps {
 	validationErrors: string[];
 	currentConfigContent: string;
 	onStartEdit: () => void;
+	onDeleteTemplate: () => void;
 	onUpdateTemplate: (field: keyof ConfigTemplate, value: any) => void;
 	onUpdateConfigContent: (content: string) => void;
 	onValidate: (errors: string[]) => void;
@@ -39,6 +39,7 @@ export function TemplateEditor({
 	validationErrors,
 	currentConfigContent,
 	onStartEdit,
+	onDeleteTemplate,
 	onUpdateTemplate,
 	onUpdateConfigContent,
 	onValidate,
@@ -51,8 +52,8 @@ export function TemplateEditor({
 }: TemplateEditorProps) {
 	if (!selectedTemplate) {
 		return (
-			<Card className="h-full flex flex-col items-center justify-center text-muted-foreground bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-border/60 shadow-sm rounded-xl">
-				<CardContent className="flex flex-col items-center justify-center p-8 text-center">
+			<div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+				<div className="flex flex-col items-center justify-center p-8 text-center">
 					<div className="mx-auto h-12 w-12 text-muted-foreground/50 flex items-center justify-center mb-4 bg-muted/30 rounded-full p-2">
 						<svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
@@ -65,8 +66,8 @@ export function TemplateEditor({
 					</div>
 					<h3 className="mt-2 text-sm font-medium text-foreground">未选择模板</h3>
 					<p className="mt-1 text-sm text-muted-foreground">请从左侧选择一个配置模板进行编辑</p>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		);
 	}
 
@@ -108,6 +109,15 @@ export function TemplateEditor({
 							>
 								<PencilIcon className="w-3.5 h-3.5 mr-1.5" />
 								编辑
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={onDeleteTemplate}
+								title="删除模板"
+								className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 mr-1"
+							>
+								<TrashIcon className="w-4 h-4" />
 							</Button>
 							<div className="w-px h-4 bg-border/60 mx-1" />
 						</>

@@ -2,7 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
-import { Activity, Calendar, User } from 'lucide-react';
+import { Activity, Calendar } from 'lucide-react';
+import { getUserAvatarPreset } from '../utils/avatarUtils';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '../utils/userUtils';
 import { UserActions } from './UserActions';
 
@@ -14,72 +15,88 @@ function SubscriptionStat({ stat }: SubscriptionStatProps) {
   const trafficInfo = parseTrafficInfo(stat.traffic || null);
   const usagePercent = trafficInfo ? Math.min(100, Math.max(0, trafficInfo.usagePercent)) : 0;
 
-  // Determine display text for usage
-  const renderUsageText = () => {
+  const displayUrl = (() => {
+    if (!stat.url) return '';
+    try {
+      const u = new URL(stat.url);
+      const path = u.pathname && u.pathname !== '/' ? u.pathname : '';
+      return `${u.hostname}${path}`;
+    } catch {
+      return stat.url;
+    }
+  })();
+
+  const rightTop = (() => {
     if (trafficInfo) {
       return (
-        <span className="font-mono font-medium text-foreground">
-          <span className="text-muted-foreground/70">已用 </span>
-          {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
-        </span>
+        <Badge variant="secondary" className="h-5 px-2 text-[10px] font-normal tabular-nums">
+          {trafficInfo.usagePercent.toFixed(1)}%
+        </Badge>
       );
     }
 
     if (stat.lastUpdated && stat.traffic) {
-      return <span className="font-mono font-medium text-foreground">{stat.traffic}</span>;
+      return <span className="font-mono font-medium text-foreground tabular-nums">{stat.traffic}</span>;
     }
 
     if (stat.lastUpdated && !stat.traffic) {
-      return <span className="text-muted-foreground/70">无流量数据</span>;
+      return <span className="text-[10px] text-muted-foreground/70">无流量数据</span>;
     }
 
-    return <span className="text-muted-foreground/70">无数据</span>;
-  };
-
+    return <span className="text-[10px] text-muted-foreground/70">无数据</span>;
+  })();
   return (
-    <div className="bg-muted/30 rounded-lg p-3 text-xs border border-border/40 hover:border-primary/20 transition-colors">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 overflow-hidden">
+    <li className="text-xs py-2 first:pt-0 last:pb-0 transition-colors">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex items-center gap-2">
+          <span
+            className={`h-1.5 w-1.5 rounded-full shrink-0 ${stat.type === 'main' ? 'bg-primary' : 'bg-muted-foreground/60'}`}
+            aria-hidden="true"
+          />
           <Badge
             variant={stat.type === 'main' ? 'default' : 'secondary'}
             className="h-5 px-1.5 text-[10px] shrink-0 font-normal"
           >
             {stat.name || (stat.type === 'main' ? '主' : '附')}
           </Badge>
-          <span className="text-muted-foreground truncate font-mono" title={stat.url}>
-            {stat.url}
-          </span>
+          {displayUrl ? (
+            <span className="min-w-0 truncate font-mono text-[11px] leading-5 text-muted-foreground/80" title={stat.url}>
+              {displayUrl}
+            </span>
+          ) : null}
         </div>
+
+        <div className="shrink-0 flex items-center">{rightTop}</div>
       </div>
 
-      <div className="space-y-1.5 border-t border-border/40 pt-2 mt-1">
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span className="flex items-center gap-1">
-            {renderUsageText()}
-          </span>
-          <span className="text-[10px] text-muted-foreground/70">
-            {trafficInfo ? `${trafficInfo.usagePercent.toFixed(1)}%` : ''}
-          </span>
-        </div>
+      {trafficInfo && (
+        <div className="mt-1.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[10px] text-muted-foreground/70">已用</span>
+            <span className="font-mono font-medium text-foreground tabular-nums text-[11px]">
+              {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
+            </span>
+          </div>
 
-        {trafficInfo && (
-          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+          <div className="mt-1 h-1 w-full bg-muted/70 rounded-full overflow-hidden">
             <div
               className={`h-full ${getTrafficBarColor(usagePercent)}`}
               style={{ width: `${usagePercent}%` }}
             />
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="flex justify-between items-center text-[10px] text-muted-foreground/70">
-          <span>
+      {(trafficInfo?.expire || stat.lastUpdated) && (
+        <div className="mt-2 flex justify-between items-center text-[10px] text-muted-foreground/70">
+          <span className="truncate">
             {trafficInfo && trafficInfo.expire
-              ? `📅 到期 ${new Date(trafficInfo.expire * 1000).toLocaleDateString()}`
+              ? `到期 ${new Date(trafficInfo.expire * 1000).toLocaleDateString('zh-CN')}`
               : ''}
           </span>
-          <span>
+          <span className="shrink-0">
             {stat.lastUpdated && (
-              <span>⏰ 操作 {new Date(stat.lastUpdated).toLocaleString('zh-CN', {
+              <span>更新 {new Date(stat.lastUpdated).toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: 'numeric',
                 day: 'numeric',
@@ -89,8 +106,8 @@ function SubscriptionStat({ stat }: SubscriptionStatProps) {
             )}
           </span>
         </div>
-      </div>
-    </div>
+      )}
+    </li>
   );
 }
 
@@ -101,6 +118,7 @@ interface UserCardProps {
 
 export function UserCard({ user, onUserAction }: UserCardProps) {
   const hasSubscriptionStats = user.subscriptionStats && user.subscriptionStats.length > 0;
+  const { gradientClass: avatarGradientClass, Icon: AvatarIcon } = getUserAvatarPreset(user.uid);
 
   return (
     <div className="break-inside-avoid bg-white/80 dark:bg-slate-900/80 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
@@ -110,8 +128,8 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
         onClick={() => onUserAction('view', user.uid, user.accessToken)}
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg shadow-sm group-hover:shadow-md transition-all">
-            <User className="h-5 w-5 text-white" />
+          <div className={`p-2 ${avatarGradientClass} rounded-lg shadow-sm group-hover:shadow-md transition-all`}>
+            <AvatarIcon className="h-5 w-5 text-white" />
           </div>
           <div>
             <div className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
@@ -129,11 +147,11 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
         </div>
 
         {hasSubscriptionStats ? (
-          <div className="space-y-2.5">
+          <ul className="divide-y divide-border/30">
             {user.subscriptionStats!.map((stat, idx) => (
               <SubscriptionStat key={idx} stat={stat} />
             ))}
-          </div>
+          </ul>
         ) : (
           <div className="text-sm text-muted-foreground/60 italic py-2 bg-muted/20 rounded-lg text-center border border-dashed border-border/40">
             暂无订阅数据

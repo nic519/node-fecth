@@ -3,6 +3,7 @@
 import Loading from '@/components/Loading';
 import { NavigationBar } from '@/components/NavigationBar';
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
+import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -57,11 +58,12 @@ function AdminTemplatesContent() {
 	} = useTemplateManagement({ superToken });
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
 			{/* 导航栏 */}
 			<NavigationBar superToken={superToken} currentPage="templates" />
 
-			<main className="max-w-[1600px] mx-auto py-6 px-4 sm:px-6 lg:px-8 h-[calc(100vh-64px)]">
+			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				{/* 错误信息 */}
 				{error && (
 					<div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
@@ -75,14 +77,12 @@ function AdminTemplatesContent() {
 						<Loading message="加载中..." />
 					</div>
 				) : (
-					/* 主要内容区域 - 左右布局 */
-					<div className="grid grid-cols-12 gap-6 h-full">
-						{/* 左侧 - 模板列表 */}
-						<div className="col-span-12 lg:col-span-3 flex flex-col h-full">
+					<AdminTwoColumnLayout
+						sidebar={
 							<AdminSidePanel
 								title="模板列表"
 								icon={FileText}
-								className="h-full flex flex-col border-none shadow-none bg-transparent p-0"
+								className="h-fit"
 								action={
 									<Button
 										onClick={handleCreateTemplate}
@@ -94,38 +94,37 @@ function AdminTemplatesContent() {
 									</Button>
 								}
 							>
-								<div className="flex-1 overflow-y-auto pr-2 -mr-2">
+								<div className="max-h-[70vh] overflow-y-auto pr-2 -mr-2">
 									<TemplateList
 										templates={templates}
 										onSelectTemplate={handleSelectTemplate}
-										onDeleteTemplate={handleDeleteTemplate}
-										onStartEdit={handleStartEdit}
 									/>
 								</div>
 							</AdminSidePanel>
-						</div>
-
-						{/* 右侧 - 配置编辑器 */}
-						<div className="col-span-12 lg:col-span-9 h-full overflow-hidden flex flex-col bg-card rounded-xl border shadow-sm">
-							<TemplateEditor
-								selectedTemplate={selectedTemplate}
-								isEditing={isEditing}
-								validationErrors={validationErrors}
-								currentConfigContent={currentConfigContent}
-								onStartEdit={handleStartEdit}
-								onUpdateTemplate={handleUpdateTemplate}
-								onUpdateConfigContent={handleUpdateConfigContent}
-								onValidate={setValidationErrors}
-								onDownloadTemplate={handleDownloadTemplate}
-								onReset={handleReset}
-								onSave={handleSave}
-								onCopyConfigContent={handleCopyConfigContent}
-								onCopyTemplateUrl={handleCopyTemplateUrl}
-								loading={loading}
-								saving={saving}
-							/>
-						</div>
-					</div>
+						}
+						content={
+							<div className="min-h-[70vh] overflow-hidden flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm">
+								<TemplateEditor
+									selectedTemplate={selectedTemplate}
+									isEditing={isEditing}
+									validationErrors={validationErrors}
+									currentConfigContent={currentConfigContent}
+									onStartEdit={handleStartEdit}
+									onDeleteTemplate={() => selectedTemplate && handleDeleteTemplate(String(selectedTemplate.id))}
+									onUpdateTemplate={handleUpdateTemplate}
+									onUpdateConfigContent={handleUpdateConfigContent}
+									onValidate={setValidationErrors}
+									onDownloadTemplate={handleDownloadTemplate}
+									onReset={handleReset}
+									onSave={handleSave}
+									onCopyConfigContent={handleCopyConfigContent}
+									onCopyTemplateUrl={handleCopyTemplateUrl}
+									loading={loading}
+									saving={saving}
+								/>
+							</div>
+						}
+					/>
 				)}
 			</main>
 

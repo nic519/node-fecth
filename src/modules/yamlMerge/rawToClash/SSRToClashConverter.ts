@@ -69,7 +69,7 @@ export class SSRToClashConverter {
 
             const obfsParam = obfsParamBase64 ? Base64Helper.safeDecode(obfsParamBase64) : undefined;
             const protoParam = protoParamBase64 ? Base64Helper.safeDecode(protoParamBase64) : undefined;
-            let name = remarksBase64 ? Base64Helper.safeDecode(remarksBase64) : 'Unknown';
+            const name = remarksBase64 ? Base64Helper.safeDecode(remarksBase64) : 'Unknown';
 
             const proxy: ClashProxy = {
                 name: name,

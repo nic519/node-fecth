@@ -8,6 +8,7 @@ import { useUserManagement } from './hooks/useUserManagement';
 
 // 导入组件
 import { NavigationBar } from '@/components/NavigationBar';
+import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { UserFilters } from './components/UserFilters';
 import { UserMasonry } from './components/UserMasonry';
 import { ImportUserModal } from './components/ImportUserModal';
@@ -41,17 +42,17 @@ function AdminUsersContent() {
 	const { showToast } = useToastContext();
 
 	// 使用用户管理Hook
-	const { 
-        users, 
-        loading, 
-        error, 
-        fetchUsers, 
-        handleUserAction, 
-        handleExport,
-        deleteModal, 
-        addUserModal,
-        importModal 
-    } = useUserManagement({
+	const {
+		users,
+		loading,
+		error,
+		fetchUsers,
+		handleUserAction,
+		handleExport,
+		deleteModal,
+		addUserModal,
+		importModal
+	} = useUserManagement({
 		superToken,
 		showToast,
 	});
@@ -70,49 +71,50 @@ function AdminUsersContent() {
 			<NavigationBar superToken={superToken} currentPage="users" />
 
 			<main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-				<div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-					{/* 左侧：筛选和操作 */}
-					<UserFilters
-						searchTerm={searchTerm}
-						loading={loading}
-						onSearchTermChange={setSearchTerm}
-						onRefresh={fetchUsers}
-						onAddUser={addUserModal.open}
-						onExport={handleExport}
-						onImport={importModal.open}
-					/>
+				<AdminTwoColumnLayout
+					sidebar={
+						<UserFilters
+							searchTerm={searchTerm}
+							loading={loading}
+							onSearchTermChange={setSearchTerm}
+							onRefresh={fetchUsers}
+							onAddUser={addUserModal.open}
+							onExport={handleExport}
+							onImport={importModal.open}
+						/>
+					}
+					content={
+						<div className="space-y-6">
+							{/* 错误信息 */}
+							{error && (
+								<div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+									<div className="text-destructive font-medium">{error}</div>
+								</div>
+							)}
 
-					{/* 右侧：列表和数据 */}
-					<div className="lg:col-span-3 space-y-6">
-						{/* 错误信息 */}
-						{error && (
-							<div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
-								<div className="text-destructive font-medium">{error}</div>
-							</div>
-						)}
+							{/* 用户列表 - 瀑布流展示 */}
+							<UserMasonry users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
 
-						{/* 用户列表 - 瀑布流展示 */}
-						<UserMasonry users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
-
-						{/* 分页信息 */}
-						<div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 px-4 py-3 border border-border/60 rounded-xl shadow-sm backdrop-blur-sm">
-							<div className="flex items-center text-xs font-medium text-muted-foreground">
-								<span>共 {filteredUsers.length} 条记录</span>
-							</div>
-							<div className="flex gap-2">
-								<Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
-									上一页
-								</Button>
-								<Button size="sm" variant="default" className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
-									1
-								</Button>
-								<Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
-									下一页
-								</Button>
+							{/* 分页信息 */}
+							<div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 px-4 py-3 border border-border/60 rounded-xl shadow-sm backdrop-blur-sm">
+								<div className="flex items-center text-xs font-medium text-muted-foreground">
+									<span>共 {filteredUsers.length} 条记录</span>
+								</div>
+								<div className="flex gap-2">
+									<Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
+										上一页
+									</Button>
+									<Button size="sm" variant="default" className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
+										1
+									</Button>
+									<Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
+										下一页
+									</Button>
+								</div>
 							</div>
 						</div>
-					</div>
-				</div>
+					}
+				/>
 			</main>
 
 			{/* 删除用户确认模态框 */}
@@ -222,17 +224,17 @@ function AdminUsersContent() {
 				</DialogContent>
 			</Dialog>
 
-            {/* 导入用户模态框 */}
-            <ImportUserModal 
-                isOpen={importModal.isOpen}
-                onClose={importModal.close}
-                onImport={importModal.handleImport}
-                jsonContent={importModal.jsonContent}
-                onJsonContentChange={importModal.setJsonContent}
-                isImporting={importModal.isImporting}
-                importProgress={importModal.importProgress}
-                importErrors={importModal.importErrors}
-            />
+			{/* 导入用户模态框 */}
+			<ImportUserModal
+				isOpen={importModal.isOpen}
+				onClose={importModal.close}
+				onImport={importModal.handleImport}
+				jsonContent={importModal.jsonContent}
+				onJsonContentChange={importModal.setJsonContent}
+				isImporting={importModal.isImporting}
+				importProgress={importModal.importProgress}
+				importErrors={importModal.importErrors}
+			/>
 		</div>
 	);
 }
