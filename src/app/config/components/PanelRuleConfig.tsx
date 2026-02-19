@@ -84,7 +84,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                 </div>
 
                 {enableCustomFilters ? (
-                    <div className="border border-border/60 rounded-xl p-4 space-y-4 bg-muted/10 backdrop-blur-sm">
+                    <div className="border border-border/60 rounded-xl p-3 space-y-3 bg-muted/10 backdrop-blur-sm">
                         {loadingFilters ? (
                             <div className="flex items-center justify-center py-4 text-muted-foreground">
                                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -101,19 +101,16 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                             <div className="text-muted-foreground text-sm">未找到可用的过滤选项。</div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
                                     {filterOptions.map((option) => {
                                         const mandatory = isMandatory(option);
                                         const isChecked = mandatory || config.requiredFilters?.split(',').map(s => s.trim()).includes(option);
 
                                         return (
-                                            <div 
-                                                key={option} 
-                                                className={`flex items-center space-x-2 p-3 rounded-lg border transition-all duration-200 ${
-                                                    isChecked 
-                                                        ? 'bg-primary/5 border-primary/30 shadow-sm' 
-                                                        : 'bg-card border-border/40 hover:border-border/80 hover:bg-accent/50'
-                                                }`}
+                                            <div
+                                                key={option}
+                                                className={`flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${isChecked ? 'bg-primary/10' : 'hover:bg-accent/40'
+                                                    }`}
                                             >
                                                 <Checkbox
                                                     id={`filter-${option}`}
@@ -124,9 +121,9 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                                                 />
                                                 <Label
                                                     htmlFor={`filter-${option}`}
-                                                    className={`text-sm font-medium cursor-pointer flex-1 ${mandatory ? 'text-muted-foreground' : ''}`}
+                                                    className={`text-sm font-medium cursor-pointer flex items-center gap-1.5 flex-1 min-w-0 ${mandatory ? 'text-muted-foreground' : ''}`}
                                                 >
-                                                    {option}
+                                                    <span className="truncate">{option}</span>
                                                     {mandatory && <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full border border-border/50">必选</span>}
                                                 </Label>
                                             </div>
@@ -159,8 +156,8 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     </Label>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button 
-                                size="sm" 
+                            <Button
+                                size="sm"
                                 disabled={readOnly}
                                 className="bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                             >
