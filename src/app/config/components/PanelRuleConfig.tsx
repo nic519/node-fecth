@@ -85,67 +85,69 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     </div>
                 </div>
 
-                {enableCustomFilters ? (
-                    <div className="border border-border/60 rounded-xl p-3 space-y-3 bg-muted/10 backdrop-blur-sm">
-                        {loadingFilters ? (
-                            <div className="flex items-center justify-center py-4 text-muted-foreground">
-                                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                                正在加载过滤选项...
-                            </div>
-                        ) : filterError ? (
-                            <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-                                <div className="font-semibold mb-1">加载失败</div>
-                                {filterError}
-                                <br />
-                                <span className="text-xs text-muted-foreground mt-1 block">请检查规则 URL 是否正确且允许跨域访问。</span>
-                            </div>
-                        ) : filterOptions.length === 0 ? (
-                            <div className="text-muted-foreground text-sm">未找到可用的过滤选项。</div>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
-                                    {filterOptions.map((option) => {
-                                        const mandatory = isMandatory(option);
-                                        const isChecked = mandatory || config.requiredFilters?.split(',').map(s => s.trim()).includes(option);
+                <div className={`border border-border/60 rounded-xl p-3 space-y-3 bg-muted/10 backdrop-blur-sm transition-all duration-300 ${!enableCustomFilters ? 'opacity-80' : ''}`}>
+                    {!enableCustomFilters && (
+                        <div className="text-sm text-muted-foreground bg-muted/30 p-2.5 rounded-md border border-border/50 flex items-center gap-2 mb-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+                            未启用自定义过滤，默认包含所有策略组。
+                        </div>
+                    )}
+                    {loadingFilters ? (
+                        <div className="flex items-center justify-center py-4 text-muted-foreground">
+                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                            正在加载过滤选项...
+                        </div>
+                    ) : filterError ? (
+                        <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                            <div className="font-semibold mb-1">加载失败</div>
+                            {filterError}
+                            <br />
+                            <span className="text-xs text-muted-foreground mt-1 block">请检查规则 URL 是否正确且允许跨域访问。</span>
+                        </div>
+                    ) : filterOptions.length === 0 ? (
+                        <div className="text-muted-foreground text-sm">未找到可用的过滤选项。</div>
+                    ) : (
+                        <>
+                            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar ${!enableCustomFilters ? 'pointer-events-none grayscale opacity-60' : ''}`}>
+                                {filterOptions.map((option) => {
+                                    const mandatory = isMandatory(option);
+                                    const isChecked = mandatory || config.requiredFilters?.split(',').map(s => s.trim()).includes(option);
+                                    // Visual check state: if disabled (not custom), show all as checked to imply "all included"
+                                    const displayChecked = !enableCustomFilters || isChecked;
 
-                                        return (
-                                            <div
-                                                key={option}
-                                                className={`flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${isChecked ? 'bg-primary/10' : 'hover:bg-accent/40'
-                                                    }`}
+                                    return (
+                                        <div
+                                            key={option}
+                                            className={`flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${displayChecked ? 'bg-primary/10' : 'hover:bg-accent/40'
+                                                }`}
+                                        >
+                                            <Checkbox
+                                                id={`filter-${option}`}
+                                                checked={displayChecked}
+                                                onCheckedChange={(checked) => !mandatory && handleFilterSelection(option, checked as boolean)}
+                                                disabled={readOnly || mandatory || !enableCustomFilters}
+                                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                            />
+                                            <Label
+                                                htmlFor={`filter-${option}`}
+                                                className={`text-sm font-medium cursor-pointer flex items-center gap-1.5 flex-1 min-w-0 ${mandatory ? 'text-muted-foreground' : ''}`}
                                             >
-                                                <Checkbox
-                                                    id={`filter-${option}`}
-                                                    checked={isChecked}
-                                                    onCheckedChange={(checked) => !mandatory && handleFilterSelection(option, checked as boolean)}
-                                                    disabled={readOnly || mandatory}
-                                                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                                />
-                                                <Label
-                                                    htmlFor={`filter-${option}`}
-                                                    className={`text-sm font-medium cursor-pointer flex items-center gap-1.5 flex-1 min-w-0 ${mandatory ? 'text-muted-foreground' : ''}`}
-                                                >
-                                                    <span className="truncate">{option}</span>
-                                                    {mandatory && <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full border border-border/50">必选</span>}
-                                                </Label>
-                                            </div>
-                                        );
-                                    })}
+                                                <span className="truncate">{option}</span>
+                                                {mandatory && <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full border border-border/50">必选</span>}
+                                            </Label>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            {enableCustomFilters && (!config.requiredFilters || config.requiredFilters.length === 0) && (
+                                <div className="text-sm text-amber-600 dark:text-amber-500 font-medium bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md border border-amber-200 dark:border-amber-900/50 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                    请至少选择一项，否则将无法生效 (视为未启用)。
                                 </div>
-                                {(!config.requiredFilters || config.requiredFilters.length === 0) && (
-                                    <p className="text-sm text-amber-600 dark:text-amber-500 font-medium bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md border border-amber-200 dark:border-amber-900/50 flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                        请至少选择一项，否则将无法生效 (视为未启用)。
-                                    </p>
-                                )}
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-muted-foreground border border-dashed border-border/60 rounded-xl p-6 text-center bg-muted/5">
-                        未启用自定义过滤，将保留规则文件中的所有策略组。
-                    </p>
-                )}
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
 
             <div className="space-y-2">

@@ -7,7 +7,6 @@ import { AREA_CODES } from '@/config/proxy-area.config';
 import { Checkbox } from '@/components/ui/checkbox';
 import { memo } from 'react';
 import { Link, Flag, Globe, Trash2 } from 'lucide-react';
-import CountryFlag from 'react-world-flags';
 
 interface SubConfigCardProps {
     index: number;
@@ -101,7 +100,6 @@ export const SubConfigCard = memo(function SubConfigCard({
                                                 htmlFor={`sub-${index}-area-${area}`}
                                                 className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
                                             >
-                                                <CountryFlag code={area} className="h-3 w-4 rounded-[2px] object-cover shadow-sm" />
                                                 <span>{area}</span>
                                             </Label>
                                         </div>
