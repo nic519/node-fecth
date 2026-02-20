@@ -25,9 +25,9 @@ function DashboardContent() {
 	}
 
 	return (
-		<div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50">
+		<div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950">
 			{/* Decorative background gradient */}
-			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20 pointer-events-none" />
+			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#09090b_40%,#1e1b4b_100%)] opacity-20 pointer-events-none" />
 
 			{/* 顶部导航 */}
 			<NavigationBar superToken={superToken} currentPage="dashboard" />

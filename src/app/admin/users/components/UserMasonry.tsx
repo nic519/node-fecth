@@ -17,7 +17,7 @@ export interface UserMasonryProps {
 export function UserMasonry({ users, loading, error, onUserAction }: UserMasonryProps) {
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center py-20 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-border/60 shadow-sm backdrop-blur-sm">
+			<div className="flex items-center justify-center py-20 bg-white/80 dark:bg-zinc-900/80 rounded-xl border border-border/60 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60">
 				<Loading message="正在加载用户数据..." size="md" />
 			</div>
 		);
@@ -25,7 +25,7 @@ export function UserMasonry({ users, loading, error, onUserAction }: UserMasonry
 
 	if (users.length === 0 && !error) {
 		return (
-			<div className="flex flex-col items-center justify-center py-20 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-border/60 shadow-sm text-muted-foreground backdrop-blur-sm">
+			<div className="flex flex-col items-center justify-center py-20 bg-white/80 dark:bg-zinc-900/80 rounded-xl border border-border/60 shadow-sm text-muted-foreground backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"

@@ -14,13 +14,16 @@ export function AdminSidePanel({ title, icon: Icon, children, action, className 
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl border border-border/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-sm p-4",
+        "flex flex-col rounded-xl border border-border/60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-sm p-4 relative overflow-hidden",
         className
       )}
     >
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-border/40">
+      {/* Colorful top border for accent */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-violet-500 to-indigo-500 opacity-80" />
+      
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-border/40 pt-2">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary border border-primary/10">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-violet-600 text-white shadow-md shadow-primary/20">
             <Icon className="h-4 w-4" />
           </div>
           <h2 className="font-semibold text-base text-foreground tracking-tight">{title}</h2>

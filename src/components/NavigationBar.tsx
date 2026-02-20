@@ -11,7 +11,7 @@ export interface NavigationBarProps {
 
 export const AcmeLogo = ({ className }: { className?: string }) => {
 	return (
-		<svg fill="none" height="36" viewBox="0 0 32 32" width="36" className={cn("text-blue-600", className)}>
+		<svg fill="none" height="36" viewBox="0 0 32 32" width="36" className={cn("text-primary dark:text-violet-400", className)}>
 			<path
 				clipRule="evenodd"
 				d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
@@ -34,7 +34,7 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 					: '管理员控制台');
 
 	return (
-		<nav className="sticky top-0 z-40 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-border/40 shadow-sm">
+		<nav className="sticky top-0 z-40 w-full bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-border/40 shadow-sm supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-950/60">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-3">
@@ -49,8 +49,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'dashboard'
-									? 'text-primary bg-primary/10'
-									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
+									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>
 							<LayoutDashboard className="w-4 h-4" />
@@ -61,8 +61,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'users'
-									? 'text-primary bg-primary/10'
-									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
+									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>
 							<Users className="w-4 h-4" />
@@ -73,8 +73,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'templates'
-									? 'text-primary bg-primary/10'
-									: 'text-muted-foreground hover:text-foreground hover:bg-muted'
+									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>
 							<FileText className="w-4 h-4" />

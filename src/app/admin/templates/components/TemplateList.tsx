@@ -29,22 +29,22 @@ export function TemplateList({ templates, onSelectTemplate }: TemplateListProps)
 				<div
 					key={template.id}
 					className={cn(
-						"cursor-pointer transition-colors relative group px-2 py-1.5 rounded-sm select-none",
+						"cursor-pointer transition-all relative group px-3 py-2.5 rounded-md select-none border border-transparent",
 						template.isSelected
-							? "bg-accent/80 text-accent-foreground font-medium"
-							: "hover:bg-accent/40 text-muted-foreground hover:text-foreground"
+							? "bg-gradient-to-r from-violet-500/10 to-indigo-500/10 text-violet-700 dark:text-violet-300 border-violet-200/50 dark:border-violet-800/50 shadow-sm"
+							: "hover:bg-muted/50 text-muted-foreground hover:text-foreground hover:border-border/50"
 					)}
 					onClick={() => onSelectTemplate(String(template.id))}
 				>
-					<div className="flex flex-col gap-0.5 min-w-0">
+					<div className="flex flex-col gap-1 min-w-0">
 						<div className="flex items-center justify-between gap-2">
-							<span className="text-sm truncate leading-none">
+							<span className={cn("text-sm font-medium truncate leading-none", template.isSelected ? "text-violet-900 dark:text-violet-100" : "")}>
 								{template.name}
 							</span>
 						</div>
 						<p className={cn(
 							"text-xs truncate transition-colors",
-							template.isSelected ? "text-accent-foreground/70" : "text-muted-foreground/60 group-hover:text-muted-foreground/80"
+							template.isSelected ? "text-violet-600/80 dark:text-violet-400/80" : "text-muted-foreground/60 group-hover:text-muted-foreground/80"
 						)}>
 							{template.description || '无描述'}
 						</p>

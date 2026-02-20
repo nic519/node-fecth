@@ -121,7 +121,7 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
   const { gradientClass: avatarGradientClass, Icon: AvatarIcon } = getUserAvatarPreset(user.uid);
 
   return (
-    <div className="break-inside-avoid bg-white/80 dark:bg-slate-900/80 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+    <div className="break-inside-avoid bg-white/80 dark:bg-zinc-900/80 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60">
       {/* Header: User Info - Clickable */}
       <div
         className="flex items-start justify-between mb-4 group cursor-pointer"
@@ -142,7 +142,7 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
       {/* Body: Stats */}
       <div className="space-y-3 mb-5">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-          <Activity className="h-4 w-4 text-muted-foreground/70" />
+          <Activity className="h-4 w-4 text-primary" />
           <span>流量使用情况</span>
         </div>
 

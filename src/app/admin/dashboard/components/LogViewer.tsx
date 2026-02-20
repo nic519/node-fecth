@@ -147,7 +147,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <ListFilter className="h-3.5 w-3.5 text-primary/70" />
+                  <ListFilter className="h-3.5 w-3.5 text-primary" />
                   总记录数
                 </span>
                 <span className="text-sm font-medium">{total}</span>
@@ -156,7 +156,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Activity className="h-3.5 w-3.5 text-blue-500/70" />
+                    <Activity className="h-3.5 w-3.5 text-blue-500" />
                     日志级别
                   </label>
                   <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
@@ -175,7 +175,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Tag className="h-3.5 w-3.5 text-purple-500/70" />
+                    <Tag className="h-3.5 w-3.5 text-purple-500" />
                     事件类型
                   </label>
                   <Select value={type} onValueChange={(v) => {
@@ -197,7 +197,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <User className="h-3.5 w-3.5 text-orange-500/70" />
+                    <User className="h-3.5 w-3.5 text-orange-500" />
                     用户ID
                   </label>
                   <Input
@@ -213,7 +213,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
           </AdminSidePanel>
         }
         content={
-          <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm min-h-[600px] flex flex-col">
+          <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60 min-h-[600px] flex flex-col">
             <CardContent className="pt-4 flex-1 flex flex-col">
               <TooltipProvider>
                 <div className="flex-1 overflow-auto">
