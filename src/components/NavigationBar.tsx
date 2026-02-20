@@ -49,7 +49,7 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'dashboard'
-									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									? 'bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 font-bold shadow-sm ring-1 ring-violet-500/20'
 									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>
@@ -61,7 +61,7 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'users'
-									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									? 'bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 font-bold shadow-sm ring-1 ring-violet-500/20'
 									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>
@@ -73,7 +73,7 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 							className={cn(
 								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
 								currentPage === 'templates'
-									? 'bg-gradient-to-r from-primary/10 to-violet-500/10 text-primary font-bold shadow-sm'
+									? 'bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 text-violet-600 dark:text-violet-400 font-bold shadow-sm ring-1 ring-violet-500/20'
 									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
 							)}
 						>

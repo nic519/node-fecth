@@ -62,7 +62,7 @@ export function UserFilters({
                 </div>
                 <div className="bg-muted/30 border border-border/50 rounded-lg p-3 text-center">
                     <div className="text-xs text-muted-foreground font-medium mb-1">当前显示</div>
-                    <div className="text-xl font-bold text-primary">{filteredCount}</div>
+                    <div className="text-xl font-bold text-violet-600 dark:text-violet-400">{filteredCount}</div>
                 </div>
             </div>
 
@@ -70,13 +70,13 @@ export function UserFilters({
             <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">搜索</label>
                 <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-violet-500 transition-colors" />
                     <Input
                         type="text"
                         placeholder="输入用户ID..."
                         value={searchTerm}
                         onChange={(e) => onSearchTermChange(e.target.value)}
-                        className="pl-9 bg-background/50 border-border/60 focus:bg-background focus-visible:ring-primary/20 transition-all shadow-sm"
+                        className="pl-9 bg-background/50 border-border/60 focus:bg-background focus-visible:ring-violet-500/20 focus-visible:border-violet-500/50 transition-all shadow-sm"
                     />
                 </div>
             </div>

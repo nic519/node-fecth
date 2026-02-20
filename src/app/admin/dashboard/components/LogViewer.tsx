@@ -147,7 +147,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <ListFilter className="h-3.5 w-3.5 text-primary" />
+                  <ListFilter className="h-3.5 w-3.5 text-violet-500" />
                   总记录数
                 </span>
                 <span className="text-sm font-medium">{total}</span>
@@ -156,32 +156,32 @@ export function LogViewer({ superToken }: LogViewerProps) {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Activity className="h-3.5 w-3.5 text-blue-500" />
+                    <Activity className="h-3.5 w-3.5 text-cyan-500" />
                     日志级别
                   </label>
                   <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
                       <SelectValue placeholder="日志级别" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">全部级别</SelectItem>
-                      <SelectItem value="info">Info</SelectItem>
-                      <SelectItem value="warn">Warn</SelectItem>
-                      <SelectItem value="error">Error</SelectItem>
-                      <SelectItem value="audit">Audit</SelectItem>
+                      <SelectItem value="info" className="text-blue-500">Info</SelectItem>
+                      <SelectItem value="warn" className="text-amber-500">Warn</SelectItem>
+                      <SelectItem value="error" className="text-red-500">Error</SelectItem>
+                      <SelectItem value="audit" className="text-purple-500">Audit</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Tag className="h-3.5 w-3.5 text-purple-500" />
+                    <Tag className="h-3.5 w-3.5 text-fuchsia-500" />
                     事件类型
                   </label>
                   <Select value={type} onValueChange={(v) => {
                     setType(v === 'all' ? '' : v);
                   }}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
                       <SelectValue placeholder="全部类型" />
                     </SelectTrigger>
                     <SelectContent>
@@ -197,7 +197,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <User className="h-3.5 w-3.5 text-orange-500" />
+                    <User className="h-3.5 w-3.5 text-amber-500" />
                     用户ID
                   </label>
                   <Input
@@ -205,7 +205,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
+                    className="bg-muted/30 border-border/60 focus-visible:ring-violet-500/20 focus-visible:border-violet-500/50 transition-all"
                   />
                 </div>
               </div>
@@ -222,31 +222,31 @@ export function LogViewer({ superToken }: LogViewerProps) {
                       <TableRow className="hover:bg-transparent border-border/60">
                         <TableHead className="w-[180px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <Clock className="h-3.5 w-3.5" />
+                            <Clock className="h-3.5 w-3.5 text-blue-500" />
                             <span>时间</span>
                           </span>
                         </TableHead>
                         <TableHead className="w-[100px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <AlertTriangle className="h-3.5 w-3.5" />
+                            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
                             <span>级别</span>
                           </span>
                         </TableHead>
                         <TableHead className="w-[150px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <Tag className="h-3.5 w-3.5" />
+                            <Tag className="h-3.5 w-3.5 text-fuchsia-500" />
                             <span>类型</span>
                           </span>
                         </TableHead>
                         <TableHead className="font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <MessageSquare className="h-3.5 w-3.5" />
+                            <MessageSquare className="h-3.5 w-3.5 text-emerald-500" />
                             <span>消息</span>
                           </span>
                         </TableHead>
                         <TableHead className="w-[120px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <User className="h-3.5 w-3.5" />
+                            <User className="h-3.5 w-3.5 text-violet-500" />
                             <span>用户</span>
                           </span>
                         </TableHead>
@@ -257,7 +257,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                         <TableRow>
                           <TableCell colSpan={5} className="h-64 text-center">
                             <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
-                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
                               <span className="text-sm font-medium animate-pulse">正在加载日志数据...</span>
                             </div>
                           </TableCell>

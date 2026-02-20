@@ -121,10 +121,10 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
   const { gradientClass: avatarGradientClass, Icon: AvatarIcon } = getUserAvatarPreset(user.uid);
 
   return (
-    <div className="break-inside-avoid bg-white/80 dark:bg-zinc-900/80 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60">
+    <div className="break-inside-avoid bg-white/80 dark:bg-zinc-900/60 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-violet-500/50 transition-all duration-300 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/40 group">
       {/* Header: User Info - Clickable */}
       <div
-        className="flex items-start justify-between mb-4 group cursor-pointer"
+        className="flex items-start justify-between mb-4 cursor-pointer"
         onClick={() => onUserAction('view', user.uid, user.accessToken)}
       >
         <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
             <AvatarIcon className="h-5 w-5 text-white" />
           </div>
           <div>
-            <div className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+            <div className="font-semibold text-foreground text-lg group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
               {user.uid}
             </div>
           </div>
@@ -142,7 +142,7 @@ export function UserCard({ user, onUserAction }: UserCardProps) {
       {/* Body: Stats */}
       <div className="space-y-3 mb-5">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-          <Activity className="h-4 w-4 text-primary" />
+          <Activity className="h-4 w-4 text-violet-500" />
           <span>流量使用情况</span>
         </div>
 
