@@ -1,13 +1,12 @@
 'use client';
 
 import { YamlEditor } from '@/components/YamlEditor';
-import { DocumentArrowDownIcon, LinkIcon, ClipboardDocumentIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileDown, Link, Clipboard, Pencil, Trash2 } from 'lucide-react';
 import type { ConfigTemplate } from '@/types/user-config';
 
 // TemplateItem definition (or import it if it's exported from somewhere)
@@ -107,7 +106,7 @@ export function TemplateEditor({
 								size="sm"
 								className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-none mr-2"
 							>
-								<PencilIcon className="w-3.5 h-3.5 mr-1.5" />
+								<Pencil className="w-3.5 h-3.5 mr-1.5" />
 								编辑
 							</Button>
 							<Button
@@ -117,7 +116,7 @@ export function TemplateEditor({
 								title="删除模板"
 								className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 mr-1"
 							>
-								<TrashIcon className="w-4 h-4" />
+								<Trash2 className="w-4 h-4" />
 							</Button>
 							<div className="w-px h-4 bg-border/60 mx-1" />
 						</>
@@ -130,7 +129,7 @@ export function TemplateEditor({
 						title="下载配置"
 						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<DocumentArrowDownIcon className="w-4 h-4" />
+						<FileDown className="w-4 h-4" />
 					</Button>
 					<Button
 						variant="ghost"
@@ -139,7 +138,7 @@ export function TemplateEditor({
 						title="复制配置"
 						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<ClipboardDocumentIcon className="w-4 h-4" />
+						<Clipboard className="w-4 h-4" />
 					</Button>
 					<Button
 						variant="ghost"
@@ -148,7 +147,7 @@ export function TemplateEditor({
 						title="复制链接"
 						className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
 					>
-						<LinkIcon className="w-4 h-4" />
+						<Link className="w-4 h-4" />
 					</Button>
 
 					{isEditing && (

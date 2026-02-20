@@ -4,8 +4,7 @@ import Loading from '@/components/Loading';
 import { NavigationBar } from '@/components/NavigationBar';
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -89,7 +88,7 @@ function AdminTemplatesContent() {
 										size="sm"
 										className="h-8 px-3 text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
 									>
-										<PlusIcon className="w-3.5 h-3.5 mr-1.5" />
+										<Plus className="w-3.5 h-3.5 mr-1.5" />
 										新建
 									</Button>
 								}

@@ -3,7 +3,6 @@
 import type { ConfigTemplate } from '@/types/user-config';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export interface TemplateItem extends ConfigTemplate {
 	configContent?: string;
