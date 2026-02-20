@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { LogEvent, LogLevel } from '@/types/log';
+import { LogEvent, LogLevel, LogType } from '@/types/log';
 import { formatDateTime } from '@/app/admin/users/utils/userUtils';
 import { logApi } from '@/services/log-api';
 import { useToastContext } from '@/providers/toast-provider';
@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, RotateCcw } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, RotateCcw, ListFilter, Activity } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { LogDetailsDialog } from './LogDetailsDialog';
@@ -116,132 +116,98 @@ export function LogViewer({ superToken }: LogViewerProps) {
             icon={Filter}
             className="h-fit"
             action={
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={fetchLogs}
-                disabled={loading}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
-                title="刷新列表"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
+              <div className="flex items-center gap-1">
+                {hasFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReset}
+                    className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    重置
+                  </Button>
                 )}
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fetchLogs()}
+                  disabled={loading}
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+                  title="刷新列表"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             }
           >
-            <div className="space-y-4">
-              <div className="bg-muted/30 border border-border/50 rounded-lg p-3 text-center">
-                <div className="text-xs text-muted-foreground font-medium mb-1">总记录数</div>
-                <div className="text-xl font-bold text-foreground">{total}</div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <ListFilter className="h-3.5 w-3.5 text-primary/70" />
+                  总记录数
+                </span>
+                <span className="text-sm font-medium">{total}</span>
               </div>
 
-              {hasFilters && (
-                <div className="bg-muted/20 border border-border/40 rounded-lg p-3">
-                  <div className="text-xs font-medium text-muted-foreground mb-2">已应用筛选</div>
-                  <div className="flex flex-wrap gap-2">
-                    {level !== 'all' && (
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer select-none"
-                        onClick={() => {
-                          setPage(1);
-                          setLevel('all');
-                          fetchLogs({ page: 1, level: 'all' });
-                        }}
-                        title="点击移除级别筛选"
-                      >
-                        级别: {level.toUpperCase()}
-                      </Badge>
-                    )}
-                    {!!type && (
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer select-none"
-                        onClick={() => {
-                          setPage(1);
-                          setType('');
-                          fetchLogs({ page: 1, type: '' });
-                        }}
-                        title="点击移除事件类型筛选"
-                      >
-                        类型: {type}
-                      </Badge>
-                    )}
-                    {!!userId && (
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer select-none"
-                        onClick={() => {
-                          setPage(1);
-                          setUserId('');
-                          fetchLogs({ page: 1, userId: '' });
-                        }}
-                        title="点击移除用户筛选"
-                      >
-                        用户: {userId}
-                      </Badge>
-                    )}
-                  </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Activity className="h-3.5 w-3.5 text-blue-500/70" />
+                    日志级别
+                  </label>
+                  <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
+                      <SelectValue placeholder="日志级别" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部级别</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="warn">Warn</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="audit">Audit</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">日志级别</label>
-                <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
-                  <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
-                    <SelectValue placeholder="日志级别" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部级别</SelectItem>
-                    <SelectItem value="info">Info</SelectItem>
-                    <SelectItem value="warn">Warn</SelectItem>
-                    <SelectItem value="error">Error</SelectItem>
-                    <SelectItem value="audit">Audit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Tag className="h-3.5 w-3.5 text-purple-500/70" />
+                    事件类型
+                  </label>
+                  <Select value={type} onValueChange={(v) => {
+                    setType(v === 'all' ? '' : v);
+                  }}>
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20">
+                      <SelectValue placeholder="全部类型" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部类型</SelectItem>
+                      {Object.values(LogType).map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">事件类型</label>
-                <Input
-                  placeholder="输入事件类型..."
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">用户ID</label>
-                <Input
-                  placeholder="输入用户ID..."
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
-                />
-              </div>
-
-              <div className="pt-4 space-y-3 border-t border-border/40">
-                <Button
-                  onClick={handleSearch}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
-                >
-                  搜索日志
-                </Button>
-                <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  disabled={loading && logs.length === 0}
-                  className="w-full border-border/60"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  重置筛选
-                </Button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <User className="h-3.5 w-3.5 text-orange-500/70" />
+                    用户ID
+                  </label>
+                  <Input
+                    placeholder="输入用户ID..."
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="bg-muted/30 border-border/60 focus-visible:ring-primary/20"
+                  />
+                </div>
               </div>
             </div>
           </AdminSidePanel>
@@ -334,8 +300,14 @@ export function LogViewer({ superToken }: LogViewerProps) {
                                     {log.message}
                                   </div>
                                   {log.meta && (
-                                    <div className="text-xs text-muted-foreground mt-1 font-mono truncate opacity-60 group-hover:opacity-100 transition-opacity">
-                                      {JSON.stringify(log.meta)}
+                                    <div className="flex flex-col gap-1 mt-1">
+                                      {/* Extract and display URL from meta if available */}
+                                      {(log.meta as any)?.url && (
+                                        <div className="text-xs text-blue-500/80 font-mono truncate opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                          {(log.meta as any).url}
+                                        </div>
+                                      )}
+
                                     </div>
                                   )}
                                 </div>
