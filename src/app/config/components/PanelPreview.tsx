@@ -47,7 +47,7 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 	}, [origin, handlePreviewSubscribeURL]);
 
 	return (
-		<div className="h-full flex flex-col">
+		<div className="h-[calc(100vh-12rem)] min-h-[600px] flex flex-col">
 			<PanelTopBar
 				className="mb-4"
 				description="查看最终生成的 YAML 输出。"

@@ -42,8 +42,8 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
         >
             <div className="flex items-center gap-2 min-w-0 flex-1">
                 <Link2 className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity text-primary" />
-                <span className="truncate font-mono opacity-70 group-hover:opacity-100 transition-opacity">
-                    {subscribeURL.replace(origin, '')}
+                <span className="line-clamp-2 break-all font-mono opacity-70 group-hover:opacity-100 transition-opacity text-left">
+                    {subscribeURL}
                 </span>
             </div>
             <div className="shrink-0 ml-2">
