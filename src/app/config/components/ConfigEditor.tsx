@@ -24,6 +24,7 @@ interface ConfigEditorProps {
 	saveSuccess: boolean;
 	loading?: boolean;
 	error?: string | null;
+	saveError?: string | null;
 }
 
 export function ConfigEditor({
@@ -40,6 +41,7 @@ export function ConfigEditor({
 	saveSuccess,
 	loading,
 	error,
+	saveError,
 }: ConfigEditorProps) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -72,6 +74,7 @@ export function ConfigEditor({
 				onSave={onSave}
 				saving={saving}
 				saveSuccess={saveSuccess}
+				saveError={saveError}
 				isOpen={isSidebarOpen}
 				onClose={() => setIsSidebarOpen(false)}
 			/>

@@ -18,6 +18,7 @@ interface ConfigSidebarProps {
 	onSave: () => void;
 	saving: boolean;
 	saveSuccess: boolean;
+	saveError?: string | null;
 	isOpen?: boolean;
 	onClose?: () => void;
 }
@@ -32,6 +33,7 @@ export function ConfigSidebar({
 	onSave,
 	saving,
 	saveSuccess,
+	saveError,
 	isOpen,
 	onClose,
 }: ConfigSidebarProps) {
@@ -176,13 +178,21 @@ export function ConfigSidebar({
 						</Button>
 
 						{/* Last Saved Status - Subtly placed below button */}
-						{lastSaved && (
+						{lastSaved && !saveError && (
 							<div className="absolute -top-8 right-0 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground bg-background/50 backdrop-blur-sm px-2 py-1 rounded-full border border-border/50 shadow-sm">
 								<Clock className="h-3 w-3" />
 								<span>上次保存: {lastSaved.toLocaleString('zh-CN', { hour: 'numeric', minute: 'numeric' })}</span>
 							</div>
 						)}
 					</div>
+
+					{/* Error Message */}
+					{saveError && (
+						<div className="flex items-center justify-center gap-2 text-xs text-destructive font-medium bg-destructive/10 p-2 rounded-lg border border-destructive/20 animate-in fade-in slide-in-from-bottom-2">
+							<AlertCircle className="h-3.5 w-3.5" />
+							<span>{saveError}</span>
+						</div>
+					)}
 				</div>
 			</aside>
 		</>
