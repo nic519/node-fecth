@@ -4,6 +4,47 @@ import { UserConfig } from '@/types/openapi-schemas';
 import { DEFAULT_RULE_URL } from '@/config/constants';
 
 const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
+const FILTER_CACHE_KEY = 'rule-filter-options-cache-v1';
+const FILTER_CACHE_TTL = 5 * 60 * 1000;
+
+type FilterCacheEntry = {
+    options: string[];
+    updatedAt: number;
+};
+
+type FilterCacheStore = Record<string, FilterCacheEntry>;
+
+const readFilterCache = (url: string): FilterCacheEntry | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = window.localStorage.getItem(FILTER_CACHE_KEY);
+        if (!raw) return null;
+        const store = JSON.parse(raw) as FilterCacheStore;
+        const entry = store[url];
+        if (!entry || !Array.isArray(entry.options) || typeof entry.updatedAt !== 'number') {
+            return null;
+        }
+        return entry;
+    } catch {
+        return null;
+    }
+};
+
+const writeFilterCache = (url: string, options: string[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+        const raw = window.localStorage.getItem(FILTER_CACHE_KEY);
+        const store = raw ? (JSON.parse(raw) as FilterCacheStore) : {};
+        store[url] = { options, updatedAt: Date.now() };
+        window.localStorage.setItem(FILTER_CACHE_KEY, JSON.stringify(store));
+    } catch {
+        return;
+    }
+};
+
+const isFilterCacheValid = (entry: FilterCacheEntry) => {
+    return Date.now() - entry.updatedAt < FILTER_CACHE_TTL;
+};
 
 interface UseRuleConfigProps {
     config: UserConfig;
@@ -49,11 +90,20 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
 
     // Fetch filters
     useEffect(() => {
+        let cancelled = false;
         const fetchFilters = async () => {
             setLoadingFilters(true);
             setFilterError(null);
+            const url = config.ruleUrl || DEFAULT_RULE_URL;
+            const cached = readFilterCache(url);
+            if (cached && isFilterCacheValid(cached)) {
+                if (!cancelled) {
+                    setFilterOptions(cached.options);
+                    setLoadingFilters(false);
+                }
+                return;
+            }
             try {
-                const url = config.ruleUrl || DEFAULT_RULE_URL;
                 const response = await fetch(url, { cache: 'no-store' });
                 if (!response.ok) throw new Error('获取规则失败');
                 const text = await response.text();
@@ -64,21 +114,35 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
                     const options = proxyGroups
                         .map((g) => g.name)
                         .filter((n): n is string => !!n);
-                    // Remove duplicates just in case
-                    setFilterOptions([...new Set(options)] as string[]);
+                    const uniqueOptions = [...new Set(options)] as string[];
+                    if (!cancelled) {
+                        setFilterOptions(uniqueOptions);
+                    }
+                    writeFilterCache(url, uniqueOptions);
                 } else {
-                    setFilterError('YAML 格式错误: 缺少 proxy-groups');
+                    if (!cancelled) {
+                        setFilterError('YAML 格式错误: 缺少 proxy-groups');
+                    }
                 }
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : '加载过滤选项出错';
-                setFilterError(message);
+                if (cached && !cancelled) {
+                    setFilterOptions(cached.options);
+                } else if (!cancelled) {
+                    setFilterError(message);
+                }
                 console.error(err);
             } finally {
-                setLoadingFilters(false);
+                if (!cancelled) {
+                    setLoadingFilters(false);
+                }
             }
         };
 
         fetchFilters();
+        return () => {
+            cancelled = true;
+        };
     }, [config.ruleUrl]);
 
     const handleFilterToggle = (checked: boolean) => {

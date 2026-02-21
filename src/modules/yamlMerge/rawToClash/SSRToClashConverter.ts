@@ -13,7 +13,7 @@ export class SSRToClashConverter {
 
             // Check if it contains ssr:// links
             return decodedBody.includes('ssr://');
-        } catch (error) {
+        } catch {
             return false;
         }
     }

@@ -3,7 +3,6 @@
 import { AcmeLogo } from '@/components/NavigationBar';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { ConfigTab } from './ConfigForm';
 import { User, Settings, Shield, RefreshCw, Key, Eye, Clock, Loader2, CheckCircle2, Save, AlertCircle } from 'lucide-react';

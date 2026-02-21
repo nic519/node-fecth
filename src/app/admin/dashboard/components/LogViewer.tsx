@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, RotateCcw, ListFilter, Activity } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { LogDetailsDialog } from './LogDetailsDialog';
@@ -274,100 +274,100 @@ export function LogViewer({ superToken }: LogViewerProps) {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        logs.map((log) => (
-                          <TableRow
-                            key={log.id}
-                            className="cursor-pointer hover:bg-muted/50 transition-colors border-border/40 group"
-                            onClick={() => setSelectedLog(log)}
-                          >
-                            <TableCell className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors py-2">
-                              {formatDateTime(log.createdAt)}
-                            </TableCell>
-                            <TableCell className="py-2">
-                              <Badge variant={
-                                log.level === 'error' ? 'destructive' :
-                                  log.level === 'warn' ? 'secondary' :
-                                    log.level === 'audit' ? 'outline' : 'default'
-                              } className="rounded-md font-normal px-2.5 py-0.5 shadow-sm">
-                                {log.level.toUpperCase()}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-mono text-xs font-medium text-foreground py-2">{log.type}</TableCell>
-                            <TableCell className="max-w-[360px] py-2">
-                              <div className="flex items-start gap-3">
-                                <div className="min-w-0 flex-1">
-                                  <div className="truncate text-sm text-foreground/80 group-hover:text-foreground transition-colors" title={log.message}>
-                                    {log.message}
-                                  </div>
-                                  {log.meta && (
-                                    <div className="flex flex-col gap-1 mt-1">
-                                      {/* Extract and display URL from meta if available */}
-                                      {(log.meta as any)?.url && (
-                                        <div className="text-xs text-blue-500/80 font-mono truncate opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                          {(log.meta as any).url}
-                                        </div>
-                                      )}
-
+                        logs.map((log) => {
+                          const metaUrl = typeof log.meta?.url === 'string' ? log.meta.url : undefined;
+                          return (
+                            <TableRow
+                              key={log.id}
+                              className="cursor-pointer hover:bg-muted/50 transition-colors border-border/40 group"
+                              onClick={() => setSelectedLog(log)}
+                            >
+                              <TableCell className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors py-2">
+                                {formatDateTime(log.createdAt)}
+                              </TableCell>
+                              <TableCell className="py-2">
+                                <Badge variant={
+                                  log.level === 'error' ? 'destructive' :
+                                    log.level === 'warn' ? 'secondary' :
+                                      log.level === 'audit' ? 'outline' : 'default'
+                                } className="rounded-md font-normal px-2.5 py-0.5 shadow-sm">
+                                  {log.level.toUpperCase()}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="font-mono text-xs font-medium text-foreground py-2">{log.type}</TableCell>
+                              <TableCell className="max-w-[360px] py-2">
+                                <div className="flex items-start gap-3">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="truncate text-sm text-foreground/80 group-hover:text-foreground transition-colors" title={log.message}>
+                                      {log.message}
                                     </div>
-                                  )}
+                                    {metaUrl && (
+                                      <div className="flex flex-col gap-1 mt-1">
+                                        {/* Extract and display URL from meta if available */}
+                                        <div className="text-xs text-blue-500/80 font-mono truncate opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                          {metaUrl}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleCopy(log.message, '消息已复制到剪贴板');
+                                          }}
+                                        >
+                                          <Copy className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>复制消息</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                          disabled={!log.userId}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!log.userId) return;
+                                            handleCopy(log.userId, '用户 ID 已复制到剪贴板');
+                                          }}
+                                        >
+                                          <User className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{log.userId ? '复制用户 ID' : '无用户 ID'}</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleCopy(JSON.stringify(log, null, 2), '日志 JSON 已复制到剪贴板');
+                                          }}
+                                        >
+                                          <Code className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>复制 JSON</TooltipContent>
+                                    </Tooltip>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleCopy(log.message, '消息已复制到剪贴板');
-                                        }}
-                                      >
-                                        <Copy className="h-4 w-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>复制消息</TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                        disabled={!log.userId}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          if (!log.userId) return;
-                                          handleCopy(log.userId, '用户 ID 已复制到剪贴板');
-                                        }}
-                                      >
-                                        <User className="h-4 w-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>{log.userId ? '复制用户 ID' : '无用户 ID'}</TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleCopy(JSON.stringify(log, null, 2), '日志 JSON 已复制到剪贴板');
-                                        }}
-                                      >
-                                        <Code className="h-4 w-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>复制 JSON</TooltipContent>
-                                  </Tooltip>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground py-2">{log.userId || '-'}</TableCell>
-                          </TableRow>
-                        ))
+                              </TableCell>
+                              <TableCell className="font-mono text-xs text-muted-foreground py-2">{log.userId || '-'}</TableCell>
+                            </TableRow>
+                          );
+                        })
                       )}
                     </TableBody>
                   </Table>

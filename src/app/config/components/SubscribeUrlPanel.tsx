@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Link2, Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { copyToClipboard } from '@/utils/configUtils';
 
 interface SubscribeUrlPanelProps {

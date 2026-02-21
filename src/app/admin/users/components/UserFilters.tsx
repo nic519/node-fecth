@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Filter, RefreshCw, UserPlus, Download, Upload, Users, Database } from 'lucide-react';
+import { Loader2, Search, RefreshCw, UserPlus, Download, Upload, Users, Database } from 'lucide-react';
 
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 

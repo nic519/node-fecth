@@ -1,7 +1,6 @@
 'use client';
 
 import type { ConfigTemplate } from '@/types/user-config';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface TemplateItem extends ConfigTemplate {
