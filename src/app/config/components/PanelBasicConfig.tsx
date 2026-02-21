@@ -25,7 +25,7 @@ function PromoLinkButton({ promoUrl }: PromoLinkButtonProps) {
         <Button
             size="sm"
             asChild
-            className="h-10 px-3 text-xs font-medium bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95 duration-300 hover:shadow-md hover:shadow-orange-500/30 motion-safe:animate-[pulse_3s_ease-in-out_infinite] motion-safe:hover:animate-none will-change-transform"
+            className="h-10 px-3 text-xs font-medium text-white bg-gradient-to-r from-orange-700 to-amber-600 hover:from-amber-800 hover: border-orange-600/20 transition-all hover:scale-105 active:scale-95 duration-300"
         >
             <a href={promoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5">
                 <Sparkles className="w-3.5 h-3.5" />

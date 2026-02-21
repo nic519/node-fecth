@@ -8,6 +8,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { memo } from 'react';
 import { Link, Flag, Globe, Trash2 } from 'lucide-react';
 
+const AREA_EMOJI: Record<AreaCode, string> = {
+    TW: '🏝️',
+    SG: '🇸🇬',
+    JP: '🇯🇵',
+    VN: '🇻🇳',
+    HK: '🇭🇰',
+    US: '🇺🇸'
+};
+
 interface SubConfigCardProps {
     index: number;
     item: SubConfig;
@@ -83,11 +92,12 @@ export const SubConfigCard = memo(function SubConfigCard({
                         <div className="space-y-2">
                             <Label className="flex items-center gap-2">
                                 <Globe className="w-4 h-4" />
-                                包含地区 (Include Areas)
+                                包含地区
                             </Label>
                             <div className="flex flex-wrap gap-2 pt-2">
                                 {AREA_CODES.map((area: AreaCode) => {
                                     const isChecked = item.includeArea?.includes(area) || false;
+                                    const emoji = AREA_EMOJI[area];
                                     return (
                                         <div key={`${index}-${area}`} className="flex items-center space-x-2">
                                             <Checkbox
@@ -100,6 +110,7 @@ export const SubConfigCard = memo(function SubConfigCard({
                                                 htmlFor={`sub-${index}-area-${area}`}
                                                 className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
                                             >
+                                                <span>{emoji}</span>
                                                 <span>{area}</span>
                                             </Label>
                                         </div>
