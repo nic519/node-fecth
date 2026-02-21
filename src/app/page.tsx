@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Layers, Shield, Globe, ArrowRight, Settings2, RefreshCw, Zap, CheckCircle2 } from 'lucide-react';
+import { RuleFilterSelector } from '@/components/RuleFilterSelector';
+import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
 
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptions();
 
   // Check for admin token
   useEffect(() => {
@@ -121,6 +124,40 @@ function HomeContent() {
             title="全设备同步"
             description="固定订阅地址，内部规则与覆写在网站完成，一次修改多端同步。"
           />
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20 grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-start">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-slate-900">规则过滤示例</h2>
+            <p className="text-slate-600 leading-relaxed">
+              首页直接展示规则过滤控件，让配置体验更具真实感。以下为静态数据示例，展示必选项、已选项与开关状态的真实交互形态。
+            </p>
+            <div className="grid gap-4">
+              <ScenarioCard
+                title="必选规则自动锁定"
+                description="关键策略组会自动标记为必选，保证基础分流稳定生效。"
+                icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+              />
+              <ScenarioCard
+                title="自定义过滤一键开关"
+                description="快速切换为默认全量策略或精细化过滤方案。"
+                icon={<Settings2 className="w-5 h-5 text-indigo-600" />}
+              />
+            </div>
+          </div>
+          <Card className="border border-slate-200/70 bg-white/95 shadow-xl shadow-slate-200/40">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-500">规则过滤控件</div>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">静态示例</span>
+              </div>
+              <RuleFilterSelector
+                filterOptions={filterOptions}
+                loading={loadingFilters}
+                error={filterError}
+              />
+            </CardContent>
+          </Card>
         </section>
 
         <section id="scenarios" className="max-w-6xl mx-auto mt-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-start">

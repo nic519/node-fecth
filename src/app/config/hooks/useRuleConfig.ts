@@ -4,7 +4,7 @@ import { UserConfig } from '@/types/user-config';
 import { DEFAULT_RULE_URL } from '@/config/constants';
 import { ruleService } from '@/services/rule-api';
 
-const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
+export const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
 const FILTER_CACHE_KEY = 'rule-filter-options-cache-v1';
 const FILTER_CACHE_TTL = 5 * 60 * 1000;
 
@@ -47,6 +47,63 @@ const isFilterCacheValid = (entry: FilterCacheEntry) => {
     return Date.now() - entry.updatedAt < FILTER_CACHE_TTL;
 };
 
+export const isMandatoryFilter = (option: string) => {
+    return MANDATORY_KEYWORDS.some(keyword => option.includes(keyword));
+};
+
+export function useStaticRuleFilterOptions() {
+    const [filterOptions, setFilterOptions] = useState<string[]>([]);
+    const [loadingFilters, setLoadingFilters] = useState(false);
+    const [filterError, setFilterError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        const fetchFilters = async () => {
+            setLoadingFilters(true);
+            setFilterError(null);
+            const url = DEFAULT_RULE_URL;
+            const cached = readFilterCache(url);
+            if (cached && isFilterCacheValid(cached)) {
+                if (!cancelled) {
+                    setFilterOptions(cached.options);
+                    setLoadingFilters(false);
+                }
+                return;
+            }
+            try {
+                const uniqueOptions = await ruleService.fetchRuleFilterOptions(url);
+                if (!cancelled) {
+                    setFilterOptions(uniqueOptions);
+                }
+                writeFilterCache(url, uniqueOptions);
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : '加载过滤选项出错';
+                if (cached && !cancelled) {
+                    setFilterOptions(cached.options);
+                } else if (!cancelled) {
+                    setFilterError(message);
+                }
+                console.error(err);
+            } finally {
+                if (!cancelled) {
+                    setLoadingFilters(false);
+                }
+            }
+        };
+
+        fetchFilters();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    return {
+        filterOptions,
+        loadingFilters,
+        filterError
+    };
+}
+
 interface UseRuleConfigProps {
     config: UserConfig;
     onChange: (newConfig: UserConfig) => void;
@@ -64,7 +121,7 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
     }, [config, onChange]);
 
     const isMandatory = (option: string) => {
-        return MANDATORY_KEYWORDS.some(keyword => option.includes(keyword));
+        return isMandatoryFilter(option);
     };
 
     // Sync enable state with config
