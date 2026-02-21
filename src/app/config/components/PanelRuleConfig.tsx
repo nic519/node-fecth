@@ -163,7 +163,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                             <Button
                                 size="sm"
                                 disabled={readOnly}
-                                className="w-full sm:w-auto bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                                className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                             >
                                 <Edit className="w-3.5 h-3.5 mr-2" />
                                 编辑规则

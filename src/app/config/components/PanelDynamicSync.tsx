@@ -172,17 +172,10 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
                         variant="ghost"
                         onClick={onSync}
                         disabled={isLoading}
-                        className={cn(
-                            "h-8 w-8 p-0 shrink-0 rounded-full transition-all shadow-sm",
-                            isError
-                                ? "bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 hover:scale-110"
-                                : isSuccess
-                                    ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                    : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-900/40 dark:hover:to-blue-800/40 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 active:scale-95"
-                        )}
+                        className="h-8 w-8 p-0 shrink-0 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                     >
                         {isLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                            <Loader2 className="w-4 h-4 animate-spin text-white/90" />
                         ) : isSuccess ? (
                             <CheckCircle2 className="w-4 h-4" />
                         ) : isError ? (

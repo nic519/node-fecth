@@ -2,7 +2,7 @@ import { AreaCode, UserConfig, SubConfig } from '@/types/user-config';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Link, FileText, Filter, ListPlus, Plus } from 'lucide-react';
+import { Link, FileText, Filter, ListPlus, Plus, Sparkles, ArrowUpRight } from 'lucide-react';
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback } from 'react';
 import { SubConfigCard } from './SubConfigCard';
@@ -16,7 +16,32 @@ interface BasicConfigProps {
     uid?: string;
 }
 
+interface PromoLinkButtonProps {
+    promoUrl: string;
+}
+
+function PromoLinkButton({ promoUrl }: PromoLinkButtonProps) {
+    return (
+        <Button
+            size="sm"
+            asChild
+            className="h-10 px-3 text-xs font-medium bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95 duration-300 hover:shadow-md hover:shadow-orange-500/30 motion-safe:animate-[pulse_3s_ease-in-out_infinite] motion-safe:hover:animate-none will-change-transform"
+        >
+            <a href={promoUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 transition-transform duration-300 motion-safe:hover:-translate-y-0.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="flex flex-col items-start leading-tight">
+                    <span>订阅推广注册</span>
+                    <span className="text-[10px] text-white/85 font-normal">性价比高，延迟极低</span>
+                </span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+        </Button>
+    );
+}
+
 export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
+    const promoUrl = 'https://i03.1ytaff.com/register?aff=bYJ44TS8';
+
     const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
     }, [config, onChange]);
@@ -61,7 +86,12 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
         <div className="space-y-8">
             {/* Main Configuration Section */}
             <div className="space-y-6">
-                <PanelTopBar description="填写主订阅与生成配置的基础信息。" />
+                <PanelTopBar
+                    description="填写主订阅与生成配置的基础信息。"
+                    right={(
+                        <PromoLinkButton promoUrl={promoUrl} />
+                    )}
+                />
 
                 <div className="space-y-6">
                     <div className="space-y-2 group">
@@ -148,7 +178,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                         size="sm"
                         onClick={handleAppendSubListAdd}
                         disabled={readOnly}
-                        className="flex items-center gap-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                        className="flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                     >
                         <Plus className="w-4 h-4" />
                         添加订阅源
