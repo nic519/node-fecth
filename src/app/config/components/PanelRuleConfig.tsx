@@ -56,7 +56,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                     readOnly={readOnly}
                     className="transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
                 />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground break-all">
                     不填写时默认使用：<a href={DEFAULT_RULE_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                         {DEFAULT_RULE_URL}
                     </a>
@@ -64,24 +64,24 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
             </div>
 
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                     <Label htmlFor="requiredFilters" className="text-base flex items-center gap-2">
                         <div className="p-1 rounded bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400">
                             <ListFilter className="w-3.5 h-3.5" />
                         </div>
                         需要的过滤项
                     </Label>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-between sm:justify-end space-x-2 bg-muted/30 sm:bg-transparent p-2 sm:p-0 rounded-lg">
+                        <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground order-2 sm:order-1">
+                            {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有'}
+                        </Label>
                         <Switch
                             id="enable-filters"
                             checked={enableCustomFilters}
                             onCheckedChange={handleFilterToggle}
                             disabled={readOnly}
-                            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-teal-500 data-[state=checked]:to-emerald-500"
+                            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-teal-500 data-[state=checked]:to-emerald-500 order-1 sm:order-2"
                         />
-                        <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground">
-                            {enableCustomFilters ? '已启用自定义过滤' : '默认包含所有'}
-                        </Label>
                     </div>
                 </div>
 
@@ -151,7 +151,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
             </div>
 
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                     <Label className="flex items-center gap-2">
                         <div className="p-1 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
                             <Edit className="w-3.5 h-3.5" />
@@ -163,18 +163,18 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                             <Button
                                 size="sm"
                                 disabled={readOnly}
-                                className="bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                                className="w-full sm:w-auto bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-0 transition-all hover:scale-105 active:scale-95"
                             >
                                 <Edit className="w-3.5 h-3.5 mr-2" />
                                 编辑规则
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-                            <DialogHeader>
+                        <DialogContent className="w-[95vw] max-w-4xl h-[85vh] sm:h-[80vh] flex flex-col p-4 sm:p-6">
+                            <DialogHeader className="mb-2">
                                 <DialogTitle>编辑规则覆写</DialogTitle>
-                                <DialogDescription>
+                                <DialogDescription className="text-xs sm:text-sm">
                                     在此处输入 YAML 格式的内容以覆写或追加规则。
-                                    <span className="text-xs opacity-80 block mt-1">教程：<a href="https://clashparty.org/docs/guide/override/yaml" target="_blank" rel="noopener noreferrer">https://clashparty.org/docs/guide/override/yaml</a></span>
+                                    <span className="text-xs opacity-80 block mt-1 truncate">教程：<a href="https://clashparty.org/docs/guide/override/yaml" target="_blank" rel="noopener noreferrer">https://clashparty.org/docs/guide/override/yaml</a></span>
                                 </DialogDescription>
                             </DialogHeader>
                             <div className={`flex-1 min-h-0 border rounded-md overflow-hidden ${yamlError ? 'border-destructive' : ''}`}>

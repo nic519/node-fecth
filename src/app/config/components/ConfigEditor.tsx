@@ -7,6 +7,8 @@ import { PanelPreview } from './PanelPreview';
 import { ConfigSidebar } from './ConfigSidebar';
 import Loading from '@/components/Loading';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Menu } from 'lucide-react';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -39,27 +41,43 @@ export function ConfigEditor({
 	loading,
 	error,
 }: ConfigEditorProps) {
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 	return (
 		<div className="flex min-h-screen w-full bg-slate-50/50 dark:bg-zinc-950 relative">
 			{/* Background Gradient */}
 			<div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#09090b_40%,#1e1b4b_100%)] opacity-20 pointer-events-none" />
 
+			{/* Mobile Menu Button */}
+			<Button
+				variant="ghost"
+				size="icon"
+				className="fixed top-4 left-4 z-40 md:hidden bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-border/20 shadow-sm hover:bg-white/80 dark:hover:bg-black/80"
+				onClick={() => setIsSidebarOpen(true)}
+			>
+				<Menu className="h-5 w-5" />
+			</Button>
+
 			{/* Fixed Sidebar */}
 			<ConfigSidebar
 				uid={uid}
 				token={token}
 				activeTab={activeTab}
-				onTabChange={onTabChange}
+				onTabChange={(tab) => {
+					onTabChange(tab);
+					setIsSidebarOpen(false);
+				}}
 				validationErrors={validationErrors}
 				lastSaved={lastSaved}
 				onSave={onSave}
 				saving={saving}
 				saveSuccess={saveSuccess}
+				isOpen={isSidebarOpen}
+				onClose={() => setIsSidebarOpen(false)}
 			/>
 
 			{/* Main Content Area - pushed right by sidebar width (w-72) */}
-			<main className="flex-1 ml-72 p-6 md:p-8 min-h-screen transition-all duration-300">
+			<main className="flex-1 ml-0 md:ml-72 p-6 md:p-8 min-h-screen transition-all duration-300">
 				<div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
 					{loading ? (
