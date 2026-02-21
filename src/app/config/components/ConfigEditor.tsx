@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { ValidationMessage } from './ValidationMessage';
 import { ConfigForm, ConfigTab } from './ConfigForm';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/user-config';
 import { PanelPreview } from './PanelPreview';
 import { ConfigSidebar } from './ConfigSidebar';
 import Loading from '@/components/Loading';

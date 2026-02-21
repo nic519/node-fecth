@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import yaml from 'js-yaml';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/user-config';
 import { DEFAULT_RULE_URL } from '@/config/constants';
+import { ruleService } from '@/services/rule-api';
 
 const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
 const FILTER_CACHE_KEY = 'rule-filter-options-cache-v1';
@@ -104,26 +105,11 @@ export function useRuleConfig({ config, onChange }: UseRuleConfigProps) {
                 return;
             }
             try {
-                const response = await fetch(url, { cache: 'no-store' });
-                if (!response.ok) throw new Error('获取规则失败');
-                const text = await response.text();
-                const data = yaml.load(text) as unknown;
-
-                if (data && typeof data === 'object' && 'proxy-groups' in data && Array.isArray((data as { ['proxy-groups']?: unknown })['proxy-groups'])) {
-                    const proxyGroups = (data as { ['proxy-groups']?: { name?: string }[] })['proxy-groups'] ?? [];
-                    const options = proxyGroups
-                        .map((g) => g.name)
-                        .filter((n): n is string => !!n);
-                    const uniqueOptions = [...new Set(options)] as string[];
-                    if (!cancelled) {
-                        setFilterOptions(uniqueOptions);
-                    }
-                    writeFilterCache(url, uniqueOptions);
-                } else {
-                    if (!cancelled) {
-                        setFilterError('YAML 格式错误: 缺少 proxy-groups');
-                    }
+                const uniqueOptions = await ruleService.fetchRuleFilterOptions(url);
+                if (!cancelled) {
+                    setFilterOptions(uniqueOptions);
                 }
+                writeFilterCache(url, uniqueOptions);
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : '加载过滤选项出错';
                 if (cached && !cancelled) {

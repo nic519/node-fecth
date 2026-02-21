@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import { Activity, Calendar } from 'lucide-react';
 import { getUserAvatarPreset } from '../utils/avatarUtils';
-import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '../utils/userUtils';
+import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
 import { UserActions } from './UserActions';
 
 interface SubscriptionStatProps {

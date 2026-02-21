@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { UserConfig } from '@/types/openapi-schemas';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { UserConfig } from '@/types/user-config';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
 
@@ -20,6 +20,7 @@ export interface SyncItemData {
 export function useDynamicSync(config: UserConfig) {
     const [statuses, setStatuses] = useState<Record<string, SyncStatus>>({});
     const [dynamicInfos, setDynamicInfos] = useState<Record<string, DynamicInfo>>({});
+    const timeoutIdsRef = useRef<number[]>([]);
 
     const items = useMemo<SyncItemData[]>(() => [
         ...(config.subscribe ? [{ url: config.subscribe, source: '主订阅', flag: DEFAULT_SUB_FLAG }] : []),
@@ -31,11 +32,10 @@ export function useDynamicSync(config: UserConfig) {
         setStatuses(prev => ({ ...prev, [url]: { status: 'loading', message: undefined } }));
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        const timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
         try {
             const response = await dynamicService.syncUrl(url, controller.signal);
-            clearTimeout(timeoutId);
 
             if (response.code === 0) {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));
@@ -53,7 +53,7 @@ export function useDynamicSync(config: UserConfig) {
                 }));
 
                 // Clear success status after 3 seconds
-                setTimeout(() => {
+                const resetTimeoutId = window.setTimeout(() => {
                     setStatuses(prev => {
                         if (prev[url]?.status === 'success') {
                             return { ...prev, [url]: { status: 'idle' } };
@@ -61,6 +61,7 @@ export function useDynamicSync(config: UserConfig) {
                         return prev;
                     });
                 }, 3000);
+                timeoutIdsRef.current.push(resetTimeoutId);
 
             } else {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'error', message: response.msg || '失败' } }));
@@ -68,6 +69,8 @@ export function useDynamicSync(config: UserConfig) {
         } catch (error: unknown) {
             const message = error instanceof Error && error.name === 'AbortError' ? '请求超时' : '网络错误';
             setStatuses(prev => ({ ...prev, [url]: { status: 'error', message } }));
+        } finally {
+            clearTimeout(timeoutId);
         }
     }, []);
 
@@ -101,6 +104,13 @@ export function useDynamicSync(config: UserConfig) {
             isMounted = false;
         };
     }, [items]);
+
+    useEffect(() => {
+        return () => {
+            timeoutIdsRef.current.forEach((id) => clearTimeout(id));
+            timeoutIdsRef.current = [];
+        };
+    }, []);
 
     return {
         items,

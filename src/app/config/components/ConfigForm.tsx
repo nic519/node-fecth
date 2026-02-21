@@ -1,4 +1,4 @@
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/user-config';
 import { PanelDynamicSync } from './PanelDynamicSync';
 import { PanelBasicConfig } from './PanelBasicConfig';
 import { PanelRuleConfig } from './PanelRuleConfig';

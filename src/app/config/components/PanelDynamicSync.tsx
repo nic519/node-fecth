@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, RefreshCw, CheckCircle2, Clock, Activity, Link as LinkIcon } from 'lucide-react';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/user-config';
 import { useDynamicSync, SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
 import { cn } from '@/lib/utils';
 import {
@@ -11,7 +11,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatTraffic, getTrafficBarColor, parseTrafficInfo, formatDateTime } from '@/app/admin/users/utils/userUtils';
+import { formatTraffic, getTrafficBarColor, parseTrafficInfo, formatDateTime } from '@/utils/trafficUtils';
 import { PanelTopBar } from './PanelTopBar';
 
 interface DynamicSyncPanelProps {
@@ -174,7 +174,7 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
                         disabled={isLoading}
                         className={cn(
                             "h-8 w-8 p-0 shrink-0 rounded-full transition-all shadow-sm",
-                            isError 
+                            isError
                                 ? "bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 hover:scale-110"
                                 : isSuccess
                                     ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"

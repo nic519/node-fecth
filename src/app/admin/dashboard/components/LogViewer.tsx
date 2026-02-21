@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LogEvent, LogLevel, LogType } from '@/types/log';
-import { formatDateTime } from '@/app/admin/users/utils/userUtils';
+import { formatDateTime } from '@/utils/trafficUtils';
 import { logApi } from '@/services/log-api';
 import { useToastContext } from '@/providers/toast-provider';
 import { copyToClipboard } from '@/utils/configUtils';

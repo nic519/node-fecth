@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { LogEvent } from '@/types/log';
-import { formatDateTime } from '@/app/admin/users/utils/userUtils';
+import { formatDateTime } from '@/utils/trafficUtils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
