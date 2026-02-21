@@ -7,6 +7,39 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Layers, Shield, Globe, ArrowRight, Settings2, RefreshCw, Zap, CheckCircle2 } from 'lucide-react';
 import { RuleFilterSelector } from '@/components/RuleFilterSelector';
+import { SyncItemCard } from '@/components/SyncItemCard';
+import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
+
+const previewSyncItems: SyncItemData[] = [
+  { url: 'https://sub.nodefetch.io/sub1', source: '主订阅', flag: '🐙' },
+  { url: 'https://sub.nodefetch.io/sub2', source: '追加订阅', flag: '🍚' },
+  { url: 'https://sub.nodefetch.io/sub3', source: '追加订阅', flag: '🍌' }
+];
+const previewStatuses: Record<string, SyncStatus> = {
+  'https://sub.nodefetch.io/sub1': { status: 'success', message: '流量紧张' },
+  'https://sub.nodefetch.io/sub2': { status: 'success', message: '流量充足' },
+  'https://sub.nodefetch.io/sub3': { status: 'success', message: '流量充足' }
+};
+const previewInfos: Record<string, DynamicInfo> = {
+  'https://sub.nodefetch.io/sub1': {
+    id: 'demo-main',
+    url: 'https://sub.nodefetch.io/main',
+    traffic: 'upload=402653184;download=307904819200;total=336870912000',
+    updatedAt: '2026-02-21T02:10:00.000Z'
+  },
+  'https://sub.nodefetch.io/sub2': {
+    id: 'demo-japan',
+    url: 'https://sub.nodefetch.io/japan',
+    traffic: 'upload=536870912;download=2684354560;total=85899345920',
+    updatedAt: '2026-02-21T00:05:00.000Z'
+  },
+  'https://sub.nodefetch.io/sub3': {
+    id: 'demo-backup',
+    url: 'https://sub.nodefetch.io/backup',
+    traffic: 'upload=134217728;download=805306368;total=102400000000',
+    updatedAt: '2026-02-21T01:30:00.000Z'
+  }
+};
 import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
 
 function HomeContent() {
@@ -134,11 +167,6 @@ function HomeContent() {
             </p>
             <div className="grid gap-4">
               <ScenarioCard
-                title="必选规则自动锁定"
-                description="关键策略组会自动标记为必选，保证基础分流稳定生效。"
-                icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
-              />
-              <ScenarioCard
                 title="自定义过滤一键开关"
                 description="快速切换为默认全量策略或精细化过滤方案。"
                 icon={<Settings2 className="w-5 h-5 text-indigo-600" />}
@@ -158,6 +186,24 @@ function HomeContent() {
               />
             </CardContent>
           </Card>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-slate-900">订阅同步示例</h3>
+            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">静态演示</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {previewSyncItems.map((item) => (
+              <SyncItemCard
+                key={item.url}
+                item={item}
+                status={previewStatuses[item.url] || { status: 'idle' }}
+                info={previewInfos[item.url]}
+                showAction={false}
+              />
+            ))}
+          </div>
         </section>
 
         <section id="scenarios" className="max-w-6xl mx-auto mt-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-start">
