@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { PanelTopBar } from './PanelTopBar';
 
@@ -52,11 +53,10 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 				description="查看最终生成的 YAML 输出。"
 				right={
 					<Button
-						variant="outline"
 						size="sm"
 						onClick={handlePreviewSubscribeURL}
 						disabled={previewLoading}
-						className="h-8 gap-2 bg-background hover:bg-accent hover:text-accent-foreground transition-all"
+						className={cn("h-8 gap-2", secondaryActionButtonClass)}
 					>
 						{previewLoading ? (
 							<Loader2 className="w-3.5 h-3.5 animate-spin" />

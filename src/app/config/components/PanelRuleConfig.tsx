@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { YamlEditor } from '@/components/YamlEditor';
 import { useRuleConfig } from '../hooks/useRuleConfig';
 import { DEFAULT_RULE_URL } from '@/config/constants';
+import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import { PanelTopBar } from './PanelTopBar';
 
 interface RuleConfigProps {
@@ -163,9 +164,9 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
                             <Button
                                 size="sm"
                                 disabled={readOnly}
-                                className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                                className={cn("w-full sm:w-auto", secondaryActionButtonClass)}
                             >
-                                <Edit className="w-3.5 h-3.5 mr-2" />
+                                <Edit className="w-3.5 h-3.5" />
                                 编辑规则
                             </Button>
                         </DialogTrigger>

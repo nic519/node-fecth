@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, RefreshCw, CheckCircle2, Clock, Activity, Link as LinkIcon } from 'lucide-react';
 import { UserConfig } from '@/types/user-config';
 import { useDynamicSync, SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
-import { cn } from '@/lib/utils';
+import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import {
     Tooltip,
     TooltipContent,
@@ -172,7 +172,7 @@ function SyncItem({ item, status, info, onSync }: SyncItemProps) {
                         variant="ghost"
                         onClick={onSync}
                         disabled={isLoading}
-                        className="h-8 w-8 p-0 shrink-0 rounded-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                        className={cn("h-8 w-8 p-0 shrink-0 rounded-full", secondaryActionButtonClass)}
                     >
                         {isLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin text-white/90" />

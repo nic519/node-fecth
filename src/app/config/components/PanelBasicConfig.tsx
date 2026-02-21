@@ -8,6 +8,7 @@ import { useCallback } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
+import { secondaryActionButtonClass } from '@/lib/utils';
 
 interface BasicConfigProps {
     config: UserConfig;
@@ -178,7 +179,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                         size="sm"
                         onClick={handleAppendSubListAdd}
                         disabled={readOnly}
-                        className="flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-lg shadow-emerald-500/20 border-0 transition-all hover:scale-105 active:scale-95"
+                        className={`flex items-center gap-1 ${secondaryActionButtonClass}`}
                     >
                         <Plus className="w-4 h-4" />
                         添加订阅源
