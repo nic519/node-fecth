@@ -92,7 +92,7 @@ export const SubConfigCard = memo(function SubConfigCard({
                         <div className="space-y-2">
                             <Label className="flex items-center gap-2">
                                 <Globe className="w-4 h-4" />
-                                包含地区
+                                筛选地区
                             </Label>
                             <div className="flex flex-wrap gap-2 pt-2">
                                 {AREA_CODES.map((area: AreaCode) => {
@@ -118,7 +118,7 @@ export const SubConfigCard = memo(function SubConfigCard({
                                 })}
                             </div>
                             <p className="text-[0.8rem] text-muted-foreground mt-1">
-                                勾选要保留的地区。若<b>全不选</b>则默认包含所有地区。
+                                勾选要筛选的地区，防止多订阅模式，<b>过多节点，影响测速速度</b><br />若 <b>全不选</b> 则默认包含所有地区
                             </p>
                         </div>
                     </div>

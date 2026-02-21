@@ -9,6 +9,7 @@ import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
 import { secondaryActionButtonClass } from '@/lib/utils';
+import { PROMO_URL } from '@/config/constants';
 
 interface BasicConfigProps {
     config: UserConfig;
@@ -41,7 +42,7 @@ function PromoLinkButton({ promoUrl }: PromoLinkButtonProps) {
 }
 
 export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
-    const promoUrl = 'https://i03.1ytaff.com/register?aff=bYJ44TS8';
+
 
     const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
@@ -90,7 +91,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                 <PanelTopBar
                     description="填写主订阅与生成配置的基础信息。"
                     right={(
-                        <PromoLinkButton promoUrl={promoUrl} />
+                        <PromoLinkButton promoUrl={PROMO_URL} />
                     )}
                 />
 
@@ -165,15 +166,12 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-bold flex items-center gap-2 text-primary/80">
-                            <div className="p-1.5 rounded-md bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
-                                <ListPlus className="w-5 h-5" />
+                        <Label className="text-base flex items-center gap-2">
+                            <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                <ListPlus className="w-3.5 h-3.5" />
                             </div>
                             追加订阅列表
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1 ml-9">
-                            合并其他机场订阅，支持自定义筛选地区
-                        </p>
+                        </Label>
                     </div>
                     <Button
                         size="sm"
