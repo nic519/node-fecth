@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { Layers, Shield, Globe, ArrowRight, Settings2 } from 'lucide-react';
+import { Layers, Shield, Globe, ArrowRight, Settings2, RefreshCw, Zap, CheckCircle2 } from 'lucide-react';
 
 function HomeContent() {
   const router = useRouter();
@@ -20,8 +20,7 @@ function HomeContent() {
   }, [searchParams, router]);
 
   return (
-    <div className="min-h-screen bg-slate-50 selection:bg-blue-100">
-      {/* Navigation */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100">
       <nav className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -30,9 +29,12 @@ function HomeContent() {
             </div>
             <span className="font-bold text-slate-900 text-lg tracking-tight">NodeFetch</span>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600">
-              <Link href="#features">特性</Link>
+              <Link href="#features">核心能力</Link>
+            </Button>
+            <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600">
+              <Link href="#scenarios">使用场景</Link>
             </Button>
             <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
               <Link href="/admin">进入后台</Link>
@@ -41,110 +43,208 @@ function HomeContent() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="pt-32 pb-16 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6 border border-blue-100">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            新一代订阅管理工具
+      <main className="pt-28 pb-20 px-6">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6 border border-blue-100">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              Clash 订阅配置生成与管理
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-5 tracking-tight leading-tight">
+              用专业分流规则与多订阅聚合
+              <span className="text-blue-600">打造稳定</span>
+              的跨设备配置
+            </h1>
+            <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">
+              NodeFetch 让订阅配置从此可控：强规则、快检测、易同步。一次编辑规则，多设备即刻一致更新，始终保持最佳线路与可用性。
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild size="lg" className="h-11 px-7 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 rounded-full">
+                <Link href="/admin">
+                  立即开始管理 <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="h-11 px-7 text-base border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-full">
+                <Link href="https://github.com/vpei/node-fecth" target="_blank">
+                  查看文档
+                </Link>
+              </Button>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-500">
+              <span className="px-3 py-1 bg-white rounded-full border border-slate-200">每分钟延时检测</span>
+              <span className="px-3 py-1 bg-white rounded-full border border-slate-200">多设备自动同步</span>
+              <span className="px-3 py-1 bg-white rounded-full border border-slate-200">可扩展规则系统</span>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
-            化繁为简，
-            <span className="text-blue-600">掌控</span>
-            您的节点订阅
-          </h1>
-
-          <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            专为多订阅场景设计。智能聚合、精准过滤、多端适配。
-            <br className="hidden md:block" />
-            让复杂的节点配置管理变得前所未有的简单。
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button asChild size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 rounded-full transition-transform hover:scale-105">
-              <Link href="/admin">
-                立即开始管理 <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 rounded-full">
-              <Link href="https://github.com/vpei/node-fecth" target="_blank">
-                查看文档
-              </Link>
-            </Button>
-          </div>
+          <Card className="border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/50">
+            <CardContent className="p-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-500">实时订阅概览</div>
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">在线</span>
+              </div>
+              <div className="space-y-4">
+                <StatusRow title="订阅源 A" status="流量正常" detail="剩余 128GB" />
+                <StatusRow title="订阅源 B (备用)" status="稳定可用" detail="剩余 40GB" />
+                <StatusRow title="分流规则集" status="已应用" detail="2,480 条规则" />
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <StatBadge label="当前最优" value="HK-01" />
+                <StatBadge label="平均延时" value="84ms" />
+                <StatBadge label="同步设备" value="4 台" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Core Features Grid */}
-        <div id="features" className="max-w-6xl mx-auto mt-24 grid md:grid-cols-3 gap-8">
+        <section id="features" className="max-w-6xl mx-auto mt-20 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <FeatureCard
-            icon={<Layers className="w-6 h-6 text-blue-600" />}
+            icon={<Layers className="w-5 h-5 text-blue-600" />}
             title="多订阅聚合"
-            description="不再为分散的订阅链接烦恼。支持无限制合并多个订阅源，自动去重与统一管理，一键生成最终配置。"
+            description="支持添加、合并多个订阅源，自动去重与统一管理，每个订阅单独展示流量状态。"
           />
           <FeatureCard
-            icon={<Settings2 className="w-6 h-6 text-indigo-600" />}
-            title="智能过滤规则"
-            description="强大的正则匹配与地区筛选功能。轻松剔除无效节点，只保留您真正需要的优质线路。"
+            icon={<Settings2 className="w-5 h-5 text-indigo-600" />}
+            title="强分流规则"
+            description="直接使用专业人员维护的规则集，提升隐匿性与稳定性，规则结构清晰可控。"
           />
           <FeatureCard
-            icon={<Globe className="w-6 h-6 text-emerald-600" />}
-            title="多端口模式"
-            description="针对不同地区（HK, US, JP...）自动生成独立端口配置。实现精细化的分流策略，优化网络体验。"
+            icon={<RefreshCw className="w-5 h-5 text-emerald-600" />}
+            title="每分钟检测"
+            description="周期性延时测试，实时判断链路是否可用，自动锁定最佳线路。"
           />
-        </div>
+          <FeatureCard
+            icon={<Globe className="w-5 h-5 text-sky-600" />}
+            title="全设备同步"
+            description="固定订阅地址，内部规则与覆写在网站完成，一次修改多端同步。"
+          />
+        </section>
 
-        {/* Secondary Features */}
-        <div className="max-w-6xl mx-auto mt-16 pt-16 border-t border-slate-200">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-slate-900">为什么选择 NodeFetch？</h2>
-              <div className="space-y-4">
-                <CheckItem text="极简配置：基于 YAML 的可视化编辑，直观易懂" />
-                <CheckItem text="云端同步：基于 Cloudflare KV，配置实时云端保存" />
-                <CheckItem text="安全可靠：访问令牌机制，保护您的私有订阅信息" />
-                <CheckItem text="高性能：边缘计算驱动，毫秒级响应速度" />
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div className="font-medium text-slate-900">订阅源 A</div>
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">已启用</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div className="font-medium text-slate-900">订阅源 B (备用)</div>
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">已启用</span>
-                </div>
-                <div className="flex items-center justify-center py-2">
-                  <ArrowRight className="text-slate-400 transform rotate-90" />
-                </div>
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center">
-                  <div className="font-semibold text-blue-600">统一聚合订阅</div>
-                  <div className="text-xs text-slate-500 mt-1">自动去重 • 地区过滤 • 规则优化</div>
-                </div>
-              </div>
+        <section id="scenarios" className="max-w-6xl mx-auto mt-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-start">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-slate-900">使用场景</h2>
+            <p className="text-slate-600 leading-relaxed">
+              在电脑上新增一条规则后，只需在 NodeFetch 修改一次，手机、软路由等设备刷新订阅即可自动同步配置。规则统一、策略一致，维护成本显著降低。
+            </p>
+            <div className="grid gap-4">
+              <ScenarioCard
+                title="规则一次编辑，多端同步"
+                description="新增覆写、过滤节点、分流规则等操作均在网页完成，订阅地址不变。"
+                icon={<CheckCircle2 className="w-5 h-5 text-blue-600" />}
+              />
+              <ScenarioCard
+                title="多订阅容灾"
+                description="可添加多家服务商订阅，彼此隔离展示流量状态，不再因忘记充值导致断网。"
+                icon={<Shield className="w-5 h-5 text-emerald-600" />}
+              />
+              <ScenarioCard
+                title="最佳线路自动选"
+                description="一分钟级延时检测，保证链路连通并选取性能最优节点。"
+                icon={<Zap className="w-5 h-5 text-amber-500" />}
+              />
             </div>
           </div>
-        </div>
+          <Card className="border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/50">
+            <CardContent className="p-6 space-y-4">
+              <div className="text-sm text-slate-500">配置变更流程</div>
+              <FlowStep index="01" title="在网页完成规则更新" desc="新增覆写、过滤节点、调整分流规则" />
+              <FlowStep index="02" title="云端保存并生成订阅" desc="固定订阅地址保持不变" />
+              <FlowStep index="03" title="设备刷新订阅自动同步" desc="电脑、手机、软路由一致生效" />
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20">
+          <div className="grid md:grid-cols-3 gap-6">
+            <HighlightCard
+              title="专业分流策略"
+              description="预置高质量规则集，覆盖常见流量分流场景，兼顾稳定性与隐私保护。"
+            />
+            <HighlightCard
+              title="节点接入无限制"
+              description="兼容任何服务商订阅格式，灵活扩展新增订阅源，轻松合并。"
+            />
+            <HighlightCard
+              title="稳定运行保障"
+              description="实时链路检测 + 分流优化，让节点始终保持可用与高性能。"
+            />
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20">
+          <Card className="border border-slate-200/70 bg-gradient-to-br from-white to-blue-50 shadow-xl shadow-slate-200/50">
+            <CardContent className="p-8 md:p-10 grid md:grid-cols-[1.2fr_0.8fr] gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">多订阅管理，一目了然</h3>
+                <p className="text-slate-600 leading-relaxed mb-6">
+                  合并多个订阅源同时保留独立流量状态视图，支持容灾与备用线路切换，确保任何时刻都能保持联通。
+                </p>
+                <div className="flex flex-wrap gap-2 text-sm text-slate-500">
+                  <span className="px-3 py-1 bg-white rounded-full border border-slate-200">流量状态独立展示</span>
+                  <span className="px-3 py-1 bg-white rounded-full border border-slate-200">订阅容灾自动切换</span>
+                  <span className="px-3 py-1 bg-white rounded-full border border-slate-200">规则覆盖多设备</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <MiniCard title="订阅源 A" meta="剩余 128GB" />
+                <MiniCard title="订阅源 B" meta="剩余 40GB" />
+                <MiniCard title="订阅源 C" meta="即将到期" highlight />
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-slate-900">常见问题</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <FaqCard
+              question="如何保证分流规则的稳定性？"
+              answer="规则集由专业人员维护，并持续迭代更新，避免误杀与规则失效。"
+            />
+            <FaqCard
+              question="订阅地址是否会变化？"
+              answer="不会变化。你只需在网页调整规则和覆写内容，设备侧刷新订阅即可同步。"
+            />
+            <FaqCard
+              question="多订阅合并后还能看流量吗？"
+              answer="每个订阅源仍保持独立流量状态展示，避免忽略充值导致断网。"
+            />
+            <FaqCard
+              question="延时检测的频率是多少？"
+              answer="系统每分钟检测一次节点延时，自动选取最优线路保障体验。"
+            />
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto mt-20">
+          <Card className="border border-blue-200 bg-blue-600 text-white shadow-xl shadow-blue-600/30">
+            <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">准备好掌控你的订阅配置了吗？</h3>
+                <p className="text-blue-100">用更稳定、更安全的方式管理你的 Clash 配置。</p>
+              </div>
+              <Button asChild size="lg" className="bg-white text-blue-700 hover:bg-blue-50 rounded-full h-11 px-8">
+                <Link href="/admin">
+                  立即进入后台 <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-12 mt-12">
+      <footer className="bg-white border-t border-slate-200 py-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} NodeFetch. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-slate-400 hover:text-slate-600 transition-colors">
-              <span className="sr-only">GitHub</span>
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-              </svg>
-            </a>
+          <p className="text-slate-500 text-sm">© {new Date().getFullYear()} NodeFetch. All rights reserved.</p>
+          <div className="flex gap-6 text-sm text-slate-500">
+            <span>专业分流</span>
+            <span>多订阅管理</span>
+            <span>设备同步</span>
           </div>
         </div>
       </footer>
@@ -154,26 +254,102 @@ function HomeContent() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card className="border-0 shadow-none bg-transparent hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 rounded-2xl p-2">
+    <Card className="border border-slate-200/70 bg-white/90 shadow-sm hover:shadow-lg hover:shadow-slate-200/60 transition-all duration-200">
       <CardContent className="p-6">
-        <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+        <div className="w-10 h-10 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center mb-4">
           {icon}
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
-        <p className="text-slate-600 leading-relaxed">{description}</p>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+        <p className="text-slate-600 leading-relaxed text-sm">{description}</p>
       </CardContent>
     </Card>
   );
 }
 
-function CheckItem({ text }: { text: string }) {
+function StatusRow({ title, status, detail }: { title: string; status: string; detail: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-        <Shield className="w-3 h-3 text-blue-600" />
+    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50">
+      <div>
+        <div className="font-medium text-slate-900">{title}</div>
+        <div className="text-xs text-slate-500">{detail}</div>
       </div>
-      <span className="text-slate-700">{text}</span>
+      <span className="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700">{status}</span>
     </div>
+  );
+}
+
+function StatBadge({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-2 py-3">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-sm font-semibold text-slate-900 mt-1">{value}</div>
+    </div>
+  );
+}
+
+function ScenarioCard({ title, description, icon }: { title: string; description: string; icon: React.ReactNode }) {
+  return (
+    <Card className="border border-slate-200/70 bg-white/90 shadow-sm">
+      <CardContent className="p-5 flex gap-4">
+        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+          {icon}
+        </div>
+        <div>
+          <div className="font-semibold text-slate-900 mb-1">{title}</div>
+          <div className="text-sm text-slate-600 leading-relaxed">{description}</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function FlowStep({ index, title, desc }: { index: string; title: string; desc: string }) {
+  return (
+    <div className="flex gap-4 items-start">
+      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm">
+        {index}
+      </div>
+      <div>
+        <div className="font-semibold text-slate-900">{title}</div>
+        <div className="text-sm text-slate-600">{desc}</div>
+      </div>
+    </div>
+  );
+}
+
+function HighlightCard({ title, description }: { title: string; description: string }) {
+  return (
+    <Card className="border border-slate-200/70 bg-white/90 shadow-sm">
+      <CardContent className="p-6">
+        <div className="font-semibold text-slate-900 mb-2">{title}</div>
+        <p className="text-sm text-slate-600 leading-relaxed">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MiniCard({ title, meta, highlight }: { title: string; meta: string; highlight?: boolean }) {
+  return (
+    <div className={`p-4 rounded-xl border ${highlight ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-white'}`}>
+      <div className="flex items-center justify-between">
+        <div className="font-medium text-slate-900">{title}</div>
+        <span className={`text-xs px-2 py-1 rounded ${highlight ? 'bg-amber-200 text-amber-800' : 'bg-emerald-100 text-emerald-700'}`}>
+          {highlight ? '即将到期' : '正常'}
+        </span>
+      </div>
+      <div className="text-xs text-slate-500 mt-2">{meta}</div>
+    </div>
+  );
+}
+
+function FaqCard({ question, answer }: { question: string; answer: string }) {
+  return (
+    <Card className="border border-slate-200/70 bg-white/90 shadow-sm">
+      <CardContent className="p-6 space-y-2">
+        <div className="font-semibold text-slate-900">{question}</div>
+        <p className="text-sm text-slate-600 leading-relaxed">{answer}</p>
+      </CardContent>
+    </Card>
   );
 }
 

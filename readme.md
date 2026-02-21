@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 本项目是生成订阅配置给clash的工具
 
-## Getting Started
+- 直接使用由专业人员写好的强大分流规则，确保更加合理和高性能、隐匿性更健壮的分流规则
 
-First, run the development server:
+- 可以无缝接入任何服务商的节点
+
+- 每一分钟会做一次延时测试，确保你的链路是通的，且在最佳线路上
+
+- 一次编写扩展规则，在多设备同时应用，因为网址是不变的，但是内部的规则，如添加覆写，过滤节点、新增分流规则，是在本网站完成。
+
+使用场景1：
+我的电脑上加了一个规则，我直接在本网站去修改，那这个规则只要在手机软路由等其他设备更新一下即可自动同步。
+
+- 可以增添、合并多个订阅，但会单独显示每一个订阅的使用流量状态，不会因为忘记充值而断网，同时也确保互相容灾
+
+---
+
+## 技术栈
+
+- Next.js App Router（Next 16）+ React 19 + TypeScript
+- Tailwind CSS 4 + shadcn/ui（Radix UI 组件体系）
+- Drizzle ORM + Cloudflare D1（SQLite）
+- OpenNext（Cloudflare Workers/Pages 部署）
+- ky（HTTP 客户端）+ zod（配置校验）+ Monaco Editor（配置编辑）
+
+---
+
+## 技术设计
+
+### 架构概览
+
+- 前端：Next.js App Router 页面与组件，负责订阅配置与管理界面
+- 后端：Next.js Route Handlers（/api/*），提供用户配置、模板与管理接口
+- 数据层：Drizzle ORM 统一访问 D1/SQLite，支持本地开发与生产环境
+
+### 核心模块
+
+- 用户配置：保存用户订阅、规则与覆写信息，订阅地址固定，规则可在线更新
+- 动态订阅抓取：拉取订阅内容并持久化，支持自动重试与内容格式转换
+- 规则合并与生成：多订阅聚合、策略化合并（多端口/多订阅策略），输出 Clash YAML
+- 管理后台：基于 superToken 进行管理员操作（用户管理、模板管理、日志记录）
+ 
+
+### 鉴权机制
+
+- 管理端：通过 superToken 访问（Query 参数或环境变量）
+- 用户端：通过 token 访问用户配置与订阅
+
+---
+
+## 运行教程
+
+### 1) 安装依赖
+
+```bash
+bun install
+```
+
+### 2) 配置环境变量
+
+创建 `.dev.vars`，至少包含超级管理员令牌：
+
+```bash
+SUPER_ADMIN_TOKEN="your-super-token"
+```
+
+### 3) 本地开发
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4) 数据库迁移（可选）
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run db:generate
+npm run db:push
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 5) 预览与部署（Cloudflare）
 
-## Learn More
+```bash
+npm dev
+npm run deploy
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 常用访问入口
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 管理后台：`/admin/dashboard?superToken=YOUR_TOKEN`
+- 用户配置页：`/config?uid=USER_ID&token=USER_TOKEN`
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

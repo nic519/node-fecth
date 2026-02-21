@@ -18,7 +18,7 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
 
     return (
         <div className="space-y-6">
-            <PanelTopBar description={<>用于访问管理面板的安全令牌；修改后<span className="font-bold text-destructive">订阅地址会变化</span>。</>} />
+            <PanelTopBar description={<>用于访问管理面板的安全令牌；修改后 <span className="font-bold text-destructive">订阅地址会变化</span></>} />
 
             <div className="space-y-2 group">
                 <Label htmlFor="accessToken" className="text-base flex items-center gap-2 group-focus-within:text-primary transition-colors">
