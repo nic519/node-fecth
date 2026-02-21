@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
-import { YamlEditor } from '@/components/YamlEditor';
 import { PanelTopBar } from './PanelTopBar';
 
 interface PreviewPanelProps {
@@ -85,7 +84,6 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 				</div>
 			) : (
 				<div className="flex-1 overflow-hidden relative">
-					{/* Add a loading overlay if reloading */}
 					{previewLoading && (
 						<div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px] transition-all duration-300">
 							<div className="bg-background/80 p-3 rounded-full shadow-lg border border-border/40">
@@ -93,15 +91,11 @@ export function PanelPreview({ uid, token }: PreviewPanelProps) {
 							</div>
 						</div>
 					)}
-					<YamlEditor
-						value={previewContent}
-						onChange={() => { }}
-						readOnly={true}
-						height="100%"
-						transparent={true}
-						bordered={false}
-						className="bg-transparent"
-					/>
+					<div className="h-full w-full overflow-auto rounded-xl border border-border/60 bg-muted/10 p-4">
+						<pre className="text-xs font-mono whitespace-pre-wrap break-words">
+							{previewContent || '暂无预览内容'}
+						</pre>
+					</div>
 				</div>
 			)}
 		</div>

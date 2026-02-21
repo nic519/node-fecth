@@ -35,102 +35,137 @@ export function YamlEditor({
 	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { resolvedTheme } = useTheme();
+	const completionDisposableRef = useRef<monaco.IDisposable | null>(null);
+	const disposablesRef = useRef<monaco.IDisposable[]>([]);
+
+	useEffect(() => {
+		return () => {
+			if (completionDisposableRef.current) {
+				completionDisposableRef.current.dispose();
+				completionDisposableRef.current = null;
+			}
+			disposablesRef.current.forEach((d) => d.dispose());
+			disposablesRef.current = [];
+		};
+	}, []);
 
 	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
 		editorRef.current = editor;
 
-		// 添加自动补全
-		monaco.languages.registerCompletionItemProvider('yaml', {
-			provideCompletionItems: () => {
-				const suggestions = [
-					{
-						label: 'port',
-						kind: monaco.languages.CompletionItemKind.Property,
-						insertText: 'port: ${1:7890}',
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: 'HTTP 代理端口',
-					},
-					{
-						label: 'socks-port',
-						kind: monaco.languages.CompletionItemKind.Property,
-						insertText: 'socks-port: ${1:7891}',
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: 'SOCKS 代理端口',
-					},
-					{
-						label: 'mode',
-						kind: monaco.languages.CompletionItemKind.Property,
-						insertText: 'mode: ${1:rule}',
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: '运行模式：rule/global/direct/script',
-					},
-					{
-						label: 'log-level',
-						kind: monaco.languages.CompletionItemKind.Property,
-						insertText: 'log-level: ${1:info}',
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: '日志级别：silent/error/warning/info/debug',
-					},
-					{
-						label: 'allow-lan',
-						kind: monaco.languages.CompletionItemKind.Property,
-						insertText: 'allow-lan: ${1:false}',
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: '是否允许局域网连接',
-					},
-					{
-						label: 'proxy-groups',
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: [
-							'proxy-groups:',
-							'  - name: "${1:🚀 节点选择}"',
-							'    type: ${2:select}',
-							'    proxies:',
-							'      - ${3:DIRECT}',
-						].join('\n'),
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: '代理组配置',
-					},
-					{
-						label: 'rules',
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: ['rules:', '  - ${1:DOMAIN-SUFFIX},${2:example.com},${3:DIRECT}', '  - MATCH,${4:🚀 节点选择}'].join('\n'),
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: '规则配置',
-					},
-					{
-						label: 'dns',
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: [
-							'dns:',
-							'  enable: ${1:true}',
-							'  ipv6: ${2:false}',
-							'  listen: 0.0.0.0:53',
-							'  enhanced-mode: ${3:fake-ip}',
-							'  nameserver:',
-							'    - ${4:114.114.114.114}',
-							'    - ${5:8.8.8.8}',
-						].join('\n'),
-						insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-						documentation: 'DNS 配置',
-					},
-				];
-				return { suggestions };
-			},
-		});
+		// 注册代码补全 (仅注册一次，且非只读模式)
+		if (!completionDisposableRef.current && !readOnly) {
+			completionDisposableRef.current = monaco.languages.registerCompletionItemProvider('yaml', {
+				provideCompletionItems: (model: any, position: any) => {
+					// 获取当前光标位置的单词范围，用于替换
+					const word = model.getWordUntilPosition(position);
+					const range = {
+						startLineNumber: position.lineNumber,
+						endLineNumber: position.lineNumber,
+						startColumn: word.startColumn,
+						endColumn: word.endColumn,
+					};
+
+					const suggestions = [
+						{
+							label: 'port',
+							kind: monaco.languages.CompletionItemKind.Property,
+							insertText: 'port: ${1:7890}',
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: 'HTTP 代理端口',
+							range,
+						},
+						{
+							label: 'socks-port',
+							kind: monaco.languages.CompletionItemKind.Property,
+							insertText: 'socks-port: ${1:7891}',
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: 'SOCKS 代理端口',
+							range,
+						},
+						{
+							label: 'mode',
+							kind: monaco.languages.CompletionItemKind.Property,
+							insertText: 'mode: ${1:rule}',
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: '运行模式：rule/global/direct/script',
+							range,
+						},
+						{
+							label: 'log-level',
+							kind: monaco.languages.CompletionItemKind.Property,
+							insertText: 'log-level: ${1:info}',
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: '日志级别：silent/error/warning/info/debug',
+							range,
+						},
+						{
+							label: 'allow-lan',
+							kind: monaco.languages.CompletionItemKind.Property,
+							insertText: 'allow-lan: ${1:false}',
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: '是否允许局域网连接',
+							range,
+						},
+						{
+							label: 'proxy-groups',
+							kind: monaco.languages.CompletionItemKind.Snippet,
+							insertText: [
+								'proxy-groups:',
+								'  - name: "${1:🚀 节点选择}"',
+								'    type: ${2:select}',
+								'    proxies:',
+								'      - ${3:DIRECT}',
+							].join('\n'),
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: '代理组配置',
+							range,
+						},
+						{
+							label: 'rules',
+							kind: monaco.languages.CompletionItemKind.Snippet,
+							insertText: ['rules:', '  - ${1:DOMAIN-SUFFIX},${2:example.com},${3:DIRECT}', '  - MATCH,${4:🚀 节点选择}'].join('\n'),
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: '规则配置',
+							range,
+						},
+						{
+							label: 'dns',
+							kind: monaco.languages.CompletionItemKind.Snippet,
+							insertText: [
+								'dns:',
+								'  enable: ${1:true}',
+								'  ipv6: ${2:false}',
+								'  listen: 0.0.0.0:53',
+								'  enhanced-mode: ${3:fake-ip}',
+								'  nameserver:',
+								'    - ${4:114.114.114.114}',
+								'    - ${5:8.8.8.8}',
+							].join('\n'),
+							insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+							documentation: 'DNS 配置',
+							range,
+						},
+					];
+					return { suggestions } as any;
+				},
+			});
+		}
 
 		// 验证 YAML 语法
 		if (onValidate) {
 			const validateYaml = () => {
 				const content = editor.getValue();
 				const errors: string[] = [];
+				const model = editor.getModel();
+
+				if (!model) return;
 
 				try {
 					yaml.load(content);
 					onValidate([]);
 
 					// 清除之前的错误标记
-					monaco.editor.setModelMarkers(editor.getModel()!, 'yaml', []);
+					monaco.editor.setModelMarkers(model, 'yaml', []);
 				} catch (e: any) {
 					if (e.message) {
 						errors.push(e.message);
@@ -139,7 +174,7 @@ export function YamlEditor({
 						const lineMatch = e.message.match(/line (\d+)/i);
 						if (lineMatch) {
 							const line = parseInt(lineMatch[1]);
-							monaco.editor.setModelMarkers(editor.getModel()!, 'yaml', [
+							monaco.editor.setModelMarkers(model, 'yaml', [
 								{
 									severity: monaco.MarkerSeverity.Error,
 									message: e.message,
@@ -159,7 +194,8 @@ export function YamlEditor({
 			validateYaml();
 
 			// 内容变化时验证
-			editor.onDidChangeModelContent(validateYaml);
+			const changeDisposable = editor.onDidChangeModelContent(validateYaml);
+			disposablesRef.current.push(changeDisposable);
 		}
 	};
 
