@@ -1,54 +1,64 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { Github } from 'lucide-react';
+import { Github, Sparkles } from 'lucide-react';
 import { CoreFeatures } from '@/components/CoreFeatures';
 import { RuleFilterSelector } from '@/components/RuleFilterSelector';
-import { SyncItemCard } from '@/components/SyncItemCard';
+import { SyncPreviewGrid } from '@/components/index/SyncPreviewGrid';
 import { ModeToggle } from '@/components/ui/mode-toggle';
-import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
 import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
 import { SubscriptionDemo } from '@/components/SubscriptionDemo';
-import { LatencyDemo } from '@/components/LatencyDemo';
+import { LatencyDemo } from '@/components/index/LatencyDemo';
 import { AcmeLogo } from '@/components/NavigationBar';
+import { useToastContext } from '@/providers/toast-provider';
+
+function Header() {
+  const { showToast } = useToastContext();
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else {
+        if (currentScrollY > lastScrollY.current) {
+          setIsVisible(false); // Hide when scrolling down
+        } else {
+          setIsVisible(true); // Show when scrolling up
+        }
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+    return () => window.removeEventListener('scroll', controlNavbar);
+  }, []);
+
+  return (
+    <nav className={`fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <AcmeLogo className="w-10 h-10 text-primary" />
+          <span className="font-bold text-lg tracking-tight">NodeFetch</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button size="sm" onClick={() => showToast('即将开放', 'info')}><Sparkles className="w-4 h-4" />立即使用</Button>
+          <ModeToggle />
+        </div>
+      </div>
+    </nav>
+  );
+}
 
 // Static preview data
-const previewSyncItems: SyncItemData[] = [
-  { url: 'https://sub.nodefetch.io/sub1', source: '主订阅', flag: '🐙' },
-  { url: 'https://sub.nodefetch.io/sub2', source: '追加订阅', flag: '🍚' },
-  { url: 'https://sub.nodefetch.io/sub3', source: '追加订阅', flag: '🍌' }
-];
-
-const previewStatuses: Record<string, SyncStatus> = {
-  'https://sub.nodefetch.io/sub1': { status: 'success', message: '流量紧张' },
-  'https://sub.nodefetch.io/sub2': { status: 'success', message: '流量充足' },
-  'https://sub.nodefetch.io/sub3': { status: 'success', message: '流量充足' }
-};
-
-const previewInfos: Record<string, DynamicInfo> = {
-  'https://sub.nodefetch.io/sub1': {
-    id: 'demo-main',
-    url: 'https://sub.nodefetch.io/main',
-    traffic: 'upload=402653184;download=307904819200;expire=1779780995;total=336870912000',
-    updatedAt: '2026-02-21T02:10:00.000Z',
-  },
-  'https://sub.nodefetch.io/sub2': {
-    id: 'demo-japan',
-    url: 'https://sub.nodefetch.io/japan',
-    traffic: 'upload=536870912;download=19984954560;expire=1779780995;total=85899345920',
-    updatedAt: '2026-02-21T00:05:00.000Z'
-  },
-  'https://sub.nodefetch.io/sub3': {
-    id: 'demo-backup',
-    url: 'https://sub.nodefetch.io/backup',
-    traffic: 'upload=134217728;download=72805306368;expire=1779780995;total=102400000000',
-    updatedAt: '2026-02-21T01:30:00.000Z'
-  }
-};
+// Moved to SyncPreviewGrid component
 
 function HomeContent() {
   const router = useRouter();
@@ -66,23 +76,7 @@ function HomeContent() {
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-blue-100 dark:selection:bg-blue-900">
       {/* Header */}
-      <nav className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AcmeLogo className="w-10 h-10 text-primary" />
-            <span className="font-bold text-lg tracking-tight">NodeFetch</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-foreground">
-              <Link href="https://github.com/vpei/node-fecth" target="_blank">
-                <Github className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </Link>
-            </Button>
-            <ModeToggle />
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <main className="pt-32 pb-20 px-6">
         {/* Hero Section */}
@@ -148,17 +142,7 @@ function HomeContent() {
               </div>
             </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            {previewSyncItems.map((item) => (
-              <SyncItemCard
-                key={item.url}
-                item={item}
-                status={previewStatuses[item.url] || { status: 'idle' }}
-                info={previewInfos[item.url]}
-                showAction={false}
-              />
-            ))}
-          </div>
+          <SyncPreviewGrid />
         </section>
 
         {/* Demo Section: Latency Test */}
