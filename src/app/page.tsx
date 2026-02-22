@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { Layers, Shield, Zap, Globe, Github, Monitor } from 'lucide-react';
+import { Github } from 'lucide-react';
+import { CoreFeatures } from '@/components/CoreFeatures';
 import { RuleFilterSelector } from '@/components/RuleFilterSelector';
 import { SyncItemCard } from '@/components/SyncItemCard';
 import { ModeToggle } from '@/components/ui/mode-toggle';
@@ -13,6 +14,7 @@ import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/u
 import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
 import { SubscriptionDemo } from '@/components/SubscriptionDemo';
 import { LatencyDemo } from '@/components/LatencyDemo';
+import { AcmeLogo } from '@/components/NavigationBar';
 
 // Static preview data
 const previewSyncItems: SyncItemData[] = [
@@ -67,9 +69,7 @@ function HomeContent() {
       <nav className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-              N
-            </div>
+            <AcmeLogo className="w-10 h-10 text-primary" />
             <span className="font-bold text-lg tracking-tight">NodeFetch</span>
           </div>
           <div className="flex items-center gap-3">
@@ -106,9 +106,8 @@ function HomeContent() {
           <div className="flex flex-col gap-12">
             <div className="space-y-6 text-center">
               <h2 className="text-3xl font-bold">简单直观的规则配置</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-                无需编写复杂配置文件。在网页上直接勾选需要的规则集，支持自定义覆写与过滤。
-                所见即所得，配置完成后自动生成订阅链接。
+              <p className="text-muted-foreground text-md leading-relaxed max-w-2xl mx-auto">
+                无需编写复杂配置文件。在网页上直接勾选需要的规则集，所见即所得
               </p>
             </div>
             <Card className="border-border/60 bg-card/50 backdrop-blur shadow-xl">
@@ -135,7 +134,7 @@ function HomeContent() {
             {/* Left Column */}
             <div className="space-y-8">
               <h2 className="text-3xl font-bold">多订阅容灾与流量监控</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
+              <p className="text-muted-foreground text-md leading-relaxed">
                 支持无限制添加备用订阅源，自动合并节点，不再担心因忘记充值导致断网，实现真正的网络高可用。
               </p>
             </div>
@@ -168,8 +167,8 @@ function HomeContent() {
             {/* Top: Text */}
             <div className="space-y-6 text-center max-w-3xl mx-auto">
               <h2 className="text-3xl font-bold">智能延迟检测与自动优选</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                NodeFetch 会在后台每分钟自动对所有节点进行延迟测试，根据实时网络状况自动切换到延迟最低的线路。
+              <p className="text-muted-foreground text-md leading-relaxed">
+                NodeFetch 会在后台每分钟自动对所有节点进行延迟测试，自动切换到延迟最低的线路
               </p>
             </div>
 
@@ -184,38 +183,7 @@ function HomeContent() {
         </section>
 
         {/* Core Features Grid */}
-        <section className="max-w-6xl mx-auto mb-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold">其他功能优势</h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <FeatureCard
-              icon={<Globe className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
-              title="全服务商兼容"
-              description="可接入任意服务商节点，支持多订阅合并"
-            />
-            <FeatureCard
-              icon={<Layers className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
-              title="多设备自动同步"
-              description="编写规则，订阅地址不变，方便多设备同步"
-            />
-            <FeatureCard
-              icon={<Monitor className="w-6 h-6 text-blue-600 dark:text-blue-400" />}
-              title="自定义过滤节点"
-              description="比如过滤某些商家的倍速节点，或特殊用途节点"
-            />
-            <FeatureCard
-              icon={<Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />}
-              title="注重隐私"
-              description="不需要任何个人信息，即可使用"
-            />
-            <FeatureCard
-              icon={<Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />}
-              title="可更换模板或覆写"
-              description="更加精细化管理分流规则，且可以实时预览"
-            />
-          </div>
-        </section>
+        <CoreFeatures />
 
       </main>
 
@@ -234,19 +202,7 @@ function HomeContent() {
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <Card className="border-border/60 bg-card hover:bg-accent/50 transition-colors duration-200">
-      <CardContent className="p-6">
-        <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center mb-4">
-          {icon}
-        </div>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground leading-relaxed text-sm">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
+
 
 export default function Home() {
   return (
