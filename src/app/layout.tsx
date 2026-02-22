@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { Providers } from "@/providers/providers";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
+
 export const metadata: Metadata = {
-  title: "节点管理后台",
-  description: "专业的节点配置管理平台",
+  title: "NodeFetch - Clash 订阅配置生成工具",
+  description: "专业的节点配置管理平台，支持多订阅聚合、规则分流与延迟优选。",
 };
 
 export default function RootLayout({
@@ -15,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body
-        className="antialiased min-h-screen bg-background text-foreground"
+        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased min-h-screen bg-background text-foreground`}
         suppressHydrationWarning
       >
         <Providers>

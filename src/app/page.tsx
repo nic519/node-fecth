@@ -43,7 +43,7 @@ function Header() {
 
   return (
     <nav className={`fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto  h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AcmeLogo className="w-10 h-10 text-primary" />
           <span className="font-bold text-lg tracking-tight">NodeFetch</span>
@@ -74,92 +74,112 @@ function HomeContent() {
   }, [searchParams, router]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-blue-100 dark:selection:bg-blue-900">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 dark:selection:bg-primary/30 font-sans">
       {/* Header */}
       <Header />
 
+      {/* Background Grid Pattern */}
+      <div className="fixed inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]">
+        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
+      </div>
+
       <main className="pt-32 pb-20 px-6">
         {/* Hero Section */}
-        <div className="max-w-4xl mx-auto text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-6 border border-blue-100 dark:border-blue-800">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            Clash 订阅配置生成工具
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-tight">
-            专业分流规则与
-            <span className="text-blue-600 dark:text-blue-400">多订阅聚合</span>
+        <div className="max-w-4xl mx-auto text-center mb-24 relative">
+
+          <h1 className="font-heading text-5xl md:text-7xl font-bold mb-8 tracking-tight leading-[1.1]">
+            构建极致的
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-violet-600 block mt-2">Clash 分流规则</span>
           </h1>
 
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium  border border-primary/20 hover:bg-primary/20 transition-colors cursor-default">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            Clash 配置 · 规则编排 · 订阅聚合
+          </div>
         </div>
 
         {/* Demo Section 1: Rule Configuration */}
-        <section className="max-w-6xl mx-auto mb-24">
-          <div className="flex flex-col gap-12">
-            <div className="space-y-6 text-center">
-              <h2 className="text-3xl font-bold">简单直观的规则配置</h2>
-              <p className="text-muted-foreground text-md leading-relaxed max-w-2xl mx-auto">
-                无需编写复杂配置文件。在网页上直接勾选需要的规则集，所见即所得
+        <section id="config-section" className="max-w-6xl mx-auto mb-32 ">
+          <div className="flex flex-col gap-16">
+            <div className="space-y-4 text-center">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">所见即所得的规则编排</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                无需编写复杂配置文件。在网页上直接勾选需要的规则集，实时预览生成的配置。
               </p>
             </div>
-            <Card className="border-border/60 bg-card/50 backdrop-blur shadow-xl">
-              {/* <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-1 rounded border border-blue-200 dark:border-blue-800">
-                静态交互示例
-              </span> */}
-              <CardContent className="p-6">
 
-                <RuleFilterSelector
-                  filterOptions={filterOptions}
-                  loading={loadingFilters}
-                  error={filterError}
-                />
-              </CardContent>
-            </Card>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-violet-600/30 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+              <Card className="relative border-border/60 bg-card/80 backdrop-blur-xl shadow-2xl">
+                <CardContent className="p-8">
+                  <RuleFilterSelector
+                    filterOptions={filterOptions}
+                    loading={loadingFilters}
+                    error={filterError}
+                  />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
 
-
-
         {/* Demo Section 2: Subscription Management */}
-        <section className="max-w-6xl mx-auto mb-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <section className="max-w-6xl mx-auto mb-32">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left Column */}
-            <div className="space-y-8">
-              <h2 className="text-3xl font-bold">多订阅容灾与流量监控</h2>
-              <p className="text-muted-foreground text-md leading-relaxed">
-                支持无限制添加备用订阅源，自动合并节点，不再担心因忘记充值导致断网，实现真正的网络高可用。
-              </p>
-            </div>
-
-            {/* Right Column */}
-            <div className="w-full">
+            <div className="space-y-8 order-2 lg:order-1">
               <div className="relative">
                 {/* Decorative background elements */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl -z-10" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-violet-500/10 rounded-xl blur-2xl -z-10" />
                 <SubscriptionDemo />
               </div>
             </div>
+
+            {/* Right Column */}
+            <div className="space-y-6 order-1 lg:order-2">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold leading-tight">多源聚合与<br /><span className="text-primary">高可用容灾</span></h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                支持无限制添加备用订阅源，自动合并节点与去重。不再担心因单点失效导致断网，实现真正的网络高可用。
+              </p>
+              <ul className="space-y-3 mt-4">
+                {['自动去重合并', '故障节点剔除', '多格式支持 (Clash/V2Ray)'].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-muted-foreground">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <SyncPreviewGrid />
+
+          <div className="mt-16 relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur opacity-20 transition duration-1000"></div>
+            <SyncPreviewGrid />
+          </div>
         </section>
 
         {/* Demo Section: Latency Test */}
-        <section className="max-w-6xl mx-auto mb-24">
-          <div className="flex flex-col gap-12">
+        <section className="max-w-6xl mx-auto mb-32">
+          <div className="flex flex-col gap-16">
             {/* Top: Text */}
             <div className="space-y-6 text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold">智能延迟检测与自动优选</h2>
-              <p className="text-muted-foreground text-md leading-relaxed">
-                NodeFetch 会在后台每分钟自动对所有节点进行延迟测试，自动切换到延迟最低的线路
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">全自动延迟检测与优选</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                后台自动对所有节点进行并发延迟测试，基于实时数据自动切换到延迟最低的线路，确保时刻高速在线。
               </p>
             </div>
 
             {/* Bottom: Demo */}
-            <div className="w-full">
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl blur-xl -z-10" />
+            <div className="w-full relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+              <div className="relative bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 overflow-hidden">
                 <LatencyDemo />
               </div>
             </div>
@@ -172,13 +192,17 @@ function HomeContent() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 py-12">
+      <footer className="border-t border-border bg-muted/20 backdrop-blur-sm py-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-muted-foreground text-sm">
+          <div className="flex items-center justify-center gap-2 mb-6 opacity-80">
+            <AcmeLogo className="w-8 h-8 text-primary" />
+            <span className="font-heading font-bold text-lg">NodeFetch</span>
+          </div>
+          <p className="text-muted-foreground text-sm mb-4">
             © {new Date().getFullYear()} NodeFetch. All rights reserved.
           </p>
-          <p className="text-muted-foreground/60 text-xs mt-2">
-            Professional Clash Configuration Generator
+          <p className="text-muted-foreground/60 text-xs font-mono">
+            Built for performance and reliability.
           </p>
         </div>
       </footer>
