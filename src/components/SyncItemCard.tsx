@@ -1,9 +1,10 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, CheckCircle2, Clock, Activity } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle2, Clock, Activity, Calendar } from 'lucide-react';
 import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import {
   Tooltip,
@@ -29,6 +30,39 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
   const trafficInfo = info?.traffic ? parseTrafficInfo(info.traffic) : null;
   const usagePercent = trafficInfo ? Math.min(100, Math.max(0, trafficInfo.usagePercent)) : 0;
   const shouldShowAction = showAction ?? !!onSync;
+
+  const [displayedPercent, setDisplayedPercent] = useState(0);
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Add a small delay to ensure the transition is noticeable
+          timer = setTimeout(() => {
+            setDisplayedPercent(usagePercent);
+          }, 100);
+        } else {
+          // Reset when out of view to replay animation next time
+          setDisplayedPercent(0);
+          clearTimeout(timer);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (progressRef.current) {
+      observer.observe(progressRef.current);
+    }
+
+    return () => {
+      if (progressRef.current) {
+        observer.unobserve(progressRef.current);
+      }
+      clearTimeout(timer);
+    };
+  }, [usagePercent]);
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
@@ -73,34 +107,34 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">
                   <Clock className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">
-                    {formatDateTime(info.updatedAt)}
+                    最后更新 {formatDateTime(info.updatedAt)}
                   </span>
                 </div>
-                {info.traffic && (
+                {trafficInfo && (
                   <div className="space-y-1.5" title="流量信息">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <Activity className="w-3.5 h-3.5 shrink-0" />
-                        {trafficInfo ? (
-                          <span className="truncate font-medium">
-                            {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
-                          </span>
-                        ) : (
-                          <span className="truncate font-mono">
-                            {info.traffic}
-                          </span>
-                        )}
+                        <span className="truncate font-medium">
+                          流量消耗 {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
+                        </span>
                       </div>
                       <span className="text-[10px] text-muted-foreground">
-                        {trafficInfo ? `${trafficInfo.usagePercent.toFixed(1)}%` : ''}
+                        {trafficInfo.usagePercent.toFixed(1)}%
                       </span>
                     </div>
-                    {trafficInfo && (
-                      <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                        <div
-                          className={cn("h-full transition-all", getTrafficBarColor(usagePercent))}
-                          style={{ width: `${usagePercent}%` }}
-                        />
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden" ref={progressRef}>
+                      <div
+                        className={cn("h-full rounded-full transition-all duration-1000 ease-out", getTrafficBarColor(usagePercent))}
+                        style={{ width: `${displayedPercent}%` }}
+                      />
+                    </div>
+                    {trafficInfo.expire && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-0.5" title="到期时间">
+                        <Calendar className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">
+                          到期时间 {new Date(trafficInfo.expire * 1000).toLocaleString('zh-CN')}
+                        </span>
                       </div>
                     )}
                   </div>
