@@ -50,28 +50,15 @@ export class ClashRuleFilter {
         }
 
         // 3. 初始筛选：找出名字中包含过滤关键词的策略组
-        const processingQueue: string[] = [];
         groupMap.forEach((group, name) => {
             if (filters.some((f) => name.includes(f))) {
                 result.keptGroupNames.add(name);
-                processingQueue.push(name);
             }
         });
 
-        // 4. 递归筛选：如果保留的组引用了其他组或节点，那些被引用的也需要保留（这里主要处理组引用组的情况，或者收集被引用的节点）
-        while (processingQueue.length > 0) {
-            const currentName = processingQueue.shift()!;
-            const group = groupMap.get(currentName);
-            if (!group || !Array.isArray(group.proxies)) continue;
+        // 4. 递归筛选：已移除。用户只希望保留明确指定的组，不希望自动包含依赖的组。
+        // 如果保留的组引用了未保留的组，后续步骤会自动清理无效引用。
 
-            group.proxies.forEach((proxyName) => {
-                // 如果引用的 proxyName 是一个策略组，且尚未被保留，则加入保留列表和处理队列
-                if (groupMap.has(proxyName) && !result.keptGroupNames.has(proxyName)) {
-                    result.keptGroupNames.add(proxyName);
-                    processingQueue.push(proxyName);
-                }
-            });
-        }
 
         // 5. 更新 yamlObj 中的 proxy-groups，只保留在 keptGroupNames 中的组
         if (Array.isArray(proxyGroups)) {
