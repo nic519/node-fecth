@@ -90,7 +90,7 @@ export function UserFilters({
                         className="w-full justify-center bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-700 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                     >
                         <UserPlus className="mr-2 h-4 w-4" />
-                        添加新用户
+                        注册新用户
                     </Button>
                 </div>
             )}

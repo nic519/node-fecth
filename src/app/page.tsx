@@ -16,7 +16,9 @@ import { useTheme } from 'next-themes';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
-function Header() {
+import { RegisterUserDialog } from '@/components/RegisterUserDialog';
+
+function Header({ onRegisterClick }: { onRegisterClick: () => void }) {
   const { showToast } = useToastContext();
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -49,7 +51,7 @@ function Header() {
           <span className="font-bold text-lg tracking-tight">NodeFetch</span>
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm" onClick={() => showToast('即将开放', 'info')} className="rounded-full"><Sparkles className="w-4 h-4" />立即使用</Button>
+          <Button size="sm" onClick={onRegisterClick} className="rounded-full"><Sparkles className="w-4 h-4" />立即使用</Button>
           <ModeToggle className="rounded-full bg-transparent border-0 hover:bg-muted/50" />
         </div>
       </div>
@@ -66,16 +68,19 @@ function HomeContent() {
   const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptions();
   const { resolvedTheme } = useTheme();
 
+  // Register modal state
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const superToken = searchParams.get('superToken') || undefined;
+
   // Check for admin token (super admin access only)
   useEffect(() => {
-    const superToken = searchParams.get('superToken');
     if (superToken) {
       router.push(`/admin/dashboard?superToken=${superToken}`);
     }
-  }, [searchParams, router]);
+  }, [superToken, router]);
 
-  const auroraColors = resolvedTheme === 'light' 
-    ? ["#CFE8FF", "#B19EEF", "#FFD9F0"] 
+  const auroraColors = resolvedTheme === 'light'
+    ? ["#CFE8FF", "#B19EEF", "#FFD9F0"]
     : ["#7cff67", "#B19EEF", "#5227FF"];
   const auroraBlend = resolvedTheme === 'light' ? 0.2 : 0.5;
   const auroraAmplitude = resolvedTheme === 'light' ? 0.55 : 1.0;
@@ -84,9 +89,9 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen text-foreground selection:bg-primary/20 dark:selection:bg-primary/30 font-sans">
-      
+
       {/* Header */}
-      <Header />
+      <Header onRegisterClick={() => setIsRegisterOpen(true)} />
       {/* {resolvedTheme === 'dark' && (
         <div className="fixed inset-0 -z-20 w-full h-full">
           <Aurora
@@ -179,7 +184,7 @@ function HomeContent() {
             </div>
           </div>
 
-          <div className="mt-16 relative group"> 
+          <div className="mt-16 relative group">
             <SyncPreviewGrid />
           </div>
         </section>
@@ -225,6 +230,13 @@ function HomeContent() {
           </p>
         </div>
       </footer>
+
+      {/* Register User Dialog */}
+      <RegisterUserDialog
+        isOpen={isRegisterOpen}
+        onOpenChange={setIsRegisterOpen}
+        superToken={superToken}
+      />
     </div>
   );
 }

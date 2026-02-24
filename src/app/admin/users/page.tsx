@@ -12,11 +12,11 @@ import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { UserFilters } from './components/UserFilters';
 import { UserMasonry } from './components/UserMasonry';
 import { ImportUserModal } from './components/ImportUserModal';
+import { RegisterUserDialog } from '@/components/RegisterUserDialog';
 
 // 导入UI组件
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import {
 	Dialog,
 	DialogContent,
@@ -141,90 +141,12 @@ function AdminUsersContent() {
 			</Dialog>
 
 			{/* 添加用户模态框 */}
-			<Dialog open={addUserModal.isOpen} onOpenChange={(open) => !open && addUserModal.close()}>
-				<DialogContent className="sm:max-w-[500px] border-border/60 shadow-xl">
-					<DialogHeader>
-						<DialogTitle className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600">添加新用户</DialogTitle>
-						<DialogDescription className="text-center">
-							请输入新用户的详细信息以创建账号
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-6 py-4">
-						<div className="space-y-2">
-							<Label htmlFor="uid" className="text-sm font-medium">用户ID</Label>
-							<div className="relative group">
-								<User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-								<Input
-									id="uid"
-									className="pl-9 border-border/60 focus-visible:ring-primary/20 transition-all"
-									placeholder="请输入用户ID"
-									value={addUserModal.form.uid}
-									onChange={(e) => addUserModal.setUid(e.target.value)}
-								/>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="token" className="text-sm font-medium">访问令牌</Label>
-							<div className="flex gap-2">
-								<div className="relative flex-1 group">
-									<Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-									<Input
-										id="token"
-										className="pl-9 border-border/60 focus-visible:ring-primary/20 transition-all"
-										placeholder="请输入用户访问令牌"
-										value={addUserModal.form.token}
-										onChange={(e) => addUserModal.setToken(e.target.value)}
-									/>
-								</div>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={() => {
-										const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-										let result = '';
-										for (let i = 0; i < 16; i++) {
-											result += chars.charAt(Math.floor(Math.random() * chars.length));
-										}
-										addUserModal.setToken(result);
-									}}
-									title="生成随机令牌"
-									className="shrink-0 border-border/60 hover:bg-muted/50 hover:text-primary transition-colors"
-								>
-									<Dices className="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="subscribe" className="text-sm font-medium">订阅链接</Label>
-							<div className="relative group">
-								<LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-								<Input
-									id="subscribe"
-									className="pl-9 border-border/60 focus-visible:ring-primary/20 transition-all"
-									placeholder="请输入订阅链接"
-									value={addUserModal.form.subscribe}
-									onChange={(e) => addUserModal.setSubscribe(e.target.value)}
-								/>
-							</div>
-						</div>
-					</div>
-					<DialogFooter className="sm:justify-between gap-2">
-						<Button variant="ghost" onClick={addUserModal.close} className="hover:bg-muted/50">
-							取消
-						</Button>
-						<Button
-							onClick={addUserModal.confirm}
-							disabled={loading}
-							className="bg-gradient-to-r from-primary to-violet-600 hover:to-violet-700 text-white min-w-[120px] shadow-lg shadow-primary/20 transition-all"
-						>
-							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							添加用户
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<RegisterUserDialog
+				isOpen={addUserModal.isOpen}
+				onOpenChange={(open) => !open && addUserModal.close()}
+				superToken={superToken}
+				onSuccess={fetchUsers}
+			/>
 
 			{/* 导入用户模态框 */}
 			<ImportUserModal
