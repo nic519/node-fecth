@@ -54,7 +54,7 @@ export function SubscriptionDemo() {
     }, []);
 
     return (
-        <div className="bg-card/50 backdrop-blur  space-y-4">
+        <div className=" space-y-4">
             <div className="flex items-center justify-between mb-2">
                 <div>
                     <Label className="text-base flex items-center gap-2">

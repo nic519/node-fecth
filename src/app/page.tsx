@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { useToastContext } from '@/providers/toast-provider';
 import { Sparkles } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
@@ -41,15 +42,15 @@ function Header() {
   }, []);
 
   return (
-    <nav className={`fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="max-w-6xl mx-auto  h-16 flex items-center justify-between">
+    <nav className={`fixed top-4 left-0 right-0 z-50 flex justify-center transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}`}>
+      <div className="flex w-full max-w-6xl items-center justify-between gap-8 px-10 py-3 bg-background/40 backdrop-blur-md border border-border/20 rounded-full shadow-sm">
         <div className="flex items-center gap-2">
-          <AcmeLogo className="w-10 h-10 text-primary" />
+          <AcmeLogo className="w-8 h-8 text-primary" />
           <span className="font-bold text-lg tracking-tight">NodeFetch</span>
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm" onClick={() => showToast('即将开放', 'info')}><Sparkles className="w-4 h-4" />立即使用</Button>
-          <ModeToggle />
+          <Button size="sm" onClick={() => showToast('即将开放', 'info')} className="rounded-full"><Sparkles className="w-4 h-4" />立即使用</Button>
+          <ModeToggle className="rounded-full bg-transparent border-0 hover:bg-muted/50" />
         </div>
       </div>
     </nav>
@@ -63,6 +64,7 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptions();
+  const { resolvedTheme } = useTheme();
 
   // Check for admin token (super admin access only)
   useEffect(() => {
@@ -72,13 +74,32 @@ function HomeContent() {
     }
   }, [searchParams, router]);
 
+  const auroraColors = resolvedTheme === 'light' 
+    ? ["#CFE8FF", "#B19EEF", "#FFD9F0"] 
+    : ["#7cff67", "#B19EEF", "#5227FF"];
+  const auroraBlend = resolvedTheme === 'light' ? 0.2 : 0.5;
+  const auroraAmplitude = resolvedTheme === 'light' ? 0.55 : 1.0;
+  const auroraSpeed = resolvedTheme === 'light' ? 0.8 : 1;
+  const auroraOpacity = resolvedTheme === 'light' ? 0.35 : 1;
+
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 dark:selection:bg-primary/30 font-sans">
+    <div className="min-h-screen text-foreground selection:bg-primary/20 dark:selection:bg-primary/30 font-sans">
+      
       {/* Header */}
       <Header />
-
+      {/* {resolvedTheme === 'dark' && (
+        <div className="fixed inset-0 -z-20 w-full h-full">
+          <Aurora
+            colorStops={auroraColors}
+            blend={auroraBlend}
+            amplitude={auroraAmplitude}
+            speed={auroraSpeed}
+            opacity={auroraOpacity}
+          />
+        </div>
+      )} */}
       {/* Background Grid Pattern */}
-      <div className="fixed inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]">
+      <div className="fixed inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]">
         <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
       </div>
 
