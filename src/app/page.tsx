@@ -37,30 +37,12 @@ function HomeContent() {
     }
   }, [superToken, router]);
 
-  const auroraColors = resolvedTheme === 'light'
-    ? ["#CFE8FF", "#B19EEF", "#FFD9F0"]
-    : ["#7cff67", "#B19EEF", "#5227FF"];
-  const auroraBlend = resolvedTheme === 'light' ? 0.2 : 0.5;
-  const auroraAmplitude = resolvedTheme === 'light' ? 0.55 : 1.0;
-  const auroraSpeed = resolvedTheme === 'light' ? 0.8 : 1;
-  const auroraOpacity = resolvedTheme === 'light' ? 0.35 : 1;
-
   return (
     <div className="min-h-screen text-foreground selection:bg-primary/20 dark:selection:bg-primary/30 font-sans">
 
       {/* Header */}
       <HomeNavbar onRegisterClick={() => setIsRegisterOpen(true)} />
-      {/* {resolvedTheme === 'dark' && (
-        <div className="fixed inset-0 -z-20 w-full h-full">
-          <Aurora
-            colorStops={auroraColors}
-            blend={auroraBlend}
-            amplitude={auroraAmplitude}
-            speed={auroraSpeed}
-            opacity={auroraOpacity}
-          />
-        </div>
-      )} */}
+
       {/* Background Grid Pattern */}
       <div className="fixed inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]">
         <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
