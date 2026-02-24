@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
+import { ResponseUtils } from '@/utils/responseUtils';
+import { NextRequest } from 'next/server';
 
 export async function GET(
   request: NextRequest,
@@ -17,29 +18,19 @@ export async function GET(
     const template = await crud.selectById(templateId);
 
     if (!template) {
-      return NextResponse.json({
-        error: 'Template not found',
-        message: `模板 ${templateId} 不存在`,
-        code: 'TEMPLATE_NOT_FOUND',
-      }, { status: 404 });
+      return ResponseUtils.error(404, `模板 ${templateId} 不存在`);
     }
 
     const content = template.content || '';
-
-    const headers = new Headers();
-    headers.set('Content-Type', 'text/yaml; charset=utf-8');
+    const extraHeaders: Record<string, string> = {};
 
     if (download === 'true' || filename) {
       const finalFilename = filename || `clash-template-${templateId}.yaml`;
-      headers.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+      extraHeaders['Content-Disposition'] = `attachment; filename="${finalFilename}"`;
     }
 
-    return new NextResponse(content, { headers });
-  } catch {
-    return NextResponse.json({
-      error: 'Internal Server Error',
-      message: '获取模板失败，请稍后重试',
-      code: 'TEMPLATE_FETCH_ERROR',
-    }, { status: 500 });
+    return ResponseUtils.raw(content, 'text/yaml; charset=utf-8', 200, extraHeaders);
+  } catch (error: unknown) {
+    return ResponseUtils.handleApiError(error);
   }
 }

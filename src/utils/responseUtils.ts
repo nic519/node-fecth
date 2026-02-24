@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BaseResponseSchema } from '@/types/schema.base';
+import { CORS_HEADERS } from '@/config/cors';
 import { ResponseCodes, type ResponseCode } from '@/types/openapi-schemas';
+import { BaseResponseSchema } from '@/types/schema.base';
 import { safeError } from '@/utils/logHelper';
+
+export { CORS_HEADERS };
 
 /**
  * 统一响应工具类
@@ -23,9 +26,7 @@ export class ResponseUtils {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+				...CORS_HEADERS,
 			},
 		});
 	}
@@ -45,9 +46,7 @@ export class ResponseUtils {
 			status: statusCode,
 			headers: {
 				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+				...CORS_HEADERS,
 			},
 		});
 	}
@@ -101,6 +100,28 @@ export class ResponseUtils {
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * 创建标准响应头
+	 */
+	static createHeaders(contentType: string = 'application/json', extraHeaders: Record<string, string> = {}): Headers {
+		const headers = new Headers(CORS_HEADERS);
+		headers.set('Content-Type', contentType);
+		Object.entries(extraHeaders).forEach(([key, value]) => {
+			headers.set(key, value);
+		});
+		return headers;
+	}
+
+	/**
+	 * 创建原始文本响应 (支持自定义 Content-Type)
+	 */
+	static raw(content: string, contentType: string = 'text/plain; charset=utf-8', status: number = 200, extraHeaders: Record<string, string> = {}): Response {
+		return new Response(content, {
+			status,
+			headers: this.createHeaders(contentType, extraHeaders),
+		});
 	}
 
 	/**

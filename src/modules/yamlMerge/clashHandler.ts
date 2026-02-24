@@ -10,6 +10,7 @@ import { ClashProxyFilter } from '@/modules/yamlMerge/filters/clashProxyFilter';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
 import { safeError } from '@/utils/logHelper';
+import { CORS_HEADERS } from '@/utils/responseUtils';
 
 const RESPONSE_HEADERS: Record<string, string> = {
 	'Content-Type': 'text/yaml; charset=utf-8',
@@ -17,6 +18,7 @@ const RESPONSE_HEADERS: Record<string, string> = {
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',
 	'X-XSS-Protection': '1; mode=block',
+	...CORS_HEADERS,
 };
 
 export class ClashHandler implements RouteHandler {

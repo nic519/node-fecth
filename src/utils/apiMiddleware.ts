@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { ConfigResponse } from '@/types/openapi-schemas';
 import { AuthUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { ConfigResponse } from '@/types/openapi-schemas';
+import { NextRequest, NextResponse } from 'next/server';
 
 export interface AuthenticatedRequest extends NextRequest {
   auth?: ConfigResponse;
@@ -38,7 +38,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
       // 1. Admin Check
       if (options.adminOnly) {
         if (!AuthUtils.validateSuperToken(request, env)) {
-          return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
+          return ResponseUtils.error(401, 'Unauthorized');
         }
       }
 
@@ -46,10 +46,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
       if (options.requiredParams) {
         for (const param of options.requiredParams) {
           if (!searchParams.get(param)) {
-            return NextResponse.json({
-              code: 400,
-              msg: `Missing ${param}`
-            }, { status: 400 });
+            return ResponseUtils.error(400, `Missing ${param}`);
           }
         }
       }
@@ -59,7 +56,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
         // Typically requires 'uid' to fetch config
         const uid = searchParams.get('uid');
         if (!uid) {
-          return NextResponse.json({ code: 400, msg: 'Missing uid' }, { status: 400 });
+          return ResponseUtils.error(400, 'Missing uid');
         }
 
         const userConfig = await AuthUtils.authenticate(request, env, uid);

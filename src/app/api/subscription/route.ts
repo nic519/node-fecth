@@ -1,42 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { AuthUtils } from '@/utils/authUtils';
-import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
+import { AuthenticatedRequest, withAuth } from '@/utils/apiMiddleware';
+import { ResponseUtils } from '@/utils/responseUtils';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: AuthenticatedRequest) => {
   const env = process.env as unknown as Env;
-  const searchParams = request.nextUrl.searchParams;
-  const uid = searchParams.get('uid');
-
-  if (!uid) {
-    return NextResponse.json({
-      error: 'Missing uid',
-      message: '缺少用户ID',
-      code: 'MISSING_UID'
-    }, { status: 400 });
-  }
+  const { auth: userConfig, uid } = request;
 
   try {
-    // AuthUtils expects a Request and Env.
-    const authConfig = await AuthUtils.authenticate(request as unknown as Request, env as unknown as Env, uid);
-
-    if (!authConfig.subscribe) {
-      return NextResponse.json({
-        error: 'Missing subscription configuration',
-        message: '用户配置中缺少订阅URL',
-        code: 'MISSING_SUBSCRIPTION'
-      }, { status: 400 });
-    }
-
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig, uid });
+    const response = await clashHandler.handle(
+      request as unknown as Request,
+      env as unknown as Env,
+      { userConfig: userConfig!, uid: uid! }
+    );
 
     if (!response) {
-      return NextResponse.json({
-        error: 'Clash handler failed',
-        message: '配置生成失败',
-        code: 'CLASH_HANDLER_FAILED'
-      }, { status: 500 });
+      return ResponseUtils.error(500, '配置生成失败', 'CLASH_HANDLER_FAILED');
     }
 
     // Return the response directly as it's already a standard Response object
@@ -44,4 +23,4 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }
-}
+}, { authenticateUser: true });
