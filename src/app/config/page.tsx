@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { RegisterSuccessDialog } from './components/RegisterSuccessDialog';
 
 function parseStoredTab(tab: string | null): ConfigTab {
 	if (tab === 'basic' || tab === 'rules' || tab === 'dynamic' || tab === 'token' || tab === 'preview') {
@@ -90,6 +91,8 @@ function UserConfigInner({ uid, token }: { uid: string; token: string }) {
 				loading={userConfigState.loading}
 				error={userConfigState.error}
 			/>
+
+			<RegisterSuccessDialog uid={uid} token={token} />
 
 			<Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
 				<DialogContent>

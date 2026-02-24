@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { ConfigTab } from './ConfigForm';
 import { User, Settings, Shield, RefreshCw, Key, Eye, Clock, Loader2, CheckCircle2, Save, AlertCircle } from 'lucide-react';
 import { SubscribeUrlPanel } from './SubscribeUrlPanel';
+import { BookmarkButton } from './BookmarkButton';
 
 interface ConfigSidebarProps {
 	uid: string;
@@ -77,7 +78,10 @@ export function ConfigSidebar({
 							</span>
 						</div>
 					</div>
-					<ModeToggle className="h-8 w-8 border-border/50 shadow-sm" />
+					<div className="flex items-center gap-2">
+						<BookmarkButton className="h-8 w-8 border-border/50 shadow-sm" />
+						<ModeToggle className="h-8 w-8 border-border/50 shadow-sm" />
+					</div>
 				</div>
 
 				{/* User Info Section - Minimalist */}
@@ -97,7 +101,7 @@ export function ConfigSidebar({
 					{/* Subscribe URL Panel acting as separator */}
 					<div className="px-2 pt-1">
 						<div className="text-[10px] font-medium text-muted-foreground/50 px-1 mb-1 uppercase tracking-wider">
-							订阅链接
+							订阅链接，导入至clash客户端
 						</div>
 						<SubscribeUrlPanel uid={uid} token={token} />
 					</div>

@@ -43,22 +43,22 @@ export const POST = async (request: Request) => {
       // SQLite JSON query: meta->>'ip'
       // We use SQLite's datetime function to compare times directly in the database
 
-      const recentRegistrations = await db.select({
-        id: logs.id
-      }).from(logs)
-        .where(and(
-          eq(logs.type, 'public_register'),
-          sql`json_extract(${logs.meta}, '$.ip') = ${ip}`,
-          sql`datetime(${logs.createdAt}) > datetime('now', '-1 day')`
-        ))
-        .limit(1);
+      // const recentRegistrations = await db.select({
+      //   id: logs.id
+      // }).from(logs)
+      //   .where(and(
+      //     eq(logs.type, 'public_register'),
+      //     sql`json_extract(${logs.meta}, '$.ip') = ${ip}`,
+      //     sql`datetime(${logs.createdAt}) > datetime('now', '-1 day')`
+      //   ))
+      //   .limit(1);
 
-      if (recentRegistrations.length > 0) {
-        return NextResponse.json({
-          code: 429,
-          msg: 'Registration limit exceeded. You can only register once every 24 hours.'
-        }, { status: 429 });
-      }
+      // if (recentRegistrations.length > 0) {
+      //   return NextResponse.json({
+      //     code: 429,
+      //     msg: '每24小时内只能创建一个账户'
+      //   }, { status: 429 });
+      // }
     }
 
     // Create User
