@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Wifi, Zap, Activity, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Activity, Globe, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Node {
   id: string;
@@ -115,8 +115,8 @@ export function LatencyDemo() {
               className={cn(
                 "relative p-3 rounded-lg border transition-all duration-200 cursor-default select-none",
                 isSelected
-                  ? "bg-muted/25 border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.2)] dark:shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
-                  : "bg-muted/15 border-transparent hover:bg-muted/50",
+                  ? "bg-muted/55 border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.2)] dark:shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
+                  : "bg-muted/35 border-transparent hover:bg-muted/50",
               )}
             >
               {/* Header Row: Icon + Name */}

@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Layers, Globe, Filter, FileJson, ShieldCheck, Zap } from 'lucide-react';
+import { FileJson, Filter, Globe, Layers, ShieldCheck, Zap } from 'lucide-react';
 
 function FeatureCard({ icon, title, description, iconBgClass }: { icon: React.ReactNode; title: string; description: string; iconBgClass?: string }) {
   return (
@@ -24,8 +24,7 @@ export function CoreFeatures() {
   return (
     <section className="max-w-6xl mx-auto mb-24">
       <div className="text-center mb-16">
-        <h2 className="font-heading text-3xl md:text-4xl font-bold">更多核心特性</h2>
-        <p className="text-muted-foreground mt-4">全方位满足您的个性化配置需求</p>
+        <h2 className="font-heading text-3xl md:text-4xl font-bold">更多核心特性</h2> 
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FeatureCard

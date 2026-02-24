@@ -1,20 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
+import { CoreFeatures } from '@/components/index/CoreFeatures';
+import { LatencyDemo } from '@/components/index/LatencyDemo';
+import { SubscriptionDemo } from '@/components/index/SubscriptionDemo';
+import { SyncPreviewGrid } from '@/components/index/SyncPreviewGrid';
+import { AcmeLogo } from '@/components/NavigationBar';
+import { RuleFilterSelector } from '@/components/RuleFilterSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
-import { Github, Sparkles } from 'lucide-react';
-import { CoreFeatures } from '@/components/CoreFeatures';
-import { RuleFilterSelector } from '@/components/RuleFilterSelector';
-import { SyncPreviewGrid } from '@/components/index/SyncPreviewGrid';
 import { ModeToggle } from '@/components/ui/mode-toggle';
-import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
-import { SubscriptionDemo } from '@/components/SubscriptionDemo';
-import { LatencyDemo } from '@/components/index/LatencyDemo';
-import { AcmeLogo } from '@/components/NavigationBar';
 import { useToastContext } from '@/providers/toast-provider';
+import { Sparkles } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 function Header() {
   const { showToast } = useToastContext();
@@ -107,13 +106,13 @@ function HomeContent() {
             <div className="space-y-4 text-center">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">所见即所得的规则编排</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                无需编写复杂配置文件。在网页上直接勾选需要的规则集，实时预览生成的配置。
+                无需编写复杂配置文件。在网页上直接勾选需要的规则集，实时预览生成的配置
               </p>
             </div>
 
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-violet-600/30 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-              <Card className="relative border-border/60 bg-card/80 backdrop-blur-xl shadow-2xl">
+              <Card className="relative border-border/60 bg-card/80 backdrop-blur-md shadow-md">
                 <CardContent className="p-8">
                   <RuleFilterSelector
                     filterOptions={filterOptions}
@@ -142,10 +141,10 @@ function HomeContent() {
             <div className="space-y-6 order-1 lg:order-2">
               <h2 className="font-heading text-3xl md:text-4xl font-bold leading-tight">多源聚合与<br /><span className="text-primary">高可用容灾</span></h2>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                支持无限制添加备用订阅源，自动合并节点与去重。不再担心因单点失效导致断网，实现真正的网络高可用。
+                支持无限制添加备用订阅源，不再担心因单点失效导致断网，实现真正的网络高可用
               </p>
               <ul className="space-y-3 mt-4">
-                {['自动去重合并', '故障节点剔除', '多格式支持 (Clash/V2Ray)'].map((item) => (
+                {['自动去重合并', '清晰显示每个节点的来源', '独立展示每个源的用量，到期时间'].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-muted-foreground">
                     <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -159,8 +158,7 @@ function HomeContent() {
             </div>
           </div>
 
-          <div className="mt-16 relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur opacity-20 transition duration-1000"></div>
+          <div className="mt-16 relative group"> 
             <SyncPreviewGrid />
           </div>
         </section>
@@ -172,7 +170,7 @@ function HomeContent() {
             <div className="space-y-6 text-center max-w-3xl mx-auto">
               <h2 className="font-heading text-3xl md:text-4xl font-bold">全自动延迟检测与优选</h2>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                后台自动对所有节点进行并发延迟测试，基于实时数据自动切换到延迟最低的线路，确保时刻高速在线。
+                每60秒自动对所有节点进行延迟测试，实时切换到延迟最低的线路
               </p>
             </div>
 

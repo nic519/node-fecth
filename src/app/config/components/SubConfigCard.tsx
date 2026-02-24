@@ -1,12 +1,12 @@
-import { AreaCode, SubConfig } from '@/types/user-config';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { AREA_CODES } from '@/config/proxy-area.config';
-import { Checkbox } from '@/components/ui/checkbox';
+import { AreaCode, SubConfig } from '@/types/user-config';
+import { Flag, Globe, Link, Trash2 } from 'lucide-react';
 import { memo } from 'react';
-import { Link, Flag, Globe, Trash2 } from 'lucide-react';
 
 const AREA_EMOJI: Record<AreaCode, string> = {
     TW: '🏝️',
@@ -85,7 +85,7 @@ export const SubConfigCard = memo(function SubConfigCard({
                                 maxLength={10}
                             />
                             <p className="text-[0.8rem] text-muted-foreground">
-                                用于区分不同订阅源的简短标识或 Emoji。
+                                用于区分不同订阅源的简短标识
                             </p>
                         </div>
 

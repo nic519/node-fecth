@@ -1,19 +1,17 @@
 'use client';
 
-import { useState, useCallback } from 'react';
 import { SubConfigCard } from '@/app/config/components/SubConfigCard';
-import { Button } from '@/components/ui/button';
-import { Plus, ListPlus } from 'lucide-react';
-import { SubConfig, AreaCode } from '@/types/user-config';
 import { Label } from '@/components/ui/label';
-import { secondaryActionButtonClass } from '@/lib/utils';
+import { AreaCode, SubConfig } from '@/types/user-config';
 import { getRandomEmoji } from '@/utils/emojiUtils';
+import { ListPlus } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 export function SubscriptionDemo() {
     const [subList, setSubList] = useState<SubConfig[]>([
         {
             subscribe: 'https://example.com/sub/backup1',
-            flag: '备用一',
+            flag: '🐙',
             includeArea: ['HK', 'JP', 'SG']
         },
     ]);
@@ -56,7 +54,7 @@ export function SubscriptionDemo() {
     }, []);
 
     return (
-        <div className="bg-card/50 backdrop-blur shadow-xl space-y-4">
+        <div className="bg-card/50 backdrop-blur  space-y-4">
             <div className="flex items-center justify-between mb-2">
                 <div>
                     <Label className="text-base flex items-center gap-2">

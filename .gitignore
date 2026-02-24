@@ -38,3 +38,4 @@ node_modules
 /.trae
 .wrangler/
 /.open-next
+/public

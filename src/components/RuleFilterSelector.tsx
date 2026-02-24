@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { isMandatoryFilter } from '@/app/config/hooks/useRuleConfig';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, ListFilter } from 'lucide-react';
-import { isMandatoryFilter } from '@/app/config/hooks/useRuleConfig';
+import { ListFilter, Loader2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface RuleFilterSelectorProps {
   filterOptions: string[];
@@ -90,7 +90,7 @@ export function RuleFilterSelector({
           <div className="p-1 rounded bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400">
             <ListFilter className="w-3.5 h-3.5" />
           </div>
-          需要的过滤项
+          需要的规则项
         </Label>
         <div className="flex items-center justify-between sm:justify-end space-x-2 bg-muted/30 sm:bg-transparent p-2 sm:p-0 rounded-lg">
           <Label htmlFor="enable-filters" className="text-sm font-normal text-muted-foreground order-2 sm:order-1">

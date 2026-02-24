@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import type { DynamicInfo, SyncItemData, SyncStatus } from '@/app/config/hooks/useDynamicSync';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, CheckCircle2, Clock, Activity, Calendar } from 'lucide-react';
-import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { formatTraffic, getTrafficBarColor, parseTrafficInfo, formatDateTime } from '@/utils/trafficUtils';
-import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
+import { cn, secondaryActionButtonClass } from '@/lib/utils';
+import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
+import { Activity, Calendar, CheckCircle2, Clock, Loader2, RefreshCw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SyncItemCardProps {
   item: SyncItemData;
