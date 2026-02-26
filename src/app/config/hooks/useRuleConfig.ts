@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import yaml from 'js-yaml';
-import { UserConfig } from '@/types/user-config';
 import { DEFAULT_RULE_URL } from '@/config/constants';
 import { ruleService } from '@/services/rule-api';
+import { UserConfig } from '@/types/user-config';
+import yaml from 'js-yaml';
+import { useCallback, useEffect, useState } from 'react';
 
 export const MANDATORY_KEYWORDS = ["国外流量", "手动选择", "漏网之鱼", "新加坡", "日本", "香港", "速度最优"];
 const FILTER_CACHE_KEY = 'rule-filter-options-cache-v1';
-const FILTER_CACHE_TTL = 5 * 60 * 1000;
+const FILTER_CACHE_TTL = 30 * 60 * 1000;
 
 type FilterCacheEntry = {
     options: string[];

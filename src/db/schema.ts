@@ -57,7 +57,7 @@ export const users = sqliteTable('users', {
 	ruleUrl: text('rule_url').default(''),
 
 	// 文件名，默认值为：miho-cfg.yaml
-	fileName: text('file_name').notNull().default('miho-cfg.yaml'),
+	fileName: text('file_name').notNull().default('miho-cfg'),
 
 	// 追加的子配置列表	
 	// 格式为 JSON 字符串，存储需要追加的子配置项

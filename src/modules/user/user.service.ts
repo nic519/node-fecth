@@ -1,6 +1,6 @@
+import { DbInstance } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { DbInstance } from '@/db';
 import { UserConfigSchema, type IUserConfig } from './user.schema';
 
 export class UserService {
@@ -63,7 +63,7 @@ export class UserService {
 				requiredFilters: requiredFilters || '',
 				ruleUrl: ruleUrl || '',
 				// fileName 有默认值 'miho-cfg.yaml'，如果未提供则使用默认值
-				fileName: fileName || `${uid}.yaml`,
+				fileName: fileName || `${uid}`,
 				// appendSubList 有默认值 ''，如果未提供则使用默认值
 				appendSubList: appendSubList ? JSON.stringify(appendSubList) : '',
 				ruleOverwrite: ruleOverwrite || '',
