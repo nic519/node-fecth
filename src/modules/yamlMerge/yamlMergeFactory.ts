@@ -1,21 +1,21 @@
 import { GlobalConfig } from '@/config/global-config';
-import { BaseCRUD } from '@/db/base-crud';
 import { getRuntimeEnv } from '@/db';
+import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
-import { UserConfig } from '@/types/openapi-schemas';
 import { PreMergeInfo } from '@/modules/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/modules/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
+import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
+import { UserConfig } from '@/types/openapi-schemas';
 import { fetchRawContent } from '@/utils/http/client';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
-import { StrategyMultiSub } from './strategyMultiSub';
 import yaml from 'js-yaml';
-import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
+import { StrategyMultiSub } from './strategyMultiSub';
 
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
 
-	constructor(private userConfig: UserConfig) { }
+	constructor(private userConfig: UserConfig, private uid?: string) { }
 
 	private async measure<T>(name: string, fn: () => Promise<T>): Promise<T> {
 		const start = Date.now();
@@ -139,7 +139,7 @@ export class YamlMergeFactory {
 
 	async multiSubStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const ruleContent = await this.measure('fetch_rule_content', () => this.fetchRuleContent());
-		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig);
+		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig, this.uid);
 		const { yamlContent, subInfo } = await yamlStrategy.generate();
 		return { yamlContent, subInfo };
 	}

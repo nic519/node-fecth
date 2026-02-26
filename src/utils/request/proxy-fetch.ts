@@ -48,8 +48,9 @@ export class ProxyFetch {
 	/**
 	 * 获取Clash订阅内容，带超时控制和缓存降级
 	 * @param timeoutMs 超时时间（毫秒）
+	 * @param userId 用户ID (可选，用于日志记录)
 	 */
-	async fetchWithTimeout(timeoutMs: number): Promise<ClashContent> {
+	async fetchWithTimeout(timeoutMs: number, userId?: string): Promise<ClashContent> {
 		try {
 			return await Promise.race([
 				this.fetchClashContent(),
@@ -59,7 +60,7 @@ export class ProxyFetch {
 			]);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : String(error);
-			logger.warn({ url: this.clashSubUrl, error: errorMsg }, '订阅获取超时或失败，尝试降级使用缓存');
+			logger.warn({ url: this.clashSubUrl, error: errorMsg, userId }, '订阅获取超时或失败，尝试降级使用缓存');
 
 			const cached = await this.fetchFromCache();
 			if (cached) {

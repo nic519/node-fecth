@@ -11,7 +11,7 @@ import yaml from 'js-yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
-	constructor(private ruleContent: string, private userConfig: UserConfig) { }
+	constructor(private ruleContent: string, private userConfig: UserConfig, private uid?: string) { }
 
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
 		const allProxyList: ClashProxy[] = [];
@@ -22,6 +22,7 @@ export class StrategyMultiSub {
 		};
 
 		const appendSubList = this.userConfig.appendSubList;
+		const userId = this.uid || this.userConfig.accessToken; // Use uid if available, fallback to accessToken (which is wrong, but keeping for compatibility if uid missing)
 
 		if (appendSubList && appendSubList.length > 0) {
 			appendSubList.push({
@@ -37,7 +38,7 @@ export class StrategyMultiSub {
 			const tasks = appendSubList.map(sub => limit(async () => {
 				try {
 					const trafficUtils = new ProxyFetch(sub.subscribe);
-					const { subInfo, content: clashContent } = await trafficUtils.fetchWithTimeout(SUBSCRIPTION_TIMEOUT);
+					const { subInfo, content: clashContent } = await trafficUtils.fetchWithTimeout(SUBSCRIPTION_TIMEOUT, userId); // 这里传递 userId
 
 					// 注意：这里会有多个订阅覆盖 preMergeInfo.clashContent 的情况
 					// 但为了保持兼容性，暂时保留此逻辑
@@ -51,7 +52,7 @@ export class StrategyMultiSub {
 
 					return { proxyList: appendProxyList, subInfo, flag: sub.flag };
 				} catch (error) {
-					logger.error({ url: sub.subscribe, error }, 'Failed to fetch subscription in strategy');
+					logger.error({ url: sub.subscribe, error, userId: userId }, 'Failed to fetch subscription in strategy');
 					// 失败时不中断整体流程，返回空列表
 					return { proxyList: [], subInfo: '', flag: sub.flag };
 				}

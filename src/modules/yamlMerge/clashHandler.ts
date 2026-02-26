@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import yaml from 'js-yaml';
-import { UserConfig } from '@/types/openapi-schemas';
-import { YamlMergeFactory } from '@/modules/yamlMerge/yamlMergeFactory';
-import { SubscribeParamsValidator } from '@/types/request/url-params.types';
-import { RouteHandler } from '@/types/routes.types';
+import { ClashProxyFilter } from '@/modules/yamlMerge/filters/clashProxyFilter';
 import { ClashRuleFilter } from '@/modules/yamlMerge/filters/clashRuleFilter';
 import { ClashRuleOverride } from '@/modules/yamlMerge/filters/clashRuleOverride';
-import { ClashProxyFilter } from '@/modules/yamlMerge/filters/clashProxyFilter';
+import { YamlMergeFactory } from '@/modules/yamlMerge/yamlMergeFactory';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
+import { UserConfig } from '@/types/openapi-schemas';
+import { SubscribeParamsValidator } from '@/types/request/url-params.types';
+import { RouteHandler } from '@/types/routes.types';
 import { safeError } from '@/utils/logHelper';
 import { CORS_HEADERS } from '@/utils/responseUtils';
+import yaml from 'js-yaml';
 
 const RESPONSE_HEADERS: Record<string, string> = {
 	'Content-Type': 'text/yaml; charset=utf-8',
@@ -43,7 +43,7 @@ export class ClashHandler implements RouteHandler {
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 
-			const yamlMerge = new YamlMergeFactory(userConfig);
+			const yamlMerge = new YamlMergeFactory(userConfig, uid);
 			// 获取合并后的 YAML 对象和性能计时数据
 			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
 
@@ -54,7 +54,7 @@ export class ClashHandler implements RouteHandler {
 			let finalYamlString = yaml.dump(yamlObj);
 
 			// 添加头部注释信息
-			finalYamlString = this._addRemark(finalYamlString, userConfig, uid, request);
+			finalYamlString = await this._addRemark(finalYamlString, userConfig, uid, request, env);
 
 			const totalDuration = Date.now() - startTime;
 
@@ -132,15 +132,71 @@ export class ClashHandler implements RouteHandler {
 		}
 	}
 
-	private _addRemark(content: string, config: UserConfig, uid: string | undefined | null, request: Request): string {
+	private async _addRemark(content: string, config: UserConfig, uid: string | undefined | null, request: Request, env?: Env): Promise<string> {
+		let remark = '';
+		
 		if (uid && config.accessToken) {
 			try {
 				const urlObj = new URL(request.url);
 				const configUrl = `${urlObj.origin}/config?uid=${uid}&token=${config.accessToken}`;
-				return `# 订阅管理地址\n# ${configUrl}\n\n` + content;
+				remark += `# 订阅管理地址\n# ${configUrl}\n\n`;
 			} catch {
 			}
 		}
-		return content;
+
+		if (uid && env) {
+			try {
+				const logger = createLogService(env);
+				// 查询最近的错误或警告日志 (最近 10 分钟)
+				const startTime = new Date(Date.now() - 10 * 60 * 1000);
+				const logs = await logger.queryLogs({
+					userId: uid,
+					limit: 10,
+					startTime,
+					level: 'warn' // 获取 warn 及以上级别，但目前 LogService 似乎只支持精确匹配，这里先只查 warn，或者我们修改 LogService 支持数组
+				});
+
+				// 由于 LogService.queryLogs 目前只支持单个 level，我们分别查询 error 和 warn
+				// 或者我们修改 queryLogs 方法。为了最小化改动，这里简单查询一下最近的 error 和 warn
+				
+				const errorLogs = await logger.queryLogs({
+					userId: uid,
+					limit: 5,
+					startTime,
+					level: 'error'
+				});
+				
+				const warnLogs = await logger.queryLogs({
+					userId: uid,
+					limit: 5,
+					startTime,
+					level: 'warn'
+				});
+
+				const allLogs = [...errorLogs.data, ...warnLogs.data].sort((a, b) => 
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+				);
+
+				if (allLogs.length > 0) {
+					remark += `# 最近的异常日志 (Last 10 min):\n`;
+					for (const log of allLogs) {
+						const time = new Date(log.createdAt).toLocaleTimeString();
+						let msg = log.message;
+						if (log.meta && typeof log.meta === 'object') {
+							const meta = log.meta as Record<string, unknown>;
+							if (meta.url) msg += ` URL: ${meta.url}`;
+							if (meta.error) msg += ` Error: ${meta.error}`;
+						}
+						remark += `# [${time}] [${log.level.toUpperCase()}] ${msg}\n`;
+					}
+					remark += `\n`;
+				}
+
+			} catch (e) {
+				console.error('Failed to add log remarks:', e);
+			}
+		}
+
+		return remark + content;
 	}
 }
