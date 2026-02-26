@@ -2,8 +2,8 @@ import { FileService } from './FileService';
 import { SSRToClashConverter } from './SSRToClashConverter';
 
 // Define paths
-const INPUT_FILE = '/Users/nicholas/Downloads/renzhe-原始.txt';
-const OUTPUT_FILE = '/Users/nicholas/Desktop/my_program/node-fecth/src/modules/yamlMerge/rawToClash/renzhe-clash.yaml';
+const INPUT_FILE = '/Users/nicholas/Downloads/1yunti-ori.txt';
+const OUTPUT_FILE = '/Users/nicholas/Downloads/1yunti-clash.yaml';
 
 function convertRawToClash() {
     try {

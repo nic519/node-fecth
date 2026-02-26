@@ -1,14 +1,14 @@
 import { getDb } from '@/db';
 import { dynamic } from '@/db/schema';
-import { inArray } from 'drizzle-orm';
-import { hashUrl } from '@/utils/hashUtils';
 import { formatDate } from '@/utils/dateUtils';
-import { logger } from '@/utils/request/network.config';
+import { hashUrl } from '@/utils/hashUtils';
 import { httpClient } from '@/utils/http/client';
 import { safeError, safeString } from '@/utils/logHelper';
+import { logger } from '@/utils/request/network.config';
+import { inArray } from 'drizzle-orm';
 
-import { CommonUtils } from '@/utils/commonUtils';
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
+import { CommonUtils } from '@/utils/commonUtils';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -42,7 +42,7 @@ export class DynamicService {
 			let content = await response.text();
 
 			// Auto-convert SSR subscription format to Clash YAML
-			if (SSRToClashConverter.isSSR(content)) {
+			if (SSRToClashConverter.isValidProtocol(content)) {
 				logger.info({ url: cleanUrl }, 'Detected SSR content, converting to Clash format');
 				try {
 					content = SSRToClashConverter.convert(content);
