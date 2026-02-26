@@ -1,14 +1,14 @@
-import { UserConfig } from '@/types/openapi-schemas';
+import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
-import { ClashProxy } from '@/types/clash.types';
-import { ProxyFetch } from '@/utils/request/proxy-fetch';
-import yaml from 'js-yaml';
 import type { YamlObject, YamlValue } from '@/modules/yamlMerge/utils/yamlTypes';
-import { PreMergeInfo } from './clash-merge.types';
-import { DEFAULT_SUB_FLAG } from '@/config/constants';
+import { ClashProxy } from '@/types/clash.types';
+import { UserConfig } from '@/types/openapi-schemas';
 import { createConcurrencyLimit } from '@/utils/http/client';
 import { logger } from '@/utils/request/network.config';
+import { ProxyFetch } from '@/utils/request/proxy-fetch';
+import yaml from 'js-yaml';
+import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
 	constructor(private ruleContent: string, private userConfig: UserConfig) { }
@@ -32,11 +32,12 @@ export class StrategyMultiSub {
 			// 使用并发控制，最大并发数 5
 			// 相比于原来的分批处理，这种方式更高效，能充分利用网络带宽
 			const limit = createConcurrencyLimit(5);
+			const SUBSCRIPTION_TIMEOUT = 10000; // 10 seconds timeout for each subscription
 
 			const tasks = appendSubList.map(sub => limit(async () => {
 				try {
 					const trafficUtils = new ProxyFetch(sub.subscribe);
-					const { subInfo, content: clashContent } = await trafficUtils.fetchClashContent();
+					const { subInfo, content: clashContent } = await trafficUtils.fetchWithTimeout(SUBSCRIPTION_TIMEOUT);
 
 					// 注意：这里会有多个订阅覆盖 preMergeInfo.clashContent 的情况
 					// 但为了保持兼容性，暂时保留此逻辑

@@ -1,5 +1,5 @@
-import { logger } from './network.config';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
+import { logger } from './network.config';
 
 // ==================== 常量定义 ====================
 
@@ -43,6 +43,30 @@ export class ProxyFetch {
 
 		// 2. 从源地址获取并更新缓存
 		return await this.fetchAndSave(cached);
+	}
+
+	/**
+	 * 获取Clash订阅内容，带超时控制和缓存降级
+	 * @param timeoutMs 超时时间（毫秒）
+	 */
+	async fetchWithTimeout(timeoutMs: number): Promise<ClashContent> {
+		try {
+			return await Promise.race([
+				this.fetchClashContent(),
+				new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error('Subscription fetch timeout')), timeoutMs)
+				)
+			]);
+		} catch (error) {
+			const errorMsg = error instanceof Error ? error.message : String(error);
+			logger.warn({ url: this.clashSubUrl, error: errorMsg }, '订阅获取超时或失败，尝试降级使用缓存');
+
+			const cached = await this.fetchFromCache();
+			if (cached) {
+				return cached;
+			}
+			throw error;
+		}
 	}
 
 	/**
