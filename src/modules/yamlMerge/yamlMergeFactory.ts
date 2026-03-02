@@ -11,6 +11,7 @@ import { fetchRawContent } from '@/utils/http/client';
 import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import yaml from 'js-yaml';
 import { StrategyMultiSub } from './strategyMultiSub';
+import { DEFAULT_RULE_URL } from '@/config/constants';
 
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
@@ -27,7 +28,7 @@ export class YamlMergeFactory {
 	}
 
 	private get effectiveRuleUrl(): string {
-		return this.userConfig.ruleUrl || GlobalConfig.ruleUrl;
+		return this.userConfig.ruleUrl || DEFAULT_RULE_URL;
 	}
 
 	async fetchPreMergeInfo(): Promise<PreMergeInfo> {
@@ -76,10 +77,6 @@ export class YamlMergeFactory {
 
 	private shouldUseInternalTemplate(urlOrId: string): boolean {
 		if (!urlOrId.startsWith('http')) {
-			return false;
-		}
-
-		if (GlobalConfig.isDev) {
 			return false;
 		}
 

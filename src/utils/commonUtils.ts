@@ -2,13 +2,6 @@ import { ProxyConfig } from '../config/global-config';
 
 
 export class CommonUtils {
-	/**
-	 * 检测是否本地开发模式
-	 */
-	static isLocalEnv(request: Request): boolean {
-		const currentUrl = new URL(request.url);
-		return currentUrl.host.startsWith('127.0.0.1') || currentUrl.host.startsWith('localhost');
-	}
 
 	/**
 	 * 清理 URL 中的空格和包裹符号
@@ -23,19 +16,21 @@ export class CommonUtils {
 		// 2. 去除首尾的反引号
 		cleanUrl = cleanUrl.replace(/^[`'"]+|[`'"]+$/g, '');
 		// 3. 再次去除可能的空格
-		cleanUrl = cleanUrl.trim(); 
-
-		return cleanUrl;
+		return cleanUrl.trim();
 	}
 
-	static tryProxyUrl(cleanUrl: string): string {
+	static tryProxyUrl(cleanUrl: string, forceProxy: boolean = false): string {
 		// 检查是否需要走代理
 		try {
-			const urlObj = new URL(cleanUrl);
-			// 检查域名是否在目标列表中
-			const needProxy = ProxyConfig.targetDomains.some(domain => 
-				urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`)
-			);
+			let needProxy = forceProxy;
+
+			if (!needProxy) {
+				const urlObj = new URL(cleanUrl);
+				// 检查域名是否在目标列表中
+				needProxy = ProxyConfig.targetDomains.some(domain =>
+					urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`)
+				);
+			}
 
 			if (needProxy) {
 				// 构建代理 URL: https://proxy-api?url=target-url

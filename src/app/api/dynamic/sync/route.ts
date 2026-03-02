@@ -10,13 +10,13 @@ import { safeError } from '@/utils/logHelper';
  */
 export const POST = async (request: Request) => {
     try {
-        const { url } = await request.json() as { url: string };
+        const { url, useProxy } = await request.json() as { url: string; useProxy?: boolean };
 
         if (!url) {
             return NextResponse.json({ code: 400, msg: 'URL is required' }, { status: 400 });
         }
 
-        const result = await DynamicService.fetchAndSave(url);
+        const result = await DynamicService.fetchAndSave(url, { retries: 3, useProxy });
 
         return NextResponse.json({
             code: 0,

@@ -27,15 +27,13 @@ export class DynamicService {
 	 * Fetch content from source URL and save to database
 	 * 使用 ky 库进行增强的网络请求，包含自动重试和超时控制
 	 */
-	static async fetchAndSave(url: string, retries = 3): Promise<DynamicContent> {
+	static async fetchAndSave(url: string, options: { retries?: number; useProxy?: boolean } = {}): Promise<DynamicContent> {
+		const { retries = 3, useProxy = false } = options;
 		const cleanUrl = CommonUtils.normalizeUrl(url);
 		try {
 			logger.info({ url: cleanUrl }, 'Start fetching dynamic content from source');
 
-			// 使用统一的 HTTP 客户端发起请求
-			// ky 会自动处理重试 (默认3次) 和超时 (默认15秒)
-			// 如果需要覆盖默认重试次数，可以在这里配置 
-			const response = await httpClient.get(CommonUtils.tryProxyUrl(cleanUrl), {
+			const response = await httpClient.get(CommonUtils.tryProxyUrl(cleanUrl, useProxy), {
 				retry: retries
 			});
 
@@ -126,7 +124,7 @@ export class DynamicService {
 	/**
 	 * Get multiple contents by URLs
 	 */
-	static async getByUrls(urls: string[]): Promise<DynamicContent[]> {
+	static async getSummaryByUrls(urls: string[]): Promise<DynamicContent[]> {
 		try {
 			// 构造查询集合：包含原始 URL 和清理后的 URL
 			const searchUrls = new Set<string>();

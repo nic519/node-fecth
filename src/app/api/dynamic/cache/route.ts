@@ -8,7 +8,7 @@ export const POST = async (request: Request) => {
         const validUrls = Array.isArray(urls) ? urls.filter(Boolean) : [];
 
         if (validUrls.length > 0) {
-            const results = await DynamicService.getByUrls(validUrls);
+            const results = await DynamicService.getSummaryByUrls(validUrls);
             return NextResponse.json({
                 code: 0,
                 msg: 'success',
