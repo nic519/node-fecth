@@ -8,7 +8,7 @@ import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
 import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
 import { UserConfig } from '@/types/openapi-schemas';
 import { fetchRawContent } from '@/utils/http/client';
-import { ProxyFetch } from '@/utils/request/proxy-fetch';
+import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import yaml from 'js-yaml';
 import { StrategyMultiSub } from './strategyMultiSub';
 import { DEFAULT_RULE_URL } from '@/config/constants';
@@ -34,8 +34,10 @@ export class YamlMergeFactory {
 	async fetchPreMergeInfo(): Promise<PreMergeInfo> {
 		const templatePromise = this.measure('fetch_rule_content', () => this.fetchRuleContent());
 
-		const trafficUtils = new ProxyFetch(this.userConfig.subscribe);
-		const clashPromise = this.measure('fetch_clash_content', () => trafficUtils.fetchClashContent());
+		const clashPromise = this.measure('fetch_clash_content', async () => {
+			const result = await DynamicService.fetchAndSave(this.userConfig.subscribe);
+			return { subInfo: result.traffic || '', content: result.content };
+		});
 
 		const [ruleContent, { subInfo, content: clashContent }] = await Promise.all([templatePromise, clashPromise]);
 

@@ -27,7 +27,7 @@ export function useDynamicSync(config: UserConfig) {
         ...(config.appendSubList || []).map(sub => ({ url: sub.subscribe, source: '追加订阅', flag: sub.flag }))
     ].filter(item => item.url), [config.subscribe, config.appendSubList]);
 
-    const syncUrl = useCallback(async (url: string) => {
+    const syncUrl = useCallback(async (url: string, useProxy?: boolean) => {
         if (!url) return;
         setStatuses(prev => ({ ...prev, [url]: { status: 'loading', message: undefined } }));
 
@@ -35,7 +35,7 @@ export function useDynamicSync(config: UserConfig) {
         const timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
         try {
-            const response = await dynamicService.syncUrl(url, controller.signal);
+            const response = await dynamicService.syncUrl(url, useProxy, controller.signal);
 
             if (response.code === 0) {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));

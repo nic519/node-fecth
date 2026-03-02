@@ -12,7 +12,7 @@ export const dynamicService = {
         return apiClient.post<DynamicInfo[]>('/dynamic/cache', { urls });
     },
 
-    syncUrl: (url: string, signal?: AbortSignal) => {
-        return apiClient.post<DynamicInfo>('/dynamic/sync', { url }, undefined, { signal });
+    syncUrl: (url: string, useProxy?: boolean, signal?: AbortSignal) => {
+        return apiClient.post<DynamicInfo>('/dynamic/sync', { url, useProxy }, undefined, { signal });
     },
 };

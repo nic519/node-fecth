@@ -14,12 +14,14 @@ import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
 import { Activity, Calendar, CheckCircle2, Clock, Loader2, RefreshCw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
 
 interface SyncItemCardProps {
   item: SyncItemData;
   status: SyncStatus;
   info?: DynamicInfo;
-  onSync?: () => void;
+  onSync?: (useProxy?: boolean) => void;
   showAction?: boolean;
 }
 
@@ -32,6 +34,7 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
   const shouldShowAction = showAction ?? !!onSync;
 
   const [displayedPercent, setDisplayedPercent] = useState(0);
+  const [useProxy, setUseProxy] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -157,21 +160,36 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
           </div>
 
           {shouldShowAction ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onSync}
-              disabled={isLoading || !onSync}
-              className={cn("h-8 w-8 p-0 shrink-0 rounded-full", secondaryActionButtonClass)}
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white/90" />
-              ) : isSuccess ? (
-                <CheckCircle2 className="w-4 h-4" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-            </Button>
+            <div className="flex flex-col items-end gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onSync?.(useProxy)}
+                disabled={isLoading || !onSync}
+                className={cn("h-8 w-8 p-0 shrink-0 rounded-full", secondaryActionButtonClass)}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white/90" />
+                ) : isSuccess ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`proxy-${item.url}`}
+                  checked={useProxy}
+                  onCheckedChange={(checked) => setUseProxy(checked as boolean)}
+                />
+                <Label
+                  htmlFor={`proxy-${item.url}`}
+                  className="text-[10px] text-muted-foreground font-normal cursor-pointer select-none"
+                >
+                  远端请求
+                </Label>
+              </div>
+            </div>
           ) : (
             <div className="h-8 w-8" />
           )}
