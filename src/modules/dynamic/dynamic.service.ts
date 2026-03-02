@@ -34,8 +34,8 @@ export class DynamicService {
 
 			// 使用统一的 HTTP 客户端发起请求
 			// ky 会自动处理重试 (默认3次) 和超时 (默认15秒)
-			// 如果需要覆盖默认重试次数，可以在这里配置
-			const response = await httpClient.get(cleanUrl, {
+			// 如果需要覆盖默认重试次数，可以在这里配置 
+			const response = await httpClient.get(CommonUtils.tryProxyUrl(cleanUrl), {
 				retry: retries
 			});
 

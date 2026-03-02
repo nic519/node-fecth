@@ -13,3 +13,18 @@ export const GlobalConfig: GlobalConfigType = {
 	ruleUrl: DEFAULT_RULE_URL,
 };
 
+export const ProxyConfig = {
+	/**
+	 * 需要走代理的目标域名列表
+	 */
+	targetDomains: [
+		'liangxin.xyz'
+	],
+
+	/**
+	 * 代理服务 API 地址
+	 * 使用 Vercel 部署的代理服务绕过 Cloudflare 限制
+	 */
+	proxyApiUrl: 'https://transfer-bice-rho.vercel.app/api/proxy'
+};
+
