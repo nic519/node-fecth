@@ -2,8 +2,8 @@ import { users, Log, dynamic } from '@/db/schema';
 import { desc, inArray, InferSelectModel } from 'drizzle-orm';
 import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schema';
 import { TrafficInfo, type IUserConfig } from './user.schema';
-import { ProxyFetch } from '@/utils/request/proxy-fetch';
 import { UserService } from './user.service';
+import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { DbInstance } from '@/db';
 import { createLogService, LogService } from '@/services/log-service';
 import { LogLevel } from '@/types/log';
@@ -295,8 +295,9 @@ export class AdminService {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
-			const trafficUtils = new ProxyFetch(configResponse.subscribe);
-			const { subInfo } = await trafficUtils.fetchClashContent();
+			// Use DynamicService.getWithCache to get fresh content (cache handling is internal)
+			const result = await DynamicService.getWithCache(configResponse.subscribe);
+			const subInfo = result.traffic;
 
 			if (!subInfo) {
 				throw new Error('无法获取流量信息');

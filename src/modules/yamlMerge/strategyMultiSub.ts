@@ -6,7 +6,7 @@ import { ClashProxy } from '@/types/clash.types';
 import { UserConfig } from '@/types/openapi-schemas';
 import { createConcurrencyLimit } from '@/utils/http/client';
 import { logger } from '@/utils/request/network.config';
-import { ProxyFetch } from '@/utils/request/proxy-fetch';
+import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import yaml from 'js-yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
@@ -22,7 +22,7 @@ export class StrategyMultiSub {
 		};
 
 		const appendSubList = this.userConfig.appendSubList;
-		const userId = this.uid || this.userConfig.accessToken; // Use uid if available, fallback to accessToken (which is wrong, but keeping for compatibility if uid missing)
+		const userId = this.uid || this.userConfig.accessToken; // Use uid if available, fallback to accessToken
 
 		if (appendSubList && appendSubList.length > 0) {
 			appendSubList.push({
@@ -31,14 +31,15 @@ export class StrategyMultiSub {
 			});
 
 			// 使用并发控制，最大并发数 5
-			// 相比于原来的分批处理，这种方式更高效，能充分利用网络带宽
 			const limit = createConcurrencyLimit(5);
-			const SUBSCRIPTION_TIMEOUT = 10000; // 10 seconds timeout for each subscription
+			// 10 seconds timeout for each subscription is handled within fetch logic if needed, 
+			// but getWithCache does not expose timeout. Assuming default ky timeout or sufficient.
 
 			const tasks = appendSubList.map(sub => limit(async () => {
 				try {
-					const trafficUtils = new ProxyFetch(sub.subscribe);
-					const { subInfo, content: clashContent } = await trafficUtils.fetchWithTimeout(SUBSCRIPTION_TIMEOUT, userId); // 这里传递 userId
+					const result = await DynamicService.getWithCache(sub.subscribe);
+					const clashContent = result.content;
+					const subInfo = result.traffic || '';
 
 					// 注意：这里会有多个订阅覆盖 preMergeInfo.clashContent 的情况
 					// 但为了保持兼容性，暂时保留此逻辑

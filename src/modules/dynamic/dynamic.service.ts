@@ -122,6 +122,41 @@ export class DynamicService {
 	}
 
 	/**
+	 * Get content with caching strategy
+	 * 1. Try to get valid cache from DB
+	 * 2. If expired or missing, fetch from source and save
+	 * @param url Source URL
+	 * @param ttlMs Cache Time-To-Live in milliseconds (default: 5 minutes)
+	 */
+	static async getWithCache(url: string, ttlMs: number = 5 * 60 * 1000): Promise<DynamicContent> {
+		const cached = await this.getByUrl(url);
+
+		if (cached) {
+			const updatedAt = new Date(cached.updatedAt.replace(' ', 'T')).getTime();
+			const now = Date.now();
+
+			if (now - updatedAt < ttlMs) {
+				logger.info({ url }, 'Cache hit: returning valid cached content');
+				return cached;
+			}
+			logger.info({ url }, 'Cache expired: fetching fresh content');
+		} else {
+			logger.info({ url }, 'Cache miss: fetching fresh content');
+		}
+
+		try {
+			return await this.fetchAndSave(url);
+		} catch (error) {
+			// If fetch fails but we have stale cache, return it as fallback
+			if (cached) {
+				logger.warn({ url, error }, 'Fetch failed: returning stale cache as fallback');
+				return cached;
+			}
+			throw error;
+		}
+	}
+
+	/**
 	 * Get multiple contents by URLs
 	 */
 	static async getSummaryByUrls(urls: string[]): Promise<DynamicContent[]> {
