@@ -15,6 +15,7 @@ export const RegisterRequestSchema = z.object({
 	 * 包含订阅地址、访问令牌等
 	 */
 	config: UserConfigSchema,
+	superToken: z.string().min(1).optional(),
 });
 
 /**

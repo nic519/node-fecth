@@ -23,7 +23,7 @@ export const GET = withAuth(async () => {
 }, { adminOnly: true });
 
 /// 创建新用户
-export const POST = withAuth(async (request) => {
+export const POST = async (request: Request) => {
   const env = process.env as unknown as Env;
 
   try {
@@ -32,7 +32,12 @@ export const POST = withAuth(async (request) => {
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }
-    const { uid, config } = validationResult.data;
+    const { uid, config, superToken } = validationResult.data;
+
+    const superAdminToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+    if (!superAdminToken || superToken !== superAdminToken) {
+      return ResponseUtils.error(401, 'Unauthorized');
+    }
 
     const db = getDb(env);
     const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
@@ -42,4 +47,4 @@ export const POST = withAuth(async (request) => {
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }
-}, { adminOnly: true });
+};

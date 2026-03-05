@@ -13,10 +13,10 @@ export const adminService = {
 
 	/**
 	 * 添加用户
-	 * POST /api/admin/users?superToken=xxx
+	 * POST /api/admin/users
 	 */
 	addUser: (superToken: string, data: { uid: string; config: UserConfig }) => {
-		return apiClient.post<null>('/admin/users', data, { superToken });
+		return apiClient.post<null>('/admin/users', { ...data, superToken });
 	},
 
 	/**

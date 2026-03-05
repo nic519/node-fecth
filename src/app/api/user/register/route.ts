@@ -16,7 +16,7 @@ export const POST = async (request: Request) => {
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }
-    const { uid, config } = validationResult.data;
+    const { uid, config, superToken } = validationResult.data;
 
     // Get IP address
     const xForwardedFor = request.headers.get('x-forwarded-for');
@@ -31,7 +31,8 @@ export const POST = async (request: Request) => {
     // Note: In some environments process.env might be empty, relying on binding
     // But existing code uses process.env.SUPER_ADMIN_TOKEN
     const superAdminToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
-    const isSuperAdmin = superAdminToken && querySuperToken === superAdminToken;
+    const requestSuperToken = superToken || querySuperToken;
+    const isSuperAdmin = superAdminToken && requestSuperToken === superAdminToken;
 
     const db = getDb(env);
     const logService = createLogService();
