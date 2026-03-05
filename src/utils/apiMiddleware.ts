@@ -1,5 +1,5 @@
 import { ConfigResponse } from '@/types/openapi-schemas';
-import { AuthUtils } from '@/utils/authUtils';
+import { AuthService, AuthTokenUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -23,8 +23,7 @@ interface AuthOptions {
    */
   requiredParams?: string[];
   /**
-   * Perform user authentication using AuthUtils.authenticate
-   * If true, req.auth will be populated with ConfigResponse
+   * Perform user authentication and populate ConfigResponse
    */
   authenticateUser?: boolean;
 }
@@ -37,7 +36,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
     try {
       // 1. Admin Check
       if (options.adminOnly) {
-        if (!AuthUtils.validateSuperToken(request, env)) {
+        if (!AuthTokenUtils.isSuperAdminRequest(request, env)) {
           return ResponseUtils.error(401, 'Unauthorized');
         }
       }
@@ -59,7 +58,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
           return ResponseUtils.error(400, 'Missing uid');
         }
 
-        const userConfig = await AuthUtils.authenticate(request, env, uid);
+        const userConfig = await AuthService.authenticateUserConfig(request, env, uid);
         (request as AuthenticatedRequest).auth = userConfig;
         (request as AuthenticatedRequest).uid = uid;
       }

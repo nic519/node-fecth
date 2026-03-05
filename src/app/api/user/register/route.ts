@@ -6,7 +6,7 @@ import { sql, and, eq } from 'drizzle-orm';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
-import { AuthUtils } from '@/utils/authUtils';
+import { AuthTokenUtils } from '@/utils/authUtils';
 
 export const POST = async (request: Request) => {
   const env = process.env as unknown as Env;
@@ -28,7 +28,7 @@ export const POST = async (request: Request) => {
     const url = new URL(request.url);
     const querySuperToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);
     const requestSuperToken = superToken || querySuperToken;
-    const isSuperAdmin = AuthUtils.validateSuperTokenValue(requestSuperToken, env);
+    const isSuperAdmin = AuthTokenUtils.isValidSuperAdminTokenValue(requestSuperToken, env);
 
     const db = getDb(env);
     const logService = createLogService();
@@ -57,7 +57,7 @@ export const POST = async (request: Request) => {
     }
 
     // Create User
-    const manager = new AdminService(db, AuthUtils.getSuperAdminToken(env));
+    const manager = new AdminService(db, AuthTokenUtils.getSuperAdminToken(env));
     // Use 'public' as adminId for self-registration, or 'admin' if super token used
     await manager.createUser(uid, config, isSuperAdmin ? 'admin' : 'public');
 
