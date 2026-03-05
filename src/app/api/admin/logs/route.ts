@@ -1,47 +1,44 @@
 
 import { createLogService } from '@/services/log-service';
-import { LogLevel } from '@/types/log';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/utils/apiMiddleware';
+import { AdminLogsQuerySchema, ResponseCodes } from '@/types/openapi-schemas';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   const env = process.env as unknown as Env;
   const searchParams = request.nextUrl.searchParams;
-  const superToken = searchParams.get('superToken');
-
-  if (!superToken || superToken !== env.SUPER_ADMIN_TOKEN) {
-    return NextResponse.json({ code: 401, msg: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     const logger = createLogService(env);
-
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '20');
-    const level = searchParams.get('level') as LogLevel | undefined;
-    const type = searchParams.get('type') || undefined;
-    const userId = searchParams.get('userId') || undefined;
-    const startTimeStr = searchParams.get('startTime');
-    const endTimeStr = searchParams.get('endTime');
+    const query = {
+      page: searchParams.get('page') ?? undefined,
+      pageSize: searchParams.get('pageSize') ?? undefined,
+      level: searchParams.get('level') ?? undefined,
+      type: searchParams.get('type') ?? undefined,
+      userId: searchParams.get('userId') ?? undefined,
+      startTime: searchParams.get('startTime') ?? undefined,
+      endTime: searchParams.get('endTime') ?? undefined,
+    };
+    const validationResult = AdminLogsQuerySchema.safeParse(query);
+    if (!validationResult.success) {
+      return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid query parameters', validationResult.error.format());
+    }
+    const { page, pageSize, level, type, userId, startTime, endTime } = validationResult.data;
 
     const result = await logger.queryLogs({
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
+      limit: pageSize ?? 20,
+      offset: ((page ?? 1) - 1) * (pageSize ?? 20),
       level,
       type,
       userId,
-      startTime: startTimeStr ? new Date(startTimeStr) : undefined,
-      endTime: endTimeStr ? new Date(endTimeStr) : undefined,
+      startTime: startTime ? new Date(startTime) : undefined,
+      endTime: endTime ? new Date(endTime) : undefined,
     });
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success',
-      data: result
-    });
+    return ResponseUtils.success(result, 'success');
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);
   }
-}
+}, { adminOnly: true });

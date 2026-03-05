@@ -3,6 +3,8 @@ import { templates } from '@/db/schema';
 import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { desc } from 'drizzle-orm';
+import { ScTemplateCreateReq } from '@/types/schema.template';
+import { ResponseCodes } from '@/types/openapi-schemas';
 
 // GET: 获取模板列表
 export const GET = withAuth(async (request) => {
@@ -25,12 +27,12 @@ export const POST = withAuth(async (request) => {
   const env = process.env as unknown as Env;
 
   try {
-    const body = await request.json() as { name: string; description?: string; content: string };
-    const { name, description, content } = body;
-
-    if (!name || !content) {
-      return ResponseUtils.error(400, 'Missing name or content');
+    const body = await request.json();
+    const validationResult = ScTemplateCreateReq.safeParse(body);
+    if (!validationResult.success) {
+      return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);
     }
+    const { name, description, content } = validationResult.data;
 
     const db = getDb(env);
     const id = crypto.randomUUID();

@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
 import { AdminService } from '@/modules/user/admin.service';
-import { UserConfig } from '@/types/openapi-schemas';
+import { AdminUserCreateRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { withAuth } from '@/utils/apiMiddleware';
 import { getDb } from '@/db';
+import { ResponseUtils } from '@/utils/responseUtils';
 
 /// 获取所有用户信息
 export const GET = withAuth(async () => {
@@ -14,15 +14,11 @@ export const GET = withAuth(async () => {
     const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
     const users = await manager.getUserSummaryList();
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success',
-      data: {
-        users: users
-      }
-    });
+    return ResponseUtils.success({
+      users
+    }, 'success');
   } catch (error: unknown) {
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+    return ResponseUtils.handleApiError(error);
   }
 }, { adminOnly: true });
 
@@ -31,22 +27,19 @@ export const POST = withAuth(async (request) => {
   const env = process.env as unknown as Env;
 
   try {
-    const body = await request.json() as { uid: string; config: UserConfig };
-    const { uid, config } = body;
-
-    if (!uid || !config) {
-      return NextResponse.json({ code: 400, msg: 'Missing uid or config' }, { status: 400 });
+    const body = await request.json();
+    const validationResult = AdminUserCreateRequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }
+    const { uid, config } = validationResult.data;
 
     const db = getDb(env);
     const manager = new AdminService(db, env.SUPER_ADMIN_TOKEN);
     await manager.createUser(uid, config, 'admin'); // 'admin' is hardcoded adminId for now
 
-    return NextResponse.json({
-      code: 0,
-      msg: 'success'
-    });
+    return ResponseUtils.success(null, 'success');
   } catch (error: unknown) {
-    return NextResponse.json({ code: 500, msg: error instanceof Error ? error.message : 'Error' }, { status: 500 });
+    return ResponseUtils.handleApiError(error);
   }
 }, { adminOnly: true });

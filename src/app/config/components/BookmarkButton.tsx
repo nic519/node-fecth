@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bookmark, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,20 +12,19 @@ import {
 import { cn } from '@/lib/utils';
 
 export function BookmarkButton({ className }: { className?: string }) {
-  const [os, setOs] = useState<'mac' | 'win'>('win');
+  const [os] = useState<'mac' | 'win'>(() => {
+    if (typeof window === 'undefined') return 'win';
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ||
+      (navigator.userAgent && navigator.userAgent.includes('Mac'));
+    return isMac ? 'mac' : 'win';
+  });
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [hintText, setHintText] = useState('添加到书签');
   const [isHovered, setIsHovered] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState('#');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ||
-        (navigator.userAgent && navigator.userAgent.includes('Mac'));
-      setOs(isMac ? 'mac' : 'win');
-      setCurrentUrl(window.location.href);
-    }
-  }, []);
+  const [currentUrl] = useState(() => {
+    if (typeof window === 'undefined') return '#';
+    return window.location.href;
+  });
 
   const handleClick = () => {
     const shortcut = os === 'mac' ? '⌘+D' : 'Ctrl+D';

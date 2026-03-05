@@ -17,15 +17,14 @@ interface RegisterSuccessDialogProps {
 }
 
 export function RegisterSuccessDialog({ uid, token }: RegisterSuccessDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showToast } = useToastContext();
+  const [isOpen, setIsOpen] = useState(() => searchParams.get('new') === 'true');
 
   // Detect if user just registered (based on URL param)
   useEffect(() => {
     if (searchParams.get('new') === 'true') {
-      setIsOpen(true);
       // Clean up URL
       const params = new URLSearchParams(searchParams.toString());
       params.delete('new');

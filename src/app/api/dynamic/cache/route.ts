@@ -1,26 +1,21 @@
-import { NextResponse } from 'next/server';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { safeError } from '@/utils/logHelper';
+import { ResponseUtils } from '@/utils/responseUtils';
+import { DynamicCacheRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 
 export const POST = async (request: Request) => {
     try {
-        const { urls } = await request.json() as { urls?: string[] };
-        const validUrls = Array.isArray(urls) ? urls.filter(Boolean) : [];
-
-        if (validUrls.length > 0) {
-            const results = await DynamicService.getSummaryByUrls(validUrls);
-            return NextResponse.json({
-                code: 0,
-                msg: 'success',
-                data: results
-            });
-        } else {
-            return NextResponse.json({ code: 400, msg: 'URLs parameter is required' }, { status: 400 });
+        const body = await request.json();
+        const validationResult = DynamicCacheRequestSchema.safeParse(body);
+        if (!validationResult.success) {
+            return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
         }
+
+        const { urls } = validationResult.data;
+        const results = await DynamicService.getSummaryByUrls(urls);
+        return ResponseUtils.success(results, 'success');
     } catch (error: unknown) {
         console.error('Dynamic cache fetch error:', safeError(error));
-        const message = error instanceof Error ? error.message : 'Internal Server Error';
-        return NextResponse.json({ code: 500, msg: message }, { status: 500 });
+        return ResponseUtils.handleApiError(error);
     }
 };
-

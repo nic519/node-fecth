@@ -1,68 +1,24 @@
-import { z } from 'zod';
-// 从用户模块导入用户相关 Schema
-import {
-	AreaCodeSchema,
-	SubscribeSchema,
-	UserConfigSchema,
-	type IUserConfig,
-} from '@/modules/user/user.schema';
-
 // =============================================================================
-// 基础 Schemas - 作为单一真理源(Single Source of Truth)
+// 统一 Schema 导出
+// 整合所有子模块的 Schema 定义，作为项目的单一真理源 (Single Source of Truth)
 // =============================================================================
 
-// 系统日志 Schema - 新增
-export const SystemLogSchema = z.object({
-	time: z.string(),
-	level: z.enum(['INFO', 'WARN', 'ERROR', 'DEBUG']),
-	message: z.string(),
-});
+// 基础 Schema 和响应码
+export * from './schema/common';
 
-// =============================================================================
-// 响应 Schemas - 统一格式 {code, data, msg}
-// =============================================================================
+// 认证相关 Schema (注册等)
+export * from './schema/auth';
 
-// 响应代码常量
-export const ResponseCodes = {
-	SUCCESS: 0,
-	INVALID_PARAMS: 400,
-	UNAUTHORIZED: 401,
-	FORBIDDEN: 403,
-	NOT_FOUND: 404,
-	CONFLICT: 409,
-	FORMAT_ERROR: 422,
-	INTERNAL_ERROR: 500,
-} as const;
+// 动态同步相关 Schema
+export * from './schema/dynamic';
 
-// 用户列表响应 Schema
-export const UsersListResponseSchema = z.object({
-	code: z.literal(ResponseCodes.SUCCESS),
-	msg: z.string(),
-	data: z.object({
-		users: z.array(UserConfigSchema),
-		count: z.number(),
-		timestamp: z.string(),
-	}),
-});
+// 管理员相关 Schema (用户管理、日志查询)
+export * from './schema/admin';
 
+// 用户响应相关 Schema
+export * from './schema/user-response';
 
-// =============================================================================
-// 请求参数 Schemas
-// =============================================================================
-
-export const TokenQuerySchema = z.object({
-	token: z.string().min(1, '令牌不能为空'),
-});
-
-export const SuperTokenQuerySchema = z.object({
-	superToken: z.string().min(1, '超级管理员令牌不能为空'),
-});
-
-// =============================================================================
-// 导出所有TypeScript类型 - 作为单一真理源
-// =============================================================================
-
-// 从用户模块导出用户相关类型
+// 从用户模块导出用户相关类型 (保持兼容性)
 export {
 	AreaCodeSchema,
 	SubscribeSchema as SubConfigSchema,
@@ -71,13 +27,13 @@ export {
 	type TrafficInfo,
 } from '@/modules/user/user.schema';
 
+import { z } from 'zod';
+import { AreaCodeSchema, SubscribeSchema } from '@/modules/user/user.schema';
+import { IUserConfig } from '@/modules/user/user.schema';
+
+// 导出基础类型的 TypeScript 定义
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
 export type SubConfig = z.infer<typeof SubscribeSchema>;
-export type SystemLog = z.infer<typeof SystemLogSchema>;
 
-// 导出响应代码类型
-export type ResponseCode = (typeof ResponseCodes)[keyof typeof ResponseCodes];
-
-// 导出响应类型
-export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
+// 导出用户配置响应类型 (别名)
 export type ConfigResponse = IUserConfig;

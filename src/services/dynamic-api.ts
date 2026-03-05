@@ -1,11 +1,7 @@
 import { apiClient } from './api-client';
+import type { DynamicSummary } from '@/types/openapi-schemas';
 
-export interface DynamicInfo {
-    id: string;
-    url: string;
-    traffic: string | null;
-    updatedAt: string;
-}
+export type DynamicInfo = DynamicSummary;
 
 export const dynamicService = {
     syncUrls: (urls: string[]) => {

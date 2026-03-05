@@ -9,6 +9,7 @@ import { inArray } from 'drizzle-orm';
 
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
 import { CommonUtils } from '@/utils/commonUtils';
+import type { DynamicSummary } from '@/types/openapi-schemas';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -159,7 +160,7 @@ export class DynamicService {
 	/**
 	 * Get multiple contents by URLs
 	 */
-	static async getSummaryByUrls(urls: string[]): Promise<DynamicContent[]> {
+	static async getSummaryByUrls(urls: string[]): Promise<DynamicSummary[]> {
 		try {
 			// 构造查询集合：包含原始 URL 和清理后的 URL
 			const searchUrls = new Set<string>();
