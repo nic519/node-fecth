@@ -25,17 +25,23 @@ export class AuthUtils {
 		return null;
 	}
 
+	static getSuperAdminToken(env: Env): string | undefined {
+		return (process.env as { SUPER_ADMIN_TOKEN?: string }).SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+	}
+
+	static validateSuperTokenValue(superToken: string | null | undefined, env: Env): boolean {
+		const envSuperToken = this.getSuperAdminToken(env);
+		return !!(superToken && envSuperToken && superToken === envSuperToken);
+	}
+
 	/**
 	 * 验证 Super Admin Token
 	 */
 	static validateSuperToken(request: Request, env: Env): boolean {
 		const url = new URL(request.url);
 		const superToken = url.searchParams.get('superToken');
-		// 注意：OpenNext 中 process.env.SUPER_ADMIN_TOKEN 优于 env.SUPER_ADMIN_TOKEN
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const envSuperToken = (process.env as any).SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
 
-		return !!(superToken && envSuperToken && superToken === envSuperToken);
+		return this.validateSuperTokenValue(superToken, env);
 	}
 
 	/**

@@ -16,7 +16,7 @@ export const adminService = {
 	 * POST /api/admin/users
 	 */
 	addUser: (superToken: string, data: { uid: string; config: UserConfig }) => {
-		return apiClient.post<null>('/admin/users', { ...data, superToken });
+		return apiClient.post<null>('/admin/users', data, { superToken });
 	},
 
 	/**

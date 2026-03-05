@@ -6,6 +6,7 @@ import { sql, and, eq } from 'drizzle-orm';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
+import { AuthUtils } from '@/utils/authUtils';
 
 export const POST = async (request: Request) => {
   const env = process.env as unknown as Env;
@@ -26,13 +27,8 @@ export const POST = async (request: Request) => {
     // Check for Super Token (Bypass limit)
     const url = new URL(request.url);
     const querySuperToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);
-    // Also check body or headers if needed, but standard is usually query or header
-    // Using simple check against env
-    // Note: In some environments process.env might be empty, relying on binding
-    // But existing code uses process.env.SUPER_ADMIN_TOKEN
-    const superAdminToken = process.env.SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
     const requestSuperToken = superToken || querySuperToken;
-    const isSuperAdmin = superAdminToken && requestSuperToken === superAdminToken;
+    const isSuperAdmin = AuthUtils.validateSuperTokenValue(requestSuperToken, env);
 
     const db = getDb(env);
     const logService = createLogService();
@@ -61,7 +57,7 @@ export const POST = async (request: Request) => {
     }
 
     // Create User
-    const manager = new AdminService(db, superAdminToken);
+    const manager = new AdminService(db, AuthUtils.getSuperAdminToken(env));
     // Use 'public' as adminId for self-registration, or 'admin' if super token used
     await manager.createUser(uid, config, isSuperAdmin ? 'admin' : 'public');
 
