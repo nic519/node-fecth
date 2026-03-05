@@ -1,5 +1,5 @@
 import { AdminService } from '@/modules/user/admin.service';
-import { AdminUserCreateRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { withAuth } from '@/utils/apiMiddleware';
 import { getDb } from '@/db';
 import { ResponseUtils } from '@/utils/responseUtils';
@@ -28,7 +28,7 @@ export const POST = withAuth(async (request) => {
 
   try {
     const body = await request.json();
-    const validationResult = AdminUserCreateRequestSchema.safeParse(body);
+    const validationResult = RegisterRequestSchema.safeParse(body);
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }

@@ -5,6 +5,7 @@ import { logs } from '@/db/schema';
 import { sql, and, eq } from 'drizzle-orm';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
+import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
 
 export const POST = async (request: Request) => {
   const env = process.env as unknown as Env;
@@ -24,7 +25,7 @@ export const POST = async (request: Request) => {
 
     // Check for Super Token (Bypass limit)
     const url = new URL(request.url);
-    const querySuperToken = url.searchParams.get('superToken');
+    const querySuperToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);
     // Also check body or headers if needed, but standard is usually query or header
     // Using simple check against env
     // Note: In some environments process.env might be empty, relying on binding

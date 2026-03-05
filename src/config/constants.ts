@@ -13,3 +13,5 @@ export const DEFAULT_RULE_URL = process.env.NODE_ENV === 'development' ? DEV_RUL
 
 /// 推广订阅注册链接
 export const PROMO_URL = 'https://i03.1ytaff.com/register?aff=bYJ44TS8';
+
+export const SUPER_TOKEN_QUERY_PARAM = 'superToken';
