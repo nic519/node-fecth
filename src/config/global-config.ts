@@ -13,7 +13,8 @@ export const ProxyConfig = {
 	 * 需要走代理的目标域名列表
 	 */
 	targetDomains: [
-		'liangxin.xyz'
+		'liangxin.xyz',
+		'1ytsub.com'
 	],
 
 	/**
