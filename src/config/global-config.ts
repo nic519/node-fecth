@@ -14,7 +14,8 @@ export const ProxyConfig = {
 	 */
 	targetDomains: [
 		'liangxin.xyz',
-		'1ytsub.com'
+		'1ytsub.com',
+		'bigmelook.com'
 	],
 
 	/**
