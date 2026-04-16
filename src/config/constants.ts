@@ -12,6 +12,6 @@ const PROD_RULE_URL = 'https://node.1024.hair/api/subscription/template/3c779cd5
 export const DEFAULT_RULE_URL = process.env.NODE_ENV === 'development' ? DEV_RULE_URL : PROD_RULE_URL;
 
 /// 推广订阅注册链接
-export const PROMO_URL = 'https://i03.1ytaff.com/register?aff=bYJ44TS8';
+export const PROMO_URL = 'https://xn--9kqz23b19z.com/#/register?code=PI0eDXNf';
 
 export const SUPER_TOKEN_QUERY_PARAM = 'superToken';
