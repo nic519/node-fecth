@@ -1,38 +1,17 @@
 import { defineConfig } from 'drizzle-kit';
+import * as dotenv from 'dotenv';
 
-/**
- * Drizzle Kit 配置 - 推荐方案
- *
- * 最佳实践：
- * 1. 本地开发：使用独立的稳定 SQLite 文件
- * 2. 生产环境：使用 Cloudflare D1 HTTP API
- * 3. Drizzle Studio 连接独立文件，不依赖 Wrangler 运行时
- */
-
-const isProduction = process.env.NODE_ENV === 'production';
+// 加载 .dev.vars 文件中的环境变量
+dotenv.config({ path: '.dev.vars' });
 
 export default defineConfig({
 	schema: './src/db/schema.ts',
 	out: './drizzle',
-	dialect: 'sqlite',
-
-	...(isProduction
-		? {
-			// 生产环境：使用 D1 HTTP API
-			driver: 'd1-http' as const,
-			dbCredentials: {
-				accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
-				databaseId: process.env.CLOUDFLARE_DATABASE_ID!,
-				token: process.env.CLOUDFLARE_D1_TOKEN!,
-			},
-		}
-		: {
-			// 开发环境：使用独立的本地文件（不依赖 Wrangler）
-			dbCredentials: {
-				url: '.wrangler/state/v3/d1/miniflare-D1DatabaseObject/4177397522330b0ecc63f8d05c202d6aa6790575b55e4ab4250a5029b2fd1b10.sqlite',
-			},
-		}),
-
+	dialect: 'turso',
+	dbCredentials: {
+		url: process.env.TURSO_DATABASE_URL!,
+		authToken: process.env.TURSO_AUTH_TOKEN,
+	},
 	verbose: true,
 	strict: true,
 });

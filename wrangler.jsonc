@@ -8,14 +8,6 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "node-fetch-db",
-      "database_id": "7b3a5b77-a944-42e8-a822-614840ff97f9",
-      "migrations_dir": "drizzle"
-    }
-  ],
   "observability": {
     "logs": {
       "enabled": true
