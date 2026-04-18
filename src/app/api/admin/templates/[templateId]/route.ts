@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb, getRuntimeEnv } from '@/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ScTemplateCreateReq } from '@/types/schema.template';
@@ -8,7 +8,7 @@ import { withAuth } from '@/utils/apiMiddleware';
 
 // PUT: 更新模板
 export const PUT = withAuth(async (request, { params }) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const { templateId } = await params;
 
   try {
@@ -46,7 +46,7 @@ export const PUT = withAuth(async (request, { params }) => {
 
 // DELETE: 删除模板
 export const DELETE = withAuth(async (_, { params }) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const { templateId } = await params;
 
   try {

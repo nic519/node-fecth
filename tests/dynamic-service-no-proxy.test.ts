@@ -3,14 +3,8 @@ import { afterEach, beforeEach, expect, mock, test } from "bun:test";
 import { DynamicService } from "../src/modules/dynamic/dynamic.service";
 import { httpClient } from "../src/utils/http/client";
 
-type DynamicServiceWithDb = typeof DynamicService & {
-	db: {
-		insert: () => {
-			values: () => {
-				onConflictDoUpdate: () => Promise<void>;
-			};
-		};
-	};
+type DynamicServiceWithDb = {
+	db: unknown;
 };
 
 const dynamicServiceWithDb = DynamicService as unknown as DynamicServiceWithDb;

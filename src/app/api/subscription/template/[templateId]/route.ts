@@ -1,3 +1,4 @@
+import { getRuntimeEnv } from '@/db';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
@@ -7,14 +8,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const { templateId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const download = searchParams.get('download');
   const filename = searchParams.get('filename');
 
   try {
-    const crud = new BaseCRUD<Template>(env as unknown as Env, templates);
+    const crud = new BaseCRUD<Template>(env, templates);
     const template = await crud.selectById(templateId);
 
     if (!template) {

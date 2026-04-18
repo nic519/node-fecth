@@ -20,7 +20,7 @@ export class BaseCRUD<T extends { id: string; createdAt: string; updatedAt: stri
 	protected db;
 
 	constructor(
-		protected env: Env,
+		protected env: Env | undefined,
 		protected table: any // Drizzle table schema
 	) {
 		this.db = getDb(env);

@@ -1,3 +1,4 @@
+import { getRuntimeEnv } from '@/db';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
 import { withAuth, type AuthenticatedRequest } from '@/utils/apiMiddleware';
@@ -5,7 +6,7 @@ import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
 
 export const GET = withAuth(async (request: AuthenticatedRequest) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const logger = createLogService(env);
   const uid = request.uid;
 
@@ -30,7 +31,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
     });
 
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env as unknown as Env, { userConfig: authConfig, uid });
+    const response = await clashHandler.handle(request as unknown as Request, env, { userConfig: authConfig, uid });
 
     if (!response) {
       return ResponseUtils.error(500, '配置生成失败');

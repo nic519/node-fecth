@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb, getRuntimeEnv } from '@/db';
 import { templates } from '@/db/schema';
 import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
@@ -8,7 +8,7 @@ import { ResponseCodes } from '@/types/openapi-schemas';
 
 // GET: 获取模板列表
 export const GET = withAuth(async (request) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
 
   try {
     const db = getDb(env);
@@ -24,7 +24,7 @@ export const GET = withAuth(async (request) => {
 
 // POST: 创建模板
 export const POST = withAuth(async (request) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
 
   try {
     const body = await request.json();

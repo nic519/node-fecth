@@ -33,7 +33,7 @@ export class ClashHandler implements RouteHandler {
 		return headers;
 	}
 
-	async handle(request: Request, env: Env, params?: Record<string, any>): Promise<Response | null> {
+	async handle(request: Request, env?: Env, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
 		const userConfig: UserConfig = params!.userConfig;
 		const uid = params?.uid || url.searchParams.get('uid');

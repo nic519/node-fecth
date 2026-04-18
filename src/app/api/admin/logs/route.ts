@@ -1,4 +1,4 @@
-
+import { getRuntimeEnv } from '@/db';
 import { createLogService } from '@/services/log-service';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { withAuth } from '@/utils/apiMiddleware';
@@ -7,7 +7,7 @@ import { AdminLogsQuerySchema, ResponseCodes } from '@/types/openapi-schemas';
 export const runtime = 'nodejs';
 
 export const GET = withAuth(async (request) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const searchParams = request.nextUrl.searchParams;
 
   try {

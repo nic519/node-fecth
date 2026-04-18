@@ -102,12 +102,13 @@ export class LogService {
     }
 
     // 获取数据
-    let dataQuery = this.db.select().from(logs);
-    if (whereClause) {
-      dataQuery = dataQuery.where(whereClause);
-    }
-
-    const data = await dataQuery.orderBy(desc(logs.createdAt)).limit(limit).offset(offset);
+    const data = await this.db
+      .select()
+      .from(logs)
+      .where(whereClause)
+      .orderBy(desc(logs.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     return {
       data,

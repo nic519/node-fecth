@@ -2,7 +2,7 @@ import { UserService } from '@/modules/user/user.service';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ScUserUpdateReq } from '@/modules/user/user.schema';
 import { withAuth } from '@/utils/apiMiddleware';
-import { getDb } from '@/db';
+import { getDb, getRuntimeEnv } from '@/db';
 
 // GET: 获取用户配置
 export const GET = withAuth(async (request) => {
@@ -11,7 +11,7 @@ export const GET = withAuth(async (request) => {
 
 // PUT: 更新用户配置
 export const PUT = withAuth(async (request) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
   const uid = request.uid!;
 
   try {

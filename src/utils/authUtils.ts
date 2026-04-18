@@ -1,6 +1,6 @@
 import { ConfigResponse } from '@/types/openapi-schemas';
 import { UserService } from '@/modules/user/user.service';
-import { getDb } from '@/db';
+import { getDb, getRuntimeEnv } from '@/db';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
 
 export class AuthTokenUtils {
@@ -17,16 +17,17 @@ export class AuthTokenUtils {
 		return null;
 	}
 
-	static getSuperAdminToken(env: Env): string | undefined {
-		return (process.env as { SUPER_ADMIN_TOKEN?: string }).SUPER_ADMIN_TOKEN || env.SUPER_ADMIN_TOKEN;
+	static getSuperAdminToken(env?: Env): string | undefined {
+		const runtimeEnv = getRuntimeEnv(env);
+		return runtimeEnv?.SUPER_ADMIN_TOKEN;
 	}
 
-	static isValidSuperAdminTokenValue(superToken: string | null | undefined, env: Env): boolean {
+	static isValidSuperAdminTokenValue(superToken: string | null | undefined, env?: Env): boolean {
 		const envSuperToken = this.getSuperAdminToken(env);
 		return !!(superToken && envSuperToken && superToken === envSuperToken);
 	}
 
-	static isSuperAdminRequest(request: Request, env: Env): boolean {
+	static isSuperAdminRequest(request: Request, env?: Env): boolean {
 		const url = new URL(request.url);
 		const superToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);
 		return this.isValidSuperAdminTokenValue(superToken, env);
@@ -34,7 +35,7 @@ export class AuthTokenUtils {
 }
 
 export class AuthService {
-	static async authenticateUserConfig(request: Request, env: Env, uid: string): Promise<ConfigResponse> {
+	static async authenticateUserConfig(request: Request, env: Env | undefined, uid: string): Promise<ConfigResponse> {
 		const db = getDb(env);
 		const userService = new UserService(db);
 

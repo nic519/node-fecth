@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb, getRuntimeEnv } from '@/db';
 import { AdminService } from '@/modules/user/admin.service';
 import { createLogService } from '@/services/log-service';
 import { logs } from '@/db/schema';
@@ -9,7 +9,7 @@ import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
 import { AuthTokenUtils } from '@/utils/authUtils';
 
 export const POST = async (request: Request) => {
-  const env = process.env as unknown as Env;
+  const env = getRuntimeEnv();
 
   try {
     const body = await request.json();

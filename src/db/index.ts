@@ -5,6 +5,11 @@ import * as schema from './schema';
 
 export function getRuntimeEnv(env?: Env): Env | undefined {
   if (env) return env;
+
+  if (process.env.TURSO_DATABASE_URL || process.env.SUPER_ADMIN_TOKEN || process.env.TURSO_AUTH_TOKEN) {
+    return process.env as unknown as Env;
+  }
+
   const context = (globalThis as any)[Symbol.for('__cloudflare-context__')];
   return context?.env;
 }

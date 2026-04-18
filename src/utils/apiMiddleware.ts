@@ -1,4 +1,5 @@
 import { ConfigResponse } from '@/types/openapi-schemas';
+import { getRuntimeEnv } from '@/db';
 import { AuthService, AuthTokenUtils } from '@/utils/authUtils';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest, NextResponse } from 'next/server';
@@ -30,7 +31,7 @@ interface AuthOptions {
 
 export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
   return async (request: NextRequest, context: { params: Promise<Record<string, string>> }) => {
-    const env = process.env as unknown as Env;
+    const env = getRuntimeEnv();
     const searchParams = request.nextUrl.searchParams;
 
     try {
