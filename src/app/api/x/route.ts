@@ -1,13 +1,11 @@
-import { getRuntimeEnv } from '@/db';
+import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
 import { withAuth, type AuthenticatedRequest } from '@/utils/apiMiddleware';
-import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
 
 export const GET = withAuth(async (request: AuthenticatedRequest) => {
-  const env = getRuntimeEnv();
-  const logger = createLogService(env);
+  const { logService } = createServerServices();
   const uid = request.uid;
 
   try {
@@ -17,7 +15,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
       return ResponseUtils.error(500, '用户配置加载失败');
     }
 
-    void logger.log({
+    void logService.log({
       level: 'info',
       type: LogType.SUBSCRIPTION_ACCESS,
       message: '用户访问订阅配置',
@@ -31,7 +29,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
     });
 
     const clashHandler = new ClashHandler();
-    const response = await clashHandler.handle(request as unknown as Request, env, { userConfig: authConfig, uid });
+    const response = await clashHandler.handle(request as unknown as Request, { userConfig: authConfig, uid });
 
     if (!response) {
       return ResponseUtils.error(500, '配置生成失败');
@@ -39,7 +37,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
 
     return response;
   } catch (error: unknown) {
-    void logger.log({
+    void logService.log({
       level: 'error',
       type: LogType.SUBSCRIPTION_ACCESS,
       message: '订阅配置生成失败',

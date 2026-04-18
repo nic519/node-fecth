@@ -1,4 +1,5 @@
-import { getDb } from '@/db';
+import type { DbInstance } from '@/server/db';
+import { getServerDb } from '@/server/db';
 import { logs, NewLog } from '@/db/schema';
 import { desc, eq, and, sql, count } from 'drizzle-orm';
 import { LogLevel } from '@/types/log';
@@ -13,11 +14,7 @@ export interface LogEventParams {
 }
 
 export class LogService {
-  private db;
-
-  constructor(env?: Env) {
-    this.db = getDb(env);
-  }
+  constructor(private db: DbInstance) { }
 
   /**
    * 记录一条日志
@@ -135,4 +132,4 @@ export class LogService {
 }
 
 // Export a factory function
-export const createLogService = (env?: Env) => new LogService(env);
+export const createLogService = (db?: DbInstance) => new LogService(db ?? getServerDb());

@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getServerDb } from '@/server/db';
 import { dynamic } from '@/db/schema';
 import { formatDate } from '@/utils/dateUtils';
 import { hashUrl } from '@/utils/hashUtils';
@@ -22,7 +22,7 @@ export interface DynamicContent {
 }
 
 export class DynamicService {
-	private static db = getDb();
+	private static db = getServerDb();
 
 	/**
 	 * Fetch content from source URL and save to database

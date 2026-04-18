@@ -19,7 +19,7 @@
 
 - Next.js App Router（Next 16）+ React 19 + TypeScript
 - Tailwind CSS 4 + shadcn/ui（Radix UI 组件体系）
-- Drizzle ORM + Cloudflare D1（SQLite）
+- Drizzle ORM + Turso / libSQL（SQLite）
 - OpenNext（Cloudflare Workers/Pages 部署）
 - ky（HTTP 客户端）+ zod（配置校验）+ Monaco Editor（配置编辑）
 
@@ -31,7 +31,7 @@
 
 - 前端：Next.js App Router 页面与组件，负责订阅配置与管理界面
 - 后端：Next.js Route Handlers（/api/*），提供用户配置、模板与管理接口
-- 数据层：Drizzle ORM 统一访问 D1/SQLite，支持本地开发与生产环境
+- 数据层：Drizzle ORM 统一访问 Turso / libSQL，支持本地开发、Vercel 与 Cloudflare
 
 ### 核心模块
 
@@ -58,10 +58,12 @@ bun install
 
 ### 2) 配置环境变量
 
-创建 `.dev.vars`，至少包含超级管理员令牌：
+创建 `.env.local`，至少包含以下环境变量：
 
 ```bash
 SUPER_ADMIN_TOKEN="your-super-token"
+TURSO_DATABASE_URL="libsql://your-database.turso.io"
+TURSO_AUTH_TOKEN="your-turso-token"
 ```
 
 ### 3) 本地开发
@@ -77,10 +79,18 @@ npm run db:generate
 npm run db:push
 ```
 
-### 5) 预览与部署（Cloudflare）
+### 5) 部署
+
+Vercel:
 
 ```bash
-npm dev
+npm run build
+```
+
+Cloudflare:
+
+```bash
+npm run preview
 npm run deploy
 ```
 
@@ -90,4 +100,3 @@ npm run deploy
 
 - 管理后台：`/admin/dashboard?superToken=YOUR_TOKEN`
 - 用户配置页：`/config?uid=USER_ID&token=USER_TOKEN`
-

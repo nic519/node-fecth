@@ -4,9 +4,14 @@ import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schem
 import { TrafficInfo, type IUserConfig } from './user.schema';
 import { UserService } from './user.service';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
-import { DbInstance } from '@/db';
-import { createLogService, LogService } from '@/services/log-service';
+import type { DbInstance } from '@/server/db';
+import { LogService } from '@/services/log-service';
 import { LogLevel } from '@/types/log';
+
+interface AdminServiceDeps {
+	logService?: LogService;
+	userService?: UserService;
+}
 
 export class AdminService {
 	private userService: UserService;
@@ -14,10 +19,11 @@ export class AdminService {
 
 	constructor(
 		private db: DbInstance,
-		private superAdminToken: string | undefined
+		private superAdminToken: string | undefined,
+		deps: AdminServiceDeps = {},
 	) {
-		this.userService = new UserService(db);
-		this.logService = createLogService();
+		this.userService = deps.userService ?? new UserService(db);
+		this.logService = deps.logService ?? new LogService(db);
 	}
 
 	/**

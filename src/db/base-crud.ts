@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getDb } from '@/db';
 import { eq } from 'drizzle-orm';
+import type { DbInstance } from '@/server/db';
 
 /**
  * 通用 CRUD 基类 - Supabase 风格
@@ -17,14 +17,10 @@ import { eq } from 'drizzle-orm';
  * ```
  */
 export class BaseCRUD<T extends { id: string; createdAt: string; updatedAt: string }> {
-	protected db;
-
 	constructor(
-		protected env: Env | undefined,
+		protected db: DbInstance,
 		protected table: any // Drizzle table schema
-	) {
-		this.db = getDb(env);
-	}
+	) { }
 
 	/**
 	 * 🔍 查询所有记录

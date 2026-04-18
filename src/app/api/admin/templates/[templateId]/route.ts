@@ -1,4 +1,4 @@
-import { getDb, getRuntimeEnv } from '@/db';
+import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ScTemplateCreateReq } from '@/types/schema.template';
@@ -8,7 +8,6 @@ import { withAuth } from '@/utils/apiMiddleware';
 
 // PUT: 更新模板
 export const PUT = withAuth(async (request, { params }) => {
-  const env = getRuntimeEnv();
   const { templateId } = await params;
 
   try {
@@ -21,7 +20,7 @@ export const PUT = withAuth(async (request, { params }) => {
 
     const { name, description, content } = validationResult.data;
 
-    const db = getDb(env);
+    const db = getServerDb();
     const now = new Date().toISOString();
 
     await db.update(templates)
@@ -46,11 +45,10 @@ export const PUT = withAuth(async (request, { params }) => {
 
 // DELETE: 删除模板
 export const DELETE = withAuth(async (_, { params }) => {
-  const env = getRuntimeEnv();
   const { templateId } = await params;
 
   try {
-    const db = getDb(env);
+    const db = getServerDb();
     await db.delete(templates).where(eq(templates.id, templateId)).execute();
 
     return ResponseUtils.success(null);

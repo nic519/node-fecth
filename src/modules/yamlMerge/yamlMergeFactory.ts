@@ -1,5 +1,5 @@
 import { appConfig } from '@/config/global-config';
-import { getRuntimeEnv } from '@/db';
+import { getServerDb } from '@/server/db';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
 import { PreMergeInfo } from '@/modules/yamlMerge/clash-merge.types';
@@ -12,6 +12,7 @@ import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import yaml from 'js-yaml';
 import { StrategyMultiSub } from './strategyMultiSub';
 import { DEFAULT_RULE_URL } from '@/config/constants';
+import { resolveRuntimeEnv } from '@/server/runtime';
 
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
@@ -62,12 +63,8 @@ export class YamlMergeFactory {
 
 	private async getTemplateFromDB(templateId: string): Promise<string> {
 		try {
-			const env = this.runtimeOptions.env || getRuntimeEnv();
-			if (!env) {
-				throw new Error('环境变量未初始化');
-			}
-
-			const crud = new BaseCRUD<Template>(env, templates);
+			const env = this.runtimeOptions.env ?? resolveRuntimeEnv();
+			const crud = new BaseCRUD<Template>(getServerDb(env), templates);
 			const template = await crud.selectById(templateId);
 
 			if (!template) {

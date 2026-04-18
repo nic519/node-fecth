@@ -1,6 +1,5 @@
 import { ConfigResponse } from '@/types/openapi-schemas';
-import { getRuntimeEnv } from '@/db';
-import { AuthService, AuthTokenUtils } from '@/utils/authUtils';
+import { authenticateUserConfig, isSuperAdminRequest } from '@/server/auth';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -31,13 +30,12 @@ interface AuthOptions {
 
 export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
   return async (request: NextRequest, context: { params: Promise<Record<string, string>> }) => {
-    const env = getRuntimeEnv();
     const searchParams = request.nextUrl.searchParams;
 
     try {
       // 1. Admin Check
       if (options.adminOnly) {
-        if (!AuthTokenUtils.isSuperAdminRequest(request, env)) {
+        if (!isSuperAdminRequest(request)) {
           return ResponseUtils.error(401, 'Unauthorized');
         }
       }
@@ -59,7 +57,7 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
           return ResponseUtils.error(400, 'Missing uid');
         }
 
-        const userConfig = await AuthService.authenticateUserConfig(request, env, uid);
+        const userConfig = await authenticateUserConfig(request, uid);
         (request as AuthenticatedRequest).auth = userConfig;
         (request as AuthenticatedRequest).uid = uid;
       }

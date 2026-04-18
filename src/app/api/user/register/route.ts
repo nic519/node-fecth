@@ -1,16 +1,13 @@
-import { getDb, getRuntimeEnv } from '@/db';
-import { AdminService } from '@/modules/user/admin.service';
-import { createLogService } from '@/services/log-service';
+import { createServerServices } from '@/server/services';
+import { getSuperAdminToken, resolveRuntimeEnv } from '@/server/runtime';
+import { isValidSuperAdminTokenValue } from '@/server/auth';
 import { logs } from '@/db/schema';
 import { sql, and, eq } from 'drizzle-orm';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
-import { AuthTokenUtils } from '@/utils/authUtils';
 
 export const POST = async (request: Request) => {
-  const env = getRuntimeEnv();
-
   try {
     const body = await request.json();
     const validationResult = RegisterRequestSchema.safeParse(body);
@@ -28,10 +25,10 @@ export const POST = async (request: Request) => {
     const url = new URL(request.url);
     const querySuperToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);
     const requestSuperToken = superToken || querySuperToken;
-    const isSuperAdmin = AuthTokenUtils.isValidSuperAdminTokenValue(requestSuperToken, env);
+    const runtimeEnv = resolveRuntimeEnv();
+    const isSuperAdmin = isValidSuperAdminTokenValue(requestSuperToken, runtimeEnv);
 
-    const db = getDb(env);
-    const logService = createLogService();
+    const { adminService, db, logService } = createServerServices(runtimeEnv);
 
     if (!isSuperAdmin) {
       // Rate Limit Check
@@ -57,9 +54,7 @@ export const POST = async (request: Request) => {
     }
 
     // Create User
-    const manager = new AdminService(db, AuthTokenUtils.getSuperAdminToken(env));
-    // Use 'public' as adminId for self-registration, or 'admin' if super token used
-    await manager.createUser(uid, config, isSuperAdmin ? 'admin' : 'public');
+    await adminService.createUser(uid, config, isSuperAdmin ? 'admin' : 'public');
 
     // Log the public registration for rate limiting
     if (!isSuperAdmin) {

@@ -1,4 +1,4 @@
-import { DbInstance } from '@/db';
+import type { DbInstance } from '@/server/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { UserConfigSchema, type IUserConfig } from './user.schema';

@@ -1,17 +1,14 @@
-import { getRuntimeEnv } from '@/db';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
 import { AuthenticatedRequest, withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
 
 export const GET = withAuth(async (request: AuthenticatedRequest) => {
-  const env = getRuntimeEnv();
   const { auth: userConfig, uid } = request;
 
   try {
     const clashHandler = new ClashHandler();
     const response = await clashHandler.handle(
       request as unknown as Request,
-      env,
       { userConfig: userConfig!, uid: uid! }
     );
 

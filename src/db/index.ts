@@ -1,52 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import * as schema from './schema';
-
-export function getRuntimeEnv(env?: Env): Env | undefined {
-  if (env) return env;
-
-  if (process.env.TURSO_DATABASE_URL || process.env.SUPER_ADMIN_TOKEN || process.env.TURSO_AUTH_TOKEN) {
-    return process.env as unknown as Env;
-  }
-
-  const context = (globalThis as any)[Symbol.for('__cloudflare-context__')];
-  return context?.env;
-}
-
-function getEnvVar(key: string, envOrNull?: any): string | undefined {
-  // 1. Try passed env
-  if (envOrNull && envOrNull[key]) return envOrNull[key];
-
-  // 2. Try global context
-  const context = (globalThis as any)[Symbol.for('__cloudflare-context__')];
-  if (context?.env?.[key]) return context.env[key];
-
-  // 3. Try process.env
-  if (process.env[key]) return process.env[key];
-
-  return undefined;
-}
-
-export function getDb(envOrNull?: any) {
-  const url = getEnvVar('TURSO_DATABASE_URL', envOrNull);
-  const authToken = getEnvVar('TURSO_AUTH_TOKEN', envOrNull);
-
-  if (!url) {
-    console.warn('WARN: TURSO_DATABASE_URL not found. Database operations will fail.');
-    // Return a dummy client to avoid crash during build
-    const dummyClient = createClient({ url: 'file::memory:' });
-    return drizzle(dummyClient, { schema });
-  }
-
-  const client = createClient({
-    url,
-    authToken,
-  });
-
-  return drizzle(client, { schema });
-}
-
-export type DbInstance = ReturnType<typeof getDb>;
+// Compatibility barrel for legacy imports.
+// Prefer importing from `@/server/db` or `@/server/runtime` in new server code.
+export { getServerDb as getDb, type DbInstance } from '@/server/db';
+export { resolveRuntimeEnv as getRuntimeEnv } from '@/server/runtime';
 export * from './schema';
 export { BaseCRUD } from './base-crud';

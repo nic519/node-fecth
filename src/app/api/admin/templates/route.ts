@@ -1,4 +1,4 @@
-import { getDb, getRuntimeEnv } from '@/db';
+import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
 import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
@@ -8,10 +8,8 @@ import { ResponseCodes } from '@/types/openapi-schemas';
 
 // GET: 获取模板列表
 export const GET = withAuth(async (request) => {
-  const env = getRuntimeEnv();
-
   try {
-    const db = getDb(env);
+    const db = getServerDb();
     const result = await db.select().from(templates).orderBy(desc(templates.createdAt)).all();
 
     return ResponseUtils.success({
@@ -24,8 +22,6 @@ export const GET = withAuth(async (request) => {
 
 // POST: 创建模板
 export const POST = withAuth(async (request) => {
-  const env = getRuntimeEnv();
-
   try {
     const body = await request.json();
     const validationResult = ScTemplateCreateReq.safeParse(body);
@@ -34,7 +30,7 @@ export const POST = withAuth(async (request) => {
     }
     const { name, description, content } = validationResult.data;
 
-    const db = getDb(env);
+    const db = getServerDb();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
 

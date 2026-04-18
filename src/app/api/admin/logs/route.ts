@@ -1,5 +1,4 @@
-import { getRuntimeEnv } from '@/db';
-import { createLogService } from '@/services/log-service';
+import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { withAuth } from '@/utils/apiMiddleware';
 import { AdminLogsQuerySchema, ResponseCodes } from '@/types/openapi-schemas';
@@ -7,11 +6,10 @@ import { AdminLogsQuerySchema, ResponseCodes } from '@/types/openapi-schemas';
 export const runtime = 'nodejs';
 
 export const GET = withAuth(async (request) => {
-  const env = getRuntimeEnv();
   const searchParams = request.nextUrl.searchParams;
 
   try {
-    const logger = createLogService(env);
+    const { logService } = createServerServices();
     const query = {
       page: searchParams.get('page') ?? undefined,
       pageSize: searchParams.get('pageSize') ?? undefined,
@@ -27,7 +25,7 @@ export const GET = withAuth(async (request) => {
     }
     const { page, pageSize, level, type, userId, startTime, endTime } = validationResult.data;
 
-    const result = await logger.queryLogs({
+    const result = await logService.queryLogs({
       limit: pageSize ?? 20,
       offset: ((page ?? 1) - 1) * (pageSize ?? 20),
       level,

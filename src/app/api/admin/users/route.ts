@@ -1,18 +1,14 @@
 import { AdminService } from '@/modules/user/admin.service';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { createServerServices } from '@/server/services';
 import { withAuth } from '@/utils/apiMiddleware';
-import { getDb, getRuntimeEnv } from '@/db';
 import { ResponseUtils } from '@/utils/responseUtils';
 
 /// 获取所有用户信息
 export const GET = withAuth(async () => {
-  const env = getRuntimeEnv();
-
   try {
-    const db = getDb(env);
-    // Note: Assuming env.USERS_KV is available on process.env or global env
-    const manager = new AdminService(db, env?.SUPER_ADMIN_TOKEN);
-    const users = await manager.getUserSummaryList();
+    const { adminService } = createServerServices();
+    const users = await adminService.getUserSummaryList();
 
     return ResponseUtils.success({
       users
@@ -24,8 +20,6 @@ export const GET = withAuth(async () => {
 
 /// 创建新用户
 export const POST = withAuth(async (request) => {
-  const env = getRuntimeEnv();
-
   try {
     const body = await request.json();
     const validationResult = RegisterRequestSchema.safeParse(body);
@@ -34,9 +28,8 @@ export const POST = withAuth(async (request) => {
     }
     const { uid, config } = validationResult.data;
 
-    const db = getDb(env);
-    const manager = new AdminService(db, env?.SUPER_ADMIN_TOKEN);
-    await manager.createUser(uid, config, 'admin'); // 'admin' is hardcoded adminId for now
+    const { adminService } = createServerServices();
+    await adminService.createUser(uid, config, 'admin');
 
     return ResponseUtils.success(null, 'success');
   } catch (error: unknown) {

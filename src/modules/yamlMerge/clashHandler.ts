@@ -11,6 +11,7 @@ import { RouteHandler } from '@/types/routes.types';
 import { safeError } from '@/utils/logHelper';
 import { CORS_HEADERS } from '@/utils/responseUtils';
 import yaml from 'js-yaml';
+import { resolveRuntimeEnv } from '@/server/runtime';
 
 const RESPONSE_HEADERS: Record<string, string> = {
 	'Content-Type': 'text/yaml; charset=utf-8',
@@ -33,17 +34,20 @@ export class ClashHandler implements RouteHandler {
 		return headers;
 	}
 
-	async handle(request: Request, env?: Env, params?: Record<string, any>): Promise<Response | null> {
+	async handle(request: Request, params?: Record<string, any>): Promise<Response | null> {
 		const url = new URL(request.url);
 		const userConfig: UserConfig = params!.userConfig;
 		const uid = params?.uid || url.searchParams.get('uid');
-		const logger = createLogService(env);
+		const logger = createLogService();
 		const startTime = Date.now();
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 
-			const yamlMerge = new YamlMergeFactory(userConfig, { uid, env });
+			const yamlMerge = new YamlMergeFactory(userConfig, {
+				uid,
+				env: resolveRuntimeEnv(),
+			});
 			// 获取合并后的 YAML 对象和性能计时数据
 			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
 
@@ -54,7 +58,7 @@ export class ClashHandler implements RouteHandler {
 			let finalYamlString = yaml.dump(yamlObj);
 
 			// 添加头部注释信息
-			finalYamlString = await this._addRemark(finalYamlString, userConfig, uid, request, env);
+			finalYamlString = await this._addRemark(finalYamlString, userConfig, uid, request);
 
 			const totalDuration = Date.now() - startTime;
 
@@ -132,7 +136,7 @@ export class ClashHandler implements RouteHandler {
 		}
 	}
 
-	private async _addRemark(content: string, config: UserConfig, uid: string | undefined | null, request: Request, env?: Env): Promise<string> {
+	private async _addRemark(content: string, config: UserConfig, uid: string | undefined | null, request: Request): Promise<string> {
 		let remark = '';
 		
 		if (uid && config.accessToken) {
@@ -144,9 +148,9 @@ export class ClashHandler implements RouteHandler {
 			}
 		}
 
-		if (uid && env) {
+		if (uid) {
 			try {
-				const logger = createLogService(env);
+				const logger = createLogService();
 				// 查询最近的错误或警告日志 (最近 10 分钟)
 				const startTime = new Date(Date.now() - 10 * 60 * 1000);
 				const logs = await logger.queryLogs({

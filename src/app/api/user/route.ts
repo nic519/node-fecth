@@ -1,8 +1,8 @@
 import { UserService } from '@/modules/user/user.service';
+import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ScUserUpdateReq } from '@/modules/user/user.schema';
 import { withAuth } from '@/utils/apiMiddleware';
-import { getDb, getRuntimeEnv } from '@/db';
 
 // GET: 获取用户配置
 export const GET = withAuth(async (request) => {
@@ -11,12 +11,10 @@ export const GET = withAuth(async (request) => {
 
 // PUT: 更新用户配置
 export const PUT = withAuth(async (request) => {
-  const env = getRuntimeEnv();
   const uid = request.uid!;
 
   try {
-    const db = getDb(env);
-    const userService = new UserService(db);
+    const { userService } = createServerServices();
 
     const body = await request.json();
 
