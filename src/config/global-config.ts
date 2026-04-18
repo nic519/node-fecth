@@ -1,9 +1,8 @@
 
-export interface GlobalConfigType {
+export interface AppConfig {
 	workerUrl: string;
-	env?: Env;
 }
 
-export const GlobalConfig: GlobalConfigType = {
+export const appConfig = {
 	workerUrl: 'https://node.1024.hair',
-};
+} as const satisfies AppConfig;

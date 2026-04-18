@@ -43,7 +43,7 @@ export class ClashHandler implements RouteHandler {
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
 
-			const yamlMerge = new YamlMergeFactory(userConfig, uid);
+			const yamlMerge = new YamlMergeFactory(userConfig, { uid, env });
 			// 获取合并后的 YAML 对象和性能计时数据
 			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
 

@@ -1,4 +1,4 @@
-import { GlobalConfig } from '@/config/global-config';
+import { appConfig } from '@/config/global-config';
 import { getRuntimeEnv } from '@/db';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
@@ -16,7 +16,10 @@ import { DEFAULT_RULE_URL } from '@/config/constants';
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
 
-	constructor(private userConfig: UserConfig, private uid?: string) { }
+	constructor(
+		private userConfig: UserConfig,
+		private runtimeOptions: { uid?: string; env?: Env } = {},
+	) { }
 
 	private async measure<T>(name: string, fn: () => Promise<T>): Promise<T> {
 		const start = Date.now();
@@ -59,7 +62,7 @@ export class YamlMergeFactory {
 
 	private async getTemplateFromDB(templateId: string): Promise<string> {
 		try {
-			const env = GlobalConfig.env || getRuntimeEnv();
+			const env = this.runtimeOptions.env || getRuntimeEnv();
 			if (!env) {
 				throw new Error('环境变量未初始化');
 			}
@@ -84,7 +87,7 @@ export class YamlMergeFactory {
 
 		try {
 			const url = new URL(urlOrId);
-			const workerUrl = new URL(GlobalConfig.workerUrl);
+			const workerUrl = new URL(appConfig.workerUrl);
 
 			const isSameDomain = url.hostname === workerUrl.hostname;
 			const isTemplatePath = url.pathname.includes('/api/subscription/template/');
@@ -138,7 +141,7 @@ export class YamlMergeFactory {
 
 	async multiSubStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const ruleContent = await this.measure('fetch_rule_content', () => this.fetchRuleContent());
-		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig, this.uid);
+		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig, this.runtimeOptions.uid);
 		const { yamlContent, subInfo } = await yamlStrategy.generate();
 		return { yamlContent, subInfo };
 	}
