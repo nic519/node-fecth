@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { RegisterSuccessDialog } from './components/RegisterSuccessDialog';
+import type { UserConfig } from '@/types/user-config';
 
 function parseStoredTab(tab: string | null): ConfigTab {
   if (tab === 'basic' || tab === 'rules' || tab === 'dynamic' || tab === 'token' || tab === 'preview') {
@@ -39,8 +40,18 @@ function setStoredTab(storageKey: string, tab: ConfigTab) {
   window.dispatchEvent(new Event('config:activeTab'));
 }
 
-function UserConfigInner({ uid, token }: { uid: string; token: string }) {
-  const userConfigState = useUserConfig({ uid, token });
+function UserConfigInner({
+  uid,
+  token,
+  initialConfig,
+  initialLastSaved,
+}: {
+  uid: string;
+  token: string;
+  initialConfig: UserConfig | null;
+  initialLastSaved: Date | null;
+}) {
+  const userConfigState = useUserConfig({ uid, token, initialConfig, initialLastSaved });
   const storageKey = `config.activeTab:${uid}`;
   const activeTab = useSyncExternalStore<ConfigTab>(
     subscribeToStorageChanges,
@@ -125,10 +136,28 @@ function UserConfigInner({ uid, token }: { uid: string; token: string }) {
   );
 }
 
-export function ConfigPageClient({ uid, token }: { uid: string; token: string }) {
+export function ConfigPageClient({
+  uid,
+  token,
+  initialConfig,
+  initialLastSaved,
+}: {
+  uid: string;
+  token: string;
+  initialConfig: UserConfig | null;
+  initialLastSaved: Date | null;
+}) {
   usePageTitle(`${uid} - 配置订阅`, '');
 
-  return <UserConfigInner key={uid} uid={uid} token={token} />;
+  return (
+    <UserConfigInner
+      key={uid}
+      uid={uid}
+      token={token}
+      initialConfig={initialConfig}
+      initialLastSaved={initialLastSaved}
+    />
+  );
 }
 
 export function MissingUidState() {

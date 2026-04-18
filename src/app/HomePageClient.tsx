@@ -1,6 +1,6 @@
 'use client';
 
-import { useStaticRuleFilterOptions } from '@/app/config/hooks/useRuleConfig';
+import { useStaticRuleFilterOptionsWithInitialData } from '@/app/config/hooks/useRuleConfig';
 import { CoreFeatures } from '@/components/index/CoreFeatures';
 import { LatencyDemo } from '@/components/index/LatencyDemo';
 import { SubscriptionDemo } from '@/components/index/SubscriptionDemo';
@@ -14,10 +14,16 @@ import { Suspense, useRef, useState } from 'react';
 import { RegisterUserDialog } from '@/components/RegisterUserDialog';
 import { HomeNavbar } from '@/components/HomeNavbar';
 
-export function HomePageClient({ superToken }: { superToken?: string }) {
-  const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptions();
+export function HomePageClient({
+  superToken,
+  initialFilterOptions = [],
+}: {
+  superToken?: string;
+  initialFilterOptions?: string[];
+}) {
+  const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptionsWithInitialData(initialFilterOptions);
   const { resolvedTheme } = useTheme();
-
+  void resolvedTheme;
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   return (
@@ -138,6 +144,7 @@ export function HomePageClient({ superToken }: { superToken?: string }) {
         </div>
       </footer>
 
+      {/* 弹窗 */}
       <RegisterUserDialog
         isOpen={isRegisterOpen}
         onOpenChange={setIsRegisterOpen}

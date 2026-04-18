@@ -1,4 +1,6 @@
 import { ConfigPageClient, MissingUidState } from './ConfigPageClient';
+import { createServerServices } from '@/server/services';
+import type { UserConfig } from '@/types/user-config';
 
 export default async function UserConfigPage({
   searchParams,
@@ -15,5 +17,24 @@ export default async function UserConfigPage({
     return <MissingUidState />;
   }
 
-  return <ConfigPageClient uid={uid} token={token ?? ''} />;
+  let initialConfig: UserConfig | null = null;
+  let initialLastSaved: Date | null = null;
+
+  if (token) {
+    const userConfig = await createServerServices().userService.validateAndGetUser(uid, token);
+    if (userConfig) {
+      const { updatedAt, ...config } = userConfig;
+      initialConfig = config;
+      initialLastSaved = updatedAt ? new Date(updatedAt) : null;
+    }
+  }
+
+  return (
+    <ConfigPageClient
+      uid={uid}
+      token={token ?? ''}
+      initialConfig={initialConfig}
+      initialLastSaved={initialLastSaved}
+    />
+  );
 }

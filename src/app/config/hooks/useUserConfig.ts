@@ -8,6 +8,8 @@ import { deepEqual } from '@/lib/utils';
 export interface UseUserConfigProps {
 	uid: string;
 	token: string;
+	initialConfig?: UserConfig | null;
+	initialLastSaved?: Date | null;
 }
 
 export interface UseUserConfigReturn {
@@ -29,11 +31,16 @@ export interface UseUserConfigReturn {
 	loadConfig: () => Promise<void>;
 }
 
-export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfigReturn {
+export function useUserConfig({
+	uid,
+	token,
+	initialConfig = null,
+	initialLastSaved = null,
+}: UseUserConfigProps): UseUserConfigReturn {
 	const router = useRouter();
-	const [config, setConfig] = useState<UserConfig | null>(null);
-	const [originalConfig, setOriginalConfig] = useState<UserConfig | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [config, setConfig] = useState<UserConfig | null>(initialConfig);
+	const [originalConfig, setOriginalConfig] = useState<UserConfig | null>(initialConfig);
+	const [loading, setLoading] = useState(initialConfig === null);
 
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -41,7 +48,7 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 	const [saveSuccess, setSaveSuccess] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
 	const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
-	const [lastSaved, setLastSaved] = useState<Date | null>(null);
+	const [lastSaved, setLastSaved] = useState<Date | null>(initialLastSaved);
 
 	// 计算是否有未保存的更改
 	const isDirty = useMemo(() => {
@@ -149,9 +156,13 @@ export function useUserConfig({ uid, token }: UseUserConfigProps): UseUserConfig
 			setLoading(false);
 			return;
 		}
+		if (initialConfig) {
+			setLoading(false);
+			return;
+		}
 
 		loadConfig();
-	}, [loadConfig, token]);
+	}, [initialConfig, loadConfig, token]);
 
 	return {
 		// 状态

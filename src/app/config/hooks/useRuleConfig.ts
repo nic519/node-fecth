@@ -52,13 +52,22 @@ export const isMandatoryFilter = (option: string) => {
 };
 
 export function useStaticRuleFilterOptions() {
+    return useStaticRuleFilterOptionsWithInitialData();
+}
+
+export function useStaticRuleFilterOptionsWithInitialData(initialOptions: string[] = []) {
     const [filterOptions, setFilterOptions] = useState<string[]>([]);
-    const [loadingFilters, setLoadingFilters] = useState(false);
+    const [loadingFilters, setLoadingFilters] = useState(initialOptions.length === 0);
     const [filterError, setFilterError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
         const fetchFilters = async () => {
+            if (initialOptions.length > 0) {
+                setFilterOptions(initialOptions);
+                setLoadingFilters(false);
+                return;
+            }
             setLoadingFilters(true);
             setFilterError(null);
             const url = DEFAULT_RULE_URL;
@@ -95,7 +104,7 @@ export function useStaticRuleFilterOptions() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [initialOptions]);
 
     return {
         filterOptions,
