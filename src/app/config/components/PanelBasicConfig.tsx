@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
 import { secondaryActionButtonClass } from '@/lib/utils';
 import { PROMO_URL } from '@/config/constants';
+import { buildSubscriptionListFromConfig, getPrimarySubscriptionUrl, setPrimarySubscriptionUrl, setSubscriptionList } from '@/modules/user/subscription-list';
 
 interface BasicConfigProps {
     config: UserConfig;
@@ -21,38 +22,40 @@ interface BasicConfigProps {
 
 
 export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
-
+    const subscriptions = buildSubscriptionListFromConfig(config);
+    const secondarySubscriptions = subscriptions.slice(1);
 
     const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });
     }, [config, onChange]);
 
     const handleAppendSubListAdd = useCallback(() => {
-        const currentList = config.appendSubList || [];
         const newItem: SubConfig = {
             subscribe: '',
             flag: getRandomEmoji(),
             includeArea: []
         };
-        handleChange('appendSubList', [...currentList, newItem]);
-    }, [config.appendSubList, handleChange]);
+        onChange(setSubscriptionList(config, [...subscriptions, newItem]));
+    }, [config, onChange, subscriptions]);
 
     const handleAppendSubListRemove = useCallback((index: number) => {
-        const currentList = config.appendSubList || [];
-        const newList = currentList.filter((_, i) => i !== index);
-        handleChange('appendSubList', newList);
-    }, [config.appendSubList, handleChange]);
+        const actualIndex = index + 1;
+        const newList = subscriptions.filter((_, i) => i !== actualIndex);
+        onChange(setSubscriptionList(config, newList));
+    }, [config, onChange, subscriptions]);
 
     const handleAppendSubListUpdate = useCallback(<K extends keyof SubConfig>(index: number, field: K, value: SubConfig[K]) => {
-        const currentList = config.appendSubList || [];
-        const newList = [...currentList];
-        newList[index] = { ...newList[index], [field]: value };
-        handleChange('appendSubList', newList);
-    }, [config.appendSubList, handleChange]);
+        const actualIndex = index + 1;
+        const newList = [...subscriptions];
+        newList[actualIndex] = { ...newList[actualIndex], [field]: value };
+        onChange(setSubscriptionList(config, newList));
+    }, [config, onChange, subscriptions]);
 
     const handleAppendSubListAreaChange = useCallback((index: number, area: AreaCode, checked: boolean) => {
-        const currentList = config.appendSubList || [];
-        const item = currentList[index];
+        const item = secondarySubscriptions[index];
+        if (!item) {
+            return;
+        }
         const currentAreas = item.includeArea || [];
         let newAreas: AreaCode[];
         if (checked) {
@@ -61,7 +64,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
             newAreas = currentAreas.filter((a) => a !== area);
         }
         handleAppendSubListUpdate(index, 'includeArea', newAreas);
-    }, [config.appendSubList, handleAppendSubListUpdate]);
+    }, [handleAppendSubListUpdate, secondarySubscriptions]);
 
     return (
         <div className="space-y-8">
@@ -84,8 +87,8 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                         </Label>
                         <Input
                             id="subscribe"
-                            value={config.subscribe || ''}
-                            onChange={(e) => handleChange('subscribe', e.target.value)}
+                            value={getPrimarySubscriptionUrl(config)}
+                            onChange={(e) => onChange(setPrimarySubscriptionUrl(config, e.target.value))}
                             placeholder="https://example.com/subscription"
                             readOnly={readOnly}
                             className="font-mono transition-all border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 hover:border-primary/30"
@@ -164,14 +167,14 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
                 </div>
 
                 <div className="space-y-4">
-                    {(!config.appendSubList || config.appendSubList.length === 0) && (
+                    {secondarySubscriptions.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg bg-muted/20 text-muted-foreground">
                             <p>暂无追加订阅</p>
                             <p className="text-xs mt-1">点击上方按钮添加更多订阅源</p>
                         </div>
                     )}
 
-                    {config.appendSubList?.map((item, index) => (
+                    {secondarySubscriptions.map((item, index) => (
                         <SubConfigCard
                             key={index}
                             index={index}

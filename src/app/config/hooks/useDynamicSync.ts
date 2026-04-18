@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { UserConfig } from '@/types/user-config';
-import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
+import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
 
 const SYNC_TIMEOUT_MS = 30000;
 const STATUS_RESET_DELAY_MS = 3000;
@@ -25,10 +25,14 @@ export function useDynamicSync(config: UserConfig) {
     const [dynamicInfos, setDynamicInfos] = useState<Record<string, DynamicInfo>>({});
     const timeoutIdsRef = useRef<number[]>([]);
 
-    const items = useMemo<SyncItemData[]>(() => [
-        ...(config.subscribe ? [{ url: config.subscribe, source: '主订阅', flag: DEFAULT_SUB_FLAG }] : []),
-        ...(config.appendSubList || []).map(sub => ({ url: sub.subscribe, source: '追加订阅', flag: sub.flag }))
-    ].filter(item => item.url), [config.subscribe, config.appendSubList]);
+    const items = useMemo<SyncItemData[]>(() => {
+        const subscriptions = buildSubscriptionListFromConfig(config);
+        return subscriptions.map((sub, index) => ({
+            url: sub.subscribe,
+            source: index === 0 ? '主订阅' : '订阅源',
+            flag: sub.flag,
+        })).filter(item => item.url);
+    }, [config]);
 
     const syncUrl = useCallback(async (url: string) => {
         if (!url) return;

@@ -2,6 +2,7 @@
 
 import type { UserConfig } from '@/types/user-config';
 import { adminService } from '@/services/admin-api';
+import { DEFAULT_SUB_FLAG } from '@/config/constants';
 
 import { useState } from 'react';
 
@@ -69,6 +70,10 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 			const userConfig: UserConfig = {
 				subscribe: newUserSubscribe.trim(),
 				accessToken: newUserToken.trim(),
+				appendSubList: [{
+					subscribe: newUserSubscribe.trim(),
+					flag: DEFAULT_SUB_FLAG,
+				}],
 			};
 
 			const response = await adminService.addUser(superToken, { uid: newUserUid.trim(), config: userConfig });

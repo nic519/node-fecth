@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Key, Link as LinkIcon, Dices, Loader2, CheckCircle2, Copy, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { PROMO_URL } from '@/config/constants';
+import { DEFAULT_SUB_FLAG, PROMO_URL } from '@/config/constants';
 
 interface RegisterUserDialogProps {
   isOpen: boolean;
@@ -139,6 +139,10 @@ export function RegisterUserDialog({
       const userConfig: UserConfig = {
         subscribe: subscribe.trim(),
         accessToken: token.trim(),
+        appendSubList: [{
+          subscribe: subscribe.trim(),
+          flag: DEFAULT_SUB_FLAG,
+        }],
       };
 
       let response: { code: number; msg?: string; data?: unknown };

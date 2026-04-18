@@ -3,6 +3,7 @@ import { desc, inArray, InferSelectModel } from 'drizzle-orm';
 import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schema';
 import { TrafficInfo, type IUserConfig } from './user.schema';
 import { UserService } from './user.service';
+import { buildSubscriptionListFromConfig, getPrimarySubscriptionUrl } from './subscription-list';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import type { DbInstance } from '@/server/db';
 import { LogService } from '@/services/log-service';
@@ -50,22 +51,23 @@ export class AdminService {
 			const allUrls = new Set<string>();
 			for (const user of userList) {
 				const config = user.config;
-				if (config.subscribe) {
-					allUrls.add(config.subscribe);
-				}
+				let parsedAppendSubList: IUserConfig['appendSubList'];
 				if (user.appendSubList) {
 					try {
-						type AppendSubItem = { subscribe?: string; flag?: string };
-						const list = JSON.parse(user.appendSubList) as AppendSubItem[];
-						if (Array.isArray(list)) {
-							list.forEach((sub) => {
-								if (sub.subscribe) allUrls.add(sub.subscribe);
-							});
-						}
+						parsedAppendSubList = JSON.parse(user.appendSubList) as IUserConfig['appendSubList'];
 					} catch (e) {
 						console.error('Failed to parse appendSubList', e);
 					}
 				}
+				const subscriptions = buildSubscriptionListFromConfig({
+					subscribe: config.subscribe,
+					appendSubList: parsedAppendSubList,
+				});
+				subscriptions.forEach((sub) => {
+					if (sub.subscribe) {
+						allUrls.add(sub.subscribe);
+					}
+				});
 			}
 
 			// 查询动态表获取流量信息
@@ -80,48 +82,39 @@ export class AdminService {
 			for (const user of userList) {
 				const partialConfig = user.config;
 				const appendSubList = user.appendSubList ? JSON.parse(user.appendSubList) : undefined;
+				const subscriptions = buildSubscriptionListFromConfig({
+					subscribe: partialConfig.subscribe,
+					appendSubList,
+				});
 
 				// 构建订阅统计信息
 				const subscriptionStats: SubscriptionStat[] = [];
 
-				// 主订阅
-				if (partialConfig.subscribe) {
-					const d = dynamicMap.get(partialConfig.subscribe);
+				subscriptions.forEach((sub, index) => {
+					const d = dynamicMap.get(sub.subscribe);
 					subscriptionStats.push({
-						url: partialConfig.subscribe,
-						type: 'main',
-						name: '主订阅',
+						url: sub.subscribe,
+						type: index === 0 ? 'main' : 'append',
+						name: index === 0 ? '主订阅' : (sub.flag || '订阅源'),
 						traffic: d?.traffic || undefined,
 						lastUpdated: d?.updatedAt || undefined
 					});
-				}
-
-				// 附加订阅
-				if (appendSubList && Array.isArray(appendSubList)) {
-					appendSubList.forEach((sub) => {
-						if (sub.subscribe) {
-							const d = dynamicMap.get(sub.subscribe);
-							subscriptionStats.push({
-								url: sub.subscribe,
-								type: 'append',
-								name: sub.flag || '附加订阅',
-								traffic: d?.traffic || undefined,
-								lastUpdated: d?.updatedAt || undefined
-							});
-						}
-					});
-				}
+				});
 
 				// 合并数据库字段到配置对象
 				const config: UserAdminConfig = {
 					...partialConfig,
+					subscribe: getPrimarySubscriptionUrl({
+						subscribe: partialConfig.subscribe,
+						appendSubList: subscriptions,
+					}),
 					uid: user.id,
 					updatedAt: user.updatedAt,
 					accessToken: user.accessToken,
 					requiredFilters: user.requiredFilters || undefined,
 					ruleUrl: user.ruleUrl || undefined,
 					fileName: user.fileName || undefined,
-					appendSubList: appendSubList,
+					appendSubList: subscriptions,
 					subscriptionStats
 				};
 				summaries.push(config);
