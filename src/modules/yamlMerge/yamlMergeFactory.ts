@@ -1,7 +1,3 @@
-import { appConfig } from '@/config/global-config';
-import { getServerDb } from '@/server/db';
-import { BaseCRUD } from '@/db/base-crud';
-import { templates, type Template } from '@/db/schema';
 import { PreMergeInfo } from '@/modules/yamlMerge/clash-merge.types';
 import { StrategyDirectly } from '@/modules/yamlMerge/strategyDirectly';
 import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
@@ -12,7 +8,6 @@ import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import yaml from 'js-yaml';
 import { StrategyMultiSub } from './strategyMultiSub';
 import { DEFAULT_RULE_URL } from '@/config/constants';
-import { resolveRuntimeEnv } from '@/server/runtime';
 
 export class YamlMergeFactory {
 	private timings: Record<string, number> = {};
@@ -49,73 +44,9 @@ export class YamlMergeFactory {
 	}
 
 	private async fetchRuleContent(): Promise<string> {
-		let ruleContent: string;
 		const ruleUrl = this.effectiveRuleUrl;
 
-		if (this.shouldUseInternalTemplate(ruleUrl)) {
-			const templateId = this.extractTemplateIdFromUrl(ruleUrl);
-			ruleContent = await this.getTemplateFromDB(templateId);
-		} else {
-			ruleContent = await fetchRawContent(ruleUrl);
-		}
-		return ruleContent;
-	}
-
-	private async getTemplateFromDB(templateId: string): Promise<string> {
-		try {
-			const env = this.runtimeOptions.env ?? resolveRuntimeEnv();
-			const crud = new BaseCRUD<Template>(getServerDb(env), templates);
-			const template = await crud.selectById(templateId);
-
-			if (!template) {
-				throw new Error(`模板 ${templateId} 不存在`);
-			}
-
-			return template.content || '';
-		} catch (error) {
-			throw new Error(`无法获取模板 ${templateId}: ${error instanceof Error ? error.message : String(error)}`);
-		}
-	}
-
-	private shouldUseInternalTemplate(urlOrId: string): boolean {
-		if (!urlOrId.startsWith('http')) {
-			return false;
-		}
-
-		try {
-			const url = new URL(urlOrId);
-			const workerUrl = new URL(appConfig.workerUrl);
-
-			const isSameDomain = url.hostname === workerUrl.hostname;
-			const isTemplatePath = url.pathname.includes('/api/subscription/template/');
-
-			return isSameDomain && isTemplatePath;
-		} catch (error) {
-			console.error('shouldUseInternalTemplate error:', error);
-			return false;
-		}
-	}
-
-	private extractTemplateIdFromUrl(url: string): string {
-		try {
-			const urlObj = new URL(url);
-			const pathname = urlObj.pathname;
-
-			const match = pathname.match(/\/api\/subscription\/template\/(.+)$/);
-			if (match && match[1]) {
-				return match[1];
-			}
-
-			const templateId = urlObj.searchParams.get('template');
-			if (templateId) {
-				return templateId;
-			}
-
-			throw new Error(`无法从URL中提取模板ID: ${url}`);
-		} catch (error) {
-			console.error('extractTemplateIdFromUrl error:', error);
-			throw new Error(`无法从URL中提取模板ID: ${error instanceof Error ? error.message : String(error)}`);
-		}
+		return fetchRawContent(ruleUrl);
 	}
 
 	async fastStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
