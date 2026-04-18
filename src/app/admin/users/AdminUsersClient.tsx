@@ -20,8 +20,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from 'lucide-react';
+import type { UserAdminConfig } from '@/modules/user/admin.schema';
 
-export function AdminUsersClient({ superToken }: { superToken: string }) {
+export function AdminUsersClient({
+  superToken,
+  initialUsers,
+}: {
+  superToken: string;
+  initialUsers: UserAdminConfig[];
+}) {
   usePageTitle('用户管理');
 
   const { showToast } = useToastContext();
@@ -38,6 +45,7 @@ export function AdminUsersClient({ superToken }: { superToken: string }) {
     importModal
   } = useUserManagement({
     superToken,
+    initialUsers,
     showToast,
   });
 

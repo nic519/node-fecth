@@ -7,11 +7,17 @@ import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TemplateEditor } from './components/TemplateEditor';
-import { TemplateList } from './components/TemplateList';
+import { TemplateList, type TemplateItem } from './components/TemplateList';
 import { TemplateModals } from './components/TemplateModals';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 
-export function AdminTemplatesClient({ superToken }: { superToken: string }) {
+export function AdminTemplatesClient({
+  superToken,
+  initialTemplates,
+}: {
+  superToken: string;
+  initialTemplates: TemplateItem[];
+}) {
   const {
     templates,
     selectedTemplate,
@@ -38,7 +44,7 @@ export function AdminTemplatesClient({ superToken }: { superToken: string }) {
     closeDeleteModal,
     closeErrorModal,
     setValidationErrors,
-  } = useTemplateManagement({ superToken });
+  } = useTemplateManagement({ superToken, initialTemplates });
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950">

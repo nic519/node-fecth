@@ -7,6 +7,7 @@ import { templateService } from '@/services/template-api';
 
 export interface UseTemplateManagementProps {
 	superToken: string;
+	initialTemplates?: TemplateItem[];
 }
 
 export interface UseTemplateManagementReturn {
@@ -50,7 +51,10 @@ export interface UseTemplateManagementReturn {
 /**
  * 模板管理Hook - 处理模板数据的CRUD操作
  */
-export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps): UseTemplateManagementReturn => {
+export const useTemplateManagement = ({
+	superToken,
+	initialTemplates = [],
+}: UseTemplateManagementProps): UseTemplateManagementReturn => {
 	console.log('useTemplateManagement hook called with superToken:', superToken);
 
 	// 设置页面标题
@@ -60,8 +64,8 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 	const { showToast } = useToastContext();
 
 	// 数据状态
-	const [templates, setTemplates] = useState<TemplateItem[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [templates, setTemplates] = useState<TemplateItem[]>(initialTemplates);
+	const [loading, setLoading] = useState(initialTemplates.length === 0);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
@@ -85,9 +89,13 @@ export const useTemplateManagement = ({ superToken }: UseTemplateManagementProps
 			setError('缺少管理员令牌');
 			return;
 		}
+		if (initialTemplates.length > 0) {
+			setLoading(false);
+			return;
+		}
 		loadTemplates();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [superToken]);
+	}, [superToken, initialTemplates.length]);
 
 	const loadTemplates = async () => {
 		console.log('loadTemplates called');

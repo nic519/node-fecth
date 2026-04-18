@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export interface UseUserDataProps {
 	superToken: string;
+	initialUsers?: UserAdminConfig[];
 }
 
 export interface UseUserDataReturn {
@@ -18,9 +19,9 @@ export interface UseUserDataReturn {
 /**
  * 用户数据管理 Hook - 负责用户列表的获取和状态管理
  */
-export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn => {
-	const [users, setUsers] = useState<UserAdminConfig[]>([]);
-	const [loading, setLoading] = useState(true);
+export const useUserData = ({ superToken, initialUsers = [] }: UseUserDataProps): UseUserDataReturn => {
+	const [users, setUsers] = useState<UserAdminConfig[]>(initialUsers);
+	const [loading, setLoading] = useState(initialUsers.length === 0);
 	const [error, setError] = useState<string | null>(null);
 
 	/**
@@ -58,8 +59,12 @@ export const useUserData = ({ superToken }: UseUserDataProps): UseUserDataReturn
 			setLoading(false);
 			return;
 		}
+		if (initialUsers.length > 0) {
+			setLoading(false);
+			return;
+		}
 		fetchUsers();
-	}, [superToken, fetchUsers]);
+	}, [superToken, fetchUsers, initialUsers.length]);
 
 	return {
 		users,
