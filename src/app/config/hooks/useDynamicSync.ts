@@ -30,14 +30,14 @@ export function useDynamicSync(config: UserConfig) {
         ...(config.appendSubList || []).map(sub => ({ url: sub.subscribe, source: '追加订阅', flag: sub.flag }))
     ].filter(item => item.url), [config.subscribe, config.appendSubList]);
 
-    const syncUrl = useCallback(async (url: string, useProxy?: boolean) => {
+    const syncUrl = useCallback(async (url: string) => {
         if (!url) return;
         setStatuses(prev => ({ ...prev, [url]: { status: 'loading', message: undefined } }));
 
         try {
             // 使用 AbortSignal.timeout (30s) 替代手动的 setTimeout + AbortController，更简洁且自动处理资源清理
             const signal = AbortSignal.timeout(SYNC_TIMEOUT_MS);
-            const response = await dynamicService.syncUrl(url, useProxy, signal);
+            const response = await dynamicService.syncUrl(url, signal);
 
             if (response.code === 0) {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));

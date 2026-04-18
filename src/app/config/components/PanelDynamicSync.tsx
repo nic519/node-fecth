@@ -38,7 +38,7 @@ export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
                         item={item}
                         status={statuses[item.url] || { status: 'idle' }}
                         info={dynamicInfos[item.url]}
-                        onSync={(useProxy) => syncUrl(item.url, useProxy)}
+                        onSync={() => syncUrl(item.url)}
                     />
                 ))}
             </div>

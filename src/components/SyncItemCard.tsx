@@ -14,14 +14,12 @@ import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
 import { Activity, Calendar, CheckCircle2, Clock, Loader2, RefreshCw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Checkbox } from './ui/checkbox';
-import { Label } from './ui/label';
 
 interface SyncItemCardProps {
   item: SyncItemData;
   status: SyncStatus;
   info?: DynamicInfo;
-  onSync?: (useProxy?: boolean) => void;
+  onSync?: () => void;
   showAction?: boolean;
 }
 
@@ -34,11 +32,11 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
   const shouldShowAction = showAction ?? !!onSync;
 
   const [displayedPercent, setDisplayedPercent] = useState(0);
-  const [useProxy, setUseProxy] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
+    const progressElement = progressRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -55,13 +53,13 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
       { threshold: 0.2 }
     );
 
-    if (progressRef.current) {
-      observer.observe(progressRef.current);
+    if (progressElement) {
+      observer.observe(progressElement);
     }
 
     return () => {
-      if (progressRef.current) {
-        observer.unobserve(progressRef.current);
+      if (progressElement) {
+        observer.unobserve(progressElement);
       }
       clearTimeout(timer);
     };
@@ -164,7 +162,7 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => onSync?.(useProxy)}
+                onClick={() => onSync?.()}
                 disabled={isLoading || !onSync}
                 className={cn("h-8 w-8 p-0 shrink-0 rounded-full", secondaryActionButtonClass)}
               >
@@ -176,19 +174,6 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
                   <RefreshCw className="w-4 h-4" />
                 )}
               </Button>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={`proxy-${item.url}`}
-                  checked={useProxy}
-                  onCheckedChange={(checked) => setUseProxy(checked as boolean)}
-                />
-                <Label
-                  htmlFor={`proxy-${item.url}`}
-                  className="text-[10px] text-muted-foreground font-normal cursor-pointer select-none"
-                >
-                  远端请求
-                </Label>
-              </div>
             </div>
           ) : (
             <div className="h-8 w-8" />

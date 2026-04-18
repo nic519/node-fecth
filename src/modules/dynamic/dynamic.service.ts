@@ -28,13 +28,13 @@ export class DynamicService {
 	 * Fetch content from source URL and save to database
 	 * 使用 ky 库进行增强的网络请求，包含自动重试和超时控制
 	 */
-	static async fetchAndSave(url: string, options: { retries?: number; useProxy?: boolean } = {}): Promise<DynamicContent> {
-		const { retries = 3, useProxy = false } = options;
+	static async fetchAndSave(url: string, options: { retries?: number } = {}): Promise<DynamicContent> {
+		const { retries = 3 } = options;
 		const cleanUrl = CommonUtils.normalizeUrl(url);
 		try {
 			logger.info({ url: cleanUrl }, 'Start fetching dynamic content from source');
 
-			const response = await httpClient.get(CommonUtils.tryProxyUrl(cleanUrl, useProxy), {
+			const response = await httpClient.get(cleanUrl, {
 				retry: retries
 			});
 

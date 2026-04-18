@@ -39,11 +39,6 @@ export const DynamicSyncRequestSchema = z.object({
 	 * 需要同步的订阅源 URL
 	 */
 	url: z.string().url(),
-	/**
-	 * 是否使用代理进行请求
-	 * 默认为 false
-	 */
-	useProxy: z.boolean().optional(),
 });
 
 /**

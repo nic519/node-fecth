@@ -17,8 +17,8 @@ export const POST = async (request: Request) => {
             return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
         }
 
-        const { url, useProxy } = validationResult.data;
-        const result = await DynamicService.fetchAndSave(url, { retries: 3, useProxy });
+        const { url } = validationResult.data;
+        const result = await DynamicService.fetchAndSave(url, { retries: 3 });
         const summary = {
             id: result.id,
             url: result.url,

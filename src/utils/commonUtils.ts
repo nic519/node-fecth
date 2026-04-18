@@ -1,6 +1,3 @@
-import { ProxyConfig } from '../config/global-config';
-
-
 export class CommonUtils {
 
 	/**
@@ -17,31 +14,5 @@ export class CommonUtils {
 		cleanUrl = cleanUrl.replace(/^[`'"]+|[`'"]+$/g, '');
 		// 3. 再次去除可能的空格
 		return cleanUrl.trim();
-	}
-
-	static tryProxyUrl(cleanUrl: string, forceProxy: boolean = false): string {
-		// 检查是否需要走代理
-		try {
-			let needProxy = forceProxy;
-
-			if (!needProxy) {
-				const urlObj = new URL(cleanUrl);
-				// 检查域名是否在目标列表中
-				needProxy = ProxyConfig.targetDomains.some(domain =>
-					urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`)
-				);
-			}
-
-			if (needProxy) {
-				// 构建代理 URL: https://proxy-api?url=target-url
-				const proxyUrl = new URL(ProxyConfig.proxyApiUrl);
-				proxyUrl.searchParams.set('url', cleanUrl);
-				return proxyUrl.toString();
-			}
-		} catch (e) {
-			// URL 解析失败，忽略代理逻辑，直接返回原始清理后的 URL
-			console.warn('Invalid URL for proxy check:', cleanUrl);
-		}
-		return cleanUrl;
 	}
 }
