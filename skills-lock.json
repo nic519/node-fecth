@@ -5,6 +5,11 @@
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
       "computedHash": "5094b7e4f1a8a7175e7489adb112059d0a10f46c66f579a5e035bd1bae13eb3a"
+    },
+    "cloudflare-opennext": {
+      "source": "null-shot/cloudflare-skills",
+      "sourceType": "github",
+      "computedHash": "d3b6f0e901551bef1bcbe69e1fc0d5bfdace523a24e81ddd4143123ac0361623"
     }
   }
 }
