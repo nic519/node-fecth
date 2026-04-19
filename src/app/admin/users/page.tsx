@@ -1,5 +1,6 @@
 import { AdminUsersClient } from './AdminUsersClient';
 import { createServerServices } from '@/server/services';
+import { getValidSuperAdminToken } from '@/server/auth';
 
 export default async function AdminUsersPage({
   searchParams,
@@ -7,8 +8,7 @@ export default async function AdminUsersPage({
   searchParams: Promise<{ superToken?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const rawSuperToken = params.superToken;
-  const superToken = Array.isArray(rawSuperToken) ? rawSuperToken[0] : rawSuperToken;
+  const superToken = getValidSuperAdminToken(params.superToken);
   const initialUsers = superToken
     ? await createServerServices().adminService.getUserSummaryList()
     : [];

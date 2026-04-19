@@ -3,6 +3,7 @@ import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import type { TemplateItem } from './components/TemplateList';
+import { getValidSuperAdminToken } from '@/server/auth';
 
 export default async function AdminTemplatesPage({
   searchParams,
@@ -10,8 +11,7 @@ export default async function AdminTemplatesPage({
   searchParams: Promise<{ superToken?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const rawSuperToken = params.superToken;
-  const superToken = Array.isArray(rawSuperToken) ? rawSuperToken[0] : rawSuperToken;
+  const superToken = getValidSuperAdminToken(params.superToken);
   const templateRows = superToken
     ? await getServerDb().select().from(templates).orderBy(desc(templates.createdAt)).all()
     : [];

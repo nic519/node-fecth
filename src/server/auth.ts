@@ -34,7 +34,11 @@ export function getValidSuperAdminToken(
   explicitEnv?: Env,
 ): string | null {
   const tokenValue = Array.isArray(superToken) ? superToken[0] : superToken;
-  return isValidSuperAdminTokenValue(tokenValue, explicitEnv) ? tokenValue : null;
+  if (!isValidSuperAdminTokenValue(tokenValue, explicitEnv)) {
+    return null;
+  }
+
+  return tokenValue ?? null;
 }
 
 export function isSuperAdminRequest(request: Request, explicitEnv?: Env): boolean {
