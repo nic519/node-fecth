@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { UserConfig } from '@/types/user-config';
-import { UserConfigSchema } from '@/types/openapi-schemas';
+import { UserConfigSchema } from '@/types/api-schemas';
 import { userService } from '@/services/user-api';
 import { useRouter } from 'next/navigation';
 import { deepEqual } from '@/lib/utils';

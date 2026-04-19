@@ -1,8 +1,8 @@
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
 
-import type { IUserConfig } from './user.schema';
+import type { UserConfig } from './user.schema';
 
-type SubscriptionItem = NonNullable<IUserConfig['appendSubList']>[number];
+type SubscriptionItem = NonNullable<UserConfig['appendSubList']>[number];
 
 function normalizeSubscriptionItem(item: SubscriptionItem): SubscriptionItem | null {
   const subscribe = item.subscribe.trim();
@@ -18,14 +18,14 @@ function normalizeSubscriptionItem(item: SubscriptionItem): SubscriptionItem | n
 }
 
 export function buildSubscriptionListFromConfig(
-  config: Pick<IUserConfig, 'appendSubList'>,
+  config: Pick<UserConfig, 'appendSubList'>,
 ): SubscriptionItem[] {
   return (config.appendSubList ?? [])
     .map(normalizeSubscriptionItem)
     .filter((item): item is SubscriptionItem => item !== null);
 }
 
-export function setSubscriptionList(config: IUserConfig, appendSubList: SubscriptionItem[]): IUserConfig {
+export function setSubscriptionList(config: UserConfig, appendSubList: SubscriptionItem[]): UserConfig {
   const normalizedList = appendSubList
     .map(normalizeSubscriptionItem)
     .filter((item): item is SubscriptionItem => item !== null);

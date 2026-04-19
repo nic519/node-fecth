@@ -1,5 +1,5 @@
 import { apiClient } from './api-client';
-import type { DynamicSummary } from '@/types/openapi-schemas';
+import type { DynamicSummary } from '@/types/api-schemas';
 
 export type DynamicInfo = DynamicSummary;
 

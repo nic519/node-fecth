@@ -1,7 +1,7 @@
 import { UserService } from '@/modules/user/user.service';
 import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { ScUserUpdateReq } from '@/modules/user/user.schema';
+import { UserConfigUpdateRequestSchema } from '@/modules/user/user.schema';
 import { withAuth } from '@/utils/apiMiddleware';
 
 // GET: 获取用户配置
@@ -19,7 +19,7 @@ export const PUT = withAuth(async (request) => {
     const body = await request.json();
 
     // 使用 Zod 验证请求体
-    const validationResult = ScUserUpdateReq.safeParse(body);
+    const validationResult = UserConfigUpdateRequestSchema.safeParse(body);
     
     if (!validationResult.success) {
       return ResponseUtils.error(400, 'Invalid request body', validationResult.error.format());

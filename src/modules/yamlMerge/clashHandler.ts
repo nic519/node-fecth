@@ -5,7 +5,7 @@ import { ClashRuleOverride } from '@/modules/yamlMerge/filters/clashRuleOverride
 import { YamlMergeFactory } from '@/modules/yamlMerge/yamlMergeFactory';
 import { createLogService } from '@/services/log-service';
 import { LogType } from '@/types/log';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/api-schemas';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { RouteHandler } from '@/types/routes.types';
 import { safeError } from '@/utils/logHelper';

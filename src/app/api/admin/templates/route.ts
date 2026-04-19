@@ -3,11 +3,11 @@ import { templates } from '@/db/schema';
 import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { desc } from 'drizzle-orm';
-import { ScTemplateCreateReq } from '@/types/schema.template';
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { ConfigTemplateSaveRequestSchema } from '@/types/schema.template';
+import { ResponseCodes } from '@/types/api-schemas';
 
 // GET: 获取模板列表
-export const GET = withAuth(async (request) => {
+export const GET = withAuth(async () => {
   try {
     const db = getServerDb();
     const result = await db.select().from(templates).orderBy(desc(templates.createdAt)).all();
@@ -24,7 +24,7 @@ export const GET = withAuth(async (request) => {
 export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
-    const validationResult = ScTemplateCreateReq.safeParse(body);
+    const validationResult = ConfigTemplateSaveRequestSchema.safeParse(body);
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);
     }

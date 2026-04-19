@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { ConfigResponse } from '@/types/openapi-schemas';
+import { AuthenticatedUserConfig } from '@/types/api-schemas';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
 import { UserService } from '@/modules/user/user.service';
 import { getServerDb } from '@/server/db';
@@ -39,7 +39,7 @@ export async function authenticateUserConfig(
   request: Request,
   uid: string,
   explicitEnv?: Env,
-): Promise<ConfigResponse> {
+): Promise<AuthenticatedUserConfig> {
   const userService = new UserService(getServerDb(explicitEnv));
 
   if (isSuperAdminRequest(request, explicitEnv)) {

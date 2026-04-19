@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CORS_HEADERS } from '@/config/cors';
-import { ResponseCodes, type ResponseCode } from '@/types/openapi-schemas';
+import { ResponseCodes, type ResponseCode } from '@/types/api-schemas';
 import { BaseResponseSchema } from '@/types/schema.base';
 import { safeError } from '@/utils/logHelper';
 
@@ -9,7 +9,7 @@ export { CORS_HEADERS };
 /**
  * 统一响应工具类
  * 所有API响应都使用 {code, data, msg} 格式
- * 基于 openapi-schemas.ts 中定义的Schema，遵循单一数据源原则
+ * 基于 schema.base.ts 中定义的基础响应结构进行格式校验
  */
 export class ResponseUtils {
 	/**
@@ -91,7 +91,7 @@ export class ResponseUtils {
 
 	/**
 	 * 验证响应是否符合标准格式
-	 * 使用 openapi-schemas.ts 中定义的 BaseResponseSchema
+	 * 使用 BaseResponseSchema 检查 code/msg/data 基础结构
 	 */
 	static validateResponse(response: any): boolean {
 		try {
@@ -126,7 +126,7 @@ export class ResponseUtils {
 
 	/**
 	 * 类型守卫：检查是否为成功响应
-	 * 基于 openapi-schemas.ts 中的 SuccessResponseSchema
+	 * 当前只校验基础响应结构，调用方可再根据 code 判断业务成功
 	 */
 	static isSuccessResponse(response: any): response is { code: 0; msg: string; data: any } {
 		return BaseResponseSchema.safeParse(response).success;
@@ -134,7 +134,7 @@ export class ResponseUtils {
 
 	/**
 	 * 类型守卫：检查是否为错误响应
-	 * 基于 openapi-schemas.ts 中的 ErrorResponseSchema
+	 * 当前只校验基础响应结构，调用方可再根据 code 判断业务错误
 	 */
 	static isErrorResponse(response: any): response is { code: number; msg: string; data: any } {
 		return BaseResponseSchema.safeParse(response).success;

@@ -3,7 +3,7 @@ import { afterEach, expect, mock, test } from 'bun:test';
 import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { StrategyMultiSub } from '@/modules/yamlMerge/strategyMultiSub';
-import type { UserConfig } from '@/types/openapi-schemas';
+import type { UserConfig } from '@/types/api-schemas';
 
 const originalGetWithCache = DynamicService.getWithCache;
 

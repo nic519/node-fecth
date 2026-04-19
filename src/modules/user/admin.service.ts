@@ -1,7 +1,7 @@
 import { users, Log, dynamic } from '@/db/schema';
 import { desc, inArray, InferSelectModel } from 'drizzle-orm';
 import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schema';
-import { TrafficInfo, type IUserConfig } from './user.schema';
+import { TrafficInfo, type UserConfig } from './user.schema';
 import { UserService } from './user.service';
 import { buildSubscriptionListFromConfig } from './subscription-list';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
@@ -50,10 +50,10 @@ export class AdminService {
 			// 收集所有订阅URL以进行批量查询
 			const allUrls = new Set<string>();
 			for (const user of userList) {
-				let parsedAppendSubList: IUserConfig['appendSubList'];
+				let parsedAppendSubList: UserConfig['appendSubList'];
 				if (user.appendSubList) {
 					try {
-						parsedAppendSubList = JSON.parse(user.appendSubList) as IUserConfig['appendSubList'];
+						parsedAppendSubList = JSON.parse(user.appendSubList) as UserConfig['appendSubList'];
 					} catch (e) {
 						console.error('Failed to parse appendSubList', e);
 					}
@@ -125,7 +125,7 @@ export class AdminService {
 	/**
 	 * 创建新用户
 	 */
-	async createUser(uid: string, config: IUserConfig, adminId: string): Promise<void> {
+	async createUser(uid: string, config: UserConfig, adminId: string): Promise<void> {
 		try {
 			// 检查用户是否已存在
 			const existingConfig = await this.userService.getUserConfig(uid);

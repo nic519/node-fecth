@@ -1,5 +1,5 @@
 import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/api-schemas';
 import { fetchRawContent } from '@/utils/http/client';
 import yaml from 'js-yaml';
 import { StrategyMultiSub } from './strategyMultiSub';

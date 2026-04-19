@@ -1,6 +1,6 @@
 import { ProxyAreaObjects } from '@/config/proxy-area.config';
 import { ClashProxy, ProxyAreaInfo } from '@/types/clash.types';
-import { AreaCode } from '@/types/openapi-schemas';
+import { AreaCode } from '@/types/api-schemas';
 import yaml from 'js-yaml';
 
 export class StrategyUtils {

@@ -9,7 +9,7 @@ import { inArray } from 'drizzle-orm';
 
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
 import { CommonUtils } from '@/utils/commonUtils';
-import type { DynamicSummary } from '@/types/openapi-schemas';
+import type { DynamicSummary } from '@/types/api-schemas';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 

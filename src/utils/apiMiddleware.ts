@@ -1,10 +1,10 @@
-import { ConfigResponse } from '@/types/openapi-schemas';
+import { AuthenticatedUserConfig } from '@/types/api-schemas';
 import { authenticateUserConfig, isSuperAdminRequest } from '@/server/auth';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface AuthenticatedRequest extends NextRequest {
-  auth?: ConfigResponse;
+  auth?: AuthenticatedUserConfig;
   uid?: string;
 }
 
@@ -23,7 +23,7 @@ interface AuthOptions {
    */
   requiredParams?: string[];
   /**
-   * Perform user authentication and populate ConfigResponse
+   * Perform user authentication and populate AuthenticatedUserConfig
    */
   authenticateUser?: boolean;
 }

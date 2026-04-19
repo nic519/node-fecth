@@ -3,7 +3,7 @@ import { getSuperAdminToken, resolveRuntimeEnv } from '@/server/runtime';
 import { isValidSuperAdminTokenValue } from '@/server/auth';
 import { logs } from '@/db/schema';
 import { sql, and, eq } from 'drizzle-orm';
-import { RegisterRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { RegisterRequestSchema, ResponseCodes } from '@/types/api-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { SUPER_TOKEN_QUERY_PARAM } from '@/config/constants';
 

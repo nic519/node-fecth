@@ -1,8 +1,8 @@
 import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { ScTemplateCreateReq } from '@/types/schema.template';
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { ConfigTemplateSaveRequestSchema } from '@/types/schema.template';
+import { ResponseCodes } from '@/types/api-schemas';
 import { eq } from 'drizzle-orm';
 import { withAuth } from '@/utils/apiMiddleware';
 
@@ -12,7 +12,7 @@ export const PUT = withAuth(async (request, { params }) => {
 
   try {
     const body = await request.json();
-    const validationResult = ScTemplateCreateReq.safeParse(body);
+    const validationResult = ConfigTemplateSaveRequestSchema.safeParse(body);
 
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);

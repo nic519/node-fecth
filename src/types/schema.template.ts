@@ -1,51 +1,92 @@
-import { ResponseCodes } from '@/types/openapi-schemas';
+import { ResponseCodes } from '@/types/api-schemas';
 import { z } from 'zod';
 
-// =============================================================================
-// 配置模板相关 Schemas
-// =============================================================================
-
-// 配置模板 Schema
-export const ScTemplateModel = z.object({
-	id: z.union([z.number(), z.string()]), // 支持数字或字符串ID
+/**
+ * 配置模板 Schema。
+ *
+ * 描述后台模板列表和模板详情中返回的单个配置模板。
+ */
+export const ConfigTemplateSchema = z.object({
+	// 模板唯一标识；兼容数据库数字 ID 和接口字符串 ID。
+	id: z.union([z.number(), z.string()]),
+	// 模板名称。
 	name: z.string(),
+	// 模板说明。
 	description: z.string(),
+	// 模板 YAML 或文本内容。
 	content: z.string(),
+	// 模板创建时间，使用 ISO 日期时间字符串。
 	createdAt: z.string(),
+	// 模板最后更新时间，使用 ISO 日期时间字符串。
 	updatedAt: z.string(),
 });
 
-// 配置模板列表响应 Schema
-export const ScTemplateListResp = z.object({
+/**
+ * 配置模板列表响应 Schema。
+ *
+ * 描述管理端获取模板列表接口的成功响应结构。
+ */
+export const ConfigTemplateListResponseSchema = z.object({
+	// 业务响应码，成功时固定为 ResponseCodes.SUCCESS。
 	code: z.literal(ResponseCodes.SUCCESS),
+	// 响应消息。
 	msg: z.string(),
+	// 响应数据。
 	data: z.object({
-		templates: z.array(ScTemplateModel),
+		// 配置模板列表。
+		templates: z.array(ConfigTemplateSchema),
 	}),
 });
 
-// 创建配置模板请求 Schema
-export const ScTemplateCreateReq = z.object({
+/**
+ * 创建或更新配置模板请求 Schema。
+ *
+ * 用于校验新增模板和编辑模板时提交的请求体。
+ */
+export const ConfigTemplateSaveRequestSchema = z.object({
+	// 模板名称，不能为空。
 	name: z.string().min(1, '模板名称不能为空'),
+	// 模板说明。
 	description: z.string(),
+	// 模板内容，不能为空。
 	content: z.string().min(1, '模板内容不能为空'),
 });
 
-// 创建配置模板响应 Schema
-export const ScTemplateCreateResp = z.object({
+/**
+ * 创建配置模板响应 Schema。
+ *
+ * 描述管理端创建模板接口的成功响应结构。
+ */
+export const ConfigTemplateCreateResponseSchema = z.object({
+	// 业务响应码，成功时固定为 ResponseCodes.SUCCESS。
 	code: z.literal(ResponseCodes.SUCCESS),
+	// 响应消息。
 	msg: z.string(),
+	// 响应数据。
 	data: z.object({
+		// 创建结果说明。
 		message: z.string(),
-		template: ScTemplateModel,
+		// 创建后的模板对象。
+		template: ConfigTemplateSchema,
 	}),
 });
 
-// =============================================================================
-// 导出 TypeScript 类型
-// =============================================================================
+/**
+ * 配置模板类型。
+ */
+export type ConfigTemplate = z.infer<typeof ConfigTemplateSchema>;
 
-export type IScTemplateModel = z.infer<typeof ScTemplateModel>;
-export type IScTemplateListResp = z.infer<typeof ScTemplateListResp>;
-export type IScTemplateCreateReq = z.infer<typeof ScTemplateCreateReq>;
-export type IScTemplateCreateResp = z.infer<typeof ScTemplateCreateResp>;
+/**
+ * 配置模板列表响应类型。
+ */
+export type ConfigTemplateListResponse = z.infer<typeof ConfigTemplateListResponseSchema>;
+
+/**
+ * 创建或更新配置模板请求类型。
+ */
+export type ConfigTemplateSaveRequest = z.infer<typeof ConfigTemplateSaveRequestSchema>;
+
+/**
+ * 创建配置模板响应类型。
+ */
+export type ConfigTemplateCreateResponse = z.infer<typeof ConfigTemplateCreateResponseSchema>;

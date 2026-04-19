@@ -2,7 +2,7 @@ import yaml from 'js-yaml';
 import { ClashProxy, ClashListener, ProxyAreaInfo } from '@/types/clash.types';
 import type { YamlObject, YamlValue } from '@/modules/yamlMerge/utils/yamlTypes';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/api-schemas';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiPort {

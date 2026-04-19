@@ -1,7 +1,7 @@
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { safeError } from '@/utils/logHelper';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { DynamicSyncRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { DynamicSyncRequestSchema, ResponseCodes } from '@/types/api-schemas';
 
 /**
  * 触发单个订阅链接的实时同步

@@ -1,7 +1,7 @@
 import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { withAuth } from '@/utils/apiMiddleware';
-import { AdminLogsQuerySchema, ResponseCodes } from '@/types/openapi-schemas';
+import { AdminLogsQuerySchema, ResponseCodes } from '@/types/api-schemas';
 
 export const runtime = 'nodejs';
 

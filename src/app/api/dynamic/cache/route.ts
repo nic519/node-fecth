@@ -1,7 +1,7 @@
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { safeError } from '@/utils/logHelper';
 import { ResponseUtils } from '@/utils/responseUtils';
-import { DynamicCacheRequestSchema, ResponseCodes } from '@/types/openapi-schemas';
+import { DynamicCacheRequestSchema, ResponseCodes } from '@/types/api-schemas';
 
 export const POST = async (request: Request) => {
     try {

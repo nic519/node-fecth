@@ -2,7 +2,7 @@ import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
 import type { YamlObject, YamlValue } from '@/modules/yamlMerge/utils/yamlTypes';
 import { ClashProxy } from '@/types/clash.types';
-import { UserConfig } from '@/types/openapi-schemas';
+import { UserConfig } from '@/types/api-schemas';
 import { createConcurrencyLimit } from '@/utils/http/client';
 import { logger } from '@/utils/request/network.config';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';

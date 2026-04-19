@@ -1,7 +1,7 @@
 import type { DbInstance } from '@/server/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { UserConfigSchema, type IUserConfig } from './user.schema';
+import { UserConfigSchema, type UserConfig } from './user.schema';
 import { buildSubscriptionListFromConfig } from './subscription-list';
 
 export class UserService {
@@ -10,7 +10,7 @@ export class UserService {
 	/**
 	 * 从数据库获取用户配置
 	 */
-	async getUserConfig(uid: string): Promise<IUserConfig | null> {
+	async getUserConfig(uid: string): Promise<UserConfig | null> {
 		try {
 			const userRecord = await this.db.select().from(users).where(eq(users.id, uid)).get();
 
@@ -29,7 +29,7 @@ export class UserService {
 
 			// 合并数据库字段到配置对象
 			// 优先使用数据库字段作为单一真理源
-			const config: IUserConfig = {
+			const config: UserConfig = {
 				...configWithoutLegacySubscribe,
 				accessToken: userRecord.accessToken,
 				// 如果数据库字段为空字符串，则在配置对象中视为 undefined (对应 optional)
@@ -53,7 +53,7 @@ export class UserService {
 	/**
 	 * 保存用户配置
 	 */
-	async saveUserConfig(uid: string, config: IUserConfig): Promise<boolean> {
+	async saveUserConfig(uid: string, config: UserConfig): Promise<boolean> {
 		try {
 			// 验证配置
 			UserConfigSchema.parse(config);
@@ -120,7 +120,7 @@ export class UserService {
 	/**
 	 * 验证并获取用户
 	 */
-	async validateAndGetUser(uid: string, accessToken: string): Promise<IUserConfig | null> {
+	async validateAndGetUser(uid: string, accessToken: string): Promise<UserConfig | null> {
 		try {
 			const user = await this.getUserConfig(uid);
 			if (!user) {
@@ -154,7 +154,7 @@ export class UserService {
 	/**
 	 * 更新用户配置 (alias for saveUserConfig for compatibility)
 	 */
-	async updateUser(uid: string, body: { config: IUserConfig }): Promise<IUserConfig | null> {
+	async updateUser(uid: string, body: { config: UserConfig }): Promise<UserConfig | null> {
 		const success = await this.saveUserConfig(uid, body.config);
 		if (success) {
 			return this.getUserConfig(uid);
