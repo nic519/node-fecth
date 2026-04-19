@@ -29,6 +29,14 @@ export function isValidSuperAdminTokenValue(
   return Boolean(superToken && expectedToken && superToken === expectedToken);
 }
 
+export function getValidSuperAdminToken(
+  superToken: string | string[] | null | undefined,
+  explicitEnv?: Env,
+): string | null {
+  const tokenValue = Array.isArray(superToken) ? superToken[0] : superToken;
+  return isValidSuperAdminTokenValue(tokenValue, explicitEnv) ? tokenValue : null;
+}
+
 export function isSuperAdminRequest(request: Request, explicitEnv?: Env): boolean {
   const url = new URL(request.url);
   const superToken = url.searchParams.get(SUPER_TOKEN_QUERY_PARAM);

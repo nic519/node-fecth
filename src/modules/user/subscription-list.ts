@@ -13,7 +13,7 @@ function normalizeSubscriptionItem(item: SubscriptionItem): SubscriptionItem | n
   return {
     ...item,
     subscribe,
-    flag: item.flag?.trim() ? item.flag.trim() : DEFAULT_SUB_FLAG,
+    flag: typeof item.flag === 'string' ? item.flag.trim() : DEFAULT_SUB_FLAG,
   };
 }
 

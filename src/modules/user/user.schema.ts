@@ -17,7 +17,7 @@ export const SubscribeSchema = z.object({
 	// 订阅源 URL。
 	subscribe: z.url('订阅链接必须是有效的URL'),
 	// 订阅源在界面和规则处理中的短标识。
-	flag: z.string().min(1, '标识不能为空'),
+	flag: z.string(),
 	// 该订阅源只参与哪些地区的节点合并；为空时表示不限制地区。
 	includeArea: z.array(AreaCodeSchema).optional(),
 });
@@ -27,7 +27,7 @@ export const SubscribeSchema = z.object({
  *
  * 描述用户可保存和更新的完整订阅配置，是用户配置相关逻辑的核心结构。
  */
-export const UserConfigSchema = z.object({
+const UserConfigBaseSchema = z.object({
 	// 用户访问订阅接口时使用的访问令牌。
 	accessToken: z.string().min(1, '访问令牌不能为空'),
 	// 远程规则配置地址；允许为空字符串表示不启用远程规则。
@@ -48,12 +48,29 @@ export const UserConfigSchema = z.object({
 	updatedAt: z.string().datetime().optional(),
 });
 
+export const UserConfigSchema = UserConfigBaseSchema.superRefine((config, ctx) => {
+	const subscriptions = config.appendSubList ?? [];
+	if (subscriptions.length <= 1) {
+		return;
+	}
+
+	subscriptions.forEach((subscription, index) => {
+		if (!subscription.flag.trim()) {
+			ctx.addIssue({
+				code: 'custom',
+				message: '多个订阅源时标识不能为空',
+				path: ['appendSubList', index, 'flag'],
+			});
+		}
+	});
+});
+
 /**
  * 数据库存储的动态用户配置 Schema。
  *
  * 移除了已经作为独立字段存储的用户配置项，只保留动态同步逻辑需要的配置片段。
  */
-export const DynamicUserConfigSchema = UserConfigSchema.omit({
+export const DynamicUserConfigSchema = UserConfigBaseSchema.omit({
 	accessToken: true,
 	requiredFilters: true,
 	ruleUrl: true,
