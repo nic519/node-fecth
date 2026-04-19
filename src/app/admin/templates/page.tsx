@@ -4,6 +4,7 @@ import { templates } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import type { TemplateItem } from './components/TemplateList';
 import { getValidSuperAdminToken } from '@/server/auth';
+import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
 
 export default async function AdminTemplatesPage({
   searchParams,
@@ -12,14 +13,17 @@ export default async function AdminTemplatesPage({
 }) {
   const params = await searchParams;
   const superToken = getValidSuperAdminToken(params.superToken);
-  const templateRows = superToken
-    ? await getServerDb().select().from(templates).orderBy(desc(templates.createdAt)).all()
-    : [];
+
+  if (!superToken) {
+    return <AdminAccessDenied />;
+  }
+
+  const templateRows = await getServerDb().select().from(templates).orderBy(desc(templates.createdAt)).all();
   const initialTemplates: TemplateItem[] = templateRows.map((template, index) => ({
     ...template,
     configContent: template.content || '',
     isSelected: index === 0,
   }));
 
-  return <AdminTemplatesClient superToken={superToken ?? ''} initialTemplates={initialTemplates} />;
+  return <AdminTemplatesClient superToken={superToken} initialTemplates={initialTemplates} />;
 }

@@ -1,6 +1,7 @@
 import { AdminUsersClient } from './AdminUsersClient';
 import { createServerServices } from '@/server/services';
 import { getValidSuperAdminToken } from '@/server/auth';
+import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
 
 export default async function AdminUsersPage({
   searchParams,
@@ -9,9 +10,12 @@ export default async function AdminUsersPage({
 }) {
   const params = await searchParams;
   const superToken = getValidSuperAdminToken(params.superToken);
-  const initialUsers = superToken
-    ? await createServerServices().adminService.getUserSummaryList()
-    : [];
 
-  return <AdminUsersClient superToken={superToken ?? ''} initialUsers={initialUsers} />;
+  if (!superToken) {
+    return <AdminAccessDenied />;
+  }
+
+  const initialUsers = await createServerServices().adminService.getUserSummaryList();
+
+  return <AdminUsersClient superToken={superToken} initialUsers={initialUsers} />;
 }
