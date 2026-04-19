@@ -72,14 +72,7 @@ TURSO_AUTH_TOKEN="your-turso-token"
 npm run dev
 ```
 
-### 4) 数据库迁移（可选）
-
-```bash
-npm run db:generate
-npm run db:push
-```
-
-### 5) 部署
+### 4) 部署
 
 Vercel:
 

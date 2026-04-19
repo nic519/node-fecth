@@ -14,4 +14,5 @@ export const DEFAULT_RULE_URL = process.env.NODE_ENV === 'development' ? DEV_RUL
 /// 推广订阅注册链接
 export const PROMO_URL = 'https://xn--9kqz23b19z.com/#/register?code=PI0eDXNf';
 
-export const SUPER_TOKEN_QUERY_PARAM = 'superToken';
+/// url
+export const SUPER_TOKEN_QUERY_PARAM = 'superToken'; 
