@@ -1,6 +1,17 @@
 import { ConfigPageClient, MissingUidState } from './ConfigPageClient';
+import { AccessDeniedState } from '@/components/AccessDeniedState';
 import { createServerServices } from '@/server/services';
 import type { UserConfig } from '@/types/user-config';
+
+function ConfigAccessDenied() {
+  return (
+    <AccessDeniedState
+      eyebrow="配置页访问校验"
+      title="访问令牌无效"
+      message="当前链接无法打开该用户配置，请确认 uid 和 token 是否正确。"
+    />
+  );
+}
 
 export default async function UserConfigPage({
   searchParams,
@@ -17,22 +28,26 @@ export default async function UserConfigPage({
     return <MissingUidState />;
   }
 
+  if (!token) {
+    return <ConfigAccessDenied />;
+  }
+
   let initialConfig: UserConfig | null = null;
   let initialLastSaved: Date | null = null;
 
-  if (token) {
-    const userConfig = await createServerServices().userService.validateAndGetUser(uid, token);
-    if (userConfig) {
-      const { updatedAt, ...config } = userConfig;
-      initialConfig = config;
-      initialLastSaved = updatedAt ? new Date(updatedAt) : null;
-    }
+  const userConfig = await createServerServices().userService.validateAndGetUser(uid, token);
+  if (!userConfig) {
+    return <ConfigAccessDenied />;
   }
+
+  const { updatedAt, ...config } = userConfig;
+  initialConfig = config;
+  initialLastSaved = updatedAt ? new Date(updatedAt) : null;
 
   return (
     <ConfigPageClient
       uid={uid}
-      token={token ?? ''}
+      token={token}
       initialConfig={initialConfig}
       initialLastSaved={initialLastSaved}
     />
