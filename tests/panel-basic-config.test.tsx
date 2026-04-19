@@ -6,7 +6,6 @@ import type { UserConfig } from '@/types/user-config';
 
 test('PanelBasicConfig uses subscription sources as the only subscription entry UI', () => {
   const config: UserConfig = {
-    subscribe: 'https://primary.example.com/sub',
     accessToken: 'token',
     appendSubList: [
       { subscribe: 'https://primary.example.com/sub', flag: 'A' },

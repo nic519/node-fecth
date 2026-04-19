@@ -2,15 +2,12 @@ import { expect, test } from 'bun:test';
 
 import {
   buildSubscriptionListFromConfig,
-  getPrimarySubscriptionUrl,
-  setPrimarySubscriptionUrl,
 } from '@/modules/user/subscription-list';
 
-test('buildSubscriptionListFromConfig prefers appendSubList and avoids duplicating subscribe', () => {
+test('buildSubscriptionListFromConfig returns normalized appendSubList items', () => {
   const subscriptions = buildSubscriptionListFromConfig({
-    subscribe: 'https://primary.example.com/sub',
     appendSubList: [
-      { subscribe: 'https://primary.example.com/sub', flag: 'A' },
+      { subscribe: '  https://primary.example.com/sub  ', flag: ' A ' },
       { subscribe: 'https://secondary.example.com/sub', flag: 'B' },
     ],
   });
@@ -21,47 +18,15 @@ test('buildSubscriptionListFromConfig prefers appendSubList and avoids duplicati
   ]);
 });
 
-test('buildSubscriptionListFromConfig ignores legacy subscribe when appendSubList misses it', () => {
+test('buildSubscriptionListFromConfig ignores empty appendSubList items', () => {
   const subscriptions = buildSubscriptionListFromConfig({
-    subscribe: 'https://primary.example.com/sub',
-    appendSubList: [{ subscribe: 'https://secondary.example.com/sub', flag: 'B' }],
+    appendSubList: [
+      { subscribe: '   ', flag: 'A' },
+      { subscribe: 'https://secondary.example.com/sub', flag: 'B' },
+    ],
   });
 
   expect(subscriptions).toEqual([
     { subscribe: 'https://secondary.example.com/sub', flag: 'B' },
   ]);
-});
-
-test('setPrimarySubscriptionUrl updates the first appendSubList item and keeps other config fields intact', () => {
-  const next = setPrimarySubscriptionUrl(
-    {
-      subscribe: 'https://old.example.com/sub',
-      accessToken: 'token',
-      excludeRegex: 'Standard',
-      appendSubList: [{ subscribe: 'https://old.example.com/sub', flag: 'A' }],
-    },
-    'https://new.example.com/sub',
-  );
-
-  expect(next.subscribe).toBe('https://new.example.com/sub');
-  expect(next.excludeRegex).toBe('Standard');
-  expect(next.appendSubList).toEqual([{ subscribe: 'https://new.example.com/sub', flag: 'A' }]);
-});
-
-test('getPrimarySubscriptionUrl reads the first appendSubList item before legacy subscribe', () => {
-  const subscribe = getPrimarySubscriptionUrl({
-    subscribe: 'https://legacy.example.com/sub',
-    appendSubList: [{ subscribe: 'https://primary.example.com/sub', flag: 'A' }],
-  });
-
-  expect(subscribe).toBe('https://primary.example.com/sub');
-});
-
-test('getPrimarySubscriptionUrl returns empty when appendSubList is empty', () => {
-  const subscribe = getPrimarySubscriptionUrl({
-    subscribe: 'https://legacy.example.com/sub',
-    appendSubList: [],
-  });
-
-  expect(subscribe).toBe('');
 });

@@ -137,7 +137,6 @@ export function RegisterUserDialog({
     setLoading(true);
     try {
       const userConfig: UserConfig = {
-        subscribe: subscribe.trim(),
         accessToken: token.trim(),
         appendSubList: [{
           subscribe: subscribe.trim(),

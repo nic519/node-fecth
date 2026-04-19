@@ -18,56 +18,11 @@ function normalizeSubscriptionItem(item: SubscriptionItem): SubscriptionItem | n
 }
 
 export function buildSubscriptionListFromConfig(
-  config: Pick<IUserConfig, 'appendSubList' | 'subscribe'>,
+  config: Pick<IUserConfig, 'appendSubList'>,
 ): SubscriptionItem[] {
   return (config.appendSubList ?? [])
     .map(normalizeSubscriptionItem)
     .filter((item): item is SubscriptionItem => item !== null);
-}
-
-export function getPrimarySubscriptionUrl(
-  config: Pick<IUserConfig, 'appendSubList' | 'subscribe'>,
-): string {
-  const normalizedList = (config.appendSubList ?? [])
-    .map(normalizeSubscriptionItem)
-    .filter((item): item is SubscriptionItem => item !== null);
-
-  if (normalizedList.length > 0) {
-    return normalizedList[0].subscribe;
-  }
-
-  return '';
-}
-
-export function setPrimarySubscriptionUrl(config: IUserConfig, subscribe: string): IUserConfig {
-  const nextSubscribe = subscribe.trim();
-  const subscriptions = buildSubscriptionListFromConfig(config);
-
-  let nextSubscriptions: SubscriptionItem[];
-  if (!nextSubscribe) {
-    nextSubscriptions = subscriptions.slice(1);
-  } else if (subscriptions.length > 0) {
-    nextSubscriptions = [
-      {
-        ...subscriptions[0],
-        subscribe: nextSubscribe,
-      },
-      ...subscriptions.slice(1),
-    ];
-  } else {
-    nextSubscriptions = [
-      {
-        subscribe: nextSubscribe,
-        flag: DEFAULT_SUB_FLAG,
-      },
-    ];
-  }
-
-  return {
-    ...config,
-    subscribe: nextSubscribe,
-    appendSubList: nextSubscriptions,
-  };
 }
 
 export function setSubscriptionList(config: IUserConfig, appendSubList: SubscriptionItem[]): IUserConfig {
@@ -77,7 +32,6 @@ export function setSubscriptionList(config: IUserConfig, appendSubList: Subscrip
 
   return {
     ...config,
-    subscribe: normalizedList[0]?.subscribe ?? '',
     appendSubList: normalizedList,
   };
 }

@@ -3,7 +3,7 @@ import { desc, inArray, InferSelectModel } from 'drizzle-orm';
 import { AdminOperation, UserAdminConfig, SubscriptionStat } from './admin.schema';
 import { TrafficInfo, type IUserConfig } from './user.schema';
 import { UserService } from './user.service';
-import { buildSubscriptionListFromConfig, getPrimarySubscriptionUrl } from './subscription-list';
+import { buildSubscriptionListFromConfig } from './subscription-list';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import type { DbInstance } from '@/server/db';
 import { LogService } from '@/services/log-service';
@@ -50,7 +50,6 @@ export class AdminService {
 			// 收集所有订阅URL以进行批量查询
 			const allUrls = new Set<string>();
 			for (const user of userList) {
-				const config = user.config;
 				let parsedAppendSubList: IUserConfig['appendSubList'];
 				if (user.appendSubList) {
 					try {
@@ -60,7 +59,6 @@ export class AdminService {
 					}
 				}
 				const subscriptions = buildSubscriptionListFromConfig({
-					subscribe: config.subscribe,
 					appendSubList: parsedAppendSubList,
 				});
 				subscriptions.forEach((sub) => {
@@ -83,9 +81,10 @@ export class AdminService {
 				const partialConfig = user.config;
 				const appendSubList = user.appendSubList ? JSON.parse(user.appendSubList) : undefined;
 				const subscriptions = buildSubscriptionListFromConfig({
-					subscribe: partialConfig.subscribe,
 					appendSubList,
 				});
+				const configWithoutLegacySubscribe = { ...partialConfig } as typeof partialConfig & { subscribe?: unknown };
+				delete configWithoutLegacySubscribe.subscribe;
 
 				// 构建订阅统计信息
 				const subscriptionStats: SubscriptionStat[] = [];
@@ -103,11 +102,7 @@ export class AdminService {
 
 				// 合并数据库字段到配置对象
 				const config: UserAdminConfig = {
-					...partialConfig,
-					subscribe: getPrimarySubscriptionUrl({
-						subscribe: partialConfig.subscribe,
-						appendSubList: subscriptions,
-					}),
+					...configWithoutLegacySubscribe,
 					uid: user.id,
 					updatedAt: user.updatedAt,
 					accessToken: user.accessToken,
@@ -290,12 +285,13 @@ export class AdminService {
 	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<TrafficInfo | undefined> {
 		try {
 			const configResponse = await this.userService.getUserConfig(uid);
-			if (!configResponse?.subscribe) {
+			const firstSubscription = configResponse?.appendSubList?.[0]?.subscribe;
+			if (!firstSubscription) {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
 			// Use DynamicService.getWithCache to get fresh content (cache handling is internal)
-			const result = await DynamicService.getWithCache(configResponse.subscribe);
+			const result = await DynamicService.getWithCache(firstSubscription);
 			const subInfo = result.traffic;
 
 			if (!subInfo) {

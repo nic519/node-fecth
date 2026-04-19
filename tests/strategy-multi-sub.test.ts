@@ -12,7 +12,7 @@ afterEach(() => {
 	mock.restore();
 });
 
-test('StrategyMultiSub fetches an appendSubList subscription once when it also mirrors subscribe', async () => {
+test('StrategyMultiSub fetches an appendSubList subscription once', async () => {
 	const requestedUrls: string[] = [];
 	const primarySubscribe = 'https://primary.example.com/sub';
 
@@ -25,7 +25,6 @@ test('StrategyMultiSub fetches an appendSubList subscription once when it also m
 	}) as typeof DynamicService.getWithCache;
 
 	const config: UserConfig = {
-		subscribe: primarySubscribe,
 		accessToken: 'token',
 		excludeRegex: '',
 		appendSubList: [
@@ -43,7 +42,7 @@ test('StrategyMultiSub fetches an appendSubList subscription once when it also m
 	expect(requestedUrls).toEqual([primarySubscribe]);
 });
 
-test('StrategyMultiSub ignores legacy subscribe when appendSubList is empty', async () => {
+test('StrategyMultiSub does not fetch when appendSubList is empty', async () => {
 	const requestedUrls: string[] = [];
 
 	DynamicService.getWithCache = (async (url: string) => {
@@ -55,7 +54,6 @@ test('StrategyMultiSub ignores legacy subscribe when appendSubList is empty', as
 	}) as typeof DynamicService.getWithCache;
 
 	const config: UserConfig = {
-		subscribe: 'https://legacy.example.com/sub',
 		accessToken: 'token',
 		excludeRegex: '',
 		appendSubList: [],

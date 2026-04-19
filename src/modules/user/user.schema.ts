@@ -17,7 +17,6 @@ export const SubscribeSchema = z.object({
 
 // 用户配置 Schema
 export const UserConfigSchema = z.object({
-	subscribe: z.url('订阅链接必须是有效的URL'),
 	accessToken: z.string().min(1, '访问令牌不能为空'),
 	ruleUrl: z.union([z.string().url(), z.literal('')]).optional(),
 	requiredFilters: z.string().optional(),
@@ -81,4 +80,3 @@ export const TrafficInfoSchema = z.object({
 });
 
 export type TrafficInfo = z.infer<typeof TrafficInfoSchema>;
-

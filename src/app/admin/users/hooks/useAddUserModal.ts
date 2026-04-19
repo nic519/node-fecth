@@ -68,7 +68,6 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 
 		try {
 			const userConfig: UserConfig = {
-				subscribe: newUserSubscribe.trim(),
 				accessToken: newUserToken.trim(),
 				appendSubList: [{
 					subscribe: newUserSubscribe.trim(),

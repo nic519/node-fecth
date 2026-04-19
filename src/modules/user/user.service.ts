@@ -2,7 +2,7 @@ import type { DbInstance } from '@/server/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { UserConfigSchema, type IUserConfig } from './user.schema';
-import { buildSubscriptionListFromConfig, getPrimarySubscriptionUrl } from './subscription-list';
+import { buildSubscriptionListFromConfig } from './subscription-list';
 
 export class UserService {
 	constructor(private db: DbInstance) { }
@@ -22,18 +22,15 @@ export class UserService {
 			const partialConfig = userRecord.config;
 			const appendSubList = userRecord.appendSubList ? JSON.parse(userRecord.appendSubList) : undefined;
 			const subscriptions = buildSubscriptionListFromConfig({
-				subscribe: partialConfig.subscribe,
 				appendSubList,
 			});
+			const configWithoutLegacySubscribe = { ...partialConfig } as typeof partialConfig & { subscribe?: unknown };
+			delete configWithoutLegacySubscribe.subscribe;
 
 			// 合并数据库字段到配置对象
 			// 优先使用数据库字段作为单一真理源
 			const config: IUserConfig = {
-				...partialConfig,
-				subscribe: getPrimarySubscriptionUrl({
-					subscribe: partialConfig.subscribe,
-					appendSubList: subscriptions,
-				}),
+				...configWithoutLegacySubscribe,
 				accessToken: userRecord.accessToken,
 				// 如果数据库字段为空字符串，则在配置对象中视为 undefined (对应 optional)
 				requiredFilters: userRecord.requiredFilters || undefined,
@@ -64,9 +61,8 @@ export class UserService {
 			const now = new Date().toISOString();
 
 			// 提取需要单独存储的字段
-			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ruleOverwrite, subscribe, ...restConfig } = config;
-			const subscriptions = buildSubscriptionListFromConfig({ subscribe, appendSubList });
-			const primarySubscribe = subscriptions[0]?.subscribe || subscribe;
+			const { accessToken, requiredFilters, ruleUrl, fileName, appendSubList, ruleOverwrite, ...restConfig } = config;
+			const subscriptions = buildSubscriptionListFromConfig({ appendSubList });
 
 			// 准备数据库记录
 			const userValues = {
@@ -79,11 +75,7 @@ export class UserService {
 				// appendSubList 是订阅地址的唯一持久化来源
 				appendSubList: subscriptions.length > 0 ? JSON.stringify(subscriptions) : '',
 				ruleOverwrite: ruleOverwrite || '',
-				// config 保留其他逻辑，同时将 subscribe 与 appendSubList 的首项保持同步
-				config: {
-					...restConfig,
-					subscribe: primarySubscribe,
-				},
+				config: restConfig,
 				updatedAt: now
 			};
 

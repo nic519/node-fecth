@@ -23,7 +23,6 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
       meta: {
         url: request.url,
         method: request.method,
-        subscribe: authConfig.subscribe,
         headers: Object.fromEntries(request.headers.entries()),
       },
     });
