@@ -2,11 +2,9 @@ import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { withAuth } from '@/utils/apiMiddleware';
 
-export const DELETE = withAuth(async (
-  _request,
-  context
-) => {
-  const { uid } = await context.params;
+// DELETE: 后台删除指定用户。
+export const DELETE = withAuth(async (_request, { params }) => {
+  const { uid } = await params;
 
   try {
     const { adminService } = createServerServices();

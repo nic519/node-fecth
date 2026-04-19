@@ -25,9 +25,11 @@ export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const validationResult = ConfigTemplateSaveRequestSchema.safeParse(body);
+
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);
     }
+
     const { name, description, content } = validationResult.data;
 
     const db = getServerDb();

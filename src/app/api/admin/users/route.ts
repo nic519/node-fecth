@@ -3,7 +3,7 @@ import { createServerServices } from '@/server/services';
 import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
 
-/// 获取所有用户信息
+// GET: 获取所有用户摘要信息。
 export const GET = withAuth(async () => {
   try {
     const { adminService } = createServerServices();
@@ -17,14 +17,16 @@ export const GET = withAuth(async () => {
   }
 }, { adminOnly: true });
 
-/// 创建新用户
+// POST: 后台创建新用户。
 export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const validationResult = RegisterRequestSchema.safeParse(body);
+
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }
+
     const { uid, config } = validationResult.data;
 
     const { adminService } = createServerServices();

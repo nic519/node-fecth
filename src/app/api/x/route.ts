@@ -1,10 +1,11 @@
 import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
-import { withAuth, type AuthenticatedRequest } from '@/utils/apiMiddleware';
+import { withAuth } from '@/utils/apiMiddleware';
 import { LogType } from '@/types/log';
 
-export const GET = withAuth(async (request: AuthenticatedRequest) => {
+// GET: 生成当前用户的订阅配置，并记录访问日志。
+export const GET = withAuth(async (request) => {
   const { logService } = createServerServices();
   const uid = request.uid;
 

@@ -1,8 +1,9 @@
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
-import { AuthenticatedRequest, withAuth } from '@/utils/apiMiddleware';
+import { withAuth } from '@/utils/apiMiddleware';
 import { ResponseUtils } from '@/utils/responseUtils';
 
-export const GET = withAuth(async (request: AuthenticatedRequest) => {
+// GET: 生成当前用户的订阅配置。
+export const GET = withAuth(async (request) => {
   const { auth: userConfig, uid } = request;
 
   try {
@@ -16,7 +17,7 @@ export const GET = withAuth(async (request: AuthenticatedRequest) => {
       return ResponseUtils.error(500, '配置生成失败', 'CLASH_HANDLER_FAILED');
     }
 
-    // Return the response directly as it's already a standard Response object
+    // ClashHandler 已经返回标准 Response，这里直接透传。
     return response;
   } catch (error: unknown) {
     return ResponseUtils.handleApiError(error);

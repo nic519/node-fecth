@@ -5,6 +5,10 @@ import { AdminLogsQuerySchema, ResponseCodes } from '@/types/api-schemas';
 
 export const runtime = 'nodejs';
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 20;
+
+// GET: 按分页和筛选条件查询后台日志。
 export const GET = withAuth(async (request) => {
   const searchParams = request.nextUrl.searchParams;
 
@@ -23,11 +27,14 @@ export const GET = withAuth(async (request) => {
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid query parameters', validationResult.error.format());
     }
+
     const { page, pageSize, level, type, userId, startTime, endTime } = validationResult.data;
+    const limit = pageSize ?? DEFAULT_PAGE_SIZE;
+    const offset = ((page ?? DEFAULT_PAGE) - 1) * limit;
 
     const result = await logService.queryLogs({
-      limit: pageSize ?? 20,
-      offset: ((page ?? 1) - 1) * (pageSize ?? 20),
+      limit,
+      offset,
       level,
       type,
       userId,

@@ -4,6 +4,7 @@ import { templates, type Template } from '@/db/schema';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest } from 'next/server';
 
+// GET: 公开读取指定模板内容，可选择作为附件下载。
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ templateId: string }> }
@@ -25,6 +26,7 @@ export async function GET(
     const extraHeaders: Record<string, string> = {};
 
     if (download === 'true' || filename) {
+      // 传入 filename 或 download=true 时，浏览器会按附件下载模板。
       const finalFilename = filename || `clash-template-${templateId}.yaml`;
       extraHeaders['Content-Disposition'] = `attachment; filename="${finalFilename}"`;
     }

@@ -23,6 +23,7 @@ export const PUT = withAuth(async (request, { params }) => {
     const db = getServerDb();
     const now = new Date().toISOString();
 
+    // 只允许保存经过 schema 校验后的模板字段。
     await db.update(templates)
       .set({ name, description, content, updatedAt: now })
       .where(eq(templates.id, templateId))
