@@ -1,4 +1,3 @@
-import { AdminService } from '@/modules/user/admin.service';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/api-schemas';
 import { createServerServices } from '@/server/services';
 import { withAuth } from '@/utils/apiMiddleware';

@@ -1,5 +1,5 @@
 import { createServerServices } from '@/server/services';
-import { getSuperAdminToken, resolveRuntimeEnv } from '@/server/runtime';
+import { resolveRuntimeEnv } from '@/server/runtime';
 import { isValidSuperAdminTokenValue } from '@/server/auth';
 import { logs } from '@/db/schema';
 import { sql, and, eq } from 'drizzle-orm';

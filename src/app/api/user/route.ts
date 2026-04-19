@@ -1,4 +1,3 @@
-import { UserService } from '@/modules/user/user.service';
 import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { UserConfigUpdateRequestSchema } from '@/modules/user/user.schema';
