@@ -3,16 +3,10 @@
 /// 由于历史原因，主订阅是没有标识的，所以这里是默认给一个
 export const DEFAULT_SUB_FLAG = '🐙';
 
-
-/// 默认规则URL
-const DEV_RULE_URL = 'https://raw.githubusercontent.com/zzy333444/passwall_rule/refs/heads/main/miho-cfg.yaml';
-
-const PROD_RULE_URL = 'https://catfig.vercel.app/api/subscription/template/7a67fa50-4c0d-437e-9348-b66ab659e337';
-
-export const DEFAULT_RULE_URL = process.env.NODE_ENV === 'development' ? DEV_RULE_URL : PROD_RULE_URL;
+export const DEFAULT_RULE_URL = "https://node.1024.hair/api/subscription/template/7a67fa50-4c0d-437e-9348-b66ab659e337";
 
 /// 推广订阅注册链接
 export const PROMO_URL = 'https://xn--9kqz23b19z.com/#/register?code=PI0eDXNf';
 
 /// url
-export const SUPER_TOKEN_QUERY_PARAM = 'superToken'; 
+export const SUPER_TOKEN_QUERY_PARAM = 'superToken';
