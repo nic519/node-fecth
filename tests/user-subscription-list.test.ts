@@ -50,3 +50,19 @@ test('setSubscriptionList preserves an intentionally empty flag', () => {
     ],
   });
 });
+
+test('setSubscriptionList preserves an empty subscription while editing', () => {
+  const config: UserConfig = {
+    accessToken: 'token',
+    appendSubList: [],
+  };
+
+  expect(setSubscriptionList(config, [
+    { subscribe: '', flag: 'A', includeArea: [] },
+  ])).toEqual({
+    accessToken: 'token',
+    appendSubList: [
+      { subscribe: '', flag: 'A', includeArea: [] },
+    ],
+  });
+});

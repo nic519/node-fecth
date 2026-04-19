@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { FileText, Filter, ListPlus, Plus } from 'lucide-react';
 import { PromoLinkButton } from '@/components/PromoLinkButton';
 import { getRandomEmoji } from '@/utils/emojiUtils';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
 import { secondaryActionButtonClass } from '@/lib/utils';
 import { PROMO_URL } from '@/config/constants';
-import { buildSubscriptionListFromConfig, setSubscriptionList } from '@/modules/user/subscription-list';
+import { setSubscriptionList } from '@/modules/user/subscription-list';
 
 interface BasicConfigProps {
     config: UserConfig;
@@ -22,7 +22,7 @@ interface BasicConfigProps {
 
 
 export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
-    const subscriptions = buildSubscriptionListFromConfig(config);
+    const subscriptions = useMemo(() => config.appendSubList ?? [], [config.appendSubList]);
 
     const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
         onChange({ ...config, [key]: value });

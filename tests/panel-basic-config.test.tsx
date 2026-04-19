@@ -21,3 +21,19 @@ test('PanelBasicConfig uses subscription sources as the only subscription entry 
   expect(markup).not.toContain('主订阅地址');
   expect(markup).not.toContain('追加订阅列表');
 });
+
+test('PanelBasicConfig renders empty subscription rows while editing', () => {
+  const config: UserConfig = {
+    accessToken: 'token',
+    appendSubList: [
+      { subscribe: '', flag: 'A', includeArea: [] },
+    ],
+  };
+
+  const markup = renderToStaticMarkup(
+    <PanelBasicConfig config={config} onChange={() => {}} uid="demo-user" />,
+  );
+
+  expect(markup).toContain('sub-url-0');
+  expect(markup).toContain('sub-flag-0');
+});
