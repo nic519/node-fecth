@@ -20,26 +20,9 @@ function normalizeSubscriptionItem(item: SubscriptionItem): SubscriptionItem | n
 export function buildSubscriptionListFromConfig(
   config: Pick<IUserConfig, 'appendSubList' | 'subscribe'>,
 ): SubscriptionItem[] {
-  const normalizedList = (config.appendSubList ?? [])
+  return (config.appendSubList ?? [])
     .map(normalizeSubscriptionItem)
     .filter((item): item is SubscriptionItem => item !== null);
-
-  const legacySubscribe = config.subscribe?.trim();
-  if (!legacySubscribe) {
-    return normalizedList;
-  }
-
-  if (normalizedList.some((item) => item.subscribe === legacySubscribe)) {
-    return normalizedList;
-  }
-
-  return [
-    {
-      subscribe: legacySubscribe,
-      flag: DEFAULT_SUB_FLAG,
-    },
-    ...normalizedList,
-  ];
 }
 
 export function getPrimarySubscriptionUrl(
@@ -53,7 +36,7 @@ export function getPrimarySubscriptionUrl(
     return normalizedList[0].subscribe;
   }
 
-  return config.subscribe?.trim() ?? '';
+  return '';
 }
 
 export function setPrimarySubscriptionUrl(config: IUserConfig, subscribe: string): IUserConfig {

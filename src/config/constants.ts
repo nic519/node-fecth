@@ -1,6 +1,6 @@
 
 /// 默认订阅标志
-/// 由于历史原因，主订阅是没有标识的，所以这里是默认给一个
+/// 订阅源未填写标识时默认给一个
 export const DEFAULT_SUB_FLAG = '🐙';
 
 export const DEFAULT_RULE_URL = "https://node.1024.hair/api/subscription/template/7a67fa50-4c0d-437e-9348-b66ab659e337";

@@ -70,7 +70,7 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Badge variant={item.source === '主订阅' ? 'default' : 'secondary'} className="shrink-0">
+            <Badge variant="secondary" className="shrink-0">
               {item.flag} {item.source}
             </Badge>
           </div>

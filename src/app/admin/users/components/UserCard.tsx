@@ -50,14 +50,14 @@ function SubscriptionStat({ stat }: SubscriptionStatProps) {
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex items-center gap-2">
           <span
-            className={`h-1.5 w-1.5 rounded-full shrink-0 ${stat.type === 'main' ? 'bg-primary' : 'bg-muted-foreground/60'}`}
+            className="h-1.5 w-1.5 rounded-full shrink-0 bg-muted-foreground/60"
             aria-hidden="true"
           />
           <Badge
-            variant={stat.type === 'main' ? 'default' : 'secondary'}
+            variant="secondary"
             className="h-5 px-1.5 text-[10px] shrink-0 font-normal"
           >
-            {stat.name || (stat.type === 'main' ? '主' : '附')}
+            {stat.name || '订阅源'}
           </Badge>
           {displayUrl ? (
             <span className="min-w-0 truncate font-mono text-[11px] leading-5 text-muted-foreground/80" title={stat.url}>

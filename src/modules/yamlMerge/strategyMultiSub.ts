@@ -1,4 +1,3 @@
-import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { StrategyMultiPort } from '@/modules/yamlMerge/strategyMultiPort';
 import { StrategyUtils } from '@/modules/yamlMerge/utils/strategyUtils';
 import type { YamlObject, YamlValue } from '@/modules/yamlMerge/utils/yamlTypes';
@@ -7,6 +6,7 @@ import { UserConfig } from '@/types/openapi-schemas';
 import { createConcurrencyLimit } from '@/utils/http/client';
 import { logger } from '@/utils/request/network.config';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
+import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
 import yaml from 'js-yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
@@ -21,15 +21,10 @@ export class StrategyMultiSub {
 			subInfo: '',
 		};
 
-		const appendSubList = this.userConfig.appendSubList;
+		const appendSubList = buildSubscriptionListFromConfig(this.userConfig);
 		const userId = this.uid || this.userConfig.accessToken; // Use uid if available, fallback to accessToken
 
 		if (appendSubList && appendSubList.length > 0) {
-			appendSubList.push({
-				subscribe: this.userConfig.subscribe,
-				flag: DEFAULT_SUB_FLAG,
-			});
-
 			// 使用并发控制，最大并发数 5
 			const limit = createConcurrencyLimit(5);
 			// 10 seconds timeout for each subscription is handled within fetch logic if needed, 

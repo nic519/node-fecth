@@ -94,8 +94,8 @@ export class AdminService {
 					const d = dynamicMap.get(sub.subscribe);
 					subscriptionStats.push({
 						url: sub.subscribe,
-						type: index === 0 ? 'main' : 'append',
-						name: index === 0 ? '主订阅' : (sub.flag || '订阅源'),
+						type: 'append',
+						name: sub.flag || `订阅源 ${index + 1}`,
 						traffic: d?.traffic || undefined,
 						lastUpdated: d?.updatedAt || undefined
 					});

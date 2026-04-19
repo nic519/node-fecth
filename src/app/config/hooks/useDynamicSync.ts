@@ -27,9 +27,9 @@ export function useDynamicSync(config: UserConfig) {
 
     const items = useMemo<SyncItemData[]>(() => {
         const subscriptions = buildSubscriptionListFromConfig(config);
-        return subscriptions.map((sub, index) => ({
+        return subscriptions.map((sub) => ({
             url: sub.subscribe,
-            source: index === 0 ? '主订阅' : '订阅源',
+            source: '订阅源',
             flag: sub.flag,
         })).filter(item => item.url);
     }, [config]);

@@ -1,6 +1,5 @@
 import { expect, test } from 'bun:test';
 
-import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import {
   buildSubscriptionListFromConfig,
   getPrimarySubscriptionUrl,
@@ -22,14 +21,13 @@ test('buildSubscriptionListFromConfig prefers appendSubList and avoids duplicati
   ]);
 });
 
-test('buildSubscriptionListFromConfig prepends legacy subscribe when appendSubList misses it', () => {
+test('buildSubscriptionListFromConfig ignores legacy subscribe when appendSubList misses it', () => {
   const subscriptions = buildSubscriptionListFromConfig({
     subscribe: 'https://primary.example.com/sub',
     appendSubList: [{ subscribe: 'https://secondary.example.com/sub', flag: 'B' }],
   });
 
   expect(subscriptions).toEqual([
-    { subscribe: 'https://primary.example.com/sub', flag: DEFAULT_SUB_FLAG },
     { subscribe: 'https://secondary.example.com/sub', flag: 'B' },
   ]);
 });
@@ -57,4 +55,13 @@ test('getPrimarySubscriptionUrl reads the first appendSubList item before legacy
   });
 
   expect(subscribe).toBe('https://primary.example.com/sub');
+});
+
+test('getPrimarySubscriptionUrl returns empty when appendSubList is empty', () => {
+  const subscribe = getPrimarySubscriptionUrl({
+    subscribe: 'https://legacy.example.com/sub',
+    appendSubList: [],
+  });
+
+  expect(subscribe).toBe('');
 });

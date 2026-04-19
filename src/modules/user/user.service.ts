@@ -79,7 +79,7 @@ export class UserService {
 				// appendSubList 是订阅地址的唯一持久化来源
 				appendSubList: subscriptions.length > 0 ? JSON.stringify(subscriptions) : '',
 				ruleOverwrite: ruleOverwrite || '',
-				// config 保留其他逻辑，同时将主订阅与 appendSubList 的首项保持同步
+				// config 保留其他逻辑，同时将 subscribe 与 appendSubList 的首项保持同步
 				config: {
 					...restConfig,
 					subscribe: primarySubscribe,

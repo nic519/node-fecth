@@ -2,7 +2,7 @@ import { IUserConfig } from "./user.schema";
 
 export interface SubscriptionStat {
 	url: string;
-	type: 'main' | 'append';
+	type: 'append';
 	name?: string; // For appendSubList flag
 	traffic?: string; // Raw traffic string from DB
 	lastUpdated?: string; // From dynamic table

@@ -3,7 +3,7 @@ import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/u
 
 // Static preview data
 const previewSyncItems: SyncItemData[] = [
-  { url: 'https://sub.nodefetch.io/sub1', source: '主订阅', flag: '🐙' },
+  { url: 'https://sub.nodefetch.io/sub1', source: '订阅源', flag: '🐙' },
   { url: 'https://sub.nodefetch.io/sub2', source: '追加订阅', flag: '🍚' },
   { url: 'https://sub.nodefetch.io/sub3', source: '追加订阅', flag: '🍌' }
 ];
