@@ -1,134 +1,134 @@
-# Clash Template Visual Editor Design
+# Clash 模板可视化编辑器设计
 
-## Context
+## 背景
 
-The admin template editor currently edits the template as raw YAML through `YamlEditor`. The backend template API stores and returns the same `content` string, and this work must not change that storage or read path.
+当前管理员模板编辑器通过 `YamlEditor` 直接编辑原始 YAML。后端模板 API 仍然保存并返回同一个 `content` 字符串，本次改造不能改变现有存储和读取路径。
 
-Clash/mihomo routing rules are ordered. Rules near the top have higher priority, common domain rules use `TYPE,payload,policy`, and `MATCH,policy` is the catch-all rule. `RULE-SET` references require `rule-providers`, so first-stage rule creation should focus on direct domain rules and keep provider management for a later phase.
+Clash/mihomo 的路由规则是有顺序的，越靠前优先级越高。常见域名规则格式是 `TYPE,payload,policy`，`MATCH,policy` 是兜底规则。`RULE-SET` 需要配套 `rule-providers`，因此第一阶段的规则新增应优先支持直接域名规则，把 provider 管理留到后续阶段。
 
-References:
+参考资料：
 
 - https://wiki.metacubex.one/en/config/rules/
 - https://wiki.metacubex.one/en/config/rule-providers/content/
 
-## Goals
+## 目标
 
-1. Add a visual interaction layer for the most common template edits while preserving raw YAML editing.
-2. Let admins filter template policy groups by region, using the existing region vocabulary: `TW`, `SG`, `JP`, `VN`, `HK`, `US`.
-3. Let admins add one website or a batch of website rules without manually writing YAML lines.
-4. Keep all changes local to the selected template's `configContent` string until the existing save action is used.
+1. 在保留原始 YAML 编辑能力的同时，为最常见的模板编辑动作增加可视化交互层。
+2. 允许管理员按地区过滤模板里的策略组，地区词汇沿用现有的 `TW`、`SG`、`JP`、`VN`、`HK`、`US`。
+3. 允许管理员不用手写 YAML 行，就能新增一个网站或一批网站规则。
+4. 所有变更在点击现有保存按钮前，都只更新当前选中模板的 `configContent` 字符串。
 
-## Non-Goals
+## 非目标
 
-1. Do not change database schema, API routes, template service methods, or subscription read behavior.
-2. Do not build a complete Clash/mihomo rule IDE in the first phase.
-3. Do not add rule-provider creation or remote rule-set management in the first phase.
-4. Do not hide the raw source editor, because complex YAML must remain editable.
+1. 不修改数据库结构、API 路由、模板 service 方法或订阅读取行为。
+2. 第一阶段不构建完整的 Clash/mihomo 规则 IDE。
+3. 第一阶段不增加 rule-provider 创建或远程 rule-set 管理。
+4. 不隐藏原始源码编辑器，因为复杂 YAML 仍然需要手写能力兜底。
 
-## Recommended Approach
+## 推荐方案
 
-Use a progressive two-pane editor inside `TemplateEditor`:
+在 `TemplateEditor` 里使用渐进式双栏编辑器：
 
-- Left pane: visual tools for region filtering and website rule insertion.
-- Right pane: the existing YAML editor, still the source of truth.
-- The visual tools parse the current YAML string with `js-yaml`, mutate supported fields, dump the object back to YAML, and call `onUpdateConfigContent`.
-- If parsing fails or the expected sections are missing, the visual tools show a non-blocking disabled state while raw editing continues to work.
+- 左侧：地区过滤和网站规则插入的可视化工具。
+- 右侧：现有 YAML 编辑器，仍然是唯一事实来源。
+- 可视化工具使用 `js-yaml` 解析当前 YAML 字符串，修改受支持的字段，再 dump 回 YAML，并调用 `onUpdateConfigContent`。
+- 如果 YAML 解析失败或缺少预期字段，可视化工具显示非阻塞的禁用状态，原始编辑器继续可用。
 
-This keeps the storage model unchanged and makes the first version useful without over-committing to every Clash syntax variant.
+这个方案不改变存储模型，也能让第一版有实际价值，同时避免过早承诺支持所有 Clash 语法变体。
 
-## Components
+## 组件
 
 ### `clash-template-utils`
 
-A small client-safe utility module should own YAML parsing and mutation.
+新增一个可在客户端使用的小型工具模块，专门负责 YAML 解析和变更。
 
-Responsibilities:
+职责：
 
-- Parse template YAML into a typed working object.
-- Extract proxy group names from `proxy-groups`.
-- Infer group regions by matching names against `ProxyAreaObjects`.
-- Apply selected regions by keeping matching groups and cleaning rules that target removed groups.
-- Insert generated website rules before the first `MATCH` rule, or append if `MATCH` is absent.
-- Preserve unsupported top-level fields by mutating only supported sections.
+- 将模板 YAML 解析成有类型的工作对象。
+- 从 `proxy-groups` 提取策略组名称。
+- 根据 `ProxyAreaObjects` 的正则规则推断策略组所属地区。
+- 根据选中的地区保留对应策略组，并清理引用已移除策略组的规则。
+- 将生成的网站规则插入到第一个 `MATCH` 规则前；如果不存在 `MATCH`，则追加到末尾。
+- 只修改受支持的 section，保留其他不认识的顶层字段。
 
 ### `TemplateVisualTools`
 
-A new UI component rendered only when a template is selected.
+新增一个 UI 组件，只要选中了模板就渲染。
 
-Responsibilities:
+职责：
 
-- Show parse status and counts for proxy groups and rules.
-- Render region toggles for `TW`, `SG`, `JP`, `VN`, `HK`, `US`.
-- Provide a website rule form:
-  - rule type: `DOMAIN`, `DOMAIN-SUFFIX`, `DOMAIN-KEYWORD`
-  - one or more domain inputs, separated by newline or comma
-  - policy selector populated from current proxy group names plus `DIRECT` and `REJECT`
-  - insert position fixed to "before MATCH" for phase one
-- Trigger YAML updates through `onUpdateConfigContent`.
+- 展示 YAML 解析状态、策略组数量和规则数量。
+- 渲染 `TW`、`SG`、`JP`、`VN`、`HK`、`US` 地区开关。
+- 提供网站规则表单：
+  - 规则类型：`DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-KEYWORD`
+  - 支持输入一个或多个域名，用换行或逗号分隔
+  - policy 下拉选项来自当前策略组名称，并附加 `DIRECT` 和 `REJECT`
+  - 第一阶段固定插入到 `MATCH` 之前
+- 通过 `onUpdateConfigContent` 触发 YAML 内容更新。
 
 ### `TemplateEditor`
 
-`TemplateEditor` should keep its existing header, metadata editing, validation display, and YAML editor. In edit mode, the editor body gains a responsive split layout:
+`TemplateEditor` 保持现有头部、元信息编辑、校验错误展示和 YAML 编辑器。编辑模式下，编辑器主体改成响应式分栏布局：
 
-- Visual tools are shown in a fixed-width left column on desktop.
-- YAML editor remains the main editing surface.
-- On narrower screens, visual tools stack above the YAML editor.
-- In read-only mode, visual tools can show parsed summary but mutation controls are disabled.
+- 桌面端左侧显示固定宽度的可视化工具栏。
+- YAML 编辑器仍然占据主要编辑区域。
+- 窄屏下，可视化工具堆叠在 YAML 编辑器上方。
+- 只读模式下，可视化工具可以展示解析摘要，但变更控件需要禁用。
 
-## Data Flow
+## 数据流
 
-1. `TemplateEditor` receives `currentConfigContent`.
-2. `TemplateVisualTools` parses that string with `js-yaml`.
-3. User toggles regions or submits website rules.
-4. Utility functions return a new YAML string.
-5. `TemplateEditor` calls `onUpdateConfigContent(newContent)`.
-6. Existing validation and save behavior continue unchanged.
+1. `TemplateEditor` 接收 `currentConfigContent`。
+2. `TemplateVisualTools` 使用 `js-yaml` 解析该字符串。
+3. 用户切换地区或提交网站规则。
+4. 工具函数返回新的 YAML 字符串。
+5. `TemplateEditor` 调用 `onUpdateConfigContent(newContent)`。
+6. 现有校验和保存行为保持不变。
 
-## Region Filtering Behavior
+## 地区过滤行为
 
-Region filtering works on `proxy-groups`, not on `GEOIP` routing rules.
+地区过滤作用于 `proxy-groups`，不是新增或修改 `GEOIP` 路由规则。
 
-- A group belongs to a region when its name matches that region's configured regex.
-- Built-in policies such as `DIRECT` and `REJECT` are never treated as removable groups.
-- Rules targeting removed groups are removed, mirroring the existing server-side filtering behavior.
-- `MATCH` is retained only if its policy is still valid.
-- Empty selection is not applied automatically; the UI should require at least one selected region before applying.
+- 当策略组名称匹配某个地区的配置正则时，该组归属于该地区。
+- `DIRECT`、`REJECT` 等内置 policy 永远不被当成可移除策略组。
+- 引用已移除策略组的规则会被移除，行为与现有服务端过滤逻辑保持一致。
+- `MATCH` 只有在它的 policy 仍然有效时才会保留。
+- 空选择不会自动应用；UI 应要求至少选择一个地区后才能执行过滤。
 
-## Website Rule Behavior
+## 网站规则行为
 
-Generated rule lines use Clash/mihomo-compatible direct rules:
+生成的规则行使用 Clash/mihomo 兼容的直接规则：
 
 - `DOMAIN,example.com,Policy`
 - `DOMAIN-SUFFIX,example.com,Policy`
 - `DOMAIN-KEYWORD,google,Policy`
 
-Domains are normalized by trimming whitespace and removing URL schemes and paths when possible. Duplicate generated rules are skipped. New rules are inserted before the first `MATCH` rule to preserve catch-all behavior.
+域名输入会做轻量归一化：去除首尾空白，并在可行时移除 URL scheme 和 path。重复生成的规则会跳过。新规则插入到第一个 `MATCH` 规则之前，以保留兜底规则的语义。
 
-## Error Handling
+## 错误处理
 
-- Invalid YAML: disable visual mutation controls and show that raw YAML must be fixed first.
-- Missing `proxy-groups`: show an empty region state and allow website rules only for built-in policies.
-- Missing `rules`: create a `rules` array when adding website rules.
-- Unsupported or non-string rule entries: leave them in place unless they target a removed group during region filtering.
+- YAML 无效：禁用可视化变更控件，并提示需要先修复原始 YAML。
+- 缺少 `proxy-groups`：显示空的地区状态，网站规则只允许选择内置 policy。
+- 缺少 `rules`：新增网站规则时创建 `rules` 数组。
+- 不支持或非字符串形式的 rule：默认保留；只有地区过滤时，如果它引用了已移除策略组，才会被清理。
 
-## Testing
+## 测试
 
-Add focused tests for the YAML utility module:
+为 YAML 工具模块添加聚焦测试：
 
-1. Extracts regional groups using `ProxyAreaObjects`.
-2. Applies a region selection and removes rules targeting excluded groups.
-3. Inserts website rules before `MATCH`.
-4. Skips duplicate website rules.
-5. Handles invalid YAML as a parse error.
+1. 能使用 `ProxyAreaObjects` 提取带地区归属的策略组。
+2. 应用地区选择后，会移除指向被排除策略组的规则。
+3. 新增网站规则会插入到 `MATCH` 前。
+4. 重复网站规则会被跳过。
+5. 无效 YAML 会返回解析错误状态。
 
-Component behavior can be covered with a lightweight render test if the existing test setup supports it; otherwise the first implementation should at least verify the utility layer and run lint.
+如果现有测试环境支持轻量组件渲染测试，可以补充覆盖组件行为；否则第一阶段至少验证工具层，并运行 lint。
 
-## Later Interaction Phases
+## 后续交互阶段
 
-After the first phase is stable, discuss and design:
+第一阶段稳定后，再讨论和设计：
 
-1. A rules table with edit, delete, enable/disable, and reorder controls.
-2. Rule-provider creation and `RULE-SET` binding.
-3. YAML diff preview before applying visual changes.
-4. Operation history for undoing visual edits.
-5. More complete Clash/mihomo validation for edge cases such as logical rules, sub-rules, ports, and process rules.
+1. 规则表格，支持编辑、删除、启用/禁用和排序。
+2. rule-provider 创建，以及 `RULE-SET` 绑定。
+3. 可视化变更应用前的 YAML diff 预览。
+4. 可视化操作历史，用于撤销编辑。
+5. 更完整的 Clash/mihomo 校验，覆盖 logical rules、sub-rules、端口、进程规则等边缘语法。
