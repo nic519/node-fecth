@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, FileDown, Link, Clipboard, Pencil, Trash2, Layout } from 'lucide-react';
 import type { ConfigTemplate } from '@/types/user-config';
+import { TemplateVisualTools } from './TemplateVisualTools';
 
 // TemplateItem definition (or import it if it's exported from somewhere)
 // Assuming TemplateList exports it or use TemplateConfig
@@ -18,10 +19,13 @@ interface TemplateEditorProps {
 	isEditing: boolean;
 	validationErrors: string[];
 	currentConfigContent: string;
+	yamlRevealLine?: number | null;
+	yamlRevealKey?: number;
 	onStartEdit: () => void;
 	onDeleteTemplate: () => void;
 	onUpdateTemplate: (field: keyof ConfigTemplate, value: any) => void;
 	onUpdateConfigContent: (content: string) => void;
+	onRevealProxyGroup?: (groupName: string) => void;
 	onValidate: (errors: string[]) => void;
 	onDownloadTemplate: () => void;
 	onReset: () => void;
@@ -37,10 +41,13 @@ export function TemplateEditor({
 	isEditing,
 	validationErrors,
 	currentConfigContent,
+	yamlRevealLine = null,
+	yamlRevealKey = 0,
 	onStartEdit,
 	onDeleteTemplate,
 	onUpdateTemplate,
 	onUpdateConfigContent,
+	onRevealProxyGroup,
 	onValidate,
 	onDownloadTemplate,
 	onReset,
@@ -195,26 +202,36 @@ export function TemplateEditor({
 					</div>
 				)}
 
-				{/* YAML 编辑器 - 无边框，透明背景 */}
-				<div className="flex-1 min-h-0 relative">
-					<div className="absolute inset-0">
-						<YamlEditor
-							key={selectedTemplate?.id}
-							value={currentConfigContent}
-							onChange={onUpdateConfigContent}
-							height="100%"
-							readOnly={!isEditing}
-							onValidate={onValidate}
-							bordered={false}
-							transparent={true}
-							className="bg-transparent"
-						/>
+				{/* 可视化工具 + YAML 编辑器 */}
+				<div className="flex-1 min-h-0 flex flex-col lg:flex-row relative overflow-hidden">
+					<TemplateVisualTools
+						content={currentConfigContent}
+						readOnly={!isEditing}
+						onChange={onUpdateConfigContent}
+						onRevealProxyGroup={onRevealProxyGroup}
+					/>
+					<div className="flex-1 min-h-[420px] lg:min-h-0 relative">
+						<div className="absolute inset-0">
+							<YamlEditor
+								key={selectedTemplate?.id}
+								value={currentConfigContent}
+								onChange={onUpdateConfigContent}
+								height="100%"
+								readOnly={!isEditing}
+								onValidate={onValidate}
+								bordered={false}
+								transparent={true}
+								revealLine={yamlRevealLine}
+								revealKey={yamlRevealKey}
+								className="bg-transparent"
+							/>
+						</div>
 					</div>
 				</div>
 
 				{/* 验证错误详情 - 底部抽屉式 */}
 				{validationErrors.length > 0 && (
-					<div className="absolute bottom-0 left-0 right-0 bg-destructive/10 border-t border-destructive/20 backdrop-blur-md p-3 max-h-[150px] overflow-y-auto z-10">
+					<div className="absolute bottom-0 left-0 right-0 bg-destructive/10 border-t border-destructive/20 backdrop-blur-md p-3 max-h-[150px] overflow-y-auto custom-scrollbar z-10">
 						<h4 className="text-xs font-medium text-destructive mb-1.5">语法错误详情：</h4>
 						<ul className="text-xs text-destructive/90 space-y-1 font-mono">
 							{validationErrors.map((error, index) => (

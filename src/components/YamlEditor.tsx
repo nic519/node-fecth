@@ -2,7 +2,7 @@
 'use client';
 
 import Editor from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
+import type * as Monaco from 'monaco-editor';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import yaml from 'js-yaml';
@@ -19,6 +19,8 @@ interface YamlEditorProps {
 	bordered?: boolean;
 	className?: string;
 	transparent?: boolean;
+	revealLine?: number | null;
+	revealKey?: number;
 }
 
 export function YamlEditor({
@@ -30,13 +32,15 @@ export function YamlEditor({
 	onValidate,
 	bordered = true,
 	className = '',
-	transparent = false
+	transparent = false,
+	revealLine = null,
+	revealKey = 0,
 }: YamlEditorProps) {
-	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+	const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { resolvedTheme } = useTheme();
-	const completionDisposableRef = useRef<monaco.IDisposable | null>(null);
-	const disposablesRef = useRef<monaco.IDisposable[]>([]);
+	const completionDisposableRef = useRef<Monaco.IDisposable | null>(null);
+	const disposablesRef = useRef<Monaco.IDisposable[]>([]);
 
 	useEffect(() => {
 		return () => {
@@ -49,8 +53,9 @@ export function YamlEditor({
 		};
 	}, []);
 
-	const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: any) => {
+	const handleEditorDidMount = (editor: Monaco.editor.IStandaloneCodeEditor, monaco: any) => {
 		editorRef.current = editor;
+		revealEditorLine(editor, revealLine);
 
 		// 注册代码补全 (仅注册一次，且非只读模式)
 		if (!completionDisposableRef.current && !readOnly) {
@@ -199,6 +204,10 @@ export function YamlEditor({
 		}
 	};
 
+	useEffect(() => {
+		revealEditorLine(editorRef.current, revealLine);
+	}, [revealLine, revealKey]);
+
 	const toggleFullscreen = () => {
 		setIsFullscreen(!isFullscreen);
 	};
@@ -262,7 +271,7 @@ export function YamlEditor({
 					readOnly,
 					minimap: { enabled: false },
 					scrollBeyondLastLine: false,
-					fontSize: 14,
+					fontSize: 15,
 					fontFamily: '"JetBrains Mono", "Fira Code", Consolas, Monaco, "Courier New", monospace',
 					lineNumbers: 'on',
 					renderLineHighlight: 'line',
@@ -339,4 +348,14 @@ export function YamlEditor({
 				)}
 		</>
 	);
+}
+
+function revealEditorLine(editor: Monaco.editor.IStandaloneCodeEditor | null, lineNumber: number | null) {
+	if (!editor || !lineNumber) return;
+	const model = editor.getModel();
+	if (!model) return;
+	const safeLine = Math.max(1, Math.min(lineNumber, model.getLineCount()));
+	editor.revealLineInCenter(safeLine);
+	editor.setPosition({ lineNumber: safeLine, column: 1 });
+	editor.focus();
 }

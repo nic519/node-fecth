@@ -40,7 +40,7 @@ export class DynamicService {
 
 			let content = await response.text();
 
-			// Auto-convert SSR subscription format to Clash YAML
+			// 自动转换 SSR 订阅格式为 Clash YAML 格式
 			if (SSRToClashConverter.isValidProtocol(content)) {
 				logger.info({ url: cleanUrl }, 'Detected SSR content, converting to Clash format');
 				try {
