@@ -4,6 +4,8 @@ import type { ConfigTemplate } from '@/types/user-config';
 import { useEffect, useState } from 'react';
 import type { TemplateItem } from '../components/TemplateList';
 import { templateService } from '@/services/template-api';
+import { minimalVisualTemplateModel } from '../visual-template/fixtures';
+import { normalizeVisualTemplateContent, wrapVisualModelContent } from '../visual-template/metadata';
 
 export interface UseTemplateManagementProps {
 	superToken: string;
@@ -31,6 +33,7 @@ export interface UseTemplateManagementReturn {
 	handleSelectTemplate: (templateId: string) => void;
 	handleStartEdit: () => void;
 	handleCreateTemplate: () => void;
+	handleCreateVisualTemplate: () => void;
 	handleDeleteTemplate: (templateId: string) => void;
 	confirmDeleteTemplate: () => void;
 	handleUpdateTemplate: (field: keyof TemplateItem, value: unknown) => void;
@@ -107,14 +110,18 @@ export const useTemplateManagement = ({
 
 			if (response.code === 0) {
 				const currentTemplates = templates;
-				const templateItems: TemplateItem[] = response.data.templates.map((t: ConfigTemplate) => ({
-					...t,
-					configContent: t.content || '',
-					isSelected:
-						currentTemplates.length === 0
-							? t.id === response.data.templates[0]?.id
-							: currentTemplates.some((x) => x.id === t.id && x.isSelected),
-				}));
+				const templateItems: TemplateItem[] = response.data.templates.map((t: ConfigTemplate) => {
+					const content = normalizeVisualTemplateContent(t.content || '');
+					return {
+						...t,
+						content,
+						configContent: content,
+						isSelected:
+							currentTemplates.length === 0
+								? t.id === response.data.templates[0]?.id
+								: currentTemplates.some((x) => x.id === t.id && x.isSelected),
+					};
+				});
 				// 确保至少有一个选中的模板
 				if (templateItems.length > 0 && !templateItems.some((t) => t.isSelected)) {
 					templateItems[0].isSelected = true;
@@ -172,6 +179,36 @@ export const useTemplateManagement = ({
 			}
 		} catch (err) {
 			showToast('创建模板失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleCreateVisualTemplate = async () => {
+		try {
+			setLoading(true);
+			const response = await templateService.createTemplate(superToken, {
+				name: '新可视化模板',
+				description: 'visual-v1',
+				format: 'visual-v1',
+				content: wrapVisualModelContent(minimalVisualTemplateModel),
+			});
+
+			if (response.code === 0) {
+				const newTemplate: TemplateItem = {
+					...response.data.template,
+					format: 'visual-v1',
+					configContent: response.data.template.content || '',
+					isSelected: true,
+				};
+
+				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat({ ...newTemplate, isSelected: true }));
+				setIsEditing(true);
+			} else {
+				throw new Error(response.msg || '创建模板失败');
+			}
+		} catch (err) {
+			showToast('创建可视化模板失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');
 		} finally {
 			setLoading(false);
 		}
@@ -333,6 +370,7 @@ export const useTemplateManagement = ({
 		handleSelectTemplate,
 		handleStartEdit,
 		handleCreateTemplate,
+		handleCreateVisualTemplate,
 		handleDeleteTemplate,
 		confirmDeleteTemplate,
 		handleUpdateTemplate,

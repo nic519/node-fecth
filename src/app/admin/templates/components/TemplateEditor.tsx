@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, FileDown, Link, Clipboard, Pencil, Trash2, Layout } from 'lucide-react';
 import type { ConfigTemplate } from '@/types/user-config';
 import { TemplateVisualTools } from './TemplateVisualTools';
+import { isVisualTemplateContent } from '../visual-template/metadata';
 
 // TemplateItem definition (or import it if it's exported from somewhere)
 // Assuming TemplateList exports it or use TemplateConfig
@@ -72,6 +73,9 @@ export function TemplateEditor({
 		);
 	}
 
+	const isVisualTemplate = isVisualTemplateContent(currentConfigContent);
+	const showVisualWorkspace = isVisualTemplate && isEditing;
+
 	return (
 		<div className="flex flex-col h-full bg-transparent">
 			{/* 头部 - 标题与操作按钮 */}
@@ -86,10 +90,15 @@ export function TemplateEditor({
 							placeholder="输入模板名称"
 						/>
 					) : (
-						<div className="flex flex-col">
-							<h3 className="text-lg font-bold text-foreground truncate" title={selectedTemplate.name}>
-								{selectedTemplate.name}
-							</h3>
+						<div className="flex flex-col gap-1">
+							<div className="flex items-center gap-2 min-w-0">
+								<h3 className="text-lg font-bold text-foreground truncate" title={selectedTemplate.name}>
+									{selectedTemplate.name}
+								</h3>
+								<span className="inline-flex shrink-0 w-fit rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+									{isVisualTemplate ? '可视化模板' : 'YAML 模板'}
+								</span>
+							</div>
 							{selectedTemplate.description && (
 								<p className="text-xs text-muted-foreground truncate max-w-xl">
 									{selectedTemplate.description}
@@ -202,14 +211,16 @@ export function TemplateEditor({
 					</div>
 				)}
 
-				{/* 可视化工具 + YAML 编辑器 */}
+				{/* YAML 模板保持原始编辑器；可视化模板只在编辑态展开完整工作区 */}
 				<div className="flex-1 min-h-0 flex flex-col lg:flex-row relative overflow-hidden">
-					<TemplateVisualTools
-						content={currentConfigContent}
-						readOnly={!isEditing}
-						onChange={onUpdateConfigContent}
-						onRevealProxyGroup={onRevealProxyGroup}
-					/>
+					{showVisualWorkspace && (
+						<TemplateVisualTools
+							content={currentConfigContent}
+							readOnly={!isEditing}
+							onChange={onUpdateConfigContent}
+							onRevealProxyGroup={onRevealProxyGroup}
+						/>
+					)}
 					<div className="flex-1 min-h-[420px] lg:min-h-0 relative">
 						<div className="absolute inset-0">
 							<YamlEditor

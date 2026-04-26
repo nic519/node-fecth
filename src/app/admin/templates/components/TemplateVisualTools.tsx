@@ -252,15 +252,31 @@ function GroupListSection({
 					>
 						<div className="truncate font-medium">{group.name}</div>
 						<div className="mt-1 flex items-center gap-2 text-xs opacity-80">
-							<span>{group.proxies.length || group.proxyCount} proxies</span>
-							{group.ruleAssociations.length > 0 && <span>{group.ruleAssociations.length} rules</span>}
-							{group.filter && <span>filter</span>}
+							{getGroupListMeta(group).map((item) => (
+								<span key={item}>{item}</span>
+							))}
 						</div>
 					</button>
 				))}
 			</div>
 		</section>
 	);
+}
+
+function getGroupListMeta(group: ProxyGroupSummary): string[] {
+	if (group.type === 'url-test') {
+		return [
+			group.includeAll ? 'include-all' : '',
+			group.interval ? `${group.interval}s` : '',
+			group.filter ? 'filter' : '',
+		].filter(Boolean);
+	}
+
+	return [
+		`${group.proxies.length || group.proxyCount} proxies`,
+		group.ruleAssociations.length > 0 ? `${group.ruleAssociations.length} rules` : '',
+		group.filter ? 'filter' : '',
+	].filter(Boolean);
 }
 
 function GroupEditor({

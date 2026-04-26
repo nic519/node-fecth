@@ -37,6 +37,7 @@ export function AdminTemplatesClient({
     handleSelectTemplate,
     handleStartEdit,
     handleCreateTemplate,
+    handleCreateVisualTemplate,
     handleDeleteTemplate,
     confirmDeleteTemplate,
     handleUpdateTemplate,
@@ -105,14 +106,24 @@ export function AdminTemplatesClient({
                   icon={FileText}
                   className="h-fit"
                   action={
-                    <Button
-                      onClick={handleCreateTemplate}
-                      size="sm"
-                      className="h-8 px-3 text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
-                    >
-                      <Plus className="w-3.5 h-3.5 mr-1.5" />
-                      新建
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={handleCreateTemplate}
+                        size="sm"
+                        className="h-8 px-3 text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        YAML
+                      </Button>
+                      <Button
+                        onClick={handleCreateVisualTemplate}
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 px-3 text-xs font-medium shadow-none rounded-md"
+                      >
+                        可视化
+                      </Button>
+                    </div>
                   }
                 >
                   <div className="max-h-[70vh] overflow-y-auto pr-2 -mr-2">

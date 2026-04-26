@@ -9,6 +9,8 @@ import { z } from 'zod';
 export const ConfigTemplateSchema = z.object({
 	// 模板唯一标识；兼容数据库数字 ID 和接口字符串 ID。
 	id: z.union([z.number(), z.string()]),
+	// 模板格式；旧数据没有该字段时默认按原始 YAML 模板处理。
+	format: z.enum(['yaml', 'visual-v1']).optional(),
 	// 模板名称。
 	name: z.string(),
 	// 模板说明。
@@ -46,6 +48,8 @@ export const ConfigTemplateListResponseSchema = z.object({
 export const ConfigTemplateSaveRequestSchema = z.object({
 	// 模板名称，不能为空。
 	name: z.string().min(1, '模板名称不能为空'),
+	// 模板格式；旧模板继续使用 yaml，新模板可选择 visual-v1。
+	format: z.enum(['yaml', 'visual-v1']).optional(),
 	// 模板说明。
 	description: z.string(),
 	// 模板内容，不能为空。

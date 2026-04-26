@@ -5,6 +5,7 @@ import { desc } from 'drizzle-orm';
 import type { TemplateItem } from './components/TemplateList';
 import { getValidSuperAdminToken } from '@/server/auth';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
+import { normalizeVisualTemplateContent } from './visual-template/metadata';
 
 export default async function AdminTemplatesPage({
   searchParams,
@@ -19,11 +20,15 @@ export default async function AdminTemplatesPage({
   }
 
   const templateRows = await getServerDb().select().from(templates).orderBy(desc(templates.createdAt)).all();
-  const initialTemplates: TemplateItem[] = templateRows.map((template, index) => ({
-    ...template,
-    configContent: template.content || '',
-    isSelected: index === 0,
-  }));
+  const initialTemplates: TemplateItem[] = templateRows.map((template, index) => {
+    const content = normalizeVisualTemplateContent(template.content || '');
+    return {
+      ...template,
+      content,
+      configContent: content,
+      isSelected: index === 0,
+    };
+  });
 
   return <AdminTemplatesClient superToken={superToken} initialTemplates={initialTemplates} />;
 }
