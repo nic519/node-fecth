@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { normalizeVisualTemplateModel } from './normalizer';
 import {
 	BUILTIN_PROXY_ALIASES,
 	type FilterPreset,
@@ -42,9 +43,12 @@ export function compileFilter(filter?: FilterPreset): string | undefined {
 }
 
 export function compileVisualTemplate(model: VisualTemplateModel): string {
-	const proxyGroups = model.policies.map((policy) => compilePolicy(policy, model));
-	const ruleSets = model.policies.flatMap((policy) => compileRules(policy));
-	const providers = compileRuleProviders(model);
+	const normalizedModel = normalizeVisualTemplateModel(model);
+	if (!normalizedModel) throw new Error('Visual template model is invalid');
+
+	const proxyGroups = normalizedModel.policies.map((policy) => compilePolicy(policy, normalizedModel));
+	const ruleSets = normalizedModel.policies.flatMap((policy) => compileRules(policy));
+	const providers = compileRuleProviders(normalizedModel);
 
 	const config: ClashConfig = {
 		'proxy-groups': proxyGroups,

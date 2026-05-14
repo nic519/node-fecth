@@ -7,6 +7,7 @@ import { templateService } from '@/services/template-api';
 import { minimalVisualTemplateModel } from '../visual-template/fixtures';
 import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from '../visual-template/metadata';
 import { composeVisualTemplateContent } from '../visual-template/compose';
+import { normalizeVisualTemplateModel } from '../visual-template/normalizer';
 
 const DEFAULT_VISUAL_TEMPLATE_BASE_CONTENT = '# 可选：在这里保留原始 YAML 片段，最终输出时会与可视化 JSON 合并\n';
 
@@ -115,7 +116,7 @@ export const useTemplateManagement = ({
 				const currentTemplates = templates;
 				const templateItems: TemplateItem[] = response.data.templates.map((t: ConfigTemplate) => {
 					const legacyVisualModel = extractVisualModelFromContent(t.content || '');
-					const visualModel = t.visualModel ?? legacyVisualModel;
+					const visualModel = normalizeVisualTemplateModel(t.visualModel) ?? legacyVisualModel;
 					const content = visualModel || t.format === 'visual-v1'
 						? stripVisualModelMetadata(t.content || '')
 						: normalizeVisualTemplateContent(t.content || '');

@@ -34,6 +34,60 @@ test('compileVisualTemplate emits proxy-groups, rules, and providers', () => {
 	expect(yaml).toContain('url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/whatsapp.mrs"');
 });
 
+test('extractVisualModelFromContent normalizes legacy object proxy references', () => {
+	const legacyModel = {
+		version: 1,
+		policies: [
+			{
+				id: 'auto-hk',
+				title: '[自动]-香港🇭🇰',
+				compileName: '[自动]-香港🇭🇰',
+				type: 'url-test',
+			},
+			{
+				id: 'foreign',
+				title: '🚀 国外流量',
+				compileName: '🚀 国外流量',
+				type: 'select',
+				proxies: [{ id: 'auto-hk' }, { id: 'direct' }, { compileName: '[手动]-SG' }],
+			},
+		],
+	};
+	const encoded = Buffer.from(JSON.stringify(legacyModel), 'utf8').toString('base64');
+	const content = `# visual-v1:model:${encoded}\n# visual-v1:end\nproxy-groups: []`;
+
+	expect(extractVisualModelFromContent(content)?.policies[1]?.proxies).toEqual([
+		'[自动]-香港🇭🇰',
+		'direct',
+		'[手动]-SG',
+	]);
+});
+
+test('compileVisualTemplate accepts normalized legacy object proxy references', () => {
+	const legacyModel = {
+		version: 1,
+		policies: [
+			{
+				id: 'auto-hk',
+				title: '[自动]-香港🇭🇰',
+				compileName: '[自动]-香港🇭🇰',
+				type: 'url-test',
+			},
+			{
+				id: 'foreign',
+				title: '🚀 国外流量',
+				compileName: '🚀 国外流量',
+				type: 'select',
+				proxies: [{ id: 'auto-hk' }, { id: 'direct' }, { compileName: '[手动]-SG' }],
+			},
+		],
+	} as unknown as Parameters<typeof compileVisualTemplate>[0];
+
+	const yaml = compileVisualTemplate(legacyModel);
+
+	expect(yaml).toContain('proxies: ["[自动]-香港🇭🇰", "🇨🇳 直连", "[手动]-SG"]');
+});
+
 test('wrapVisualModelContent stores model and compiled yaml in one content string', () => {
 	const content = wrapVisualModelContent(minimalVisualTemplateModel);
 	const extracted = extractVisualModelFromContent(content);

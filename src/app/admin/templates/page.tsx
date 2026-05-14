@@ -7,6 +7,7 @@ import type { TemplateItem } from './components/TemplateList';
 import { getValidSuperAdminToken } from '@/server/auth';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
 import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from './visual-template/metadata';
+import { normalizeVisualTemplateModel } from './visual-template/normalizer';
 
 export default async function AdminTemplatesPage({
   searchParams,
@@ -25,13 +26,14 @@ export default async function AdminTemplatesPage({
   const templateRows = await db.select().from(templates).orderBy(desc(templates.createdAt)).all();
   const initialTemplates: TemplateItem[] = templateRows.map((template, index) => {
     const legacyVisualModel = extractVisualModelFromContent(template.content || '');
-    const content = template.visualModel || template.format === 'visual-v1'
+    const visualModel = normalizeVisualTemplateModel(template.visualModel) ?? legacyVisualModel;
+    const content = visualModel || template.format === 'visual-v1'
       ? stripVisualModelMetadata(template.content || '')
       : normalizeVisualTemplateContent(template.content || '');
     return {
       ...template,
-      visualModel: template.visualModel ?? legacyVisualModel,
-      format: template.format === 'visual-v1' || template.visualModel || legacyVisualModel ? 'visual-v1' : 'yaml',
+      visualModel,
+      format: template.format === 'visual-v1' || visualModel ? 'visual-v1' : 'yaml',
       content,
       configContent: content,
       isSelected: index === 0,

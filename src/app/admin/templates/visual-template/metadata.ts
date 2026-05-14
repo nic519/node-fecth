@@ -1,4 +1,5 @@
 import { compileVisualTemplate } from './compiler';
+import { normalizeVisualTemplateModel } from './normalizer';
 import type { VisualTemplateModel } from './types';
 
 const MODEL_PREFIX = '# visual-v1:model:';
@@ -21,7 +22,7 @@ export function extractVisualModelFromContent(content: string): VisualTemplateMo
 	if (!encoded) return null;
 
 	try {
-		return JSON.parse(decodeBase64(encoded)) as VisualTemplateModel;
+		return normalizeVisualTemplateModel(JSON.parse(decodeBase64(encoded)));
 	} catch {
 		return null;
 	}

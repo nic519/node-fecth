@@ -7,6 +7,7 @@ import { desc } from 'drizzle-orm';
 import { ConfigTemplateSaveRequestSchema } from '@/types/schema.template';
 import { ResponseCodes } from '@/types/api-schemas';
 import { extractVisualModelFromContent, stripVisualModelMetadata } from '@/app/admin/templates/visual-template/metadata';
+import { normalizeVisualTemplateModel } from '@/app/admin/templates/visual-template/normalizer';
 import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
 
 // GET: 获取模板列表
@@ -76,10 +77,7 @@ function buildTemplatePayload(format: 'yaml' | 'visual-v1', rawContent: string, 
 }
 
 function getRequestVisualModel(visualModel: unknown, content: string): VisualTemplateModel | null {
-	if (isVisualTemplateModel(visualModel)) return visualModel;
+	const normalizedModel = normalizeVisualTemplateModel(visualModel);
+	if (normalizedModel) return normalizedModel;
 	return extractVisualModelFromContent(content);
-}
-
-function isVisualTemplateModel(value: unknown): value is VisualTemplateModel {
-	return typeof value === 'object' && value !== null && (value as { version?: unknown }).version === 1;
 }

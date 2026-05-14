@@ -1,11 +1,20 @@
 import { ResponseCodes } from '@/types/api-schemas';
 import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
+import { normalizeVisualTemplateModel } from '@/app/admin/templates/visual-template/normalizer';
 import { z } from 'zod';
 
-const VisualTemplateModelSchema = z.custom<VisualTemplateModel>(
-	(value) => typeof value === 'object' && value !== null && (value as { version?: unknown }).version === 1,
-	'可视化模板模型格式无效',
-);
+const VisualTemplateModelSchema = z.unknown().transform((value, ctx) => {
+	const model = normalizeVisualTemplateModel(value);
+	if (!model) {
+		ctx.addIssue({
+			code: 'custom',
+			message: '可视化模板模型格式无效',
+		});
+		return z.NEVER;
+	}
+
+	return model satisfies VisualTemplateModel;
+});
 
 /**
  * 配置模板 Schema。

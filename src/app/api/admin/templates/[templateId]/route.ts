@@ -7,6 +7,7 @@ import { ResponseCodes } from '@/types/api-schemas';
 import { eq } from 'drizzle-orm';
 import { withAuth } from '@/utils/apiMiddleware';
 import { extractVisualModelFromContent, stripVisualModelMetadata } from '@/app/admin/templates/visual-template/metadata';
+import { normalizeVisualTemplateModel } from '@/app/admin/templates/visual-template/normalizer';
 import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
 
 // PUT: 更新模板
@@ -71,12 +72,9 @@ function buildTemplatePayload(format: 'yaml' | 'visual-v1', rawContent: string, 
 }
 
 function getRequestVisualModel(visualModel: unknown, content: string): VisualTemplateModel | null {
-	if (isVisualTemplateModel(visualModel)) return visualModel;
+	const normalizedModel = normalizeVisualTemplateModel(visualModel);
+	if (normalizedModel) return normalizedModel;
 	return extractVisualModelFromContent(content);
-}
-
-function isVisualTemplateModel(value: unknown): value is VisualTemplateModel {
-	return typeof value === 'object' && value !== null && (value as { version?: unknown }).version === 1;
 }
 
 // DELETE: 删除模板
