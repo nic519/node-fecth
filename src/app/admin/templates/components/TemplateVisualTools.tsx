@@ -247,24 +247,24 @@ function VisualModelTools({
 	const selectPolicies = model.policies.filter((policy) => policy.type === 'select');
 	const urlTestPolicies = model.policies.filter((policy) => policy.type === 'url-test');
 	const [activeType, setActiveType] = useState<WorkspaceType>('select');
-	const [activeSelectId, setActiveSelectId] = useState('');
-	const [activeUrlTestId, setActiveUrlTestId] = useState('');
-	const activeSelectPolicy = selectPolicies.find((policy) => policy.id === activeSelectId) ?? selectPolicies[0] ?? null;
-	const activeUrlTestPolicy = urlTestPolicies.find((policy) => policy.id === activeUrlTestId) ?? urlTestPolicies[0] ?? null;
+	const [activeSelectTitle, setActiveSelectTitle] = useState('');
+	const [activeUrlTestTitle, setActiveUrlTestTitle] = useState('');
+	const activeSelectPolicy = selectPolicies.find((policy) => policy.title === activeSelectTitle) ?? selectPolicies[0] ?? null;
+	const activeUrlTestPolicy = urlTestPolicies.find((policy) => policy.title === activeUrlTestTitle) ?? urlTestPolicies[0] ?? null;
 	const activePolicy = activeType === 'select' ? activeSelectPolicy : activeUrlTestPolicy;
 
-	const updatePolicy = (policyId: string, updater: (policy: Policy) => Policy) => {
+	const updatePolicy = (policyTitle: string, updater: (policy: Policy) => Policy) => {
 		if (readOnly || !onChange) return;
 		onChange({
 			...model,
-			policies: model.policies.map((policy) => (policy.id === policyId ? updater(policy) : policy)),
+			policies: model.policies.map((policy) => (policy.title === policyTitle ? updater(policy) : policy)),
 		});
 	};
 
-	const handlePolicySelect = (type: WorkspaceType, policyId: string) => {
+	const handlePolicySelect = (type: WorkspaceType, policyTitle: string) => {
 		setActiveType(type);
-		if (type === 'select') setActiveSelectId(policyId);
-		else setActiveUrlTestId(policyId);
+		if (type === 'select') setActiveSelectTitle(policyTitle);
+		else setActiveUrlTestTitle(policyTitle);
 	};
 
 	return (
@@ -277,16 +277,16 @@ function VisualModelTools({
 							description="直接编辑 visual JSON"
 							icon={<Route className="h-4 w-4" />}
 							policies={selectPolicies}
-							activeId={activeType === 'select' ? activePolicy?.id : ''}
-							onSelect={(policyId) => handlePolicySelect('select', policyId)}
+							activeTitle={activeType === 'select' ? activePolicy?.title : ''}
+							onSelect={(policyTitle) => handlePolicySelect('select', policyTitle)}
 						/>
 						<ModelPolicyListSection
 							title="URL-Test 自动组"
 							description="测速与筛选"
 							icon={<Activity className="h-4 w-4" />}
 							policies={urlTestPolicies}
-							activeId={activeType === 'url-test' ? activePolicy?.id : ''}
-							onSelect={(policyId) => handlePolicySelect('url-test', policyId)}
+							activeTitle={activeType === 'url-test' ? activePolicy?.title : ''}
+							onSelect={(policyTitle) => handlePolicySelect('url-test', policyTitle)}
 							className="mt-4"
 						/>
 					</div>
@@ -298,7 +298,7 @@ function VisualModelTools({
 							model={model}
 							policy={activePolicy}
 							readOnly={readOnly || !onChange}
-							onUpdate={(updater) => updatePolicy(activePolicy.id, updater)}
+							onUpdate={(updater) => updatePolicy(activePolicy.title, updater)}
 						/>
 					) : (
 						<div className="rounded-md border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed text-muted-foreground">
@@ -316,7 +316,7 @@ function ModelPolicyListSection({
 	description,
 	icon,
 	policies,
-	activeId,
+	activeTitle,
 	onSelect,
 	className,
 }: {
@@ -324,8 +324,8 @@ function ModelPolicyListSection({
 	description: string;
 	icon: React.ReactNode;
 	policies: Policy[];
-	activeId?: string;
-	onSelect: (policyId: string) => void;
+	activeTitle?: string;
+	onSelect: (policyTitle: string) => void;
 	className?: string;
 }) {
 	return (
@@ -347,17 +347,17 @@ function ModelPolicyListSection({
 			<div className="space-y-1">
 				{policies.map((policy) => (
 					<button
-						key={policy.id}
+						key={policy.title}
 						type="button"
-						onClick={() => onSelect(policy.id)}
+						onClick={() => onSelect(policy.title)}
 						className={cn(
 							'w-full rounded-md px-3 py-2.5 text-left text-sm transition-colors',
-							activeId === policy.id
+							activeTitle === policy.title
 								? 'bg-primary/10 text-primary'
 								: 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
 						)}
 					>
-						<div className="truncate font-medium">{policy.compileName}</div>
+						<div className="truncate font-medium">{policy.title}</div>
 						<div className="mt-1 flex items-center gap-2 text-xs opacity-80">
 							<span>{policy.rules?.length ?? 0} rules</span>
 							<span>{policy.proxies?.length ?? 0} refs</span>
@@ -400,13 +400,12 @@ function ModelPolicyEditor({
 	};
 
 	const addRule = () => {
-		const providerKey = createRuleProviderKey(policy);
+		const ruleName = createRuleName(policy);
 		updatePatch({
 			rules: [
 				...(policy.rules ?? []),
 				{
-					id: providerKey,
-					providerKey,
+					name: ruleName,
 					behavior: 'domain',
 					format: 'mrs',
 					url: '',
@@ -419,7 +418,7 @@ function ModelPolicyEditor({
 		<div className="space-y-4">
 			<div className="space-y-2">
 				<div className="flex items-center justify-between gap-3">
-					<h5 className="min-w-0 truncate text-base font-semibold text-foreground">{policy.compileName}</h5>
+					<h5 className="min-w-0 truncate text-base font-semibold text-foreground">{policy.title}</h5>
 					<Badge variant="outline" className="rounded-md text-[10px]">
 						{policy.type}
 					</Badge>
@@ -431,29 +430,23 @@ function ModelPolicyEditor({
 
 			<div className="grid grid-cols-2 gap-2">
 				<LabeledInput
-					label="title"
+					label="策略名称"
+					help="最终 YAML 中 proxy-group.name 和 RULE-SET 目标名。"
 					value={policy.title}
 					disabled={readOnly}
 					onChange={(value) => updatePatch({ title: value })}
-				/>
-				<LabeledInput
-					label="compileName"
-					help="最终 YAML 中 proxy-group.name 和 RULE-SET 目标名。"
-					value={policy.compileName}
-					disabled={readOnly}
-					onChange={(value) => updatePatch({ compileName: value })}
 				/>
 			</div>
 
 			{policy.type === 'select' && (
 				<div className="space-y-1.5">
-					<Label className="text-xs text-muted-foreground">proxies refs</Label>
+					<Label className="text-xs text-muted-foreground">proxies</Label>
 					<p className="text-[10px] leading-relaxed text-muted-foreground/80">
-						填写 policy id 或内置 id，用逗号/换行分隔。当前可用：{model.policies.map((item) => item.id).join(', ')}, direct, reject
+						填写策略名称或内置别名，用逗号/换行分隔。当前可用：{model.policies.map((item) => item.title).join(', ')}, direct, reject
 					</p>
 					<Textarea
-						value={(policy.proxies ?? []).map((ref) => ref.id).join(', ')}
-						onChange={(event) => updatePatch({ proxies: splitKeywordInput(event.target.value).map((id) => ({ id })) })}
+						value={(policy.proxies ?? []).join(', ')}
+						onChange={(event) => updatePatch({ proxies: splitKeywordInput(event.target.value) })}
 						disabled={readOnly}
 						rows={3}
 						className="resize-none font-mono text-xs"
@@ -489,7 +482,7 @@ function ModelPolicyEditor({
 					<div className="space-y-2">
 						{(policy.rules ?? []).map((rule, index) => (
 							<ModelRuleEditor
-								key={`${rule.id}-${index}`}
+								key={`${rule.name}-${index}`}
 								rule={rule}
 								readOnly={readOnly}
 								onUpdate={(patch) => updateRule(index, patch)}
@@ -672,10 +665,11 @@ function ModelRuleEditor({
 		<div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-3">
 			<div className="grid grid-cols-2 gap-2">
 				<LabeledInput
-					label="providerKey"
-					value={rule.providerKey}
+					label="name"
+					help="最终 YAML 中 rule-provider 的 key。"
+					value={rule.name}
 					disabled={readOnly}
-					onChange={(value) => onUpdate({ providerKey: value, id: value || rule.id })}
+					onChange={(value) => onUpdate({ name: value })}
 				/>
 				<LabeledInput
 					label="url"
@@ -1152,8 +1146,8 @@ function FieldPill({ label, value }: { label: string; value: number }) {
 	);
 }
 
-function createRuleProviderKey(policy: Policy): string {
-	const base = policy.id
+function createRuleName(policy: Policy): string {
+	const base = policy.title
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '_')
 		.replace(/^_+|_+$/g, '');

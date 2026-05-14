@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import yaml from 'js-yaml';
-import { compileFilter, compileVisualTemplate, resolvePolicyCompileName } from '@/app/admin/templates/visual-template/compiler';
+import { compileFilter, compileVisualTemplate, resolveProxyName } from '@/app/admin/templates/visual-template/compiler';
 import { minimalVisualTemplateModel } from '@/app/admin/templates/visual-template/fixtures';
 import {
 	extractVisualModelFromContent,
@@ -14,9 +14,9 @@ test('compileFilter creates include and exclude regex', () => {
 	expect(compileFilter({ include: ['港', 'HK'], exclude: ['1.5', '倍率:2'] })).toBe('(?=(港|HK))(?!.*(1\\.5|倍率:2))');
 });
 
-test('resolvePolicyCompileName resolves user and builtin policies', () => {
-	expect(resolvePolicyCompileName({ id: 'auto-hk' }, minimalVisualTemplateModel)).toBe('[自动]-香港🇭🇰');
-	expect(resolvePolicyCompileName({ id: 'direct' }, minimalVisualTemplateModel)).toBe('🇨🇳 直连');
+test('resolveProxyName resolves policy titles and builtin aliases', () => {
+	expect(resolveProxyName('[自动]-香港🇭🇰', minimalVisualTemplateModel)).toBe('[自动]-香港🇭🇰');
+	expect(resolveProxyName('direct', minimalVisualTemplateModel)).toBe('🇨🇳 直连');
 });
 
 test('compileVisualTemplate emits proxy-groups, rules, and providers', () => {
@@ -41,7 +41,7 @@ test('wrapVisualModelContent stores model and compiled yaml in one content strin
 	expect(content).toContain('# visual-v1:model:');
 	expect(content).toContain('proxy-groups:');
 	expect(extracted?.version).toBe(1);
-	expect(extracted?.policies.find((policy) => policy.id === 'whatsapp')?.compileName).toBe('[单]-WhatsApp💬');
+	expect(extracted?.policies.find((policy) => policy.title === '[单]-WhatsApp💬')?.rules?.[0]?.name).toBe('whatsapp_domain');
 });
 
 test('wrapVisualModelContent keeps the generated content valid YAML', () => {

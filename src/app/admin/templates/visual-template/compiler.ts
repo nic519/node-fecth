@@ -1,23 +1,32 @@
 import yaml from 'js-yaml';
 import {
-	BUILTIN_POLICIES,
+	BUILTIN_PROXY_ALIASES,
 	type FilterPreset,
 	type Policy,
-	type PolicyRef,
 	type RuleSetRef,
 	type VisualTemplateModel,
 } from './types';
 
 type ClashConfig = Record<string, unknown>;
 
-export function resolvePolicyCompileName(ref: PolicyRef, model: VisualTemplateModel): string {
-	const policy = model.policies.find((item) => item.id === ref.id);
-	if (policy) return policy.compileName;
+const DEFAULT_RULE_PROVIDER = {
+	type: 'http',
+	interval: 86400,
+} as const;
 
-	const builtin = BUILTIN_POLICIES.find((item) => item.id === ref.id);
-	if (builtin) return builtin.compileName;
+const DEFAULT_URL_TEST = {
+	interval: 200,
+	tolerance: 23,
+} as const;
 
-	throw new Error(`Unknown policy reference: ${ref.id}`);
+export function resolveProxyName(name: string, model: VisualTemplateModel): string {
+	const normalized = name.trim();
+	if (!normalized) throw new Error('Proxy reference cannot be empty');
+
+	const policy = model.policies.find((item) => item.title === normalized);
+	if (policy) return policy.title;
+
+	return BUILTIN_PROXY_ALIASES[normalized] ?? normalized;
 }
 
 export function compileFilter(filter?: FilterPreset): string | undefined {
@@ -55,12 +64,12 @@ export function compileVisualTemplate(model: VisualTemplateModel): string {
 
 function compilePolicy(policy: Policy, model: VisualTemplateModel): Record<string, unknown> {
 	const base: Record<string, unknown> = {
-		name: policy.compileName,
+		name: policy.title,
 		type: policy.type,
 	};
 
 	if (policy.type === 'select') {
-		base.proxies = (policy.proxies ?? []).map((ref) => resolvePolicyCompileName(ref, model));
+		base.proxies = (policy.proxies ?? []).map((proxyName) => resolveProxyName(proxyName, model));
 	}
 
 	if (policy.includeAll) base['include-all'] = true;
@@ -71,7 +80,7 @@ function compilePolicy(policy: Policy, model: VisualTemplateModel): Record<strin
 	if (filter) base.filter = filter;
 
 	if (policy.type === 'url-test') {
-		const options = { ...model.urlTestDefaults, ...policy.urlTest };
+		const options = { ...DEFAULT_URL_TEST, ...policy.urlTest };
 		if (options.url) base.url = options.url;
 		if (options.interval !== undefined) base.interval = options.interval;
 		if (options.tolerance !== undefined) base.tolerance = options.tolerance;
@@ -86,7 +95,7 @@ function compilePolicy(policy: Policy, model: VisualTemplateModel): Record<strin
 
 function compileRules(policy: Policy): string[] {
 	return (policy.rules ?? []).map((rule) => {
-		const parts = ['RULE-SET', rule.providerKey, policy.compileName];
+		const parts = ['RULE-SET', rule.name, policy.title];
 		if (rule.noResolve) parts.push('no-resolve');
 		return parts.join(',');
 	});
@@ -98,19 +107,19 @@ function compileRuleProviders(model: VisualTemplateModel): Record<string, unknow
 
 	for (const policy of model.policies) {
 		for (const rule of policy.rules ?? []) {
-			if (seen.has(rule.providerKey)) continue;
-			seen.add(rule.providerKey);
-			providers[rule.providerKey] = compileProvider(rule, model);
+			if (seen.has(rule.name)) continue;
+			seen.add(rule.name);
+			providers[rule.name] = compileProvider(rule);
 		}
 	}
 
 	return providers;
 }
 
-function compileProvider(rule: RuleSetRef, model: VisualTemplateModel): Record<string, unknown> {
+function compileProvider(rule: RuleSetRef): Record<string, unknown> {
 	return {
-		type: model.providerDefaults.type,
-		interval: model.providerDefaults.interval,
+		type: DEFAULT_RULE_PROVIDER.type,
+		interval: DEFAULT_RULE_PROVIDER.interval,
 		behavior: rule.behavior,
 		format: rule.format,
 		url: rule.url,

@@ -2,22 +2,15 @@ export type TemplateFormat = 'yaml' | 'visual-v1';
 
 export type PolicyType = 'select' | 'url-test';
 
-export type PolicyTag = 'app' | 'collection' | 'system' | 'region' | 'manual';
-
 export interface VisualTemplateModel {
 	version: 1;
 	policies: Policy[];
-	providerDefaults: RuleProviderDefaults;
-	urlTestDefaults: UrlTestDefaults;
 }
 
 export interface Policy {
-	id: string;
 	title: string;
-	compileName: string;
 	type: PolicyType;
-	tags?: PolicyTag[];
-	proxies?: PolicyRef[];
+	proxies?: string[];
 	rules?: RuleSetRef[];
 	includeAll?: boolean;
 	includeAllProxies?: boolean;
@@ -26,13 +19,8 @@ export interface Policy {
 	urlTest?: UrlTestOptions;
 }
 
-export interface PolicyRef {
-	id: string;
-}
-
 export interface RuleSetRef {
-	id: string;
-	providerKey: string;
+	name: string;
 	behavior: 'domain' | 'ipcidr' | 'classical';
 	format: 'mrs' | 'yaml' | 'text';
 	url: string;
@@ -55,23 +43,7 @@ export interface UrlTestOptions {
 	expectedStatus?: string;
 }
 
-export interface RuleProviderDefaults {
-	type: 'http';
-	interval: number;
-}
-
-export interface UrlTestDefaults {
-	url?: string;
-	interval: number;
-	tolerance: number;
-}
-
-export interface BuiltinPolicy {
-	id: string;
-	compileName: string;
-}
-
-export const BUILTIN_POLICIES: BuiltinPolicy[] = [
-	{ id: 'direct', compileName: '🇨🇳 直连' },
-	{ id: 'reject', compileName: 'REJECT' },
-];
+export const BUILTIN_PROXY_ALIASES: Record<string, string> = {
+	direct: '🇨🇳 直连',
+	reject: 'REJECT',
+};
