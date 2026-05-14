@@ -1,4 +1,5 @@
 import { DynamicUserConfigSchema } from '@/modules/user/user.schema';
+import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
 import { sql } from 'drizzle-orm';
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import z from 'zod';
@@ -17,6 +18,12 @@ export const templates = sqliteTable('templates', {
 
 	// 模板内容（YAML 配置）
 	content: text('content').notNull(),
+
+	// 模板格式；yaml 为传统模板，visual-v1 使用 visualModel 存储结构化模型。
+	format: text('format').notNull().default('yaml').$type<'yaml' | 'visual-v1'>(),
+
+	// 可视化模板模型；传统 YAML 模板为空。
+	visualModel: text('visual_model', { mode: 'json' }).$type<VisualTemplateModel | null>(),
 
 	// 时间戳
 	createdAt: text('created_at')

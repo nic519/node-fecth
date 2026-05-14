@@ -1,11 +1,12 @@
 import { AdminTemplatesClient } from './AdminTemplatesClient';
 import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
+import { ensureTemplateVisualColumns } from '@/db/template-migrations';
 import { desc } from 'drizzle-orm';
 import type { TemplateItem } from './components/TemplateList';
 import { getValidSuperAdminToken } from '@/server/auth';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
-import { normalizeVisualTemplateContent } from './visual-template/metadata';
+import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from './visual-template/metadata';
 
 export default async function AdminTemplatesPage({
   searchParams,
@@ -19,11 +20,18 @@ export default async function AdminTemplatesPage({
     return <AdminAccessDenied />;
   }
 
-  const templateRows = await getServerDb().select().from(templates).orderBy(desc(templates.createdAt)).all();
+  const db = getServerDb();
+  await ensureTemplateVisualColumns(db);
+  const templateRows = await db.select().from(templates).orderBy(desc(templates.createdAt)).all();
   const initialTemplates: TemplateItem[] = templateRows.map((template, index) => {
-    const content = normalizeVisualTemplateContent(template.content || '');
+    const legacyVisualModel = extractVisualModelFromContent(template.content || '');
+    const content = template.visualModel || template.format === 'visual-v1'
+      ? stripVisualModelMetadata(template.content || '')
+      : normalizeVisualTemplateContent(template.content || '');
     return {
       ...template,
+      visualModel: template.visualModel ?? legacyVisualModel,
+      format: template.format === 'visual-v1' || template.visualModel || legacyVisualModel ? 'visual-v1' : 'yaml',
       content,
       configContent: content,
       isSelected: index === 0,

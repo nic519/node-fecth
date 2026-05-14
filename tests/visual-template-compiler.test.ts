@@ -5,8 +5,10 @@ import { minimalVisualTemplateModel } from '@/app/admin/templates/visual-templat
 import {
 	extractVisualModelFromContent,
 	normalizeVisualTemplateContent,
+	stripVisualModelMetadata,
 	wrapVisualModelContent,
 } from '@/app/admin/templates/visual-template/metadata';
+import { composeVisualTemplateContent } from '@/app/admin/templates/visual-template/compose';
 
 test('compileFilter creates include and exclude regex', () => {
 	expect(compileFilter({ include: ['港', 'HK'], exclude: ['1.5', '倍率:2'] })).toBe('(?=(港|HK))(?!.*(1\\.5|倍率:2))');
@@ -64,4 +66,52 @@ test('normalizeVisualTemplateContent repairs legacy visual metadata body lines',
 	const repaired = normalizeVisualTemplateContent(legacyContent);
 	expect(() => yaml.load(repaired)).not.toThrow();
 	expect(extractVisualModelFromContent(repaired)?.version).toBe(1);
+});
+
+test('stripVisualModelMetadata returns plain YAML without the embedded model block', () => {
+	const content = wrapVisualModelContent(minimalVisualTemplateModel);
+	const stripped = stripVisualModelMetadata(content);
+
+	expect(stripped).not.toContain('# visual-v1:model:');
+	expect(stripped).toContain('proxy-groups:');
+	expect(yaml.load(stripped)).toMatchObject({
+		'proxy-groups': expect.any(Array),
+	});
+});
+
+test('composeVisualTemplateContent merges original yaml with compiled visual model only at output time', () => {
+	const originalYaml = [
+		'proxies:',
+		'  - { name: 🇨🇳 直连, type: direct }',
+		'port: 7890',
+		'country_pr: &country_pr ["[自动]-香港🇭🇰", "🇨🇳 直连"]',
+		'proxy-groups:',
+		'  - { name: "旧 YAML 组", type: select, proxies: *country_pr }',
+		'rules:',
+		'  - IP-CIDR,192.168.0.0/16,DIRECT',
+		'  - RULE-SET,cn_domain,DIRECT',
+		'  - MATCH,旧 YAML 组',
+		'rule-anchor:',
+		'  domain: &domain { type: http, interval: 86400, behavior: domain, format: mrs }',
+		'rule-providers:',
+		'  cn_domain: { <<: *domain, url: "https://example.test/cn.mrs" }',
+	].join('\n');
+
+	const composed = yaml.load(composeVisualTemplateContent(originalYaml, minimalVisualTemplateModel)) as Record<string, unknown>;
+	const proxyGroups = composed['proxy-groups'] as Record<string, unknown>[];
+	const rules = composed.rules as string[];
+	const providers = composed['rule-providers'] as Record<string, unknown>;
+
+	expect(proxyGroups.map((group) => group.name)).toEqual(
+		expect.arrayContaining(['旧 YAML 组', '[自动]-香港🇭🇰', '🚀 国外流量', '[单]-WhatsApp💬']),
+	);
+	expect(rules).toEqual([
+		'IP-CIDR,192.168.0.0/16,DIRECT',
+		'RULE-SET,cn_domain,DIRECT',
+		'RULE-SET,whatsapp_domain,[单]-WhatsApp💬',
+		'MATCH,🐟 漏网之鱼',
+	]);
+	expect(providers.cn_domain).toEqual(expect.any(Object));
+	expect(providers.whatsapp_domain).toEqual(expect.any(Object));
+	expect(composed.port).toBe(7890);
 });

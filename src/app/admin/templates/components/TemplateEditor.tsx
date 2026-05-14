@@ -73,7 +73,8 @@ export function TemplateEditor({
 		);
 	}
 
-	const isVisualTemplate = isVisualTemplateContent(currentConfigContent);
+	const isVisualTemplate =
+		selectedTemplate.format === 'visual-v1' || Boolean(selectedTemplate.visualModel) || isVisualTemplateContent(currentConfigContent);
 	const showVisualWorkspace = isVisualTemplate && isEditing;
 
 	return (
@@ -216,8 +217,10 @@ export function TemplateEditor({
 					{showVisualWorkspace && (
 						<TemplateVisualTools
 							content={currentConfigContent}
+							visualModel={selectedTemplate.visualModel}
 							readOnly={!isEditing}
 							onChange={onUpdateConfigContent}
+							onVisualModelChange={(model) => onUpdateTemplate('visualModel', model)}
 							onRevealProxyGroup={onRevealProxyGroup}
 						/>
 					)}

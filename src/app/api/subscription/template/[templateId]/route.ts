@@ -1,6 +1,8 @@
 import { getServerDb } from '@/server/db';
 import { BaseCRUD } from '@/db/base-crud';
 import { templates, type Template } from '@/db/schema';
+import { ensureTemplateVisualColumns } from '@/db/template-migrations';
+import { composeVisualTemplateContent } from '@/app/admin/templates/visual-template/compose';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest } from 'next/server';
 
@@ -15,14 +17,18 @@ export async function GET(
   const filename = searchParams.get('filename');
 
   try {
-    const crud = new BaseCRUD<Template>(getServerDb(), templates);
+    const db = getServerDb();
+    await ensureTemplateVisualColumns(db);
+    const crud = new BaseCRUD<Template>(db, templates);
     const template = await crud.selectById(templateId);
 
     if (!template) {
       return ResponseUtils.error(404, `模板 ${templateId} 不存在`);
     }
 
-    const content = template.content || '';
+    const content = template.format === 'visual-v1'
+      ? composeVisualTemplateContent(template.content || '', template.visualModel)
+      : template.content || '';
     const extraHeaders: Record<string, string> = {};
 
     if (download === 'true' || filename) {

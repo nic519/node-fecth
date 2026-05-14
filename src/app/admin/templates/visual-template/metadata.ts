@@ -36,6 +36,17 @@ export function normalizeVisualTemplateContent(content: string): string {
 	return hasLegacyBodyLine ? wrapVisualModelContent(model) : content;
 }
 
+export function stripVisualModelMetadata(content: string): string {
+	const lines = content.split('\n');
+	const start = lines.findIndex((line) => line.trim().startsWith(MODEL_PREFIX));
+	if (start === -1) return content;
+
+	const end = lines.findIndex((line, index) => index > start && line.trim() === MODEL_END);
+	if (end === -1) return content;
+
+	return lines.slice(end + 1).join('\n').replace(/^\n/, '');
+}
+
 export function isVisualTemplateContent(content: string): boolean {
 	return extractVisualModelFromContent(content) !== null;
 }

@@ -1,5 +1,11 @@
 import { ResponseCodes } from '@/types/api-schemas';
+import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
 import { z } from 'zod';
+
+const VisualTemplateModelSchema = z.custom<VisualTemplateModel>(
+	(value) => typeof value === 'object' && value !== null && (value as { version?: unknown }).version === 1,
+	'可视化模板模型格式无效',
+);
 
 /**
  * 配置模板 Schema。
@@ -17,6 +23,8 @@ export const ConfigTemplateSchema = z.object({
 	description: z.string(),
 	// 模板 YAML 或文本内容。
 	content: z.string(),
+	// 可视化模板模型；传统 YAML 模板为空。
+	visualModel: VisualTemplateModelSchema.nullable().optional(),
 	// 模板创建时间，使用 ISO 日期时间字符串。
 	createdAt: z.string(),
 	// 模板最后更新时间，使用 ISO 日期时间字符串。
@@ -54,6 +62,8 @@ export const ConfigTemplateSaveRequestSchema = z.object({
 	description: z.string(),
 	// 模板内容，不能为空。
 	content: z.string().min(1, '模板内容不能为空'),
+	// 可视化模板模型；visual-v1 保存时写入，yaml 模板留空。
+	visualModel: VisualTemplateModelSchema.nullable().optional(),
 });
 
 /**

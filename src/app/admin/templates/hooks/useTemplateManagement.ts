@@ -5,7 +5,10 @@ import { useEffect, useState } from 'react';
 import type { TemplateItem } from '../components/TemplateList';
 import { templateService } from '@/services/template-api';
 import { minimalVisualTemplateModel } from '../visual-template/fixtures';
-import { normalizeVisualTemplateContent, wrapVisualModelContent } from '../visual-template/metadata';
+import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from '../visual-template/metadata';
+import { composeVisualTemplateContent } from '../visual-template/compose';
+
+const DEFAULT_VISUAL_TEMPLATE_BASE_CONTENT = '# 可选：在这里保留原始 YAML 片段，最终输出时会与可视化 JSON 合并\n';
 
 export interface UseTemplateManagementProps {
 	superToken: string;
@@ -111,9 +114,15 @@ export const useTemplateManagement = ({
 			if (response.code === 0) {
 				const currentTemplates = templates;
 				const templateItems: TemplateItem[] = response.data.templates.map((t: ConfigTemplate) => {
-					const content = normalizeVisualTemplateContent(t.content || '');
+					const legacyVisualModel = extractVisualModelFromContent(t.content || '');
+					const visualModel = t.visualModel ?? legacyVisualModel;
+					const content = visualModel || t.format === 'visual-v1'
+						? stripVisualModelMetadata(t.content || '')
+						: normalizeVisualTemplateContent(t.content || '');
 					return {
 						...t,
+						format: visualModel || t.format === 'visual-v1' ? 'visual-v1' : 'yaml',
+						visualModel,
 						content,
 						configContent: content,
 						isSelected:
@@ -191,13 +200,15 @@ export const useTemplateManagement = ({
 				name: '新可视化模板',
 				description: 'visual-v1',
 				format: 'visual-v1',
-				content: wrapVisualModelContent(minimalVisualTemplateModel),
+				content: DEFAULT_VISUAL_TEMPLATE_BASE_CONTENT,
+				visualModel: minimalVisualTemplateModel,
 			});
 
 			if (response.code === 0) {
 				const newTemplate: TemplateItem = {
 					...response.data.template,
 					format: 'visual-v1',
+					visualModel: response.data.template.visualModel ?? minimalVisualTemplateModel,
 					configContent: response.data.template.content || '',
 					isSelected: true,
 				};
@@ -276,6 +287,8 @@ export const useTemplateManagement = ({
 				name: selectedTemplate.name,
 				description: selectedTemplate.description || '配置模板',
 				content: selectedTemplate.configContent,
+				format: selectedTemplate.format,
+				visualModel: selectedTemplate.format === 'visual-v1' ? selectedTemplate.visualModel ?? null : null,
 			});
 
 			if (response.code === 0) {
@@ -321,13 +334,16 @@ export const useTemplateManagement = ({
 	};
 
 	const handleCopyConfigContent = async () => {
-		if (!selectedTemplate?.configContent) {
+		if (!selectedTemplate?.configContent && selectedTemplate?.format !== 'visual-v1') {
 			showToast('没有可复制的配置内容', 'error');
 			return;
 		}
 
 		try {
-			await navigator.clipboard.writeText(selectedTemplate.configContent);
+			const content = selectedTemplate.format === 'visual-v1'
+				? composeVisualTemplateContent(selectedTemplate.configContent || '', selectedTemplate.visualModel)
+				: selectedTemplate.configContent || '';
+			await navigator.clipboard.writeText(content);
 			showToast('配置内容已复制到剪贴板', 'success');
 		} catch (err) {
 			showToast('复制失败：' + (err instanceof Error ? err.message : '未知错误'), 'error');

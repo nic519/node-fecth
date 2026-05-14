@@ -18,21 +18,52 @@ import {
 	type ProxyGroupOptionValue,
 	type ProxyGroupSummary,
 } from '../utils/clash-template-utils';
+import type { FilterPreset, Policy, RuleSetRef, VisualTemplateModel } from '../visual-template/types';
 import { Activity, GitBranch, Route, Save, ShieldAlert } from 'lucide-react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 
 interface TemplateVisualToolsProps {
 	content: string;
+	visualModel?: VisualTemplateModel | null;
 	readOnly: boolean;
 	onChange: (content: string) => void;
+	onVisualModelChange?: (model: VisualTemplateModel) => void;
 	onRevealProxyGroup?: (groupName: string) => void;
 }
 
 type DraftValues = Partial<Record<ProxyGroupOptionKey, string | boolean>>;
 type WorkspaceType = 'select' | 'url-test';
 
-export function TemplateVisualTools({ content, readOnly, onChange, onRevealProxyGroup }: TemplateVisualToolsProps) {
+export function TemplateVisualTools({ content, visualModel, readOnly, onChange, onVisualModelChange, onRevealProxyGroup }: TemplateVisualToolsProps) {
+	if (visualModel) {
+		return (
+			<VisualModelTools
+				model={visualModel}
+				readOnly={readOnly}
+				onChange={onVisualModelChange}
+			/>
+		);
+	}
+
+	return (
+		<YamlVisualTools
+			content={content}
+			readOnly={readOnly}
+			onChange={onChange}
+			onRevealProxyGroup={onRevealProxyGroup}
+		/>
+	);
+}
+
+interface YamlVisualToolsProps {
+	content: string;
+	readOnly: boolean;
+	onChange: (content: string) => void;
+	onRevealProxyGroup?: (groupName: string) => void;
+}
+
+function YamlVisualTools({ content, readOnly, onChange, onRevealProxyGroup }: YamlVisualToolsProps) {
 	const parsed = useMemo(() => parseClashTemplate(content), [content]);
 	const summaries = useMemo(() => (parsed.ok ? extractProxyGroupSummaries(parsed) : []), [parsed]);
 	const filterPresets = useMemo(() => (parsed.ok ? extractFilterPresets(parsed) : []), [parsed]);
@@ -201,6 +232,518 @@ export function TemplateVisualTools({ content, readOnly, onChange, onRevealProxy
 				</section>
 			</div>
 		</aside>
+	);
+}
+
+function VisualModelTools({
+	model,
+	readOnly,
+	onChange,
+}: {
+	model: VisualTemplateModel;
+	readOnly: boolean;
+	onChange?: (model: VisualTemplateModel) => void;
+}) {
+	const selectPolicies = model.policies.filter((policy) => policy.type === 'select');
+	const urlTestPolicies = model.policies.filter((policy) => policy.type === 'url-test');
+	const [activeType, setActiveType] = useState<WorkspaceType>('select');
+	const [activeSelectId, setActiveSelectId] = useState('');
+	const [activeUrlTestId, setActiveUrlTestId] = useState('');
+	const activeSelectPolicy = selectPolicies.find((policy) => policy.id === activeSelectId) ?? selectPolicies[0] ?? null;
+	const activeUrlTestPolicy = urlTestPolicies.find((policy) => policy.id === activeUrlTestId) ?? urlTestPolicies[0] ?? null;
+	const activePolicy = activeType === 'select' ? activeSelectPolicy : activeUrlTestPolicy;
+
+	const updatePolicy = (policyId: string, updater: (policy: Policy) => Policy) => {
+		if (readOnly || !onChange) return;
+		onChange({
+			...model,
+			policies: model.policies.map((policy) => (policy.id === policyId ? updater(policy) : policy)),
+		});
+	};
+
+	const handlePolicySelect = (type: WorkspaceType, policyId: string) => {
+		setActiveType(type);
+		if (type === 'select') setActiveSelectId(policyId);
+		else setActiveUrlTestId(policyId);
+	};
+
+	return (
+		<aside className="max-h-[46vh] min-h-0 border-b border-border/40 bg-background/70 lg:h-full lg:max-h-none lg:w-[720px] lg:shrink-0 lg:border-b-0 lg:border-r">
+			<div className="grid h-full min-h-0 grid-cols-1 overflow-y-auto custom-scrollbar lg:grid-cols-[260px_minmax(0,1fr)] lg:overflow-hidden">
+				<nav className="min-h-0 border-b border-border/50 lg:border-b-0 lg:border-r">
+					<div className="h-full overflow-y-auto custom-scrollbar p-3">
+						<ModelPolicyListSection
+							title="Select 策略"
+							description="直接编辑 visual JSON"
+							icon={<Route className="h-4 w-4" />}
+							policies={selectPolicies}
+							activeId={activeType === 'select' ? activePolicy?.id : ''}
+							onSelect={(policyId) => handlePolicySelect('select', policyId)}
+						/>
+						<ModelPolicyListSection
+							title="URL-Test 自动组"
+							description="测速与筛选"
+							icon={<Activity className="h-4 w-4" />}
+							policies={urlTestPolicies}
+							activeId={activeType === 'url-test' ? activePolicy?.id : ''}
+							onSelect={(policyId) => handlePolicySelect('url-test', policyId)}
+							className="mt-4"
+						/>
+					</div>
+				</nav>
+
+				<section className="min-h-[420px] overflow-y-auto custom-scrollbar p-5 text-sm">
+					{activePolicy ? (
+						<ModelPolicyEditor
+							model={model}
+							policy={activePolicy}
+							readOnly={readOnly || !onChange}
+							onUpdate={(updater) => updatePolicy(activePolicy.id, updater)}
+						/>
+					) : (
+						<div className="rounded-md border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed text-muted-foreground">
+							当前 JSON 模型里还没有策略。可以先在模型 fixture 或后续新增策略交互中添加 policy。
+						</div>
+					)}
+				</section>
+			</div>
+		</aside>
+	);
+}
+
+function ModelPolicyListSection({
+	title,
+	description,
+	icon,
+	policies,
+	activeId,
+	onSelect,
+	className,
+}: {
+	title: string;
+	description: string;
+	icon: React.ReactNode;
+	policies: Policy[];
+	activeId?: string;
+	onSelect: (policyId: string) => void;
+	className?: string;
+}) {
+	return (
+		<section className={className}>
+			<div className="mb-2 flex items-center justify-between gap-2 px-1">
+				<div className="flex min-w-0 items-center gap-2">
+					<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+						{icon}
+					</div>
+					<div className="min-w-0">
+						<h4 className="truncate text-base font-semibold text-foreground">{title}</h4>
+						<p className="truncate text-xs text-muted-foreground">{description}</p>
+					</div>
+				</div>
+				<Badge variant="secondary" className="rounded-md text-[10px] font-normal">
+					{policies.length}
+				</Badge>
+			</div>
+			<div className="space-y-1">
+				{policies.map((policy) => (
+					<button
+						key={policy.id}
+						type="button"
+						onClick={() => onSelect(policy.id)}
+						className={cn(
+							'w-full rounded-md px-3 py-2.5 text-left text-sm transition-colors',
+							activeId === policy.id
+								? 'bg-primary/10 text-primary'
+								: 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+						)}
+					>
+						<div className="truncate font-medium">{policy.compileName}</div>
+						<div className="mt-1 flex items-center gap-2 text-xs opacity-80">
+							<span>{policy.rules?.length ?? 0} rules</span>
+							<span>{policy.proxies?.length ?? 0} refs</span>
+						</div>
+					</button>
+				))}
+			</div>
+		</section>
+	);
+}
+
+function ModelPolicyEditor({
+	model,
+	policy,
+	readOnly,
+	onUpdate,
+}: {
+	model: VisualTemplateModel;
+	policy: Policy;
+	readOnly: boolean;
+	onUpdate: (updater: (policy: Policy) => Policy) => void;
+}) {
+	const updatePatch = (patch: Partial<Policy>) => {
+		onUpdate((current) => ({ ...current, ...patch }));
+	};
+
+	const updateFilter = (filter: FilterPreset | undefined) => {
+		updatePatch({ filter });
+	};
+
+	const updateRule = (index: number, patch: Partial<RuleSetRef>) => {
+		const rules = [...(policy.rules ?? [])];
+		rules[index] = { ...rules[index], ...patch };
+		updatePatch({ rules });
+	};
+
+	const removeRule = (index: number) => {
+		const rules = (policy.rules ?? []).filter((_, currentIndex) => currentIndex !== index);
+		updatePatch({ rules: rules.length > 0 ? rules : undefined });
+	};
+
+	const addRule = () => {
+		const providerKey = createRuleProviderKey(policy);
+		updatePatch({
+			rules: [
+				...(policy.rules ?? []),
+				{
+					id: providerKey,
+					providerKey,
+					behavior: 'domain',
+					format: 'mrs',
+					url: '',
+				},
+			],
+		});
+	};
+
+	return (
+		<div className="space-y-4">
+			<div className="space-y-2">
+				<div className="flex items-center justify-between gap-3">
+					<h5 className="min-w-0 truncate text-base font-semibold text-foreground">{policy.compileName}</h5>
+					<Badge variant="outline" className="rounded-md text-[10px]">
+						{policy.type}
+					</Badge>
+				</div>
+				<div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+					这里直接修改 visual-v1 JSON 模型；最终订阅输出时再编译成 YAML，并与右侧原始 YAML 片段合并。
+				</div>
+			</div>
+
+			<div className="grid grid-cols-2 gap-2">
+				<LabeledInput
+					label="title"
+					value={policy.title}
+					disabled={readOnly}
+					onChange={(value) => updatePatch({ title: value })}
+				/>
+				<LabeledInput
+					label="compileName"
+					help="最终 YAML 中 proxy-group.name 和 RULE-SET 目标名。"
+					value={policy.compileName}
+					disabled={readOnly}
+					onChange={(value) => updatePatch({ compileName: value })}
+				/>
+			</div>
+
+			{policy.type === 'select' && (
+				<div className="space-y-1.5">
+					<Label className="text-xs text-muted-foreground">proxies refs</Label>
+					<p className="text-[10px] leading-relaxed text-muted-foreground/80">
+						填写 policy id 或内置 id，用逗号/换行分隔。当前可用：{model.policies.map((item) => item.id).join(', ')}, direct, reject
+					</p>
+					<Textarea
+						value={(policy.proxies ?? []).map((ref) => ref.id).join(', ')}
+						onChange={(event) => updatePatch({ proxies: splitKeywordInput(event.target.value).map((id) => ({ id })) })}
+						disabled={readOnly}
+						rows={3}
+						className="resize-none font-mono text-xs"
+					/>
+				</div>
+			)}
+
+			<ModelCommonFields policy={policy} readOnly={readOnly} onUpdate={updatePatch} />
+
+			{policy.type === 'url-test' && (
+				<ModelUrlTestFields policy={policy} readOnly={readOnly} onUpdate={updatePatch} />
+			)}
+
+			<ModelFilterFields policy={policy} readOnly={readOnly} onUpdate={updateFilter} />
+
+			<div className="space-y-2">
+				<div className="flex items-center justify-between gap-3">
+					<div>
+						<Label className="text-xs font-medium text-foreground">规则集</Label>
+						<p className="mt-1 text-[10px] leading-relaxed text-muted-foreground/80">
+							这些 JSON 规则会编译为 RULE-SET 和 rule-providers。
+						</p>
+					</div>
+					<Button type="button" size="sm" variant="secondary" onClick={addRule} disabled={readOnly} className="h-8">
+						添加规则
+					</Button>
+				</div>
+				{(policy.rules ?? []).length === 0 ? (
+					<div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+						这个策略暂时没有 JSON 规则集。
+					</div>
+				) : (
+					<div className="space-y-2">
+						{(policy.rules ?? []).map((rule, index) => (
+							<ModelRuleEditor
+								key={`${rule.id}-${index}`}
+								rule={rule}
+								readOnly={readOnly}
+								onUpdate={(patch) => updateRule(index, patch)}
+								onRemove={() => removeRule(index)}
+							/>
+						))}
+					</div>
+				)}
+			</div>
+		</div>
+	);
+}
+
+function ModelCommonFields({
+	policy,
+	readOnly,
+	onUpdate,
+}: {
+	policy: Policy;
+	readOnly: boolean;
+	onUpdate: (patch: Partial<Policy>) => void;
+}) {
+	return (
+		<div className="space-y-2">
+			<div className="grid grid-cols-2 gap-2">
+				<LabeledSwitch
+					label="include-all"
+					help="把所有出站节点和 provider 节点纳入候选。"
+					checked={policy.includeAll === true}
+					disabled={readOnly}
+					onCheckedChange={(value) => onUpdate({ includeAll: value ? true : undefined })}
+				/>
+				<LabeledSwitch
+					label="all proxies"
+					help="只纳入配置中直接声明的出站节点。"
+					checked={policy.includeAllProxies === true}
+					disabled={readOnly}
+					onCheckedChange={(value) => onUpdate({ includeAllProxies: value ? true : undefined })}
+				/>
+			</div>
+			<LabeledSwitch
+				label="all providers"
+				help="只纳入所有 proxy-provider 的节点。"
+				checked={policy.includeAllProviders === true}
+				disabled={readOnly}
+				onCheckedChange={(value) => onUpdate({ includeAllProviders: value ? true : undefined })}
+			/>
+		</div>
+	);
+}
+
+function ModelUrlTestFields({
+	policy,
+	readOnly,
+	onUpdate,
+}: {
+	policy: Policy;
+	readOnly: boolean;
+	onUpdate: (patch: Partial<Policy>) => void;
+}) {
+	const urlTest = policy.urlTest ?? {};
+	const updateUrlTest = (patch: NonNullable<Policy['urlTest']>) => {
+		onUpdate({ urlTest: removeEmptyRecord({ ...urlTest, ...patch }) });
+	};
+
+	return (
+		<div className="space-y-2">
+			<LabeledInput
+				label="url"
+				help="健康检查地址；留空时使用模型默认值。"
+				value={urlTest.url ?? ''}
+				disabled={readOnly}
+				onChange={(value) => updateUrlTest({ url: value || undefined })}
+			/>
+			<div className="grid grid-cols-2 gap-2">
+				<LabeledInput
+					label="interval"
+					value={formatOptionalNumber(urlTest.interval)}
+					disabled={readOnly}
+					onChange={(value) => updateUrlTest({ interval: toOptionalNumber(value) })}
+				/>
+				<LabeledInput
+					label="tolerance"
+					value={formatOptionalNumber(urlTest.tolerance)}
+					disabled={readOnly}
+					onChange={(value) => updateUrlTest({ tolerance: toOptionalNumber(value) })}
+				/>
+			</div>
+			<div className="grid grid-cols-2 gap-2">
+				<LabeledInput
+					label="timeout"
+					value={formatOptionalNumber(urlTest.timeout)}
+					disabled={readOnly}
+					onChange={(value) => updateUrlTest({ timeout: toOptionalNumber(value) })}
+				/>
+				<LabeledInput
+					label="max failed"
+					value={formatOptionalNumber(urlTest.maxFailedTimes)}
+					disabled={readOnly}
+					onChange={(value) => updateUrlTest({ maxFailedTimes: toOptionalNumber(value) })}
+				/>
+			</div>
+			<LabeledSwitch
+				label="lazy"
+				help="开启时，未被使用的策略组不主动测速。"
+				checked={urlTest.lazy === true}
+				disabled={readOnly}
+				onCheckedChange={(value) => updateUrlTest({ lazy: value ? true : undefined })}
+			/>
+		</div>
+	);
+}
+
+function ModelFilterFields({
+	policy,
+	readOnly,
+	onUpdate,
+}: {
+	policy: Policy;
+	readOnly: boolean;
+	onUpdate: (filter: FilterPreset | undefined) => void;
+}) {
+	const filter = policy.filter ?? {};
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center justify-between gap-3">
+				<Label className="text-xs font-medium text-foreground">Filter</Label>
+				<Badge variant="secondary" className="rounded-md text-[10px] font-normal">
+					JSON
+				</Badge>
+			</div>
+			<div className="grid grid-cols-2 gap-2">
+				<div className="space-y-1.5">
+					<Label className="text-xs text-muted-foreground">包含</Label>
+					<Textarea
+						value={(filter.include ?? []).join(', ')}
+						onChange={(event) => onUpdate(normalizeModelFilter({ ...filter, include: splitKeywordInput(event.target.value), raw: undefined }))}
+						disabled={readOnly}
+						rows={3}
+						className="resize-none text-xs"
+					/>
+				</div>
+				<div className="space-y-1.5">
+					<Label className="text-xs text-muted-foreground">排除</Label>
+					<Textarea
+						value={(filter.exclude ?? []).join(', ')}
+						onChange={(event) => onUpdate(normalizeModelFilter({ ...filter, exclude: splitKeywordInput(event.target.value), raw: undefined }))}
+						disabled={readOnly}
+						rows={3}
+						className="resize-none text-xs"
+					/>
+				</div>
+			</div>
+			<div className="space-y-1.5">
+				<Label className="text-xs text-muted-foreground">原始 filter</Label>
+				<Textarea
+					value={filter.raw ?? ''}
+					onChange={(event) => onUpdate(normalizeModelFilter({ raw: event.target.value.trim() || undefined }))}
+					disabled={readOnly}
+					rows={3}
+					className="resize-none font-mono text-xs"
+				/>
+			</div>
+		</div>
+	);
+}
+
+function ModelRuleEditor({
+	rule,
+	readOnly,
+	onUpdate,
+	onRemove,
+}: {
+	rule: RuleSetRef;
+	readOnly: boolean;
+	onUpdate: (patch: Partial<RuleSetRef>) => void;
+	onRemove: () => void;
+}) {
+	return (
+		<div className="space-y-2 rounded-md border border-border/60 bg-muted/20 p-3">
+			<div className="grid grid-cols-2 gap-2">
+				<LabeledInput
+					label="providerKey"
+					value={rule.providerKey}
+					disabled={readOnly}
+					onChange={(value) => onUpdate({ providerKey: value, id: value || rule.id })}
+				/>
+				<LabeledInput
+					label="url"
+					value={rule.url}
+					disabled={readOnly}
+					onChange={(value) => onUpdate({ url: value })}
+				/>
+			</div>
+			<div className="grid grid-cols-2 gap-2">
+				<ModelSelect
+					label="behavior"
+					value={rule.behavior}
+					disabled={readOnly}
+					options={['domain', 'ipcidr', 'classical']}
+					onChange={(value) => onUpdate({ behavior: value as RuleSetRef['behavior'] })}
+				/>
+				<ModelSelect
+					label="format"
+					value={rule.format}
+					disabled={readOnly}
+					options={['mrs', 'yaml', 'text']}
+					onChange={(value) => onUpdate({ format: value as RuleSetRef['format'] })}
+				/>
+			</div>
+			<div className="flex items-center justify-between gap-3">
+				<LabeledSwitch
+					label="no-resolve"
+					checked={rule.noResolve === true}
+					disabled={readOnly}
+					onCheckedChange={(value) => onUpdate({ noResolve: value ? true : undefined })}
+				/>
+				<Button type="button" size="sm" variant="ghost" onClick={onRemove} disabled={readOnly} className="h-8 text-destructive hover:text-destructive">
+					删除
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+function ModelSelect({
+	label,
+	value,
+	disabled,
+	options,
+	onChange,
+}: {
+	label: string;
+	value: string;
+	disabled: boolean;
+	options: string[];
+	onChange: (value: string) => void;
+}) {
+	return (
+		<div className="space-y-1.5">
+			<Label className="text-xs text-muted-foreground">{label}</Label>
+			<select
+				value={value}
+				disabled={disabled}
+				onChange={(event) => onChange(event.target.value)}
+				className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+			>
+				{options.map((option) => (
+					<option key={option} value={option}>
+						{option}
+					</option>
+				))}
+			</select>
+		</div>
 	);
 }
 
@@ -607,4 +1150,42 @@ function FieldPill({ label, value }: { label: string; value: number }) {
 			<div className="font-semibold tabular-nums text-foreground">{value}</div>
 		</div>
 	);
+}
+
+function createRuleProviderKey(policy: Policy): string {
+	const base = policy.id
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '_')
+		.replace(/^_+|_+$/g, '');
+	return `${base || 'rule'}_domain`;
+}
+
+function normalizeModelFilter(filter: FilterPreset): FilterPreset | undefined {
+	const include = filter.include?.filter(Boolean);
+	const exclude = filter.exclude?.filter(Boolean);
+	const raw = filter.raw?.trim();
+	const normalized: FilterPreset = {};
+
+	if (include && include.length > 0) normalized.include = include;
+	if (exclude && exclude.length > 0) normalized.exclude = exclude;
+	if (raw) normalized.raw = raw;
+
+	return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function removeEmptyRecord<T extends Record<string, unknown>>(value: T): T {
+	return Object.fromEntries(
+		Object.entries(value).filter(([, item]) => item !== undefined && item !== null && item !== ''),
+	) as T;
+}
+
+function formatOptionalNumber(value: number | undefined): string {
+	return typeof value === 'number' ? String(value) : '';
+}
+
+function toOptionalNumber(value: string): number | undefined {
+	const trimmed = value.trim();
+	if (!trimmed) return undefined;
+	const parsed = Number(trimmed);
+	return Number.isFinite(parsed) ? parsed : undefined;
 }
