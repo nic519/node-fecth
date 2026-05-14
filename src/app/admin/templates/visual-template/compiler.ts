@@ -72,7 +72,7 @@ function compilePolicy(policy: Policy, model: VisualTemplateModel): Record<strin
 		type: policy.type,
 	};
 
-	if (policy.type === 'select') {
+	if (policy.type === 'select' && (policy.proxies ?? []).length > 0) {
 		base.proxies = (policy.proxies ?? []).map((proxyName) => resolveProxyName(proxyName, model));
 	}
 

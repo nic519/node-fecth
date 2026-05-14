@@ -88,6 +88,25 @@ test('compileVisualTemplate accepts normalized legacy object proxy references', 
 	expect(yaml).toContain('proxies: ["[自动]-香港🇭🇰", "🇨🇳 直连", "[手动]-SG"]');
 });
 
+test('compileVisualTemplate omits empty select proxies for include-all policies', () => {
+	const yaml = compileVisualTemplate({
+		version: 1,
+		policies: [
+			{
+				title: '✈️ 手动选择',
+				type: 'select',
+				includeAll: true,
+				filter: { raw: '^(?!.*@)' },
+			},
+		],
+	});
+
+	expect(yaml).toContain('name: ✈️ 手动选择');
+	expect(yaml).toContain('include-all: true');
+	expect(yaml).not.toContain('proxies:');
+	expect(yaml).not.toContain('""');
+});
+
 test('wrapVisualModelContent stores model and compiled yaml in one content string', () => {
 	const content = wrapVisualModelContent(minimalVisualTemplateModel);
 	const extracted = extractVisualModelFromContent(content);
