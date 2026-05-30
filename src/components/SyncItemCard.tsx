@@ -62,6 +62,36 @@ export function SyncItemCard({
   const proxyProviderShortLabel = item.proxyProvider
     ? SUBSCRIPTION_PROXY_PROVIDER_SHORT_LABELS[item.proxyProvider]
     : '直连';
+  const shortUrl = item.url.replace(/^https?:\/\//, '');
+  const hostLabel = shortUrl.split('/')[0] ?? shortUrl;
+  const statusLabel = isLoading
+    ? '同步中'
+    : isError
+      ? '访问异常'
+      : info
+        ? '已同步'
+        : '未同步';
+  const statusToneClass = isLoading
+    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-300'
+    : isError
+      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
+      : info
+        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+        : 'bg-slate-500/10 text-slate-500 dark:text-slate-300';
+  const statusDotClass = isLoading
+    ? 'bg-sky-500'
+    : isError
+      ? 'bg-rose-500'
+      : info
+        ? 'bg-emerald-500'
+        : 'bg-slate-300 dark:bg-slate-600';
+  const summaryText = isError
+    ? (status.message || '当前服务器暂时无法获取该订阅')
+    : trafficInfo
+      ? `已用 ${formatTraffic(trafficInfo.used)} / ${formatTraffic(trafficInfo.total)}`
+      : info
+        ? '可继续手动预更新'
+        : '尚未同步信息';
 
   const [displayedPercent, setDisplayedPercent] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -98,32 +128,31 @@ export function SyncItemCard({
   }, [usagePercent]);
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="shrink-0">
-              {item.flag} {item.source}
-            </Badge>
-          </div>
+    <Card className="overflow-hidden border-border/70 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5">
+      <CardContent className="p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <Badge variant="secondary" className="shrink-0">
+            {item.flag} {item.source}
+          </Badge>
 
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full shrink-0 transition-colors duration-300",
-              isLoading ? "bg-blue-500 animate-pulse" :
-                isSuccess ? "bg-green-500" :
-                  isError ? "bg-red-500" :
-                    "bg-slate-200 dark:bg-slate-700"
-            )}
-          />
+          <div className={cn(
+            'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-medium',
+            statusToneClass,
+          )}>
+            <span className={cn('h-1.5 w-1.5 rounded-full', statusDotClass, isLoading && 'animate-pulse')} />
+            <span>{statusLabel}</span>
+          </div>
         </div>
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="bg-muted/50 p-2 rounded text-xs font-mono text-muted-foreground cursor-help select-all">
-                <div className="line-clamp-2 break-all">
-                  {item.url}
+              <div className="cursor-help rounded-xl border border-border/50 bg-muted/25 px-3 py-2.5">
+                <div className="truncate text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+                  {hostLabel}
+                </div>
+                <div className="mt-1 line-clamp-2 break-all font-mono text-sm text-foreground/80">
+                  {shortUrl}
                 </div>
               </div>
             </TooltipTrigger>
@@ -133,9 +162,52 @@ export function SyncItemCard({
           </Tooltip>
         </TooltipProvider>
 
-        <div className="flex items-end justify-between gap-2 pt-2">
-          <div className="space-y-1.5 flex-1 min-w-0">
-            <div className="flex w-full items-center gap-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">
+                  {info ? `最后更新 ${formatDateTime(info.updatedAt)}` : '尚未建立同步记录'}
+                </span>
+              </div>
+              <div className={cn(
+                'truncate text-sm font-medium',
+                isError ? 'text-rose-600 dark:text-rose-300' : 'text-foreground/80',
+              )}>
+                {summaryText}
+              </div>
+            </div>
+
+            {trafficInfo && (
+              <div className="space-y-1.5" title="流量信息">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Activity className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate font-medium">流量占用</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">
+                    {trafficInfo.usagePercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary" ref={progressRef}>
+                  <div
+                    className={cn('h-full rounded-full transition-all duration-1000 ease-out', getTrafficBarColor(usagePercent))}
+                    style={{ width: `${displayedPercent}%` }}
+                  />
+                </div>
+                {trafficInfo.expire && (
+                  <div className="flex items-center gap-1.5 pt-0.5 text-xs text-muted-foreground" title="到期时间">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">
+                      到期时间 {new Date(trafficInfo.expire * 1000).toLocaleString('zh-CN')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-2">
               <div className="shrink-0">
                 <Select
                   value={item.proxyProvider ?? '__direct__'}
@@ -160,8 +232,8 @@ export function SyncItemCard({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-muted-foreground">
-                <Waypoints className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                <Waypoints className="h-3.5 w-3.5 shrink-0" />
                 <span>应急访问</span>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -175,82 +247,29 @@ export function SyncItemCard({
                   </PopoverTrigger>
                   <PopoverContent align="start" sideOffset={8} className="max-w-64 text-xs leading-5">
                     <p>
-                      某些订阅源在当前服务器无法获取，这时可以改由其他服务器代为拉取
+                      某些订阅源在本机网络下本来就无法直连，这时可以改由其他服务器代为拉取，并且只建议在本地拉取不了订阅时启用。
                     </p>
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
-
-            {info ? (
-              <>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">
-                  <Clock className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">
-                    最后更新 {formatDateTime(info.updatedAt)}
-                  </span>
-                </div>
-                {trafficInfo && (
-                  <div className="space-y-1.5" title="流量信息">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Activity className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate font-medium">
-                          流量消耗 {formatTraffic(trafficInfo.used)} / {formatTraffic(trafficInfo.total)}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">
-                        {trafficInfo.usagePercent.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden" ref={progressRef}>
-                      <div
-                        className={cn("h-full rounded-full transition-all duration-1000 ease-out", getTrafficBarColor(usagePercent))}
-                        style={{ width: `${displayedPercent}%` }}
-                      />
-                    </div>
-                    {trafficInfo.expire && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-0.5" title="到期时间">
-                        <Calendar className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">
-                          到期时间 {new Date(trafficInfo.expire * 1000).toLocaleString('zh-CN')}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="h-8 flex items-center text-xs text-muted-foreground/50 italic">
-                尚未同步信息
-              </div>
-            )}
-
-            {status.message && (
-              <p className={cn(
-                "text-xs font-medium truncate",
-                isError ? "text-red-500" : "text-green-500"
-              )}>
-                {status.message}
-              </p>
-            )}
           </div>
 
           {shouldShowAction ? (
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex shrink-0 flex-col items-end gap-2 pt-0.5">
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => onSync?.()}
                 disabled={isLoading || !onSync}
-                className={cn("h-8 w-8 p-0 shrink-0 rounded-full", secondaryActionButtonClass)}
+                className={cn('h-8 w-8 rounded-full p-0 shrink-0', secondaryActionButtonClass)}
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white/90" />
+                  <Loader2 className="h-4 w-4 animate-spin text-white/90" />
                 ) : isSuccess ? (
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="h-4 w-4" />
                 ) : (
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="h-4 w-4" />
                 )}
               </Button>
             </div>
