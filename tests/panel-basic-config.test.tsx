@@ -14,7 +14,11 @@ test('PanelBasicConfig uses subscription sources as the only subscription entry 
   };
 
   const markup = renderToStaticMarkup(
-    <PanelBasicConfig config={config} onChange={() => {}} uid="demo-user" />,
+    <PanelBasicConfig
+      config={config}
+      onChange={() => {}}
+      uid="demo-user"
+    />,
   );
 
   expect(markup).toContain('订阅源');
@@ -31,9 +35,14 @@ test('PanelBasicConfig renders empty subscription rows while editing', () => {
   };
 
   const markup = renderToStaticMarkup(
-    <PanelBasicConfig config={config} onChange={() => {}} uid="demo-user" />,
+    <PanelBasicConfig
+      config={config}
+      onChange={() => {}}
+      uid="demo-user"
+    />,
   );
 
   expect(markup).toContain('sub-url-0');
   expect(markup).toContain('sub-flag-0');
+  expect(markup).not.toContain('订阅代理');
 });

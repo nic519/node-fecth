@@ -5,6 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -12,7 +24,12 @@ import {
 } from '@/components/ui/tooltip';
 import { cn, secondaryActionButtonClass } from '@/lib/utils';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
-import { Activity, Calendar, CheckCircle2, Clock, Loader2, RefreshCw } from 'lucide-react';
+import {
+  SUBSCRIPTION_PROXY_PROVIDER_LABELS,
+  SUBSCRIPTION_PROXY_PROVIDER_SHORT_LABELS,
+  type SubscriptionProxyProvider,
+} from '@/config/subscription-proxy.config';
+import { Activity, Calendar, CheckCircle2, CircleHelp, Clock, Loader2, RefreshCw, Waypoints } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface SyncItemCardProps {
@@ -21,15 +38,30 @@ interface SyncItemCardProps {
   info?: DynamicInfo;
   onSync?: () => void;
   showAction?: boolean;
+  readOnly?: boolean;
+  availableProxyProviders: SubscriptionProxyProvider[];
+  onProxyProviderChange?: (proxyProvider?: SubscriptionProxyProvider) => void;
 }
 
-export function SyncItemCard({ item, status, info, onSync, showAction }: SyncItemCardProps) {
+export function SyncItemCard({
+  item,
+  status,
+  info,
+  onSync,
+  showAction,
+  readOnly,
+  availableProxyProviders,
+  onProxyProviderChange,
+}: SyncItemCardProps) {
   const isLoading = status.status === 'loading';
   const isSuccess = status.status === 'success';
   const isError = status.status === 'error';
   const trafficInfo = info?.traffic ? parseTrafficInfo(info.traffic) : null;
   const usagePercent = trafficInfo ? Math.min(100, Math.max(0, trafficInfo.usagePercent)) : 0;
   const shouldShowAction = showAction ?? !!onSync;
+  const proxyProviderShortLabel = item.proxyProvider
+    ? SUBSCRIPTION_PROXY_PROVIDER_SHORT_LABELS[item.proxyProvider]
+    : '直连';
 
   const [displayedPercent, setDisplayedPercent] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -103,6 +135,51 @@ export function SyncItemCard({ item, status, info, onSync, showAction }: SyncIte
 
         <div className="flex items-end justify-between gap-2 pt-2">
           <div className="space-y-1.5 flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                <Waypoints className="w-3.5 h-3.5 shrink-0" />
+                <span>订阅代理</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="subscription-proxy-help"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground"
+                    >
+                      <CircleHelp className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" sideOffset={8} className="max-w-64 text-xs leading-5">
+                    <p>
+                      某些订阅源在本机网络下本来就无法直连，这时可以改由其他服务器代为拉取。并且只建议在本地拉取不了订阅时启用。
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <Select
+                value={item.proxyProvider ?? '__direct__'}
+                onValueChange={(value) => onProxyProviderChange?.(
+                  value === '__direct__' ? undefined : value as SubscriptionProxyProvider,
+                )}
+                disabled={readOnly}
+              >
+                <SelectTrigger
+                  aria-label={`sync-proxy-provider-${item.flag ?? item.url}`}
+                  className="h-7 w-[84px] shrink-0 rounded-full border-border/40 bg-transparent px-2.5 text-xs shadow-none"
+                >
+                  <SelectValue>{proxyProviderShortLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__direct__">直连</SelectItem>
+                  {availableProxyProviders.map((provider) => (
+                    <SelectItem key={provider} value={provider}>
+                      {SUBSCRIPTION_PROXY_PROVIDER_LABELS[provider]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {info ? (
               <>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后更新时间">

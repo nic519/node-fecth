@@ -2,6 +2,7 @@ import { ConfigPageClient, MissingUidState } from './ConfigPageClient';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
 import { createServerServices } from '@/server/services';
 import type { UserConfig } from '@/types/user-config';
+import { getAvailableSubscriptionProxyProviders, resolveSubscriptionProxyProvider } from '@/modules/user/subscription-proxy';
 
 function ConfigAccessDenied() {
   return (
@@ -34,6 +35,7 @@ export default async function UserConfigPage({
 
   let initialConfig: UserConfig | null = null;
   let initialLastSaved: Date | null = null;
+  const availableProxyProviders = getAvailableSubscriptionProxyProviders();
 
   const userConfig = await createServerServices().userService.validateAndGetUser(uid, token);
   if (!userConfig) {
@@ -41,7 +43,13 @@ export default async function UserConfigPage({
   }
 
   const { updatedAt, ...config } = userConfig;
-  initialConfig = config;
+  initialConfig = {
+    ...config,
+    appendSubList: config.appendSubList?.map((subscription) => ({
+      ...subscription,
+      proxyProvider: resolveSubscriptionProxyProvider(subscription.proxyProvider),
+    })),
+  };
   initialLastSaved = updatedAt ? new Date(updatedAt) : null;
 
   return (
@@ -50,6 +58,7 @@ export default async function UserConfigPage({
       token={token}
       initialConfig={initialConfig}
       initialLastSaved={initialLastSaved}
+      availableProxyProviders={availableProxyProviders}
     />
   );
 }

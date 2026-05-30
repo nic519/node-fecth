@@ -3,7 +3,6 @@
 import { SubConfigCard } from '@/app/config/components/SubConfigCard';
 import { Label } from '@/components/ui/label';
 import { AreaCode, SubConfig } from '@/types/user-config';
-import { getRandomEmoji } from '@/utils/emojiUtils';
 import { ListPlus } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -16,17 +15,8 @@ export function SubscriptionDemo() {
         },
     ]);
 
-    const handleAdd = useCallback(() => {
-        const newItem: SubConfig = {
-            subscribe: '',
-            flag: getRandomEmoji(),
-            includeArea: []
-        };
-        setSubList(prev => [...prev, newItem]);
-    }, []);
-
     const handleRemove = useCallback((index: number) => {
-        //setSubList(prev => prev.filter((_, i) => i !== index));
+        setSubList(prev => prev.filter((_, i) => i !== index));
     }, []);
 
     const handleUpdate = useCallback(<K extends keyof SubConfig>(index: number, field: K, value: SubConfig[K]) => {

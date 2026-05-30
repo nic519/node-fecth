@@ -16,8 +16,8 @@ export const POST = async (request: Request) => {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid request body', validationResult.error.format());
     }
 
-    const { url } = validationResult.data;
-    const result = await DynamicService.fetchAndSave(url, { retries: 3 });
+    const { url, proxyProvider } = validationResult.data;
+    const result = await DynamicService.fetchAndSave(url, { retries: 3, proxyProvider });
 
     // 只返回前端需要展示的摘要字段，避免把完整缓存内容带回响应。
     return ResponseUtils.success({

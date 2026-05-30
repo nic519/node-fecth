@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
 	AreaCodeSchema,
+	SubscriptionProxyProviderSchema,
 	SubscribeSchema,
 	type UserConfig,
 } from '@/modules/user/user.schema';
@@ -31,6 +32,7 @@ export * from './schema/user-response';
 // 用户配置相关结构从用户模块集中透出，方便调用方统一导入。
 export {
 	AreaCodeSchema,
+	SubscriptionProxyProviderSchema,
 	SubscribeSchema as SubConfigSchema,
 	UserConfigSchema,
 	type UserConfig,
@@ -43,6 +45,7 @@ export {
  * 表示可用于代理分组、多端口模式和订阅过滤的地区标识。
  */
 export type AreaCode = z.infer<typeof AreaCodeSchema>;
+export type SubscriptionProxyProvider = z.infer<typeof SubscriptionProxyProviderSchema>;
 
 /**
  * 附加订阅配置类型。

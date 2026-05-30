@@ -50,3 +50,24 @@ test("DynamicService.fetchAndSave uses normalized source URL directly", async ()
 
 	expect(requestedUrls).toEqual(["https://liangxin.xyz/sub"]);
 });
+
+test("DynamicService.fetchAndSave uses the configured proxy provider request URL", async () => {
+	const requestedUrls: string[] = [];
+
+	httpClient.get = (async (url: string) => {
+		requestedUrls.push(url);
+		return {
+			text: async () => "mock-content",
+			headers: new Headers(),
+		};
+	}) as typeof httpClient.get;
+
+	await DynamicService.fetchAndSave("https://liangxin.xyz/sub", {
+		retries: 0,
+		proxyProvider: "cloudflare",
+	});
+
+	expect(requestedUrls).toEqual([
+		"https://transfer-v.lavamusic.workers.dev/api/proxy?url=https%3A%2F%2Fliangxin.xyz%2Fsub",
+	]);
+});

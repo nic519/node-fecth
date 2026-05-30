@@ -285,13 +285,17 @@ export class AdminService {
 	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<TrafficInfo | undefined> {
 		try {
 			const configResponse = await this.userService.getUserConfig(uid);
-			const firstSubscription = configResponse?.appendSubList?.[0]?.subscribe;
-			if (!firstSubscription) {
+			const firstSubscription = configResponse?.appendSubList?.[0];
+			if (!firstSubscription?.subscribe) {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}
 
 			// Use DynamicService.getWithCache to get fresh content (cache handling is internal)
-			const result = await DynamicService.getWithCache(firstSubscription);
+			const result = await DynamicService.getWithCache(
+				firstSubscription.subscribe,
+				5 * 60 * 1000,
+				firstSubscription.proxyProvider,
+			);
 			const subInfo = result.traffic;
 
 			if (!subInfo) {

@@ -1,5 +1,6 @@
 import { SyncItemCard } from '@/components/SyncItemCard';
 import type { SyncItemData, SyncStatus, DynamicInfo } from '@/app/config/hooks/useDynamicSync';
+import { SUBSCRIPTION_PROXY_PROVIDERS } from '@/config/subscription-proxy.config';
 
 // Static preview data
 const previewSyncItems: SyncItemData[] = [
@@ -45,6 +46,7 @@ export function SyncPreviewGrid() {
           status={previewStatuses[item.url] || { status: 'idle' }}
           info={previewInfos[item.url]}
           showAction={false}
+          availableProxyProviders={[...SUBSCRIPTION_PROXY_PROVIDERS]}
         />
       ))}
     </div>

@@ -8,8 +8,10 @@ import { logger } from '@/utils/request/network.config';
 import { inArray } from 'drizzle-orm';
 
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
+import type { SubscriptionProxyProvider } from '@/types/api-schemas';
 import { CommonUtils } from '@/utils/commonUtils';
 import type { DynamicSummary } from '@/types/api-schemas';
+import { resolveSubscriptionFetchUrl } from '@/modules/user/subscription-proxy';
 
 type DynamicRow = typeof dynamic.$inferSelect;
 
@@ -28,13 +30,17 @@ export class DynamicService {
 	 * Fetch content from source URL and save to database
 	 * 使用 ky 库进行增强的网络请求，包含自动重试和超时控制
 	 */
-	static async fetchAndSave(url: string, options: { retries?: number } = {}): Promise<DynamicContent> {
-		const { retries = 3 } = options;
+	static async fetchAndSave(
+		url: string,
+		options: { retries?: number; proxyProvider?: SubscriptionProxyProvider; runtimeEnv?: Env } = {},
+	): Promise<DynamicContent> {
+		const { retries = 3, proxyProvider, runtimeEnv } = options;
 		const cleanUrl = CommonUtils.normalizeUrl(url);
+		const requestUrl = resolveSubscriptionFetchUrl(cleanUrl, proxyProvider, runtimeEnv);
 		try {
-			logger.info({ url: cleanUrl }, 'Start fetching dynamic content from source');
+			logger.info({ url: cleanUrl, requestUrl, proxyProvider }, 'Start fetching dynamic content from source');
 
-			const response = await httpClient.get(cleanUrl, {
+			const response = await httpClient.get(requestUrl, {
 				retry: retries
 			});
 
@@ -129,7 +135,12 @@ export class DynamicService {
 	 * @param url Source URL
 	 * @param ttlMs Cache Time-To-Live in milliseconds (default: 5 minutes)
 	 */
-	static async getWithCache(url: string, ttlMs: number = 5 * 60 * 1000): Promise<DynamicContent> {
+	static async getWithCache(
+		url: string,
+		ttlMs: number = 5 * 60 * 1000,
+		proxyProvider?: SubscriptionProxyProvider,
+		runtimeEnv?: Env,
+	): Promise<DynamicContent> {
 		const cached = await this.getByUrl(url);
 
 		if (cached) {
@@ -146,7 +157,7 @@ export class DynamicService {
 		}
 
 		try {
-			return await this.fetchAndSave(url);
+			return await this.fetchAndSave(url, { proxyProvider, runtimeEnv });
 		} catch (error) {
 			// If fetch fails but we have stale cache, return it as fallback
 			if (cached) {

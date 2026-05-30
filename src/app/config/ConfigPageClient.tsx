@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { RegisterSuccessDialog } from './components/RegisterSuccessDialog';
 import type { UserConfig } from '@/types/user-config';
+import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 function parseStoredTab(tab: string | null): ConfigTab {
   if (tab === 'basic' || tab === 'rules' || tab === 'dynamic' || tab === 'token' || tab === 'preview') {
@@ -45,11 +46,13 @@ function UserConfigInner({
   token,
   initialConfig,
   initialLastSaved,
+  availableProxyProviders,
 }: {
   uid: string;
   token: string;
   initialConfig: UserConfig | null;
   initialLastSaved: Date | null;
+  availableProxyProviders: SubscriptionProxyProvider[];
 }) {
   const userConfigState = useUserConfig({ uid, token, initialConfig, initialLastSaved });
   const storageKey = `config.activeTab:${uid}`;
@@ -99,6 +102,7 @@ function UserConfigInner({
         saveError={userConfigState.saveError}
         loading={userConfigState.loading}
         error={userConfigState.error}
+        availableProxyProviders={availableProxyProviders}
       />
 
       <RegisterSuccessDialog uid={uid} token={token} />
@@ -141,11 +145,13 @@ export function ConfigPageClient({
   token,
   initialConfig,
   initialLastSaved,
+  availableProxyProviders,
 }: {
   uid: string;
   token: string;
   initialConfig: UserConfig | null;
   initialLastSaved: Date | null;
+  availableProxyProviders: SubscriptionProxyProvider[];
 }) {
   usePageTitle(`${uid} - 配置订阅`, '');
 
@@ -156,6 +162,7 @@ export function ConfigPageClient({
       token={token}
       initialConfig={initialConfig}
       initialLastSaved={initialLastSaved}
+      availableProxyProviders={availableProxyProviders}
     />
   );
 }

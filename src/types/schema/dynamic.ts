@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SubscriptionProxyProviderSchema } from '@/modules/user/user.schema';
 
 /**
  * 动态摘要 Schema
@@ -39,6 +40,10 @@ export const DynamicSyncRequestSchema = z.object({
 	 * 需要同步的订阅源 URL
 	 */
 	url: z.string().url(),
+	/**
+	 * 拉取订阅源时使用的代理提供方；为空时表示直连。
+	 */
+	proxyProvider: SubscriptionProxyProviderSchema.optional(),
 });
 
 /**

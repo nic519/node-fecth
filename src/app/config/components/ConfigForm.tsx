@@ -3,6 +3,7 @@ import { PanelDynamicSync } from './PanelDynamicSync';
 import { PanelBasicConfig } from './PanelBasicConfig';
 import { PanelRuleConfig } from './PanelRuleConfig';
 import { PanelTokenConfig } from './PanelTokenConfig';
+import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'preview';
 
@@ -12,13 +13,26 @@ interface ConfigFormProps {
     readOnly?: boolean;
     activeTab: ConfigTab;
     uid?: string;
+    availableProxyProviders: SubscriptionProxyProvider[];
 }
 
-export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid }: ConfigFormProps) {
+export function ConfigForm({
+    config,
+    onChange,
+    readOnly = false,
+    activeTab,
+    uid,
+    availableProxyProviders,
+}: ConfigFormProps) {
     return (
         <div className="space-y-6">
             {activeTab === 'basic' && (
-                <PanelBasicConfig config={config} onChange={onChange} readOnly={readOnly} uid={uid} />
+                <PanelBasicConfig
+                    config={config}
+                    onChange={onChange}
+                    readOnly={readOnly}
+                    uid={uid}
+                />
             )}
 
             {activeTab === 'rules' && (
@@ -26,7 +40,12 @@ export function ConfigForm({ config, onChange, readOnly = false, activeTab, uid 
             )}
 
             {activeTab === 'dynamic' && (
-                <PanelDynamicSync config={config} />
+                <PanelDynamicSync
+                    config={config}
+                    onChange={onChange}
+                    readOnly={readOnly}
+                    availableProxyProviders={availableProxyProviders}
+                />
             )}
 
             {activeTab === 'token' && (

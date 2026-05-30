@@ -21,7 +21,12 @@ interface BasicConfigProps {
 }
 
 
-export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: BasicConfigProps) {
+export function PanelBasicConfig({
+    config,
+    onChange,
+    readOnly = false,
+    uid,
+}: BasicConfigProps) {
     const subscriptions = useMemo(() => config.appendSubList ?? [], [config.appendSubList]);
 
     const handleChange = useCallback(<K extends keyof UserConfig>(key: K, value: UserConfig[K]) => {
@@ -32,7 +37,7 @@ export function PanelBasicConfig({ config, onChange, readOnly = false, uid }: Ba
         const newItem: SubConfig = {
             subscribe: '',
             flag: getRandomEmoji(),
-            includeArea: []
+            includeArea: [],
         };
         onChange(setSubscriptionList(config, [...subscriptions, newItem]));
     }, [config, onChange, subscriptions]);

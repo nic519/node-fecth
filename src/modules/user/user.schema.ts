@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AREA_CODES } from '@/config/proxy-area.config';
+import { SUBSCRIPTION_PROXY_PROVIDERS } from '@/config/subscription-proxy.config';
 
 /**
  * 地区代码 Schema。
@@ -7,6 +8,7 @@ import { AREA_CODES } from '@/config/proxy-area.config';
  * 约束系统支持的代理地区标识，取值来自代理地区配置。
  */
 export const AreaCodeSchema = z.enum(AREA_CODES);
+export const SubscriptionProxyProviderSchema = z.enum(SUBSCRIPTION_PROXY_PROVIDERS);
 
 /**
  * 附加订阅配置 Schema。
@@ -20,6 +22,8 @@ export const SubscribeSchema = z.object({
 	flag: z.string(),
 	// 该订阅源只参与哪些地区的节点合并；为空时表示不限制地区。
 	includeArea: z.array(AreaCodeSchema).optional(),
+	// 订阅源远程拉取时使用的代理提供方；为空时表示直连。
+	proxyProvider: SubscriptionProxyProviderSchema.optional(),
 });
 
 /**

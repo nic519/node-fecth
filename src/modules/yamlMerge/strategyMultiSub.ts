@@ -11,7 +11,12 @@ import yaml from 'js-yaml';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
-	constructor(private ruleContent: string, private userConfig: UserConfig, private uid?: string) { }
+	constructor(
+		private ruleContent: string,
+		private userConfig: UserConfig,
+		private uid?: string,
+		private runtimeEnv?: Env,
+	) { }
 
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
 		const allProxyList: ClashProxy[] = [];
@@ -32,7 +37,12 @@ export class StrategyMultiSub {
 
 			const tasks = appendSubList.map(sub => limit(async () => {
 				try {
-					const result = await DynamicService.getWithCache(sub.subscribe);
+					const result = await DynamicService.getWithCache(
+						sub.subscribe,
+						5 * 60 * 1000,
+						sub.proxyProvider,
+						this.runtimeEnv,
+					);
 					const clashContent = result.content;
 					const subInfo = result.traffic || '';
 

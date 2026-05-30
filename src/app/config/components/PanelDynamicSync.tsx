@@ -3,13 +3,39 @@ import { UserConfig } from '@/types/user-config';
 import { useDynamicSync } from '@/app/config/hooks/useDynamicSync';
 import { PanelTopBar } from './PanelTopBar';
 import { SyncItemCard } from '@/components/SyncItemCard';
+import { setSubscriptionList } from '@/modules/user/subscription-list';
+import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
+    onChange: (newConfig: UserConfig) => void;
+    readOnly?: boolean;
+    availableProxyProviders: SubscriptionProxyProvider[];
 }
 
-export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
+export function PanelDynamicSync({
+    config,
+    onChange,
+    readOnly = false,
+    availableProxyProviders,
+}: DynamicSyncPanelProps) {
     const { items, statuses, dynamicInfos, syncUrl } = useDynamicSync(config);
+
+    const handleProxyProviderChange = (index: number, proxyProvider?: SubscriptionProxyProvider) => {
+        const subscriptions = config.appendSubList ?? [];
+        const nextSubscriptions = [...subscriptions];
+        const currentSubscription = nextSubscriptions[index];
+        if (!currentSubscription) {
+            return;
+        }
+
+        nextSubscriptions[index] = {
+            ...currentSubscription,
+            proxyProvider,
+        };
+
+        onChange(setSubscriptionList(config, nextSubscriptions));
+    };
 
     return (
         <div className="space-y-6">
@@ -38,7 +64,10 @@ export function PanelDynamicSync({ config }: DynamicSyncPanelProps) {
                         item={item}
                         status={statuses[item.url] || { status: 'idle' }}
                         info={dynamicInfos[item.url]}
-                        onSync={() => syncUrl(item.url)}
+                        readOnly={readOnly}
+                        availableProxyProviders={availableProxyProviders}
+                        onProxyProviderChange={(proxyProvider) => handleProxyProviderChange(index, proxyProvider)}
+                        onSync={() => syncUrl(item.url, item.proxyProvider)}
                     />
                 ))}
             </div>

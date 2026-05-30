@@ -70,57 +70,55 @@ export const SubConfigCard = memo(function SubConfigCard({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                        <div className="space-y-2">
-                            <Label htmlFor={`sub-flag-${index}`} className="flex items-center gap-2">
-                                <Flag className="w-4 h-4" />
-                                标识 (Flag)
-                            </Label>
-                            <Input
-                                id={`sub-flag-${index}`}
-                                value={item.flag}
-                                onChange={(e) => onUpdate(index, 'flag', e.target.value)}
-                                placeholder="sub-1"
-                                readOnly={readOnly}
-                                maxLength={10}
-                            />
-                            <p className="text-[0.8rem] text-muted-foreground">
-                                用于区分不同订阅源的简短标识
-                            </p>
-                        </div>
+                    <div className="space-y-2">
+                        <Label htmlFor={`sub-flag-${index}`} className="flex items-center gap-2">
+                            <Flag className="w-4 h-4" />
+                            标识 (Flag)
+                        </Label>
+                        <Input
+                            id={`sub-flag-${index}`}
+                            value={item.flag}
+                            onChange={(e) => onUpdate(index, 'flag', e.target.value)}
+                            placeholder="sub-1"
+                            readOnly={readOnly}
+                            maxLength={10}
+                        />
+                        <p className="text-[0.8rem] text-muted-foreground">
+                            用于区分不同订阅源的简短标识
+                        </p>
+                    </div>
 
-                        <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                                <Globe className="w-4 h-4" />
-                                筛选地区
-                            </Label>
-                            <div className="flex flex-wrap gap-2 pt-2">
-                                {AREA_CODES.map((area: AreaCode) => {
-                                    const isChecked = item.includeArea?.includes(area) || false;
-                                    const emoji = AREA_EMOJI[area];
-                                    return (
-                                        <div key={`${index}-${area}`} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={`sub-${index}-area-${area}`}
-                                                checked={isChecked}
-                                                onCheckedChange={(checked) => onAreaChange(index, area, checked as boolean)}
-                                                disabled={readOnly}
-                                            />
-                                            <Label
-                                                htmlFor={`sub-${index}-area-${area}`}
-                                                className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
-                                            >
-                                                <span>{emoji}</span>
-                                                <span>{area}</span>
-                                            </Label>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <p className="text-[0.8rem] text-muted-foreground mt-1">
-                                勾选要筛选的地区，防止多订阅模式，<b>过多节点，影响测速速度</b><br />若 <b>全不选</b> 则默认包含所有地区
-                            </p>
+                    <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                            <Globe className="w-4 h-4" />
+                            筛选地区
+                        </Label>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {AREA_CODES.map((area: AreaCode) => {
+                                const isChecked = item.includeArea?.includes(area) || false;
+                                const emoji = AREA_EMOJI[area];
+                                return (
+                                    <div key={`${index}-${area}`} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={`sub-${index}-area-${area}`}
+                                            checked={isChecked}
+                                            onCheckedChange={(checked) => onAreaChange(index, area, checked as boolean)}
+                                            disabled={readOnly}
+                                        />
+                                        <Label
+                                            htmlFor={`sub-${index}-area-${area}`}
+                                            className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>{emoji}</span>
+                                            <span>{area}</span>
+                                        </Label>
+                                    </div>
+                                );
+                            })}
                         </div>
+                        <p className="text-[0.8rem] text-muted-foreground mt-1">
+                            勾选要筛选的地区，防止多订阅模式，<b>过多节点，影响测速速度</b><br />若 <b>全不选</b> 则默认包含所有地区
+                        </p>
                     </div>
                 </div>
             </CardContent>

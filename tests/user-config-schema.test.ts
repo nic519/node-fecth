@@ -59,3 +59,18 @@ test('UserConfigSchema rejects blank flags when multiple subscription sources ar
 		expect(result.error.issues[0]?.message).toBe('多个订阅源时标识不能为空');
 	}
 });
+
+test('UserConfigSchema accepts a proxy provider on a subscription source', () => {
+	const parsed = UserConfigSchema.parse({
+		accessToken: 'token',
+		appendSubList: [
+			{
+				subscribe: 'https://primary.example.com/sub',
+				flag: 'A',
+				proxyProvider: 'cloudflare',
+			},
+		],
+	});
+
+	expect(parsed.appendSubList?.[0]?.proxyProvider).toBe('cloudflare');
+});

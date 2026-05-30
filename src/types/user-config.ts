@@ -9,6 +9,8 @@ export type {
 	AreaCode,
 	// API 业务响应码常量类型。
 	ResponseCodes,
+	// 订阅源代理提供方类型。
+	SubscriptionProxyProvider,
 	// 附加订阅配置类型。
 	SubConfig,
 	// 系统日志类型。

@@ -9,6 +9,7 @@ import Loading from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
+import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 interface ConfigEditorProps {
 	uid: string;
@@ -25,6 +26,7 @@ interface ConfigEditorProps {
 	loading?: boolean;
 	error?: string | null;
 	saveError?: string | null;
+	availableProxyProviders: SubscriptionProxyProvider[];
 }
 
 export function ConfigEditor({
@@ -42,6 +44,7 @@ export function ConfigEditor({
 	loading,
 	error,
 	saveError,
+	availableProxyProviders,
 }: ConfigEditorProps) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -126,6 +129,7 @@ export function ConfigEditor({
 											onChange={onConfigChange}
 											activeTab={activeTab}
 											uid={uid}
+											availableProxyProviders={availableProxyProviders}
 										/>
 									)}
 								</CardContent>

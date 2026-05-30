@@ -34,7 +34,12 @@ export class YamlMergeFactory {
 
 	async multiSubStrategy(): Promise<{ yamlContent: YamlObject; subInfo: string }> {
 		const ruleContent = await this.measure('fetch_rule_content', () => this.fetchRuleContent());
-		const yamlStrategy = new StrategyMultiSub(ruleContent, this.userConfig, this.runtimeOptions.uid);
+		const yamlStrategy = new StrategyMultiSub(
+			ruleContent,
+			this.userConfig,
+			this.runtimeOptions.uid,
+			this.runtimeOptions.env,
+		);
 		const { yamlContent, subInfo } = await yamlStrategy.generate();
 		return { yamlContent, subInfo };
 	}

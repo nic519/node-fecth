@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { UserConfig } from '@/types/user-config';
 import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
 import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
+import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 const SYNC_TIMEOUT_MS = 30000;
 const STATUS_RESET_DELAY_MS = 3000;
@@ -18,6 +19,7 @@ export interface SyncItemData {
     url: string;
     source: string;
     flag?: string;
+    proxyProvider?: SubscriptionProxyProvider;
 }
 
 export function useDynamicSync(config: UserConfig) {
@@ -31,17 +33,18 @@ export function useDynamicSync(config: UserConfig) {
             url: sub.subscribe,
             source: '订阅源',
             flag: sub.flag,
+            proxyProvider: sub.proxyProvider,
         })).filter(item => item.url);
     }, [config]);
 
-    const syncUrl = useCallback(async (url: string) => {
+    const syncUrl = useCallback(async (url: string, proxyProvider?: SubscriptionProxyProvider) => {
         if (!url) return;
         setStatuses(prev => ({ ...prev, [url]: { status: 'loading', message: undefined } }));
 
         try {
             // 使用 AbortSignal.timeout (30s) 替代手动的 setTimeout + AbortController，更简洁且自动处理资源清理
             const signal = AbortSignal.timeout(SYNC_TIMEOUT_MS);
-            const response = await dynamicService.syncUrl(url, signal);
+            const response = await dynamicService.syncUrl(url, proxyProvider, signal);
 
             if (response.code === 0) {
                 setStatuses(prev => ({ ...prev, [url]: { status: 'success', message: '已同步' } }));
