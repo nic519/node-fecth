@@ -17,7 +17,7 @@ test('SyncItemCard renders proxy provider controls in subscription loading view'
     />,
   );
 
-  expect(markup).toContain('订阅代理');
+  expect(markup).toContain('应急访问');
   expect(markup).toContain('sync-proxy-provider-A');
   expect(markup).toContain('subscription-proxy-help');
   expect(markup).toContain('CF');

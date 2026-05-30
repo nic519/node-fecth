@@ -135,10 +135,34 @@ export function SyncItemCard({
 
         <div className="flex items-end justify-between gap-2 pt-2">
           <div className="space-y-1.5 flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex w-full items-center gap-2">
+              <div className="shrink-0">
+                <Select
+                  value={item.proxyProvider ?? '__direct__'}
+                  onValueChange={(value) => onProxyProviderChange?.(
+                    value === '__direct__' ? undefined : value as SubscriptionProxyProvider,
+                  )}
+                  disabled={readOnly}
+                >
+                  <SelectTrigger
+                    aria-label={`sync-proxy-provider-${item.flag ?? item.url}`}
+                    className="h-7 w-[84px] rounded-full border-border/40 bg-transparent px-2.5 text-xs shadow-none"
+                  >
+                    <SelectValue>{proxyProviderShortLabel}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__direct__">直连</SelectItem>
+                    {availableProxyProviders.map((provider) => (
+                      <SelectItem key={provider} value={provider}>
+                        {SUBSCRIPTION_PROXY_PROVIDER_LABELS[provider]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-muted-foreground">
                 <Waypoints className="w-3.5 h-3.5 shrink-0" />
-                <span>订阅代理</span>
+                <span>应急访问</span>
                 <Popover>
                   <PopoverTrigger asChild>
                     <button
@@ -151,33 +175,11 @@ export function SyncItemCard({
                   </PopoverTrigger>
                   <PopoverContent align="start" sideOffset={8} className="max-w-64 text-xs leading-5">
                     <p>
-                      某些订阅源在本机网络下本来就无法直连，这时可以改由其他服务器代为拉取。并且只建议在本地拉取不了订阅时启用。
+                      某些订阅源在当前服务器无法获取，这时可以改由其他服务器代为拉取
                     </p>
                   </PopoverContent>
                 </Popover>
               </div>
-              <Select
-                value={item.proxyProvider ?? '__direct__'}
-                onValueChange={(value) => onProxyProviderChange?.(
-                  value === '__direct__' ? undefined : value as SubscriptionProxyProvider,
-                )}
-                disabled={readOnly}
-              >
-                <SelectTrigger
-                  aria-label={`sync-proxy-provider-${item.flag ?? item.url}`}
-                  className="h-7 w-[84px] shrink-0 rounded-full border-border/40 bg-transparent px-2.5 text-xs shadow-none"
-                >
-                  <SelectValue>{proxyProviderShortLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__direct__">直连</SelectItem>
-                  {availableProxyProviders.map((provider) => (
-                    <SelectItem key={provider} value={provider}>
-                      {SUBSCRIPTION_PROXY_PROVIDER_LABELS[provider]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {info ? (
