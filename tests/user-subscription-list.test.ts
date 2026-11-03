@@ -66,3 +66,9 @@ test('setSubscriptionList preserves an empty subscription while editing', () => 
     ],
   });
 });
+
+test('inline sources survive list normalization and JSON persistence without a URL', () => {
+ const item = {type:'inline' as const,subscribe:'',flag:' A ',proxiesYaml:'- {name: node, type: direct}'};
+ const config = setSubscriptionList({accessToken:'token'},[item]);
+ expect(buildSubscriptionListFromConfig(JSON.parse(JSON.stringify(config)))).toEqual([{...item,flag:'A'}]);
+});

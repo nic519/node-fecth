@@ -46,3 +46,11 @@ test('PanelBasicConfig renders empty subscription rows while editing', () => {
   expect(markup).toContain('sub-flag-0');
   expect(markup).not.toContain('订阅代理');
 });
+
+test('inline subscription editor shows YAML and node count instead of a URL field', () => {
+ const markup = renderToStaticMarkup(<PanelBasicConfig config={{accessToken:'token',appendSubList:[{type:'inline',subscribe:'',flag:'A',proxiesYaml:'- {name: node, type: direct}'}]}} onChange={()=>{}} />);
+ expect(markup).toContain('sub-proxies-0');
+ expect(markup).toContain('已识别 1 个节点');
+ expect(markup).not.toContain('sub-url-0');
+ expect(markup).toContain('重新粘贴并保存');
+});

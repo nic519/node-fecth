@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { parseInlineProxies } from '@/modules/user/inline-proxies';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AREA_CODES } from '@/config/proxy-area.config';
@@ -39,6 +42,13 @@ export const SubConfigCard = memo(function SubConfigCard({
     // If nothing is checked, the backend treats it as ALL.
     // This can be confusing, so we add a helper text.
 
+    let nodeSummary = '';
+    let nodeError = '';
+    if (item.type === 'inline' && item.proxiesYaml?.trim()) {
+        try { nodeSummary = `已识别 ${parseInlineProxies(item.proxiesYaml).length} 个节点`; }
+        catch (error) { nodeError = error instanceof Error ? error.message : '节点 YAML 无效'; }
+    }
+
     return (
         <Card className="relative overflow-hidden border-l-4 border-l-primary/20 hover:border-l-primary/40 transition-colors">
             <CardContent className="p-4 space-y-4">
@@ -55,6 +65,30 @@ export const SubConfigCard = memo(function SubConfigCard({
                 </div>
 
                 <div className="space-y-4">
+                    <div className="space-y-2 pr-8">
+                        <Label htmlFor={`sub-type-${index}`}>来源类型</Label>
+                        <Select value={item.type ?? 'url'} onValueChange={value => onUpdate(index, 'type', value as 'url' | 'inline')} disabled={readOnly}>
+                            <SelectTrigger id={`sub-type-${index}`}><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="url">订阅链接</SelectItem>
+                                <SelectItem value="inline">粘贴节点</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {item.type === 'inline' ? (
+                        <div className="space-y-2">
+                            <Label htmlFor={`sub-proxies-${index}`}>节点 YAML</Label>
+                            <Textarea id={`sub-proxies-${index}`} value={item.proxiesYaml ?? ''}
+                                onChange={event => onUpdate(index, 'proxiesYaml', event.target.value)}
+                                readOnly={readOnly} spellCheck={false} rows={10} className="font-mono text-sm"
+                                aria-invalid={!!nodeError} aria-describedby={`sub-proxies-help-${index}`}
+                                placeholder={'proxies:\n  - name: 香港 01\n    type: trojan\n    server: example.com\n    port: 443\n    password: "节点密码"'} />
+                            <p id={`sub-proxies-help-${index}`} className="text-xs text-muted-foreground">可粘贴完整 YAML、proxies 片段或节点列表。只保存节点；节点更新后请重新粘贴并保存。</p>
+                            {nodeError ? <p role="alert" className="text-xs text-destructive">{nodeError}</p>
+                                : <p role="status" className="text-xs text-muted-foreground">{nodeSummary}</p>}
+                        </div>
+                    ) : (
+
                     <div className="space-y-2">
                         <Label htmlFor={`sub-url-${index}`} className="flex items-center gap-2">
                             <Link className="w-4 h-4" />
@@ -69,6 +103,8 @@ export const SubConfigCard = memo(function SubConfigCard({
                             className="font-mono text-sm"
                         />
                     </div>
+
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor={`sub-flag-${index}`} className="flex items-center gap-2">

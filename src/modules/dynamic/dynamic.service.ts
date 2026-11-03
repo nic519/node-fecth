@@ -144,10 +144,10 @@ export class DynamicService {
 		const cached = await this.getByUrl(url);
 
 		if (cached) {
-			const updatedAt = new Date(cached.updatedAt.replace(' ', 'T')).getTime();
-			const now = Date.now();
+			const updatedAt = new Date(`${cached.updatedAt.replace(' ', 'T')}+08:00`).getTime();
+			const age = Date.now() - updatedAt;
 
-			if (now - updatedAt < ttlMs) {
+			if (age >= 0 && age < ttlMs) {
 				logger.info({ url }, 'Cache hit: returning valid cached content');
 				return cached;
 			}

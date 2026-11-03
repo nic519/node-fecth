@@ -65,3 +65,18 @@ test('StrategyMultiSub does not fetch when appendSubList is empty', async () => 
 
 	expect(requestedUrls).toEqual([]);
 });
+
+test('inline nodes merge with remote nodes without fetching inline content', async () => {
+ const urls: string[] = [];
+ DynamicService.getWithCache = async (url) => { urls.push(url); return {id:'remote',url,content:'proxies: [{name: Remote, type: http, server: example.com, port: 80}]',traffic:null,updatedAt:''}; };
+ const config = {accessToken:'token',appendSubList:[
+  {type:'inline' as const,subscribe:'',flag:'A',includeArea:['HK' as const],proxiesYaml:'- {name: 香港, type: trojan, server: hk.example.com, port: 443, password: secret, sni: tls.example.com}\n- {name: 日本, type: trojan, server: jp.example.com, port: 443, password: other}'},
+  {subscribe:'https://example.com/sub',flag:'B'}
+ ]};
+ const result = await new StrategyMultiSub('proxies: []',config).generate();
+ expect(urls).toEqual(['https://example.com/sub']);
+ expect(result.yamlContent.proxies).toEqual([
+  {name:'A-香港',type:'trojan',server:'hk.example.com',port:443,password:'secret',sni:'tls.example.com'},
+  {name:'B-Remote',type:'http',server:'example.com',port:80}
+ ]);
+});

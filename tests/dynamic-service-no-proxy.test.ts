@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, expect, mock, spyOn, test } from "bun:test";
 
 import { DynamicService } from "../src/modules/dynamic/dynamic.service";
 import { httpClient } from "../src/utils/http/client";
@@ -70,4 +70,26 @@ test("DynamicService.fetchAndSave uses the configured proxy provider request URL
 	expect(requestedUrls).toEqual([
 		"https://transfer-v.lavamusic.workers.dev/api/proxy?url=https%3A%2F%2Fliangxin.xyz%2Fsub",
 	]);
+});
+
+test.each([
+	["fresh", "2026-11-03 11:34:00", "cached-content"],
+	["expired", "2026-11-03 11:22:33", "fresh-content"],
+	["at the TTL boundary", "2026-11-03 11:31:00", "fresh-content"],
+	["in the future", "2026-11-03 11:37:00", "fresh-content"],
+	["invalid", "invalid-date", "fresh-content"],
+])("DynamicService.getWithCache handles %s Beijing timestamps", async (_label, updatedAt, expectedContent) => {
+	spyOn(Date, "now").mockReturnValue(Date.parse("2026-11-03T03:36:00Z"));
+	spyOn(DynamicService, "getByUrl").mockResolvedValue({
+		id: "cached-id",
+		url: "https://example.com/sub",
+		content: "cached-content",
+		traffic: null,
+		updatedAt,
+	});
+	spyOn(globalThis, "fetch").mockResolvedValue(new Response("fresh-content"));
+
+	const result = await DynamicService.getWithCache("https://example.com/sub");
+
+	expect(result.content).toBe(expectedContent);
 });

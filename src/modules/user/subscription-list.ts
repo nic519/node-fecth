@@ -5,8 +5,8 @@ import type { UserConfig } from './user.schema';
 type SubscriptionItem = NonNullable<UserConfig['appendSubList']>[number];
 
 function normalizeSubscriptionItem(item: SubscriptionItem, preserveEmptySubscribe = false): SubscriptionItem | null {
-  const subscribe = item.subscribe.trim();
-  if (!subscribe && !preserveEmptySubscribe) {
+  const subscribe = item.type === 'inline' ? '' : item.subscribe.trim();
+  if (item.type !== 'inline' && !subscribe && !preserveEmptySubscribe) {
     return null;
   }
 

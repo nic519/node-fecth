@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { UserConfig } from '@/types/user-config';
 import { dynamicService, DynamicInfo } from '@/services/dynamic-api';
-import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
 import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 const SYNC_TIMEOUT_MS = 30000;
@@ -17,6 +16,7 @@ export interface SyncStatus {
 // DynamicInfo 已经在 service 中定义，这里移除
 export interface SyncItemData {
     url: string;
+    subscriptionIndex?: number;
     source: string;
     flag?: string;
     proxyProvider?: SubscriptionProxyProvider;
@@ -28,9 +28,10 @@ export function useDynamicSync(config: UserConfig) {
     const timeoutIdsRef = useRef<number[]>([]);
 
     const items = useMemo<SyncItemData[]>(() => {
-        const subscriptions = buildSubscriptionListFromConfig(config);
-        return subscriptions.map((sub) => ({
-            url: sub.subscribe,
+        const subscriptions = config.appendSubList ?? [];
+        return subscriptions.map((sub, subscriptionIndex) => ({
+            subscriptionIndex,
+            url: sub.type === 'inline' ? '' : sub.subscribe,
             source: '订阅源',
             flag: sub.flag,
             proxyProvider: sub.proxyProvider,

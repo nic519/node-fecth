@@ -8,6 +8,7 @@ import { logger } from '@/utils/request/network.config';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
 import yaml from 'js-yaml';
+import { normalizeInlineProxies } from '@/modules/user/inline-proxies';
 import { PreMergeInfo } from './clash-merge.types';
 
 export class StrategyMultiSub {
@@ -37,7 +38,9 @@ export class StrategyMultiSub {
 
 			const tasks = appendSubList.map(sub => limit(async () => {
 				try {
-					const result = await DynamicService.getWithCache(
+					const result = sub.type === 'inline'
+                        ? { content: normalizeInlineProxies(sub.proxiesYaml ?? ''), traffic: null }
+                        : await DynamicService.getWithCache(
 						sub.subscribe,
 						5 * 60 * 1000,
 						sub.proxyProvider,

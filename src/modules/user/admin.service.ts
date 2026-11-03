@@ -62,7 +62,7 @@ export class AdminService {
 					appendSubList: parsedAppendSubList,
 				});
 				subscriptions.forEach((sub) => {
-					if (sub.subscribe) {
+					if (sub.type !== 'inline' && sub.subscribe) {
 						allUrls.add(sub.subscribe);
 					}
 				});
@@ -90,6 +90,7 @@ export class AdminService {
 				const subscriptionStats: SubscriptionStat[] = [];
 
 				subscriptions.forEach((sub, index) => {
+                    if (sub.type === 'inline') return;
 					const d = dynamicMap.get(sub.subscribe);
 					subscriptionStats.push({
 						url: sub.subscribe,
@@ -285,7 +286,7 @@ export class AdminService {
 	async refreshUserTrafficInfo(uid: string, adminId: string): Promise<TrafficInfo | undefined> {
 		try {
 			const configResponse = await this.userService.getUserConfig(uid);
-			const firstSubscription = configResponse?.appendSubList?.[0];
+			const firstSubscription = configResponse?.appendSubList?.find(sub => sub.type !== 'inline');
 			if (!firstSubscription?.subscribe) {
 				throw new Error(`用户 ${uid} 没有订阅地址`);
 			}

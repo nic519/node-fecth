@@ -42,8 +42,8 @@ export function PanelDynamicSync({
             <PanelTopBar
                 description={
                     <div className="space-y-1">
-                        <div>共 {items.length} 个订阅源，可单独预更新。</div>
-                        <div>订阅源较多时再使用，绝大多数情况可忽略。</div>
+                        <div>共 {items.length} 个链接订阅源，可单独预更新。</div>
+                        <div>粘贴节点在保存配置后生效，无需远程同步。</div>
                     </div>
                 }
             />
@@ -66,7 +66,7 @@ export function PanelDynamicSync({
                         info={dynamicInfos[item.url]}
                         readOnly={readOnly}
                         availableProxyProviders={availableProxyProviders}
-                        onProxyProviderChange={(proxyProvider) => handleProxyProviderChange(index, proxyProvider)}
+                        onProxyProviderChange={(proxyProvider) => handleProxyProviderChange(item.subscriptionIndex ?? index, proxyProvider)}
                         onSync={() => syncUrl(item.url, item.proxyProvider)}
                     />
                 ))}

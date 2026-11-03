@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizeInlineProxies } from './inline-proxies';
 import { AREA_CODES } from '@/config/proxy-area.config';
 import { SUBSCRIPTION_PROXY_PROVIDERS } from '@/config/subscription-proxy.config';
 
@@ -17,13 +18,39 @@ export const SubscriptionProxyProviderSchema = z.enum(SUBSCRIPTION_PROXY_PROVIDE
  */
 export const SubscribeSchema = z.object({
 	// 订阅源 URL。
-	subscribe: z.url('订阅链接必须是有效的URL'),
+	subscribe: z.string().default(''),
+	type: z.enum(['url', 'inline']).optional(),
+	proxiesYaml: z.string().optional(),
 	// 订阅源在界面和规则处理中的短标识。
 	flag: z.string(),
 	// 该订阅源只参与哪些地区的节点合并；为空时表示不限制地区。
 	includeArea: z.array(AreaCodeSchema).optional(),
 	// 订阅源远程拉取时使用的代理提供方；为空时表示直连。
 	proxyProvider: SubscriptionProxyProviderSchema.optional(),
+}).superRefine((source, ctx) => {
+	if (source.type === 'inline') {
+		try {
+			normalizeInlineProxies(source.proxiesYaml ?? '');
+		} catch (error) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['proxiesYaml'],
+				message: error instanceof Error ? error.message : '节点 YAML 无效',
+			});
+		}
+	} else if (!z.url().safeParse(source.subscribe).success) {
+		ctx.addIssue({ code: 'custom', path: ['subscribe'], message: '订阅链接必须是有效的URL' });
+	}
+}).transform(source => {
+	if (source.type === 'inline') {
+		return {
+			...source,
+			subscribe: '',
+			proxyProvider: undefined,
+			proxiesYaml: normalizeInlineProxies(source.proxiesYaml ?? ''),
+		};
+	}
+	return { ...source, ...(source.proxiesYaml !== undefined ? { proxiesYaml: undefined } : {}) };
 });
 
 /**
