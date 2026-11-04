@@ -201,7 +201,7 @@ export function RegisterUserDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] border-border/60 shadow-xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600">
+          <DialogTitle className="pr-8 text-center text-2xl font-semibold tracking-[-0.025em]">
             立即创建配置
           </DialogTitle>
         </DialogHeader>
@@ -302,7 +302,7 @@ export function RegisterUserDialog({
           <Button
             onClick={handleRegister}
             disabled={loading}
-            className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 text-white shadow-lg shadow-primary/20"
+            className="min-w-28"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             确认创建

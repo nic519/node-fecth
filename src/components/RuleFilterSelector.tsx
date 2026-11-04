@@ -87,9 +87,7 @@ export function RuleFilterSelector({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <Label htmlFor="requiredFilters" className="text-base flex items-center gap-2">
-          <div className="p-1 rounded bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400">
-            <ListFilter className="w-3.5 h-3.5" />
-          </div>
+          <ListFilter className="h-4 w-4 text-muted-foreground" />
           需要的规则项
         </Label>
         <div className="flex items-center justify-between sm:justify-end space-x-2 bg-muted/30 sm:bg-transparent p-2 sm:p-0 rounded-lg">
@@ -101,7 +99,7 @@ export function RuleFilterSelector({
             checked={effectiveEnable}
             onCheckedChange={handleFilterToggle}
             disabled={readOnly}
-            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-teal-500 data-[state=checked]:to-emerald-500 order-1 sm:order-2"
+            className="order-1 data-[state=checked]:bg-primary sm:order-2"
           />
         </div>
       </div>

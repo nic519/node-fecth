@@ -37,7 +37,7 @@ const RANGE_OPTIONS = [
 ];
 
 const STATUS_META = {
-  online: { label: '活跃', dot: 'bg-emerald-500', badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' },
+  online: { label: '活跃', dot: 'bg-primary', badge: 'bg-accent text-accent-foreground' },
   recent: { label: '今日访问', dot: 'bg-amber-500', badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300' },
   stale: { label: '已离线', dot: 'bg-slate-300 dark:bg-slate-600', badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-300' },
 };
@@ -105,13 +105,13 @@ function UserRow({
       onClick={onSelect}
       className={cn(
         'group w-full border-b border-border/50 px-4 py-3.5 text-left transition-colors last:border-b-0',
-        selected ? 'bg-violet-500/[0.07]' : 'hover:bg-muted/50',
+        selected ? 'bg-primary/[0.07]' : 'hover:bg-muted/50',
       )}
     >
       <div className="flex items-center gap-3">
         <span className={cn(
           'h-2.5 w-2.5 shrink-0 rounded-full',
-          user.activeIps > 0 ? 'bg-emerald-500' : user.recentIps > 0 ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600',
+          user.activeIps > 0 ? 'bg-primary' : user.recentIps > 0 ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600',
         )} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
@@ -123,7 +123,7 @@ function UserRow({
             <span>{user.requestCount.toLocaleString()} 次请求</span>
           </div>
         </div>
-        <ChevronRight className={cn('h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform', selected && 'translate-x-0.5 text-violet-500')} />
+        <ChevronRight className={cn('h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform', selected && 'translate-x-0.5 text-primary')} />
       </div>
     </button>
   );
@@ -140,7 +140,7 @@ function Distribution({ title, items }: { title: string; items: Array<{ name: st
             <span className="truncate font-medium" title={item.name}>{item.name}</span>
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-violet-500/70"
+                className="h-full rounded-full bg-primary/70"
                 style={{ width: `${Math.max(8, (item.count / max) * 100)}%` }}
               />
             </div>
@@ -189,7 +189,7 @@ function HeartbeatStrip({
               key={index}
               className={cn(
                 'h-6 rounded-[2px]',
-                count === 0 ? 'bg-muted' : 'bg-violet-500',
+                count === 0 ? 'bg-muted' : 'bg-primary',
               )}
               style={count === 0 ? undefined : { opacity }}
               title={`${exactTime(bucketStart.toISOString())} 起 ${bucketHours} 小时：${count} 次心跳`}
@@ -223,7 +223,7 @@ function IpHeartbeatRow({
       <div className="min-w-0">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2.5 w-2.5 shrink-0">
-            {heartbeat.status === 'online' && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />}
+            {heartbeat.status === 'online' && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-50" />}
             <span className={cn('relative inline-flex h-2.5 w-2.5 rounded-full', status.dot)} />
           </span>
           <span className="truncate font-mono text-sm font-semibold" title={heartbeat.ip}>{heartbeat.ip}</span>
@@ -283,7 +283,7 @@ function SelectedUserPanel({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-semibold tracking-tight">{user.userId}</h2>
               {user.activeIps > 0 && (
-                <Badge className="border-0 bg-emerald-500/10 text-emerald-700 shadow-none dark:text-emerald-300">
+                <Badge className="border-0 bg-accent text-accent-foreground shadow-none">
                   {user.activeIps} 个 IP 活跃
                 </Badge>
               )}
@@ -377,7 +377,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
       <main className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <Activity className="h-4 w-4" />
               Subscription pulse
             </div>
@@ -436,7 +436,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
             <div className="border-b border-border/60 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-sm font-semibold">
-                  <UsersRound className="h-4 w-4 text-violet-500" />
+                  <UsersRound className="h-4 w-4 text-primary" />
                   订阅列表
                 </div>
                 <span className="text-xs text-muted-foreground">{filteredUsers.length} 个</span>

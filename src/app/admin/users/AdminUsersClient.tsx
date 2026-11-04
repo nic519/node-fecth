@@ -54,12 +54,10 @@ export function AdminUsersClient({
   });
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950">
-      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#09090b_40%,#1e1b4b_100%)] opacity-20 pointer-events-none" />
-
+    <div className="min-h-100dvh bg-background">
       <NavigationBar superToken={superToken} currentPage="users" />
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <main className="content-container py-7 sm:py-9">
         <AdminTwoColumnLayout
           sidebar={
             <UserFilters
@@ -84,21 +82,9 @@ export function AdminUsersClient({
 
               <UserMasonry users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
 
-              <div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 px-4 py-3 border border-border/60 rounded-xl shadow-sm backdrop-blur-sm">
-                <div className="flex items-center text-xs font-medium text-muted-foreground">
-                  <span>共 {filteredUsers.length} 条记录</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
-                    上一页
-                  </Button>
-                  <Button size="sm" variant="default" className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
-                    1
-                  </Button>
-                  <Button size="sm" variant="outline" className="bg-background text-muted-foreground border-border/60 hover:bg-muted" disabled>
-                    下一页
-                  </Button>
-                </div>
+              <div className="flex items-center justify-between border-t border-border/60 px-1 py-3 text-xs font-medium text-muted-foreground">
+                <span>共 {filteredUsers.length} 条记录</span>
+                {searchTerm && <span>全部 {users.length} 位用户</span>}
               </div>
             </div>
           }

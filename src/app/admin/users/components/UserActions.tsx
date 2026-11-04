@@ -17,7 +17,7 @@ export function UserActions({ uid, onUserAction }: UserActionsProps) {
 			<Button
 				size="icon"
 				variant="ghost"
-				className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+				className="h-10 w-10 rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
 				onClick={(e) => {
 					e.stopPropagation();
 					onUserAction('delete', uid);

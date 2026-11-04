@@ -1,51 +1,37 @@
 'use client';
 
+import { ArrowRight } from '@phosphor-icons/react';
 import { AcmeLogo } from '@/components/NavigationBar';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/ui/mode-toggle';
-import { Sparkles } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 
 interface HomeNavbarProps {
   onRegisterClick: () => void;
 }
 
+const LINKS = [
+  { href: '#product', label: '规则编排' },
+  { href: '#sources', label: '多源容灾' },
+  { href: '#latency', label: '延迟优选' },
+  { href: '#features', label: '产品能力' },
+];
+
 export function HomeNavbar({ onRegisterClick }: HomeNavbarProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    const controlNavbar = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      } else {
-        if (currentScrollY > lastScrollY.current) {
-          setIsVisible(false); // Hide when scrolling down
-        } else {
-          setIsVisible(true); // Show when scrolling up
-        }
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', controlNavbar);
-    return () => window.removeEventListener('scroll', controlNavbar);
-  }, []);
-
   return (
-    <nav className={`fixed top-4 left-0 right-0 z-50 flex justify-center transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}`}>
-      <div className="flex w-full max-w-6xl items-center justify-between gap-8 px-10 py-3 bg-background/40 backdrop-blur-md border border-border/20 rounded-full shadow-sm">
-        <div className="flex items-center gap-2">
-          <AcmeLogo className="w-8 h-8 text-primary" />
-          <span className="font-bold text-lg tracking-tight">NodeFetch</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button size="sm" onClick={onRegisterClick} className="rounded-full"><Sparkles className="w-4 h-4" />立即使用</Button>
-          <ModeToggle className="rounded-full bg-transparent border-0 hover:bg-muted/50" />
+    <header className="glass-header sticky top-0 z-40 border-b border-border/55">
+      <div className="content-container flex h-[72px] items-center gap-6">
+        <a href="#top" className="flex items-center gap-3" aria-label="NodeFetch 首页">
+          <AcmeLogo className="h-9 w-9" />
+          <span className="text-[17px] font-semibold tracking-[-0.025em]">NodeFetch</span>
+        </a>
+        <nav className="hidden flex-1 items-center justify-center gap-7 md:flex" aria-label="官网导航">
+          {LINKS.map((link) => <a key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{link.label}</a>)}
+        </nav>
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <ModeToggle className="border-transparent bg-transparent shadow-none hover:bg-secondary/70" />
+          <Button onClick={onRegisterClick} className="h-10 rounded-full px-4">立即使用<ArrowRight weight="bold" className="h-4 w-4" /></Button>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

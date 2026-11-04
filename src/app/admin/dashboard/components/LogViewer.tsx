@@ -147,7 +147,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <ListFilter className="h-3.5 w-3.5 text-violet-500" />
+                  <ListFilter className="h-3.5 w-3.5 text-primary" />
                   总记录数
                 </span>
                 <span className="text-sm font-medium">{total}</span>
@@ -160,7 +160,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     日志级别
                   </label>
                   <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="日志级别" />
                     </SelectTrigger>
                     <SelectContent>
@@ -181,7 +181,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                   <Select value={type} onValueChange={(v) => {
                     setType(v === 'all' ? '' : v);
                   }}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="全部类型" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,7 +205,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="bg-muted/30 border-border/60 focus-visible:ring-violet-500/20 focus-visible:border-violet-500/50 transition-all"
+                    className="bg-muted/30 border-border/60 focus-visible:ring-primary/20 focus-visible:border-primary/50 transition-all"
                   />
                 </div>
               </div>
@@ -213,7 +213,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
           </AdminSidePanel>
         }
         content={
-          <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60 min-h-[600px] flex flex-col">
+          <Card className="surface flex min-h-[600px] flex-col">
             <CardContent className="pt-4 flex-1 flex flex-col">
               <TooltipProvider>
                 <div className="flex-1 overflow-auto">
@@ -246,7 +246,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                         </TableHead>
                         <TableHead className="w-[120px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <User className="h-3.5 w-3.5 text-violet-500" />
+                            <User className="h-3.5 w-3.5 text-primary" />
                             <span>用户</span>
                           </span>
                         </TableHead>
@@ -257,7 +257,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                         <TableRow>
                           <TableCell colSpan={5} className="h-64 text-center">
                             <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
-                              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
                               <span className="text-sm font-medium animate-pulse">正在加载日志数据...</span>
                             </div>
                           </TableCell>

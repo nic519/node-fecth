@@ -61,10 +61,10 @@ export function TemplateEditor({
 		return (
 			<div className="h-full flex flex-col items-center justify-center text-muted-foreground">
 				<div className="flex flex-col items-center justify-center p-8 text-center max-w-sm mx-auto">
-					<div className="mx-auto h-20 w-20 text-violet-500/80 dark:text-violet-400/80 flex items-center justify-center mb-6 bg-gradient-to-br from-violet-100/80 to-indigo-100/80 dark:from-violet-500/10 dark:to-indigo-500/10 rounded-3xl p-5 shadow-sm ring-1 ring-violet-200/60 dark:ring-violet-500/20">
+					<div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary p-4 text-muted-foreground">
 						<Layout className="w-10 h-10" strokeWidth={1.5} />
 					</div>
-					<h3 className="mt-2 text-lg font-semibold text-foreground bg-clip-text text-transparent bg-gradient-to-br from-zinc-800 to-zinc-600 dark:from-zinc-100 dark:to-zinc-400">未选择模板</h3>
+					<h3 className="mt-2 text-lg font-semibold text-foreground">未选择模板</h3>
 					<p className="mt-2 text-sm text-muted-foreground leading-relaxed">
 						请从左侧列表中选择一个配置模板进行编辑，或者点击左上角的“新建”按钮创建一个新模板。
 					</p>
@@ -80,7 +80,7 @@ export function TemplateEditor({
 	return (
 		<div className="flex flex-col h-full bg-transparent">
 			{/* 头部 - 标题与操作按钮 */}
-			<div className="px-6 py-3 flex flex-row justify-between items-center space-y-0 h-14 border-b border-border/40 shrink-0">
+			<div className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border/50 px-4 py-3 sm:px-6">
 				{/* 左侧 - 标题/编辑框 */}
 				<div className="flex-1 mr-4">
 					{isEditing ? (
@@ -110,13 +110,13 @@ export function TemplateEditor({
 				</div>
 
 				{/* 右侧 - 操作按钮 */}
-				<div className="flex items-center gap-1">
+				<div className="flex flex-wrap items-center gap-1">
 					{!isEditing && (
 						<>
 							<Button
 								onClick={onStartEdit}
 								size="sm"
-								className="h-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-500/20 border-0 mr-2 transition-all duration-300"
+								className="mr-1"
 							>
 								<Pencil className="w-3.5 h-3.5 mr-1.5" />
 								编辑
@@ -126,7 +126,7 @@ export function TemplateEditor({
 								size="icon"
 								onClick={onDeleteTemplate}
 								title="删除模板"
-								className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 mr-1 transition-colors"
+								className="h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 mr-1 transition-colors"
 							>
 								<Trash2 className="w-4 h-4" />
 							</Button>
@@ -139,7 +139,7 @@ export function TemplateEditor({
 						size="icon"
 						onClick={onDownloadTemplate}
 						title="下载配置"
-						className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+						className="h-10 w-10 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
 					>
 						<FileDown className="w-4 h-4" />
 					</Button>
@@ -148,7 +148,7 @@ export function TemplateEditor({
 						size="icon"
 						onClick={onCopyConfigContent}
 						title="复制配置"
-						className="h-8 w-8 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+						className="h-10 w-10 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
 					>
 						<Clipboard className="w-4 h-4" />
 					</Button>
@@ -157,7 +157,7 @@ export function TemplateEditor({
 						size="icon"
 						onClick={onCopyTemplateUrl}
 						title="复制链接"
-						className="h-8 w-8 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+						className="h-10 w-10 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
 					>
 						<Link className="w-4 h-4" />
 					</Button>

@@ -1,6 +1,7 @@
-import { AdminDashboardClient } from './AdminDashboardClient';
+import { AdminOverviewClient } from './AdminOverviewClient';
 import { getValidSuperAdminToken } from '@/server/auth';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
+import { createServerServices } from '@/server/services';
 
 export default async function AdminDashboardPage({
   searchParams,
@@ -14,5 +15,6 @@ export default async function AdminDashboardPage({
     return <AdminAccessDenied />;
   }
 
-  return <AdminDashboardClient superToken={superToken} />;
+  const initialUsers = await createServerServices().adminService.getUserSummaryList();
+  return <AdminOverviewClient superToken={superToken} initialUsers={initialUsers} />;
 }

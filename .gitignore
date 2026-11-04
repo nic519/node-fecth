@@ -43,3 +43,7 @@ node_modules
 /public
 /.agents
 /.superpowers
+
+# local verification artifacts
+/.verification/
+/ui-detector.json

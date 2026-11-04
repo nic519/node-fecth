@@ -70,7 +70,7 @@ export function RegisterSuccessDialog({ uid, token }: RegisterSuccessDialogProps
         <div className="flex justify-center mt-4">
           <Button
             onClick={() => setIsOpen(false)}
-            className="w-full sm:w-auto min-w-[120px] bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/20"
+            className="w-full sm:w-auto sm:min-w-[120px]"
           >
             <CheckCircle2 className=" h-6 w-6" />
             我知道了

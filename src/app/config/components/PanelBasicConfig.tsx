@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
-import { secondaryActionButtonClass } from '@/lib/utils';
 import { PROMO_URL } from '@/config/constants';
 import { setSubscriptionList } from '@/modules/user/subscription-list';
 
@@ -83,9 +82,7 @@ export function PanelBasicConfig({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2 group">
                             <Label htmlFor="fileName" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                                <div className="p-1 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
-                                    <FileText className="w-3.5 h-3.5" />
-                                </div>
+                                <FileText className="h-4 w-4 text-muted-foreground" />
                                 配置显示名
                             </Label>
                             <Input
@@ -103,9 +100,7 @@ export function PanelBasicConfig({
 
                         <div className="space-y-2 group">
                             <Label htmlFor="excludeRegex" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                                <div className="p-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
-                                    <Filter className="w-3.5 h-3.5" />
-                                </div>
+                                <Filter className="h-4 w-4 text-muted-foreground" />
                                 节点排除正则
                             </Label>
                             <Input
@@ -128,12 +123,10 @@ export function PanelBasicConfig({
 
             {/* Append Subscription Section */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <Label className="text-base flex items-center gap-2">
-                            <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                                <ListPlus className="w-3.5 h-3.5" />
-                            </div>
+                        <Label className="flex items-center gap-2 text-base">
+                            <ListPlus className="h-[18px] w-[18px] text-muted-foreground" />
                             订阅源
                         </Label>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -144,7 +137,8 @@ export function PanelBasicConfig({
                         size="sm"
                         onClick={handleAppendSubListAdd}
                         disabled={readOnly}
-                        className={`flex items-center gap-1 ${secondaryActionButtonClass}`}
+                        variant="outline"
+                        className="flex shrink-0 items-center gap-1.5"
                     >
                         <Plus className="w-4 h-4" />
                         添加订阅源

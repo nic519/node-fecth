@@ -85,7 +85,13 @@ export function LogDetailsDialog({ log, open, onOpenChange, onCopy }: LogDetails
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto border-border/60 shadow-xl">
+      <DialogContent
+        className="max-w-2xl max-h-[80vh] overflow-y-auto border-border/60 shadow-xl"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          if (event.currentTarget instanceof HTMLElement) event.currentTarget.focus();
+        }}
+      >
         <DialogTitle className="sr-only">日志详情</DialogTitle>
         <TooltipProvider>
           {log && (

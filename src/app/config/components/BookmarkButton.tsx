@@ -21,10 +21,6 @@ export function BookmarkButton({ className }: { className?: string }) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [hintText, setHintText] = useState('添加到书签');
   const [isHovered, setIsHovered] = useState(false);
-  const [currentUrl] = useState(() => {
-    if (typeof window === 'undefined') return '#';
-    return window.location.href;
-  });
 
   const handleClick = () => {
     const shortcut = os === 'mac' ? '⌘+D' : 'Ctrl+D';
@@ -80,9 +76,6 @@ export function BookmarkButton({ className }: { className?: string }) {
             >
               <Bookmark className="h-4 w-4 transition-transform group-hover:scale-110" />
               <span className="sr-only">添加到书签</span>
-
-              {/* 隐藏的链接，用于某些浏览器的拖拽优化 */}
-              <a href={currentUrl} className="absolute inset-0 opacity-0 -z-10" tabIndex={-1} aria-hidden="true">收藏此页</a>
             </Button>
           </div>
         </TooltipTrigger>
