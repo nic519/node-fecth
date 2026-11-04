@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Users, FileText, Home } from 'lucide-react';
+import { Activity, LayoutDashboard, Users, FileText, Home } from 'lucide-react';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export interface NavigationBarProps {
 	superToken: string;
-	currentPage?: 'dashboard' | 'users' | 'templates';
+	currentPage?: 'dashboard' | 'analytics' | 'users' | 'templates';
 	title?: string;
 }
 
@@ -27,6 +27,8 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 		title ||
 		(currentPage === 'dashboard'
 			? '控制台'
+			: currentPage === 'analytics'
+				? '订阅使用分析'
 			: currentPage === 'users'
 				? '用户管理'
 				: currentPage === 'templates'
@@ -43,7 +45,7 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 						<p className="font-bold text-foreground text-lg tracking-tight hidden sm:block">{pageTitle}</p>
 					</div>
 
-					<div className="flex items-center gap-1 sm:gap-6 justify-center flex-1">
+					<div className="flex items-center gap-1 sm:gap-3 justify-center flex-1">
 						<Link
 							href={`/admin/dashboard?superToken=${superToken}`}
 							className={cn(
@@ -55,6 +57,18 @@ export function NavigationBar({ superToken, currentPage, title }: NavigationBarP
 						>
 							<LayoutDashboard className="w-4 h-4" />
 							<span>控制台</span>
+						</Link>
+						<Link
+							href={`/admin/analytics?superToken=${superToken}`}
+							className={cn(
+								"flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+								currentPage === 'analytics'
+									? 'bg-violet-500/10 text-violet-700 dark:text-violet-300 font-bold ring-1 ring-violet-500/20'
+									: 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+							)}
+						>
+							<Activity className="w-4 h-4" />
+							<span className="hidden md:inline">使用分析</span>
 						</Link>
 						<Link
 							href={`/admin/users?superToken=${superToken}`}
