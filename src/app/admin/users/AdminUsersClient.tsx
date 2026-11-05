@@ -4,7 +4,6 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useToastContext } from '@/providers/toast-provider';
 import { useUserFilters } from './hooks/useUserFilters';
 import { useUserManagement } from './hooks/useUserManagement';
-import { NavigationBar } from '@/components/NavigationBar';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { UserFilters } from './components/UserFilters';
 import { UserMasonry } from './components/UserMasonry';
@@ -51,9 +50,7 @@ export function AdminUsersClient({
   });
 
   return (
-    <div className="min-h-100dvh bg-background">
-      <NavigationBar currentPage="users" />
-
+    <div className="flex-1 bg-background">
       <main className="content-container py-7 sm:py-9">
         <AdminTwoColumnLayout
           sidebar={

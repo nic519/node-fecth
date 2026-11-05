@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSelectedLayoutSegment } from 'next/navigation';
 import { useState } from 'react';
 import {
   Pulse as Activity,
@@ -19,11 +20,6 @@ import { ModeToggle } from '@/components/ui/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { useToastContext } from '@/providers/toast-provider';
 
-export interface NavigationBarProps {
-  currentPage?: 'dashboard' | 'analytics' | 'sources' | 'users' | 'templates' | 'logs';
-  title?: string;
-}
-
 export const AcmeLogo = ({ className }: { className?: string }) => (
   <span className={cn('inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] bg-foreground text-background', className)}>
     <Graph weight="fill" className="h-[55%] w-[55%]" aria-hidden="true" />
@@ -39,9 +35,12 @@ const NAV_ITEMS = [
   { id: 'logs', label: '日志', icon: Scroll, href: '/admin/logs' },
 ] as const;
 
-export function NavigationBar({ currentPage, title = '运营后台' }: NavigationBarProps) {
+export function NavigationBar() {
+  const currentPage = useSelectedLayoutSegment();
   const [signingOut, setSigningOut] = useState(false);
   const { showToast } = useToastContext();
+
+  if (!NAV_ITEMS.some((item) => item.id === currentPage)) return null;
 
   async function signOut() {
     setSigningOut(true);
@@ -62,7 +61,7 @@ export function NavigationBar({ currentPage, title = '运营后台' }: Navigatio
           <AcmeLogo className="h-9 w-9" />
           <span className="min-w-0">
             <span className="block truncate text-[15px] font-semibold tracking-[-0.02em]">NodeFetch</span>
-            <span className="block text-[11px] leading-4 text-muted-foreground">{title}</span>
+            <span className="block text-[11px] leading-4 text-muted-foreground">运营后台</span>
           </span>
         </Link>
 

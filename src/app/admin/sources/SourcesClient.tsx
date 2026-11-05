@@ -17,7 +17,6 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 
-import { NavigationBar } from '@/components/NavigationBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -279,8 +278,7 @@ export function SourcesClient() {
   };
 
   return (
-    <div className="min-h-100dvh bg-background">
-      <NavigationBar currentPage="sources" />
+    <div className="flex-1 bg-background">
       <main className="content-container py-7 sm:py-9">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>

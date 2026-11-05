@@ -25,7 +25,6 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 
-import { NavigationBar } from '@/components/NavigationBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -302,8 +301,7 @@ export function AdminOverviewClient({ initialUsers }: { initialUsers: UserAdminC
   };
 
   return (
-    <div className="min-h-100dvh bg-background">
-      <NavigationBar currentPage="dashboard" />
+    <div className="flex-1 bg-background">
       <main className="content-container py-7 sm:py-9">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div><h1 className="text-[28px] font-semibold tracking-[-0.035em] sm:text-[32px]">运营总览</h1><p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">用户、共享订阅、流量、IP 心跳与日志在同一视图中联动。点击任一记录即可继续查看上下文。</p></div>

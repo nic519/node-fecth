@@ -20,7 +20,6 @@ import {
   Wifi,
 } from 'lucide-react';
 
-import { NavigationBar } from '@/components/NavigationBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -517,9 +516,7 @@ export function SubscriptionAnalyticsClient() {
   const selectedUser = data?.users.find((user) => user.userId === selectedUserId) ?? filteredUsers[0];
 
   return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-zinc-950">
-      <NavigationBar currentPage="analytics" />
-
+    <div className="flex-1 bg-slate-50/70 dark:bg-zinc-950">
       <main className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-2xl">

@@ -1,7 +1,6 @@
 'use client';
 
 import Loading from '@/components/Loading';
-import { NavigationBar } from '@/components/NavigationBar';
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { FileText, Plus } from 'lucide-react';
@@ -59,9 +58,7 @@ export function AdminTemplatesClient({
   };
 
   return (
-    <div className="min-h-100dvh bg-background">
-      <NavigationBar currentPage="templates" />
-
+    <div className="flex-1 bg-background">
       <main className={cn("content-container py-7 sm:py-9", isEditing && "max-w-none")}>
         {error && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
