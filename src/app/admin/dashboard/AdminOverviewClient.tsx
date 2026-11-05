@@ -165,7 +165,6 @@ function ExpiryCalendar({ sources, onSelect }: { sources: SourceAggregate[]; onS
     return [{ source, date: new Date(traffic.expire * 1000), expired: traffic.isExpired }];
   }), [sources]);
   const activeEvents = events.filter((event) => !event.expired);
-  const expiredEvents = events.filter((event) => event.expired);
   const months = [0, 1].map((offset) => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth() + offset, 1);
@@ -200,7 +199,6 @@ function ExpiryCalendar({ sources, onSelect }: { sources: SourceAggregate[]; onS
         })}
       </div>
       {selectedDay && <div className="border-t border-border/60 px-5 py-4"><div className="mb-3 flex items-center justify-between text-xs"><span className="font-medium">{selectedDay} · {selectedEvents.length} 个订阅</span><button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => setSelectedDay(null)}>收起</button></div><div className="space-y-2">{selectedEvents.map(({ source }) => <button type="button" key={source.url} onClick={() => onSelect(source)} className="flex w-full items-center justify-between gap-3 rounded-[10px] bg-secondary/60 px-3 py-2.5 text-left hover:bg-secondary"><span className="min-w-0 truncate text-sm">{sourceName(source)}</span><span className="shrink-0 text-xs text-muted-foreground">{source.references.length} 个用户</span></button>)}</div></div>}
-      {expiredEvents.length > 0 && <details className="border-t border-border/60 px-5 py-3"><summary className="flex min-h-9 cursor-pointer items-center gap-2 text-sm text-muted-foreground"><WarningCircle weight="fill" className="h-4 w-4 text-amber-500" />已过期订阅收纳（{expiredEvents.length}）<CaretRight className="ml-auto h-4 w-4 transition-transform [[open]>&]:rotate-90" /></summary><div className="mt-2 space-y-2">{expiredEvents.map(({ source, date }) => <button type="button" key={source.url} onClick={() => onSelect(source)} className="flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-left hover:bg-secondary/70"><span className="min-w-0 truncate text-sm">{sourceName(source)}</span><span className="shrink-0 text-xs text-muted-foreground">{date.toLocaleDateString('zh-CN')}</span></button>)}</div></details>}
     </section>
   );
 }
@@ -217,6 +215,7 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
   const [selectedSource, setSelectedSource] = useState<SourceAggregate | null>(null);
   const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
   const [logUser, setLogUser] = useState('');
+  const [expiredOpen, setExpiredOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -276,7 +275,7 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
     return traffic?.expire && !traffic.isExpired && traffic.expire * 1000 < Date.now() + 30 * 86400_000;
   }).length;
 
-  // 待处理队列：流量紧张优先，其次 7 天内到期；已过期源交给日历的过期收纳，不占队列。
+  // 待处理队列：流量紧张优先，其次 7 天内到期；已过期源进右侧收纳，不占队列。
   const attentionSources = useMemo(() => sources
     .map((source) => ({ source, traffic: trafficOf(source) }))
     .filter((entry): entry is { source: SourceAggregate; traffic: ParsedTrafficInfo } => Boolean(entry.traffic && !entry.traffic.isExpired))
@@ -285,6 +284,12 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
       const rank = (entry: { traffic: ParsedTrafficInfo }) => (isTightTraffic(entry.traffic) ? 0 : 1);
       return rank(a) - rank(b) || a.traffic.remaining - b.traffic.remaining;
     }), [sources]);
+
+  // 已过期收纳：按过期时间倒序，最新过期的排最前。
+  const expiredSources = useMemo(() => sources
+    .map((source) => ({ source, traffic: trafficOf(source) }))
+    .filter((entry): entry is { source: SourceAggregate; traffic: ParsedTrafficInfo } => Boolean(entry.traffic?.isExpired))
+    .sort((a, b) => (b.traffic.expire ?? 0) - (a.traffic.expire ?? 0)), [sources]);
 
   const refresh = async () => { await Promise.all([loadDirectory(), loadAnalytics(), loadLogs()]); };
   const copy = async (text: string) => {
@@ -313,48 +318,78 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
           <Metric icon={FileText} label="配置模板" value={templateCount} note="YAML 与可视化" href={`/admin/templates?${tokenQuery}`} />
         </section>
 
-        {attentionSources.length > 0 && (
-          <section className="mt-5 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] px-5 py-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-500">
-              <WarningCircle weight="fill" className="h-[18px] w-[18px]" />
-              待处理 {attentionSources.length} 项
-              <span className="text-xs font-normal text-muted-foreground">流量紧张优先，已过期源在下方日历收纳</span>
+        <div className="mt-6 grid items-stretch gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="surface overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-4 sm:px-6">
+              <div>
+                <h2 className="flex items-center gap-2 text-[15px] font-semibold"><ChartLine weight="fill" className="h-[18px] w-[18px] text-primary" />访问趋势</h2>
+                <p className="mt-1 text-xs text-muted-foreground">按{analytics?.trend.granularity === 'hour' ? '小时' : '天'}聚合订阅拉取次数与唯一 IP · 来自真实访问日志</p>
+              </div>
+              <span className="text-xs text-muted-foreground">{RANGE_OPTIONS.find((option) => option.value === rangeDays)?.label}</span>
             </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="px-3 py-4 sm:px-5">
+              <TrafficTrendChart points={analytics?.trend.points ?? []} granularity={analytics?.trend.granularity ?? 'day'} />
+            </div>
+          </section>
+
+          <section className="surface flex flex-col overflow-hidden">
+            <div className="border-b border-border/60 px-4 py-3.5">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-500">
+                <WarningCircle weight="fill" className="h-4 w-4" />
+                待处理 {attentionSources.length} 项
+              </h2>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">流量紧张优先，其次临近到期</p>
+            </div>
+            <div className="max-h-[232px] flex-1 overflow-y-auto p-2">
               {attentionSources.map(({ source, traffic }) => (
                 <button
                   type="button"
                   key={source.url}
                   onClick={() => setSelectedSource(source)}
-                  className="flex min-w-0 items-center gap-3 rounded-xl bg-card/80 px-3.5 py-2.5 text-left transition-colors hover:bg-card"
+                  className="flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-secondary/60"
                 >
                   <span className={cn('h-2 w-2 shrink-0 rounded-full', isTightTraffic(traffic) ? 'bg-red-500' : 'bg-amber-500')} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{sourceName(source)}</span>
-                    <span className="block truncate text-[11px] text-muted-foreground">
-                      {isTightTraffic(traffic) ? `剩余 ${formatTraffic(traffic.remaining)}` : `${new Date(traffic.expire! * 1000).toLocaleDateString('zh-CN')} 到期`}
-                      {' · '}{source.references.length} 个用户
-                    </span>
+                  <span className="min-w-0 flex-1 truncate text-sm">{sourceName(source)}</span>
+                  <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                    {isTightTraffic(traffic) ? `剩 ${formatTraffic(traffic.remaining)}` : `${new Date(traffic.expire! * 1000).toLocaleDateString('zh-CN')} 到期`}
                   </span>
-                  <CaretRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
                 </button>
               ))}
+              {!attentionSources.length && <div className="px-3 py-8 text-center text-xs text-muted-foreground">没有待处理项</div>}
             </div>
+            {expiredSources.length > 0 && (
+              <div className="mt-auto border-t border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setExpiredOpen((open) => !open)}
+                  className="flex min-h-11 w-full items-center gap-2 px-4 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <WarningCircle weight="fill" className="h-3.5 w-3.5 text-muted-foreground/70" />
+                  已过期收纳（{expiredSources.length}）
+                  <CaretRight className={cn('ml-auto h-3.5 w-3.5 transition-transform', expiredOpen && 'rotate-90')} />
+                </button>
+                {expiredOpen && (
+                  <div className="max-h-40 overflow-y-auto border-t border-border/50 p-2">
+                    {expiredSources.map(({ source, traffic }) => (
+                      <button
+                        type="button"
+                        key={source.url}
+                        onClick={() => setSelectedSource(source)}
+                        className="flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-secondary/60"
+                      >
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40" />
+                        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{sourceName(source)}</span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground/80">
+                          已于 {new Date(traffic.expire! * 1000).toLocaleDateString('zh-CN')} 过期
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </section>
-        )}
-
-        <section className="surface mt-6 overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-4 sm:px-6">
-            <div>
-              <h2 className="flex items-center gap-2 text-[15px] font-semibold"><ChartLine weight="fill" className="h-[18px] w-[18px] text-primary" />访问趋势</h2>
-              <p className="mt-1 text-xs text-muted-foreground">按{analytics?.trend.granularity === 'hour' ? '小时' : '天'}聚合订阅拉取次数与唯一 IP · 来自真实访问日志</p>
-            </div>
-            <span className="text-xs text-muted-foreground">{RANGE_OPTIONS.find((option) => option.value === rangeDays)?.label}</span>
-          </div>
-          <div className="px-3 py-4 sm:px-5">
-            <TrafficTrendChart points={analytics?.trend.points ?? []} granularity={analytics?.trend.granularity ?? 'day'} />
-          </div>
-        </section>
+        </div>
 
         <div className="mt-7 grid items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="surface overflow-hidden xl:sticky xl:top-24">
