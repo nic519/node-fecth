@@ -5,7 +5,10 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowSquareOut,
   ArrowsClockwise,
+  CaretDown,
   CaretRight,
+  CaretUp,
+  CaretUpDown,
   CheckCircle,
   Copy,
   LinkSimple,
@@ -32,7 +35,18 @@ type SourceReference = { uid: string; name: string; stat: SubscriptionStat };
 type SourceAggregate = { url: string; names: string[]; references: SourceReference[] };
 
 type SourceScope = 'all' | 'tight' | 'expiring' | 'expired' | 'missing';
-type SourceSort = 'attention' | 'remaining' | 'usage' | 'expiry';
+type SourceSortKey = 'attention' | 'usage' | 'remaining' | 'expiry' | 'updated' | 'refs';
+type SortDir = 'asc' | 'desc';
+
+// 每列首次点击时的默认方向：异常等级/剩余/到期升序，用量/更新/引用数降序。
+const DEFAULT_DIR: Record<SourceSortKey, SortDir> = {
+  attention: 'asc',
+  usage: 'desc',
+  remaining: 'asc',
+  expiry: 'asc',
+  updated: 'desc',
+  refs: 'desc',
+};
 
 function sourceName(source: SourceAggregate) {
   return source.names.length > 0 ? source.names.join(' / ') : '未命名订阅源';
@@ -92,6 +106,38 @@ const attentionRank = (traffic: ParsedTrafficInfo | null) => {
   return 3;
 };
 
+function SortableTh({
+  label,
+  sortKey,
+  currentKey,
+  dir,
+  onToggle,
+  className,
+}: {
+  label: string;
+  sortKey: SourceSortKey;
+  currentKey: SourceSortKey;
+  dir: SortDir;
+  onToggle: (key: SourceSortKey) => void;
+  className?: string;
+}) {
+  const active = sortKey === currentKey;
+  return (
+    <th className={cn('px-3 py-3 font-medium', className)} aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}>
+      <button
+        type="button"
+        onClick={() => onToggle(sortKey)}
+        className={cn('inline-flex items-center gap-1 transition-colors hover:text-foreground', active ? 'text-foreground' : 'text-muted-foreground')}
+      >
+        {label}
+        {active
+          ? (dir === 'asc' ? <CaretUp weight="bold" className="h-3 w-3" /> : <CaretDown weight="bold" className="h-3 w-3" />)
+          : <CaretUpDown className="h-3 w-3 opacity-40" />}
+      </button>
+    </th>
+  );
+}
+
 export function SourcesClient({ superToken }: { superToken: string }) {
   usePageTitle('订阅源');
   const [users, setUsers] = useState<Awaited<ReturnType<typeof adminService.getUsers>>['data']['users']>([]);
@@ -99,7 +145,8 @@ export function SourcesClient({ superToken }: { superToken: string }) {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [scope, setScope] = useState<SourceScope>('all');
-  const [sort, setSort] = useState<SourceSort>('attention');
+  const [sortKey, setSortKey] = useState<SourceSortKey>('attention');
+  const [sortDir, setSortDir] = useState<SortDir>(DEFAULT_DIR.attention);
   const [selectedSource, setSelectedSource] = useState<SourceAggregate | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -151,15 +198,45 @@ export function SourcesClient({ superToken }: { superToken: string }) {
       if (scope === 'missing') return !traffic;
       return true;
     });
-    return filtered.sort((a, b) => {
+    const updatedMs = (source: SourceAggregate) => Date.parse(latestUpdated(source) ?? '') || 0;
+    const sorted = filtered.sort((a, b) => {
       const trafficA = trafficOf(a);
       const trafficB = trafficOf(b);
-      if (sort === 'remaining') return (trafficA?.remaining ?? Infinity) - (trafficB?.remaining ?? Infinity);
-      if (sort === 'usage') return (trafficB?.usagePercent ?? -1) - (trafficA?.usagePercent ?? -1);
-      if (sort === 'expiry') return (trafficA?.expire ?? Infinity) - (trafficB?.expire ?? Infinity);
-      return attentionRank(trafficA) - attentionRank(trafficB) || (trafficA?.remaining ?? Infinity) - (trafficB?.remaining ?? Infinity);
+      // 缺失流量/到期/更新时间的源无论升序降序都沉底，避免把「无数据」排到最前。
+      const missingA = sortKey === 'updated' ? !updatedMs(a)
+        : sortKey === 'refs' ? false
+        : sortKey === 'expiry' ? trafficA?.expire == null
+        : sortKey === 'remaining' ? trafficA?.remaining == null
+        : sortKey === 'usage' ? trafficA == null
+        : false;
+      const missingB = sortKey === 'updated' ? !updatedMs(b)
+        : sortKey === 'refs' ? false
+        : sortKey === 'expiry' ? trafficB?.expire == null
+        : sortKey === 'remaining' ? trafficB?.remaining == null
+        : sortKey === 'usage' ? trafficB == null
+        : false;
+      if (missingA || missingB) return missingA === missingB ? 0 : missingA ? 1 : -1;
+
+      let cmp = 0;
+      if (sortKey === 'remaining') cmp = (trafficA?.remaining ?? Infinity) - (trafficB?.remaining ?? Infinity);
+      else if (sortKey === 'usage') cmp = (trafficA?.usagePercent ?? -1) - (trafficB?.usagePercent ?? -1);
+      else if (sortKey === 'expiry') cmp = (trafficA?.expire ?? Infinity) - (trafficB?.expire ?? Infinity);
+      else if (sortKey === 'updated') cmp = updatedMs(a) - updatedMs(b);
+      else if (sortKey === 'refs') cmp = a.references.length - b.references.length;
+      else cmp = attentionRank(trafficA) - attentionRank(trafficB) || (trafficA?.remaining ?? Infinity) - (trafficB?.remaining ?? Infinity);
+      return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [sources, search, scope, sort]);
+    return sorted;
+  }, [sources, search, scope, sortKey, sortDir]);
+
+  const toggleSort = (key: SourceSortKey) => {
+    if (key === sortKey) {
+      setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir(DEFAULT_DIR[key]);
+    }
+  };
 
   const copy = async (text: string) => {
     if (!(await copyToClipboard(text))) return;
@@ -202,28 +279,19 @@ export function SourcesClient({ superToken }: { superToken: string }) {
                 <SelectItem value="missing">流量未提供</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sort} onValueChange={(value) => setSort(value as SourceSort)}>
-              <SelectTrigger className="h-10 w-40 bg-secondary/50 shadow-none"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="attention">异常优先</SelectItem>
-                <SelectItem value="remaining">剩余从少到多</SelectItem>
-                <SelectItem value="usage">使用率从高到低</SelectItem>
-                <SelectItem value="expiry">到期从近到远</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-muted-foreground">{result.length} / {sources.length} 个独立源</span>
+            <span className="text-xs text-muted-foreground">{result.length} / {sources.length} 个独立源 · 点击表头排序</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">独立订阅源 / 使用用户</th>
-                  <th className="px-3 py-3 font-medium">已用 / 总量</th>
-                  <th className="px-3 py-3 font-medium">剩余</th>
-                  <th className="px-3 py-3 font-medium">到期</th>
-                  <th className="px-3 py-3 font-medium">流量更新</th>
-                  <th className="px-3 py-3 font-medium">状态</th>
+                  <SortableTh label="独立订阅源 / 使用用户" sortKey="refs" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} className="px-5" />
+                  <SortableTh label="已用 / 总量" sortKey="usage" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} />
+                  <SortableTh label="剩余" sortKey="remaining" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} />
+                  <SortableTh label="到期" sortKey="expiry" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} />
+                  <SortableTh label="流量更新" sortKey="updated" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} />
+                  <SortableTh label="状态" sortKey="attention" currentKey={sortKey} dir={sortDir} onToggle={toggleSort} />
                   <th className="px-3 py-3"><span className="sr-only">详情</span></th>
                 </tr>
               </thead>

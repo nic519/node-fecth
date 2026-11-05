@@ -49,7 +49,7 @@ export function AdminUsersClient({
     showToast,
   });
 
-  const { filteredUsers, searchTerm, setSearchTerm, scope, setScope, sort, setSort } = useUserFilters({
+  const { filteredUsers, searchTerm, setSearchTerm, scope, setScope, sort, setSort, sortDir, toggleSortDir } = useUserFilters({
     users,
   });
 
@@ -64,12 +64,14 @@ export function AdminUsersClient({
               searchTerm={searchTerm}
               scope={scope}
               sort={sort}
+              sortDir={sortDir}
               loading={loading}
               totalUsers={users.length}
               filteredCount={filteredUsers.length}
               onSearchTermChange={setSearchTerm}
               onScopeChange={setScope}
               onSortChange={setSort}
+              onToggleSortDir={toggleSortDir}
               onRefresh={fetchUsers}
               onAddUser={addUserModal.open}
               onExport={handleExport}

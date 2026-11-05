@@ -86,6 +86,13 @@ export function aggregateTraffic(user: UserAdminConfig): AggregateTraffic | null
 
 export type UserScope = 'all' | 'attention' | 'expiring' | 'no-expiry';
 export type UserSort = 'attention' | 'recent' | 'remaining';
+export type SortDirection = 'asc' | 'desc';
+
+export const DEFAULT_USER_SORT_DIR: Record<UserSort, SortDirection> = {
+	attention: 'asc',
+	recent: 'desc',
+	remaining: 'asc',
+};
 
 export function matchUserScope(user: UserAdminConfig, scope: UserScope): boolean {
 	if (scope === 'all') return true;
@@ -101,18 +108,20 @@ export function matchUserScope(user: UserAdminConfig, scope: UserScope): boolean
 
 const NO_ISSUE_RANK = 3;
 
-export function compareUsers(sort: UserSort) {
+export function compareUsers(sort: UserSort, dir: SortDirection = DEFAULT_USER_SORT_DIR[sort]) {
 	return (a: UserAdminConfig, b: UserAdminConfig): number => {
+		let cmp = 0;
 		if (sort === 'recent') {
-			return Date.parse(b.updatedAt ?? '') - Date.parse(a.updatedAt ?? '');
-		}
-		if (sort === 'remaining') {
+			cmp = Date.parse(a.updatedAt ?? '') - Date.parse(b.updatedAt ?? '');
+		} else if (sort === 'remaining') {
 			const remainingOf = (user: UserAdminConfig) => aggregateTraffic(user)?.remaining ?? Number.POSITIVE_INFINITY;
-			return remainingOf(a) - remainingOf(b);
+			cmp = remainingOf(a) - remainingOf(b);
+		} else {
+			// 异常优先：按问题等级排序，平级时剩余流量少的在前，没有流量数据的在最后。
+			const rankOf = (user: UserAdminConfig) => userIssue(user)?.rank ?? NO_ISSUE_RANK;
+			const remainingOf = (user: UserAdminConfig) => aggregateTraffic(user)?.remaining ?? Number.POSITIVE_INFINITY;
+			cmp = rankOf(a) - rankOf(b) || remainingOf(a) - remainingOf(b);
 		}
-		// 异常优先：按问题等级排序，平级时剩余流量少的在前，没有流量数据的在最后。
-		const rankOf = (user: UserAdminConfig) => userIssue(user)?.rank ?? NO_ISSUE_RANK;
-		const remainingOf = (user: UserAdminConfig) => aggregateTraffic(user)?.remaining ?? Number.POSITIVE_INFINITY;
-		return rankOf(a) - rankOf(b) || remainingOf(a) - remainingOf(b);
+		return dir === 'asc' ? cmp : -cmp;
 	};
 }

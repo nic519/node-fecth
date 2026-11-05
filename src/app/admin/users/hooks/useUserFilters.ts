@@ -2,7 +2,7 @@
 
 import { UserAdminConfig } from '@/modules/user/admin.schema';
 import { useMemo, useState } from 'react';
-import { compareUsers, matchUserScope, type UserScope, type UserSort } from '../utils/userUtils';
+import { compareUsers, DEFAULT_USER_SORT_DIR, matchUserScope, type SortDirection, type UserScope, type UserSort } from '../utils/userUtils';
 
 export interface UseUserFiltersProps {
 	users: UserAdminConfig[];
@@ -16,6 +16,8 @@ export interface UseUserFiltersReturn {
 	setScope: (scope: UserScope) => void;
 	sort: UserSort;
 	setSort: (sort: UserSort) => void;
+	sortDir: SortDirection;
+	toggleSortDir: () => void;
 }
 
 /**
@@ -24,7 +26,15 @@ export interface UseUserFiltersReturn {
 export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersReturn => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [scope, setScope] = useState<UserScope>('all');
-	const [sort, setSort] = useState<UserSort>('attention');
+	const [sort, setSortState] = useState<UserSort>('attention');
+	const [sortDir, setSortDir] = useState<SortDirection>(DEFAULT_USER_SORT_DIR.attention);
+
+	// 换排序维度时回到该维度的默认方向，方向按钮只负责翻转当前方向。
+	const setSort = (next: UserSort) => {
+		setSortState(next);
+		setSortDir(DEFAULT_USER_SORT_DIR[next]);
+	};
+	const toggleSortDir = () => setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'));
 
 	const filteredUsers = useMemo(() => {
 		let filtered = users.filter((user) => matchUserScope(user, scope));
@@ -42,8 +52,8 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 			});
 		}
 
-		return [...filtered].sort(compareUsers(sort));
-	}, [users, searchTerm, scope, sort]);
+		return [...filtered].sort(compareUsers(sort, sortDir));
+	}, [users, searchTerm, scope, sort, sortDir]);
 
 	return {
 		filteredUsers,
@@ -53,5 +63,7 @@ export const useUserFilters = ({ users }: UseUserFiltersProps): UseUserFiltersRe
 		setScope,
 		sort,
 		setSort,
+		sortDir,
+		toggleSortDir,
 	};
 };

@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity, ArrowUp, ArrowDown } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
 import { LogDetailsDialog } from './LogDetailsDialog';
@@ -48,13 +48,15 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const [level, setLevel] = useState<LogLevel | 'all'>('all');
   const [type, setType] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
 
-  const fetchLogs = useCallback(async (overrides?: Partial<{ page: number; level: LogLevel | 'all'; type: string; userId: string }>) => {
+  const fetchLogs = useCallback(async (overrides?: Partial<{ page: number; level: LogLevel | 'all'; type: string; userId: string; order: 'asc' | 'desc' }>) => {
     const effectivePage = overrides?.page ?? page;
     const effectiveLevel = overrides?.level ?? level;
     const effectiveType = overrides?.type ?? type;
     const effectiveUserId = overrides?.userId ?? userId;
+    const effectiveOrder = overrides?.order ?? order;
 
     setLoading(true);
     try {
@@ -65,6 +67,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
         level: effectiveLevel === 'all' ? undefined : effectiveLevel,
         type: effectiveType || undefined,
         userId: effectiveUserId || undefined,
+        order: effectiveOrder,
       });
 
       if (response.code === 0) {
@@ -76,7 +79,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
     } finally {
       setLoading(false);
     }
-  }, [superToken, page, pageSize, level, type, userId]);
+  }, [superToken, page, pageSize, level, type, userId, order]);
 
   useEffect(() => {
     fetchLogs();
@@ -85,6 +88,14 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const handleSearch = () => {
     setPage(1);
     fetchLogs({ page: 1 });
+  };
+
+  // 时间排序在服务端完成（覆盖全部记录，不只是当前页），切换后回到第一页。
+  const toggleOrder = () => {
+    const next = order === 'desc' ? 'asc' : 'desc';
+    setOrder(next);
+    setPage(1);
+    fetchLogs({ page: 1, order: next });
   };
 
   const handleReset = () => {
@@ -220,11 +231,17 @@ export function LogViewer({ superToken }: LogViewerProps) {
                   <Table>
                     <TableHeader className="sticky top-0 z-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
                       <TableRow className="hover:bg-transparent border-border/60">
-                        <TableHead className="w-[180px] font-semibold text-muted-foreground py-2">
-                          <span className="inline-flex items-center gap-2">
+                        <TableHead className="w-[180px] font-semibold text-muted-foreground py-2" aria-sort={order === 'asc' ? 'ascending' : 'descending'}>
+                          <button
+                            type="button"
+                            onClick={toggleOrder}
+                            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+                            title={order === 'desc' ? '当前最新在前，点击切换为最早在前' : '当前最早在前，点击切换为最新在前'}
+                          >
                             <Clock className="h-3.5 w-3.5 text-blue-500" />
                             <span>时间</span>
-                          </span>
+                            {order === 'desc' ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
+                          </button>
                         </TableHead>
                         <TableHead className="w-[100px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">

@@ -18,6 +18,7 @@ export const logApi = {
         userId?: string;
         startTime?: string;
         endTime?: string;
+        order?: 'asc' | 'desc';
     }) => {
         return apiClient.get<LogListResult>('/admin/logs', params);
     },

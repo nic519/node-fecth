@@ -33,6 +33,10 @@ export const AdminLogsQuerySchema = z.object({
 	 * 结束时间过滤 (ISO 8601)
 	 */
 	endTime: z.string().optional(),
+	/**
+	 * 按时间排序方向，默认 desc（最新在前）
+	 */
+	order: z.enum(['asc', 'desc']).optional(),
 });
 
 /**

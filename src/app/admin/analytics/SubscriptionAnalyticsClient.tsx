@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   ChevronRight,
   CircleAlert,
   Clock3,
@@ -21,6 +24,7 @@ import { NavigationBar } from '@/components/NavigationBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { cn } from '@/lib/utils';
 import { subscriptionAnalyticsApi } from '@/services/subscription-analytics-api';
@@ -275,6 +279,44 @@ function SelectedUserPanel({
   generatedAt: string;
   rangeDays: 1 | 7 | 30;
 }) {
+  // IP 行排序：最后心跳 / 请求频率 / 请求间隔，点击表头切换。
+  type IpSortKey = 'lastSeen' | 'requests' | 'interval';
+  const [ipSort, setIpSort] = useState<{ key: IpSortKey; dir: 'asc' | 'desc' }>({ key: 'lastSeen', dir: 'desc' });
+
+  const sortedIps = useMemo(() => {
+    const valueOf = (heartbeat: SubscriptionIpHeartbeat) => {
+      if (ipSort.key === 'requests') return heartbeat.requestCount;
+      if (ipSort.key === 'interval') return heartbeat.medianIntervalMinutes ?? Number.POSITIVE_INFINITY;
+      return Date.parse(heartbeat.lastSeen);
+    };
+    return [...user.ips].sort((a, b) => {
+      const cmp = valueOf(a) - valueOf(b);
+      return ipSort.dir === 'asc' ? cmp : -cmp;
+    });
+  }, [user.ips, ipSort]);
+
+  const toggleIpSort = (key: IpSortKey) => {
+    setIpSort((current) => current.key === key
+      ? { key, dir: current.dir === 'asc' ? 'desc' : 'asc' }
+      : { key, dir: key === 'interval' ? 'asc' : 'desc' });
+  };
+
+  const IpSortHeader = ({ label, sortKey, className }: { label: string; sortKey: IpSortKey; className?: string }) => {
+    const active = ipSort.key === sortKey;
+    return (
+      <button
+        type="button"
+        onClick={() => toggleIpSort(sortKey)}
+        className={cn('inline-flex items-center gap-1 transition-colors hover:text-foreground', active ? 'text-foreground' : '', className)}
+      >
+        {label}
+        {active
+          ? (ipSort.dir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
+          : <ArrowUpDown className="h-3 w-3 opacity-40" />}
+      </button>
+    );
+  };
+
   return (
     <div className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card">
       <div className="border-b border-border/60 px-5 py-5 sm:px-6">
@@ -313,11 +355,11 @@ function SelectedUserPanel({
       <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border/60 px-5 py-3 text-xs font-medium text-muted-foreground sm:px-6 lg:grid-cols-[minmax(200px,0.9fr)_minmax(260px,1.5fr)_130px_110px]">
         <span>IP / 地区 / 客户端</span>
         <span className="hidden lg:block">心跳连续性</span>
-        <span className="hidden text-center lg:block">频率</span>
-        <span className="text-right">最后心跳</span>
+        <IpSortHeader label="频率" sortKey="requests" className="hidden lg:flex lg:justify-center" />
+        <IpSortHeader label="最后心跳" sortKey="lastSeen" className="justify-self-end" />
       </div>
       <div>
-        {user.ips.map((heartbeat) => (
+        {sortedIps.map((heartbeat) => (
           <IpHeartbeatRow
             key={heartbeat.ip}
             heartbeat={heartbeat}
@@ -338,6 +380,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [userSort, setUserSort] = useState<'recent' | 'requests' | 'ips'>('recent');
   const [selectedUserId, setSelectedUserId] = useState('sw-big');
 
   const load = useCallback(async () => {
@@ -364,9 +407,14 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
 
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    if (!data || !keyword) return data?.users ?? [];
-    return data.users.filter((user) => user.userId.toLowerCase().includes(keyword));
-  }, [data, search]);
+    const filtered = !data ? [] : keyword
+      ? data.users.filter((user) => user.userId.toLowerCase().includes(keyword))
+      : [...data.users];
+    if (userSort === 'requests') filtered.sort((a, b) => b.requestCount - a.requestCount);
+    else if (userSort === 'ips') filtered.sort((a, b) => b.activeIps - a.activeIps || b.uniqueIps - a.uniqueIps);
+    else filtered.sort((a, b) => Date.parse(b.lastSeen) - Date.parse(a.lastSeen));
+    return filtered;
+  }, [data, search, userSort]);
 
   const selectedUser = data?.users.find((user) => user.userId === selectedUserId) ?? filteredUsers[0];
 
@@ -449,6 +497,17 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
                   placeholder="搜索用户 ID"
                   className="h-9 bg-muted/40 pl-9"
                 />
+              </div>
+              <div className="mt-2.5 flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">排序</span>
+                <Select value={userSort} onValueChange={(value) => setUserSort(value as typeof userSort)}>
+                  <SelectTrigger className="h-8 w-36 bg-muted/40 text-xs shadow-none"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">最近活跃</SelectItem>
+                    <SelectItem value="requests">请求最多</SelectItem>
+                    <SelectItem value="ips">活跃 IP 最多</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
