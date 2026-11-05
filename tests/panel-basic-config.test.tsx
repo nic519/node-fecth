@@ -24,6 +24,8 @@ test('PanelBasicConfig uses subscription sources as the only subscription entry 
   expect(markup).toContain('订阅源');
   expect(markup).not.toContain('主订阅地址');
   expect(markup).not.toContain('追加订阅列表');
+  expect(markup).not.toContain('来源类型');
+  expect(markup).not.toContain('id="sub-type-0"');
 });
 
 test('PanelBasicConfig renders empty subscription rows while editing', () => {
@@ -45,6 +47,8 @@ test('PanelBasicConfig renders empty subscription rows while editing', () => {
   expect(markup).toContain('sub-url-0');
   expect(markup).toContain('sub-flag-0');
   expect(markup).not.toContain('订阅代理');
+  expect(markup).toContain('来源类型');
+  expect(markup).toContain('id="sub-type-0"');
 });
 
 test('inline subscription editor shows YAML and node count instead of a URL field', () => {
@@ -53,4 +57,6 @@ test('inline subscription editor shows YAML and node count instead of a URL fiel
  expect(markup).toContain('已识别 1 个节点');
  expect(markup).not.toContain('sub-url-0');
  expect(markup).toContain('重新粘贴并保存');
+ expect(markup).not.toContain('来源类型');
+ expect(markup).not.toContain('id="sub-type-0"');
 });

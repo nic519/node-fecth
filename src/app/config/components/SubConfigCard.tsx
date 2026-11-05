@@ -33,6 +33,8 @@ export const SubConfigCard = memo(function SubConfigCard({
     // If nothing is checked, the backend treats it as ALL.
     // This can be confusing, so we add a helper text.
 
+    const sourceContent = item.type === 'inline' ? item.proxiesYaml : item.subscribe;
+
     let nodeSummary = '';
     let nodeError = '';
     if (item.type === 'inline' && item.proxiesYaml?.trim()) {
@@ -56,16 +58,18 @@ export const SubConfigCard = memo(function SubConfigCard({
                 </div>
 
                 <div className="space-y-4">
-                    <div className="space-y-2 pr-8">
-                        <Label htmlFor={`sub-type-${index}`}>来源类型</Label>
-                        <Select value={item.type ?? 'url'} onValueChange={value => onUpdate(index, 'type', value as 'url' | 'inline')} disabled={readOnly}>
-                            <SelectTrigger id={`sub-type-${index}`}><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="url">订阅链接</SelectItem>
-                                <SelectItem value="inline">粘贴节点</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {!sourceContent?.trim() && (
+                        <div className="space-y-2 pr-8">
+                            <Label htmlFor={`sub-type-${index}`}>来源类型</Label>
+                            <Select value={item.type ?? 'url'} onValueChange={value => onUpdate(index, 'type', value as 'url' | 'inline')} disabled={readOnly}>
+                                <SelectTrigger id={`sub-type-${index}`}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="url">订阅链接</SelectItem>
+                                    <SelectItem value="inline">粘贴节点</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                     {item.type === 'inline' ? (
                         <div className="space-y-2">
                             <Label htmlFor={`sub-proxies-${index}`}>节点 YAML</Label>
