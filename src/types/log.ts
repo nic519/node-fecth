@@ -32,6 +32,8 @@ export enum LogType {
   DB_CLEANUP = 'db_cleanup',
 }
 
+export const SUBSCRIPTION_REQUEST_LOG_MESSAGE = '用户访问订阅配置';
+
 /**
  * 日志关联资源类型。
  *

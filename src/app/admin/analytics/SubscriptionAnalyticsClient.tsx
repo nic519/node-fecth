@@ -352,6 +352,26 @@ function IpHeartbeatRow({
   );
 }
 
+function IpSortHeader({ label, direction, onClick, className }: {
+  label: string;
+  direction?: 'asc' | 'desc';
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn('inline-flex items-center gap-1 transition-colors hover:text-foreground', direction && 'text-foreground', className)}
+    >
+      {label}
+      {direction
+        ? (direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
+        : <ArrowUpDown className="h-3 w-3 opacity-40" />}
+    </button>
+  );
+}
+
 function SelectedUserPanel({
   user,
   windowStart,
@@ -383,22 +403,6 @@ function SelectedUserPanel({
     setIpSort((current) => current.key === key
       ? { key, dir: current.dir === 'asc' ? 'desc' : 'asc' }
       : { key, dir: key === 'interval' ? 'asc' : 'desc' });
-  };
-
-  const IpSortHeader = ({ label, sortKey, className }: { label: string; sortKey: IpSortKey; className?: string }) => {
-    const active = ipSort.key === sortKey;
-    return (
-      <button
-        type="button"
-        onClick={() => toggleIpSort(sortKey)}
-        className={cn('inline-flex items-center gap-1 transition-colors hover:text-foreground', active ? 'text-foreground' : '', className)}
-      >
-        {label}
-        {active
-          ? (ipSort.dir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)
-          : <ArrowUpDown className="h-3 w-3 opacity-40" />}
-      </button>
-    );
   };
 
   return (
@@ -439,8 +443,18 @@ function SelectedUserPanel({
       <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-border/60 px-5 py-3 text-xs font-medium text-muted-foreground sm:px-6 lg:grid-cols-[minmax(200px,0.9fr)_minmax(260px,1.5fr)_130px_110px]">
         <span>IP / 地区 / 客户端</span>
         <span className="hidden lg:block">心跳连续性</span>
-        <IpSortHeader label="频率" sortKey="requests" className="hidden lg:flex lg:justify-center" />
-        <IpSortHeader label="最后心跳" sortKey="lastSeen" className="justify-self-end" />
+        <IpSortHeader
+          label="频率"
+          direction={ipSort.key === 'requests' ? ipSort.dir : undefined}
+          onClick={() => toggleIpSort('requests')}
+          className="hidden lg:flex lg:justify-center"
+        />
+        <IpSortHeader
+          label="最后心跳"
+          direction={ipSort.key === 'lastSeen' ? ipSort.dir : undefined}
+          onClick={() => toggleIpSort('lastSeen')}
+          className="justify-self-end"
+        />
       </div>
       <div>
         {sortedIps.map((heartbeat) => (

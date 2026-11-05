@@ -2,7 +2,7 @@ import { createServerServices } from '@/server/services';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { ClashHandler } from '@/modules/yamlMerge/clashHandler';
 import { withAuth } from '@/utils/apiMiddleware';
-import { LogType } from '@/types/log';
+import { LogType, SUBSCRIPTION_REQUEST_LOG_MESSAGE } from '@/types/log';
 
 // GET: 生成当前用户的订阅配置，并记录访问日志。
 export const GET = withAuth(async (request) => {
@@ -19,7 +19,7 @@ export const GET = withAuth(async (request) => {
     void logService.log({
       level: 'info',
       type: LogType.SUBSCRIPTION_ACCESS,
-      message: '用户访问订阅配置',
+      message: SUBSCRIPTION_REQUEST_LOG_MESSAGE,
       userId: uid,
       meta: {
         url: request.url,

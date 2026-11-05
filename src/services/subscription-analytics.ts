@@ -2,6 +2,7 @@ import { and, desc, eq, gte } from 'drizzle-orm';
 
 import { logs } from '@/db/schema';
 import type { DbInstance } from '@/server/db';
+import { LogType, SUBSCRIPTION_REQUEST_LOG_MESSAGE } from '@/types/log';
 import type {
   SubscriptionAnalyticsResult,
   SubscriptionIpHeartbeat,
@@ -250,7 +251,11 @@ export async function getSubscriptionAnalytics(
   const rows = await db
     .select({ userId: logs.userId, meta: logs.meta, createdAt: logs.createdAt })
     .from(logs)
-    .where(and(eq(logs.type, 'subscription_access'), gte(logs.createdAt, windowStart.toISOString())))
+    .where(and(
+      eq(logs.type, LogType.SUBSCRIPTION_ACCESS),
+      eq(logs.message, SUBSCRIPTION_REQUEST_LOG_MESSAGE),
+      gte(logs.createdAt, windowStart.toISOString()),
+    ))
     .orderBy(desc(logs.createdAt))
     .limit(MAX_ACCESS_LOGS + 1);
 
