@@ -20,7 +20,7 @@ test('resolveSubscriptionFetchUrl uses the configured cloudflare proxy provider'
 test('getAvailableSubscriptionProxyProviders hides vercel when hosted on vercel', () => {
 	const providers = getAvailableSubscriptionProxyProviders({
 		VERCEL: '1',
-	} as unknown as Env);
+	});
 
 	expect(providers).toEqual(['cloudflare']);
 });
@@ -28,7 +28,7 @@ test('getAvailableSubscriptionProxyProviders hides vercel when hosted on vercel'
 test('resolveSubscriptionProxyProvider treats vercel as unselected on vercel hosting', () => {
 	const provider = resolveSubscriptionProxyProvider(
 		'vercel',
-		{ VERCEL_URL: 'demo.vercel.app' } as unknown as Env,
+		{ VERCEL_URL: 'demo.vercel.app' },
 	);
 
 	expect(provider).toBeUndefined();

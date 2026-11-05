@@ -5,9 +5,6 @@
 	"scripts": {
 		"dev": "next dev -p 3555",
 		"build": "next build",
-		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview ",
-		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
 		"start": "next start -p 3555",
 		"lint": "eslint"
 	},
@@ -41,11 +38,10 @@
 		"react-dom": "19.2.3",
 		"tailwind-merge": "^3.4.1",
 		"tailwindcss-animate": "^1.0.7",
+		"yaml": "2.8.2",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260214.0",
-		"@opennextjs/cloudflare": "^1.16.5",
 		"@tailwindcss/postcss": "^4",
 		"@types/bun": "^1.3.9",
 		"@types/js-yaml": "^4.0.9",
@@ -58,7 +54,6 @@
 		"server-only": "^0.0.1",
 		"shadcn": "^3.8.4",
 		"tailwindcss": "^4",
-		"typescript": "^5",
-		"wrangler": "^4.69.0"
+		"typescript": "^5"
 	}
 }

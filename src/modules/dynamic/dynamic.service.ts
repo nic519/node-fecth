@@ -36,7 +36,7 @@ export class DynamicService {
 	 */
 	static async fetchAndSave(
 		url: string,
-		options: { retries?: number; proxyProvider?: SubscriptionProxyProvider; runtimeEnv?: Env } = {},
+		options: { retries?: number; proxyProvider?: SubscriptionProxyProvider; runtimeEnv?: NodeJS.ProcessEnv } = {},
 	): Promise<DynamicContent> {
 		const { retries = 3, proxyProvider, runtimeEnv } = options;
 		const cleanUrl = CommonUtils.normalizeUrl(url);
@@ -184,7 +184,7 @@ export class DynamicService {
 		url: string,
 		ttlMs: number = 5 * 60 * 1000,
 		proxyProvider?: SubscriptionProxyProvider,
-		runtimeEnv?: Env,
+		runtimeEnv?: NodeJS.ProcessEnv,
 		onStale?: () => void,
 	): Promise<DynamicContent> {
 		const cached = await this.getByUrl(url);

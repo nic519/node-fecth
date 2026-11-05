@@ -6,7 +6,7 @@ import { LogService } from '@/services/log-service';
 import { getServerDb } from '@/server/db';
 import { resolveRuntimeEnv } from '@/server/runtime';
 
-export function createServerServices(explicitEnv?: Env) {
+export function createServerServices(explicitEnv?: NodeJS.ProcessEnv) {
   const runtimeEnv = resolveRuntimeEnv(explicitEnv);
   const db = getServerDb(runtimeEnv);
   const logService = new LogService(db);

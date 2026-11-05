@@ -6,7 +6,7 @@ import { drizzle } from 'drizzle-orm/libsql';
 import * as schema from '@/db/schema';
 import { getRuntimeValue, resolveRuntimeEnv } from '@/server/runtime';
 
-export function getServerDb(explicitEnv?: Env) {
+export function getServerDb(explicitEnv?: NodeJS.ProcessEnv) {
   const runtimeEnv = resolveRuntimeEnv(explicitEnv);
   const url = getRuntimeValue('TURSO_DATABASE_URL', runtimeEnv);
   const authToken = getRuntimeValue('TURSO_AUTH_TOKEN', runtimeEnv);

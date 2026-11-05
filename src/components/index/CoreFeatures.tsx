@@ -6,7 +6,7 @@ const FEATURES = [
   { icon: Funnel, title: '规则与节点过滤', description: '使用过滤项或正则表达式，剔除不需要的节点与规则。' },
   { icon: Key, title: '独立令牌访问', description: '每份用户配置使用独立令牌校验，管理与订阅地址相互关联。' },
   { icon: FileCode, title: 'YAML 高级覆写', description: '保留可视化编辑之外的精确控制能力，满足进阶配置需求。' },
-  { icon: Lightning, title: '边缘部署架构', description: '基于 Cloudflare 部署，缩短配置请求的响应路径。' },
+  { icon: Lightning, title: 'Vercel 部署', description: '订阅和配置管理通过同一个站点访问。' },
 ];
 
 export function CoreFeatures() {

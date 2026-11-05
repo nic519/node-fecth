@@ -5,7 +5,7 @@ import {
 } from '@/config/subscription-proxy.config';
 import { getRuntimeValue } from '@/server/runtime';
 
-function isVercelHosting(explicitEnv?: Env): boolean {
+function isVercelHosting(explicitEnv?: NodeJS.ProcessEnv): boolean {
 	return Boolean(
 		getRuntimeValue('VERCEL', explicitEnv) ||
 		getRuntimeValue('VERCEL_ENV', explicitEnv) ||
@@ -13,7 +13,7 @@ function isVercelHosting(explicitEnv?: Env): boolean {
 	);
 }
 
-export function getAvailableSubscriptionProxyProviders(explicitEnv?: Env): SubscriptionProxyProvider[] {
+export function getAvailableSubscriptionProxyProviders(explicitEnv?: NodeJS.ProcessEnv): SubscriptionProxyProvider[] {
 	if (isVercelHosting(explicitEnv)) {
 		return SUBSCRIPTION_PROXY_PROVIDERS.filter((provider) => provider !== 'vercel');
 	}
@@ -23,7 +23,7 @@ export function getAvailableSubscriptionProxyProviders(explicitEnv?: Env): Subsc
 
 export function resolveSubscriptionProxyProvider(
 	proxyProvider: SubscriptionProxyProvider | undefined,
-	explicitEnv?: Env,
+	explicitEnv?: NodeJS.ProcessEnv,
 ): SubscriptionProxyProvider | undefined {
 	if (!proxyProvider) {
 		return undefined;
@@ -37,7 +37,7 @@ export function resolveSubscriptionProxyProvider(
 export function resolveSubscriptionFetchUrl(
 	sourceUrl: string,
 	proxyProvider?: SubscriptionProxyProvider,
-	explicitEnv?: Env,
+	explicitEnv?: NodeJS.ProcessEnv,
 ): string {
 	const effectiveProvider = resolveSubscriptionProxyProvider(proxyProvider, explicitEnv);
 

@@ -25,7 +25,7 @@ export class StrategyMultiSub {
 		private ruleContent: string,
 		private userConfig: UserConfig,
 		private uid?: string,
-		private runtimeEnv?: Env,
+		private runtimeEnv?: NodeJS.ProcessEnv,
         private outcome?: SubscriptionOutcome,
 	) { }
 

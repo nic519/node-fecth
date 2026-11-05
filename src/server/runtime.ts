@@ -8,29 +8,21 @@ function hasProcessRuntimeEnv() {
   );
 }
 
-export function resolveRuntimeEnv(explicitEnv?: Env): Env | undefined {
+export function resolveRuntimeEnv(explicitEnv?: NodeJS.ProcessEnv): NodeJS.ProcessEnv | undefined {
   if (explicitEnv) {
     return explicitEnv;
   }
 
-  const cloudflareContext = (globalThis as Record<PropertyKey, unknown>)[Symbol.for('__cloudflare-context__')] as
-    | { env?: Env }
-    | undefined;
-
-  if (cloudflareContext?.env) {
-    return cloudflareContext.env;
-  }
-
   if (hasProcessRuntimeEnv()) {
-    return process.env as unknown as Env;
+    return process.env;
   }
 
   return undefined;
 }
 
-export function getRuntimeValue(key: string, explicitEnv?: Env): string | undefined {
+export function getRuntimeValue(key: string, explicitEnv?: NodeJS.ProcessEnv): string | undefined {
   const runtimeEnv = resolveRuntimeEnv(explicitEnv);
-  const runtimeValue = (runtimeEnv as Record<string, unknown> | undefined)?.[key];
+  const runtimeValue = runtimeEnv?.[key];
 
   if (typeof runtimeValue === 'string' && runtimeValue.length > 0) {
     return runtimeValue;
@@ -44,6 +36,6 @@ export function getRuntimeValue(key: string, explicitEnv?: Env): string | undefi
   return undefined;
 }
 
-export function getSuperAdminToken(explicitEnv?: Env): string | undefined {
+export function getSuperAdminToken(explicitEnv?: NodeJS.ProcessEnv): string | undefined {
   return getRuntimeValue('SUPER_ADMIN_TOKEN', explicitEnv);
 }

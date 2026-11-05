@@ -20,7 +20,7 @@
 - Next.js App Router（Next 16）+ React 19 + TypeScript
 - Tailwind CSS 4 + shadcn/ui（Radix UI 组件体系）
 - Drizzle ORM + Turso / libSQL（SQLite）
-- OpenNext（Cloudflare Workers/Pages 部署）
+- Vercel（应用部署和定时日志清理）
 - ky（HTTP 客户端）+ zod（配置校验）+ Monaco Editor（配置编辑）
 
 ---
@@ -31,7 +31,7 @@
 
 - 前端：Next.js App Router 页面与组件，负责订阅配置与管理界面
 - 后端：Next.js Route Handlers（/api/*），提供用户配置、模板与管理接口
-- 数据层：Drizzle ORM 统一访问 Turso / libSQL，支持本地开发、Vercel 与 Cloudflare
+- 数据层：Drizzle ORM 统一访问 Turso / libSQL，支持本地开发和 Vercel
 
 ### 核心模块
 
@@ -74,19 +74,12 @@ TURSO_AUTH_TOKEN="your-turso-token"
 bun run dev
 ```
 
-### 4) 部署
+### 4) 部署到 Vercel
 
-Vercel:
+在 Vercel 项目中配置第 2 步列出的环境变量，并设置 `CRON_SECRET` 供定时日志清理使用。本地可运行以下命令验证生产构建。
 
 ```bash
 bun run build
-```
-
-Cloudflare:
-
-```bash
-bun run preview
-bun run deploy
 ```
 
 ---

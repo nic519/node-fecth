@@ -10,7 +10,7 @@ export class YamlMergeFactory {
 
 	constructor(
 		private userConfig: UserConfig,
-		private runtimeOptions: { uid?: string; env?: Env; outcome?: SubscriptionOutcome } = {},
+		private runtimeOptions: { uid?: string; env?: NodeJS.ProcessEnv; outcome?: SubscriptionOutcome } = {},
 	) { }
 
 	private async measure<T>(name: string, fn: () => Promise<T>): Promise<T> {

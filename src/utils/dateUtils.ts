@@ -1,7 +1,7 @@
 
 /**
  * Format date to YYYY-MM-DD HH:mm:ss
- * Forces UTC+8 (Beijing Time) for consistency across environments (Cloudflare Workers, etc.)
+ * Forces UTC+8 (Beijing Time) for consistency across environments.
  */
 export function formatDate(date: Date = new Date()): string {
 	// 转换到 UTC+8

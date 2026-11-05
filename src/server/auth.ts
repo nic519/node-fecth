@@ -22,7 +22,7 @@ export function getAccessTokenFromRequest(request: Request): string | null {
 export async function authenticateUserConfig(
   request: Request,
   uid: string,
-  explicitEnv?: Env,
+  explicitEnv?: NodeJS.ProcessEnv,
 ): Promise<AuthenticatedUserConfig> {
   const accessToken = getAccessTokenFromRequest(request);
   if (!accessToken) {
