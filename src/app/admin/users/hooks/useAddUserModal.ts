@@ -42,11 +42,9 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 
 	const generateRandomToken = (length: number = 16) => {
 		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#';
-		let result = '';
-		for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
-		}
-		return result;
+		const randomValues = new Uint32Array(length);
+		crypto.getRandomValues(randomValues);
+		return [...randomValues].map((value) => chars.charAt(value % chars.length)).join('');
 	};
 
 	const openAddUserModal = () => {
@@ -61,24 +59,43 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 	};
 
 	const confirmAddUser = async () => {
-		if (!newUserUid.trim() || !newUserToken.trim() || !newUserSubscribe.trim()) {
+		const uid = newUserUid.trim();
+		const token = newUserToken.trim();
+		const subscribe = newUserSubscribe.trim();
+
+		if (!uid || !token || !subscribe) {
 			showToast('请填写完整的用户信息', 'error');
+			return;
+		}
+		if (!/^[A-Za-z0-9_-]{4,}$/.test(uid)) {
+			showToast('用户 ID 至少 4 位，只能包含字母、数字、下划线和短横线', 'error');
+			return;
+		}
+		if (token.length < 8) {
+			showToast('访问令牌至少 8 位', 'error');
+			return;
+		}
+		try {
+			const parsed = new URL(subscribe);
+			if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error();
+		} catch {
+			showToast('订阅链接必须是有效的 HTTP / HTTPS URL', 'error');
 			return;
 		}
 
 		try {
 			const userConfig: UserConfig = {
-				accessToken: newUserToken.trim(),
+				accessToken: token,
 				appendSubList: [{
-					subscribe: newUserSubscribe.trim(),
+					subscribe,
 					flag: DEFAULT_SUB_FLAG,
 				}],
 			};
 
-			const response = await adminService.addUser(superToken, { uid: newUserUid.trim(), config: userConfig });
+			const response = await adminService.addUser(superToken, { uid, config: userConfig });
 
 			if (response.code === 0) {
-				showToast(`用户 ${newUserUid} 创建成功`, 'success');
+				showToast(`用户 ${uid} 创建成功`, 'success');
 				setShowAddUserModal(false);
 				setNewUserUid('');
 				setNewUserToken('');

@@ -2,9 +2,9 @@
 
 import { Badge } from "@/components/ui/badge";
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
-import { Activity, Calendar } from 'lucide-react';
-import { getUserAvatarPreset } from '../utils/avatarUtils';
-import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
+import { ArrowSquareOut, CalendarBlank, Pulse, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { formatDateTime, formatTraffic, parseTrafficInfo } from '@/utils/trafficUtils';
+import { aggregateTraffic, userIssue } from '../utils/userUtils';
 import { UserActions } from './UserActions';
 
 interface SubscriptionStatProps {
@@ -80,7 +80,7 @@ function SubscriptionStat({ stat }: SubscriptionStatProps) {
 
           <div className="mt-1 h-1 w-full bg-muted/70 rounded-full overflow-hidden">
             <div
-              className={`h-full ${getTrafficBarColor(usagePercent)}`}
+              className={`h-full rounded-full ${usagePercent >= 90 ? 'bg-amber-500' : 'bg-primary'}`}
               style={{ width: `${usagePercent}%` }}
             />
           </div>
@@ -118,59 +118,79 @@ interface UserCardProps {
 
 export function UserCard({ user, onUserAction }: UserCardProps) {
   const hasSubscriptionStats = user.subscriptionStats && user.subscriptionStats.length > 0;
-  const { gradientClass: avatarGradientClass, Icon: AvatarIcon } = getUserAvatarPreset(user.uid);
+  const aggregate = aggregateTraffic(user);
+  const issue = userIssue(user);
 
   return (
-    <div className="break-inside-avoid bg-white/80 dark:bg-zinc-900/60 rounded-xl shadow-sm border border-border/60 p-5 hover:shadow-lg hover:border-violet-500/50 transition-all duration-300 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/40 group">
-      {/* Header: User Info - Clickable */}
-      <div
-        className="flex items-start justify-between mb-4 cursor-pointer"
+    <article className="surface group break-inside-avoid p-5 transition-shadow hover:shadow-md">
+      <button
+        type="button"
+        className="mb-4 flex w-full items-center justify-between gap-3 rounded-lg text-left"
         onClick={() => onUserAction('view', user.uid, user.accessToken)}
+        aria-label={`打开 ${user.uid} 的用户配置`}
       >
-        <div className="flex items-center gap-3">
-          <div className={`p-2 ${avatarGradientClass} rounded-lg shadow-sm group-hover:shadow-md transition-all`}>
-            <AvatarIcon className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <div className="font-semibold text-foreground text-lg group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-              {user.uid}
-            </div>
-          </div>
-        </div>
-      </div>
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary">
+            <UserCircle weight="fill" className="h-6 w-6 text-muted-foreground" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-lg font-semibold tracking-[-0.02em] transition-colors group-hover:text-primary">{user.uid}</span>
+            {issue && (
+              <span className={`mt-0.5 flex items-center gap-1 text-[11px] ${issue.kind === 'expired' ? 'text-muted-foreground' : 'text-amber-600 dark:text-amber-500'}`}>
+                <WarningCircle weight="fill" className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{issue.label} · {issue.detail}</span>
+              </span>
+            )}
+          </span>
+        </span>
+        <ArrowSquareOut className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
+      </button>
 
-      {/* Body: Stats */}
-      <div className="space-y-3 mb-5">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-          <Activity className="h-4 w-4 text-violet-500" />
+      <div className="mb-5 space-y-3">
+        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Pulse weight="fill" className="h-[18px] w-[18px] text-primary" />
           <span>流量使用情况</span>
         </div>
 
+        {aggregate && (
+          <div className="rounded-lg bg-secondary/45 px-3.5 py-2.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-[11px] text-muted-foreground">合计剩余</span>
+              <span className="text-sm font-semibold tabular-nums tracking-[-0.01em]">
+                {formatTraffic(aggregate.remaining)}
+                <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">/ 共 {formatTraffic(aggregate.total)}</span>
+              </span>
+            </div>
+            <div className="mt-1.5 h-1 w-full bg-muted/70 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full ${aggregate.usagePercent >= 90 ? 'bg-amber-500' : 'bg-primary'}`}
+                style={{ width: `${Math.min(100, Math.max(0, aggregate.usagePercent))}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground/80">
+              {aggregate.available}/{aggregate.remote} 个远程订阅有流量快照
+            </p>
+          </div>
+        )}
+
         {hasSubscriptionStats ? (
-          <ul className="divide-y divide-border/30">
-            {user.subscriptionStats!.map((stat, idx) => (
-              <SubscriptionStat key={idx} stat={stat} />
-            ))}
+          <ul className="divide-y divide-border/40">
+            {user.subscriptionStats!.map((stat, idx) => <SubscriptionStat key={`${stat.url}-${idx}`} stat={stat} />)}
           </ul>
         ) : (
-          <div className="text-sm text-muted-foreground/60 italic py-2 bg-muted/20 rounded-lg text-center border border-dashed border-border/40">
-            暂无订阅数据
+          <div className="rounded-lg bg-secondary/45 px-4 py-5 text-center text-sm text-muted-foreground">
+            暂无附加订阅流量快照
           </div>
         )}
       </div>
 
-      {/* Footer: Date & Actions */}
-      <div className="pt-4 border-t border-border/40 flex items-center justify-between mt-auto">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70" title="最后修改时间">
-          <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/50 pt-3">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="最后修改时间">
+          <CalendarBlank className="h-4 w-4 shrink-0" />
           <span>{user.updatedAt ? formatDateTime(user.updatedAt) : '-'}</span>
         </div>
-
-        <UserActions
-          uid={user.uid}
-          onUserAction={onUserAction}
-        />
+        <UserActions uid={user.uid} onUserAction={onUserAction} />
       </div>
-    </div>
+    </article>
   );
 }

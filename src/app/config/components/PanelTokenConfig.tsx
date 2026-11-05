@@ -22,9 +22,7 @@ export function PanelTokenConfig({ config, onChange, readOnly }: PanelTokenConfi
 
             <div className="space-y-2 group">
                 <Label htmlFor="accessToken" className="text-base flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                    <div className="p-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                        <Key className="w-3.5 h-3.5" />
-                    </div>
+                    <Key className="h-4 w-4 text-muted-foreground" />
                     Access Token
                 </Label>
                 <div className="flex gap-2">

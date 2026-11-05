@@ -1,15 +1,16 @@
 import { AreaCode, UserConfig, SubConfig } from '@/types/user-config';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { FileText, Filter, ListPlus, Plus } from 'lucide-react';
+import { FileText, Filter, ListPlus, Network, Plus } from 'lucide-react';
 import { PromoLinkButton } from '@/components/PromoLinkButton';
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback, useMemo } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
-import { secondaryActionButtonClass } from '@/lib/utils';
+import { AREA_CODES, AREA_EMOJI } from '@/config/proxy-area.config';
 import { PROMO_URL } from '@/config/constants';
 import { setSubscriptionList } from '@/modules/user/subscription-list';
 
@@ -68,6 +69,13 @@ export function PanelBasicConfig({
         handleAppendSubListUpdate(index, 'includeArea', newAreas);
     }, [handleAppendSubListUpdate, subscriptions]);
 
+    const handleMultiPortAreaChange = useCallback((area: AreaCode, checked: boolean) => {
+        const current = config.multiPortMode ?? [];
+        const next = checked ? [...current, area] : current.filter((a) => a !== area);
+        // 全不选时置空，避免空数组被误当作“启用多端口但没有地区”。
+        handleChange('multiPortMode', next.length ? next : undefined);
+    }, [config.multiPortMode, handleChange]);
+
     return (
         <div className="space-y-8">
             {/* Main Configuration Section */}
@@ -83,9 +91,7 @@ export function PanelBasicConfig({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2 group">
                             <Label htmlFor="fileName" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                                <div className="p-1 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
-                                    <FileText className="w-3.5 h-3.5" />
-                                </div>
+                                <FileText className="h-4 w-4 text-muted-foreground" />
                                 配置显示名
                             </Label>
                             <Input
@@ -103,9 +109,7 @@ export function PanelBasicConfig({
 
                         <div className="space-y-2 group">
                             <Label htmlFor="excludeRegex" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                                <div className="p-1 rounded bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
-                                    <Filter className="w-3.5 h-3.5" />
-                                </div>
+                                <Filter className="h-4 w-4 text-muted-foreground" />
                                 节点排除正则
                             </Label>
                             <Input
@@ -121,6 +125,38 @@ export function PanelBasicConfig({
                             </p>
                         </div>
                     </div>
+
+                    <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                            <Network className="h-4 w-4 text-muted-foreground" />
+                            多端口地区
+                        </Label>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {AREA_CODES.map((area: AreaCode) => {
+                                const isChecked = config.multiPortMode?.includes(area) || false;
+                                return (
+                                    <div key={`multiport-${area}`} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={`multiport-${area}`}
+                                            checked={isChecked}
+                                            onCheckedChange={(checked) => handleMultiPortAreaChange(area, checked as boolean)}
+                                            disabled={readOnly}
+                                        />
+                                        <Label
+                                            htmlFor={`multiport-${area}`}
+                                            className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>{AREA_EMOJI[area]}</span>
+                                            <span>{area}</span>
+                                        </Label>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            勾选的地区会生成多端口监听，把该地区的节点按端口拆分直连；<b>全不选</b>则不启用多端口模式
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -128,12 +164,10 @@ export function PanelBasicConfig({
 
             {/* Append Subscription Section */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <Label className="text-base flex items-center gap-2">
-                            <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                                <ListPlus className="w-3.5 h-3.5" />
-                            </div>
+                        <Label className="flex items-center gap-2 text-base">
+                            <ListPlus className="h-[18px] w-[18px] text-muted-foreground" />
                             订阅源
                         </Label>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -144,7 +178,8 @@ export function PanelBasicConfig({
                         size="sm"
                         onClick={handleAppendSubListAdd}
                         disabled={readOnly}
-                        className={`flex items-center gap-1 ${secondaryActionButtonClass}`}
+                        variant="outline"
+                        className="flex shrink-0 items-center gap-1.5"
                     >
                         <Plus className="w-4 h-4" />
                         添加订阅源

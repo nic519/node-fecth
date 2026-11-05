@@ -41,9 +41,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
             <PanelTopBar description="选择规则模板与过滤项；可选规则覆写（高级）。" />
             <div className="space-y-2 group">
                 <Label htmlFor="ruleUrl" className="flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                    <div className="p-1 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
-                        <Link className="w-3.5 h-3.5" />
-                    </div>
+                    <Link className="h-4 w-4 text-muted-foreground" />
                     规则模板 URL
                 </Label>
                 <Input
@@ -75,9 +73,7 @@ export function PanelRuleConfig({ config, onChange, readOnly = false }: RuleConf
             <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                     <Label className="flex items-center gap-2">
-                        <div className="p-1 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
-                            <Edit className="w-3.5 h-3.5" />
-                        </div>
+                        <Edit className="h-4 w-4 text-muted-foreground" />
                         规则覆写
                     </Label>
                     <Dialog>

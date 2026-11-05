@@ -27,9 +27,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity, ArrowUp, ArrowDown } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { LogDetailsDialog } from './LogDetailsDialog';
 
 interface LogViewerProps {
@@ -48,13 +50,15 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const [level, setLevel] = useState<LogLevel | 'all'>('all');
   const [type, setType] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
 
-  const fetchLogs = useCallback(async (overrides?: Partial<{ page: number; level: LogLevel | 'all'; type: string; userId: string }>) => {
+  const fetchLogs = useCallback(async (overrides?: Partial<{ page: number; level: LogLevel | 'all'; type: string; userId: string; order: 'asc' | 'desc' }>) => {
     const effectivePage = overrides?.page ?? page;
     const effectiveLevel = overrides?.level ?? level;
     const effectiveType = overrides?.type ?? type;
     const effectiveUserId = overrides?.userId ?? userId;
+    const effectiveOrder = overrides?.order ?? order;
 
     setLoading(true);
     try {
@@ -65,6 +69,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
         level: effectiveLevel === 'all' ? undefined : effectiveLevel,
         type: effectiveType || undefined,
         userId: effectiveUserId || undefined,
+        order: effectiveOrder,
       });
 
       if (response.code === 0) {
@@ -76,7 +81,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
     } finally {
       setLoading(false);
     }
-  }, [superToken, page, pageSize, level, type, userId]);
+  }, [superToken, page, pageSize, level, type, userId, order]);
 
   useEffect(() => {
     fetchLogs();
@@ -85,6 +90,14 @@ export function LogViewer({ superToken }: LogViewerProps) {
   const handleSearch = () => {
     setPage(1);
     fetchLogs({ page: 1 });
+  };
+
+  // 时间排序在服务端完成（覆盖全部记录，不只是当前页），切换后回到第一页。
+  const toggleOrder = () => {
+    const next = order === 'desc' ? 'asc' : 'desc';
+    setOrder(next);
+    setPage(1);
+    fetchLogs({ page: 1, order: next });
   };
 
   const handleReset = () => {
@@ -147,7 +160,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <ListFilter className="h-3.5 w-3.5 text-violet-500" />
+                  <ListFilter className="h-3.5 w-3.5 text-primary" />
                   总记录数
                 </span>
                 <span className="text-sm font-medium">{total}</span>
@@ -160,7 +173,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     日志级别
                   </label>
                   <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="日志级别" />
                     </SelectTrigger>
                     <SelectContent>
@@ -181,7 +194,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                   <Select value={type} onValueChange={(v) => {
                     setType(v === 'all' ? '' : v);
                   }}>
-                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-violet-500/20 focus:border-violet-500/50 transition-all">
+                    <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="全部类型" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,7 +218,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="bg-muted/30 border-border/60 focus-visible:ring-violet-500/20 focus-visible:border-violet-500/50 transition-all"
+                    className="bg-muted/30 border-border/60 focus-visible:ring-primary/20 focus-visible:border-primary/50 transition-all"
                   />
                 </div>
               </div>
@@ -213,18 +226,24 @@ export function LogViewer({ superToken }: LogViewerProps) {
           </AdminSidePanel>
         }
         content={
-          <Card className="border-border/60 shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-900/60 min-h-[600px] flex flex-col">
+          <Card className="surface flex min-h-[600px] flex-col">
             <CardContent className="pt-4 flex-1 flex flex-col">
               <TooltipProvider>
                 <div className="flex-1 overflow-auto">
                   <Table>
                     <TableHeader className="sticky top-0 z-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
                       <TableRow className="hover:bg-transparent border-border/60">
-                        <TableHead className="w-[180px] font-semibold text-muted-foreground py-2">
-                          <span className="inline-flex items-center gap-2">
+                        <TableHead className="w-[180px] font-semibold text-muted-foreground py-2" aria-sort={order === 'asc' ? 'ascending' : 'descending'}>
+                          <button
+                            type="button"
+                            onClick={toggleOrder}
+                            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+                            title={order === 'desc' ? '当前最新在前，点击切换为最早在前' : '当前最早在前，点击切换为最新在前'}
+                          >
                             <Clock className="h-3.5 w-3.5 text-blue-500" />
                             <span>时间</span>
-                          </span>
+                            {order === 'desc' ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
+                          </button>
                         </TableHead>
                         <TableHead className="w-[100px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
@@ -246,7 +265,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
                         </TableHead>
                         <TableHead className="w-[120px] font-semibold text-muted-foreground py-2">
                           <span className="inline-flex items-center gap-2">
-                            <User className="h-3.5 w-3.5 text-violet-500" />
+                            <User className="h-3.5 w-3.5 text-primary" />
                             <span>用户</span>
                           </span>
                         </TableHead>
@@ -254,14 +273,18 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     </TableHeader>
                     <TableBody>
                       {loading && logs.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="h-64 text-center">
-                            <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
-                              <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
-                              <span className="text-sm font-medium animate-pulse">正在加载日志数据...</span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        Array.from({ length: 8 }, (_, row) => (
+                          <TableRow key={row} className="border-border/40" aria-hidden>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-28" /></TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-12 rounded-md" /></TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-20" /></TableCell>
+                            <TableCell className="max-w-[360px] py-2">
+                              <Skeleton className={cn('h-4', row % 2 ? 'w-64' : 'w-48')} />
+                              {row % 3 === 0 && <Skeleton className="mt-1.5 h-3 w-40" />}
+                            </TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-14" /></TableCell>
+                          </TableRow>
+                        ))
                       ) : logs.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="h-64 text-center text-muted-foreground">

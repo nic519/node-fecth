@@ -30,20 +30,29 @@ export function TemplateList({ templates, onSelectTemplate }: TemplateListProps)
 					className={cn(
 						"cursor-pointer transition-all relative group px-3 py-2.5 rounded-md select-none border border-transparent",
 						template.isSelected
-							? "bg-gradient-to-r from-violet-500/10 to-indigo-500/10 text-violet-700 dark:text-violet-300 border-violet-200/50 dark:border-violet-800/50 shadow-sm"
+							? "bg-accent text-accent-foreground"
 							: "hover:bg-muted/50 text-muted-foreground hover:text-foreground hover:border-border/50"
 					)}
-					onClick={() => onSelectTemplate(String(template.id))}
+					role="button"
+						tabIndex={0}
+						aria-pressed={template.isSelected}
+						onClick={() => onSelectTemplate(String(template.id))}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter' || event.key === ' ') {
+								event.preventDefault();
+								onSelectTemplate(String(template.id));
+							}
+						}}
 				>
 					<div className="flex flex-col gap-1 min-w-0">
 						<div className="flex items-center justify-between gap-2">
-							<span className={cn("text-sm font-medium truncate leading-none", template.isSelected ? "text-violet-900 dark:text-violet-100" : "")}>
+							<span className={cn("text-sm font-medium truncate leading-none", template.isSelected ? "text-accent-foreground" : "")}>
 								{template.name}
 							</span>
 						</div>
 						<p className={cn(
 							"text-xs truncate transition-colors",
-							template.isSelected ? "text-violet-600/80 dark:text-violet-400/80" : "text-muted-foreground/60 group-hover:text-muted-foreground/80"
+							"text-muted-foreground"
 						)}>
 							{template.description || '无描述'}
 						</p>

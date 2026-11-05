@@ -51,7 +51,7 @@ export interface UseUserManagementReturn {
 		setJsonContent: (content: string) => void;
 		isImporting: boolean;
 		importProgress: { current: number; total: number };
-		importErrors: string[];
+		importResult: import('./useImportUserModal').ImportResult | null;
 		open: () => void;
 		close: () => void;
 		handleImport: () => Promise<void>;

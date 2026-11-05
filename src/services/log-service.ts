@@ -1,7 +1,7 @@
 import type { DbInstance } from '@/server/db';
 import { getServerDb } from '@/server/db';
 import { logs, NewLog } from '@/db/schema';
-import { desc, eq, and, sql, count } from 'drizzle-orm';
+import { asc, desc, eq, and, sql, count } from 'drizzle-orm';
 import { LogLevel } from '@/types/log';
 
 export interface LogEventParams {
@@ -63,6 +63,7 @@ export class LogService {
     userId?: string;
     startTime?: Date;
     endTime?: Date;
+    order?: 'asc' | 'desc';
   }) {
     const {
       limit = 50,
@@ -71,7 +72,8 @@ export class LogService {
       type,
       userId,
       startTime,
-      endTime
+      endTime,
+      order = 'desc'
     } = options;
 
     const conditions = [];
@@ -103,7 +105,7 @@ export class LogService {
       .select()
       .from(logs)
       .where(whereClause)
-      .orderBy(desc(logs.createdAt))
+      .orderBy(order === 'asc' ? asc(logs.createdAt) : desc(logs.createdAt))
       .limit(limit)
       .offset(offset);
 

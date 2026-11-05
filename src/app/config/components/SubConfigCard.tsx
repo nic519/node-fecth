@@ -6,19 +6,10 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { parseInlineProxies } from '@/modules/user/inline-proxies';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AREA_CODES } from '@/config/proxy-area.config';
+import { AREA_CODES, AREA_EMOJI } from '@/config/proxy-area.config';
 import { AreaCode, SubConfig } from '@/types/user-config';
 import { Flag, Globe, Link, Trash2 } from 'lucide-react';
 import { memo } from 'react';
-
-const AREA_EMOJI: Record<AreaCode, string> = {
-    TW: '🏝️',
-    SG: '🇸🇬',
-    JP: '🇯🇵',
-    VN: '🇻🇳',
-    HK: '🇭🇰',
-    US: '🇺🇸'
-};
 
 interface SubConfigCardProps {
     index: number;

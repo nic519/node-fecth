@@ -72,18 +72,18 @@ export function SyncItemCard({
         ? '已同步'
         : '未同步';
   const statusToneClass = isLoading
-    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-300'
+    ? 'bg-accent text-accent-foreground'
     : isError
       ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
       : info
-        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+        ? 'bg-secondary text-secondary-foreground'
         : 'bg-slate-500/10 text-slate-500 dark:text-slate-300';
   const statusDotClass = isLoading
-    ? 'bg-sky-500'
+    ? 'bg-primary'
     : isError
       ? 'bg-rose-500'
       : info
-        ? 'bg-emerald-500'
+        ? 'bg-primary'
         : 'bg-slate-300 dark:bg-slate-600';
   const summaryText = isError
     ? (status.message || '当前服务器暂时无法获取该订阅')

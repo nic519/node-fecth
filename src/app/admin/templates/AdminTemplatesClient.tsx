@@ -34,6 +34,7 @@ export function AdminTemplatesClient({
     validationErrors,
     isDeleteModalOpen,
     isErrorModalOpen,
+    isDiscardModalOpen,
     handleSelectTemplate,
     handleStartEdit,
     handleCreateTemplate,
@@ -49,6 +50,8 @@ export function AdminTemplatesClient({
     handleCopyTemplateUrl,
     closeDeleteModal,
     closeErrorModal,
+    closeDiscardModal,
+    confirmDiscard,
     setValidationErrors,
   } = useTemplateManagement({ superToken, initialTemplates });
 
@@ -58,11 +61,10 @@ export function AdminTemplatesClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-zinc-950">
-      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#09090b_40%,#1e1b4b_100%)] opacity-20 pointer-events-none" />
+    <div className="min-h-100dvh bg-background">
       <NavigationBar superToken={superToken} currentPage="templates" />
 
-      <main className={cn("mx-auto py-8 px-4 sm:px-6 lg:px-8", isEditing ? "max-w-[1800px]" : "max-w-7xl")}>
+      <main className={cn("content-container py-7 sm:py-9", isEditing && "max-w-none")}>
         {error && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
             <div className="text-destructive font-medium">{error}</div>
@@ -106,21 +108,12 @@ export function AdminTemplatesClient({
                   icon={FileText}
                   className="h-fit"
                   action={
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={handleCreateTemplate}
-                        size="sm"
-                        className="h-8 px-3 text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
-                      >
-                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                    <div className="grid w-full grid-cols-2 gap-2">
+                      <Button onClick={handleCreateTemplate} size="sm" className="px-3">
+                        <Plus className="h-4 w-4" />
                         YAML
                       </Button>
-                      <Button
-                        onClick={handleCreateVisualTemplate}
-                        size="sm"
-                        variant="secondary"
-                        className="h-8 px-3 text-xs font-medium shadow-none rounded-md"
-                      >
+                      <Button onClick={handleCreateVisualTemplate} size="sm" variant="secondary" className="px-3">
                         可视化
                       </Button>
                     </div>
@@ -170,6 +163,9 @@ export function AdminTemplatesClient({
         confirmDeleteTemplate={confirmDeleteTemplate}
         isErrorModalOpen={isErrorModalOpen}
         closeErrorModal={closeErrorModal}
+        isDiscardModalOpen={isDiscardModalOpen}
+        closeDiscardModal={closeDiscardModal}
+        confirmDiscard={confirmDiscard}
         loading={loading}
       />
     </div>
@@ -178,7 +174,7 @@ export function AdminTemplatesClient({
 
 function EditorShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-[calc(100vh-8rem)] overflow-hidden flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm">
+    <div className="surface flex h-[calc(100dvh-9rem)] min-h-[560px] flex-col overflow-hidden">
       {children}
     </div>
   );

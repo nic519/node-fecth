@@ -22,13 +22,14 @@ export const GET = withAuth(async (request) => {
       userId: searchParams.get('userId') ?? undefined,
       startTime: searchParams.get('startTime') ?? undefined,
       endTime: searchParams.get('endTime') ?? undefined,
+      order: searchParams.get('order') ?? undefined,
     };
     const validationResult = AdminLogsQuerySchema.safeParse(query);
     if (!validationResult.success) {
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, 'Invalid query parameters', validationResult.error.format());
     }
 
-    const { page, pageSize, level, type, userId, startTime, endTime } = validationResult.data;
+    const { page, pageSize, level, type, userId, startTime, endTime, order } = validationResult.data;
     const limit = pageSize ?? DEFAULT_PAGE_SIZE;
     const offset = ((page ?? DEFAULT_PAGE) - 1) * limit;
 
@@ -40,6 +41,7 @@ export const GET = withAuth(async (request) => {
       userId,
       startTime: startTime ? new Date(startTime) : undefined,
       endTime: endTime ? new Date(endTime) : undefined,
+      order,
     });
 
     return ResponseUtils.success(result, 'success');

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Link2, Copy, Check } from 'lucide-react';
+import { Check, Copy, LinkSimple } from '@phosphor-icons/react';
 import { copyToClipboard } from '@/utils/configUtils';
 
 interface SubscribeUrlPanelProps {
@@ -36,21 +36,15 @@ export function SubscribeUrlPanel({ uid, token }: SubscribeUrlPanelProps) {
     return (
         <button
             onClick={handleCopy}
-            className="group flex items-center justify-between w-full text-xs text-muted-foreground hover:text-foreground transition-all duration-200 px-1 py-1 rounded-lg hover:bg-muted/50 cursor-pointer"
+            className="group flex min-h-11 w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
             title="点击复制订阅链接"
         >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-                <Link2 className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity text-primary" />
-                <span className="line-clamp-2 break-all font-mono opacity-70 group-hover:opacity-100 transition-opacity text-left">
-                    {subscribeURL}
-                </span>
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+                <LinkSimple className="h-4 w-4 shrink-0 text-primary" />
+                <span className="line-clamp-2 break-all font-mono">{subscribeURL}</span>
             </div>
-            <div className="shrink-0 ml-2">
-                {copied ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
-                ) : (
-                    <Copy className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
-                )}
+            <div className="shrink-0" aria-live="polite">
+                {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4 opacity-60 group-hover:opacity-100" />}
             </div>
         </button>
     );

@@ -81,7 +81,7 @@ export function LatencyDemo() {
   return (
     <div className="w-full rounded-xl overflow-hidden bg-card border border-border shadow-2xl font-mono text-sm">
       {/* Header Bar */}
-      <div className="bg-muted/30 px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-3">
         <div className="flex items-center gap-2 text-foreground">
           <span className="font-bold">[自动]-香港</span>
           <span className="text-red-500">🇭🇰</span>
