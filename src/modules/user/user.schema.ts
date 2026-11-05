@@ -1,3 +1,4 @@
+import { load } from 'js-yaml';
 import { z } from 'zod';
 import { normalizeInlineProxies } from './inline-proxies';
 import { AREA_CODES } from '@/config/proxy-area.config';
@@ -80,6 +81,32 @@ const UserConfigBaseSchema = z.object({
 });
 
 export const UserConfigSchema = UserConfigBaseSchema.superRefine((config, ctx) => {
+	// 排除正则必须可编译，否则生成配置时才会暴露错误。
+	if (config.excludeRegex) {
+		try {
+			new RegExp(config.excludeRegex);
+		} catch {
+			ctx.addIssue({
+				code: 'custom',
+				message: '节点排除正则无法编译',
+				path: ['excludeRegex'],
+			});
+		}
+	}
+
+	// 规则覆写必须是可解析的 YAML。
+	if (config.ruleOverwrite?.trim()) {
+		try {
+			load(config.ruleOverwrite);
+		} catch (error) {
+			ctx.addIssue({
+				code: 'custom',
+				message: `规则覆写 YAML 无效：${error instanceof Error ? error.message : '解析失败'}`,
+				path: ['ruleOverwrite'],
+			});
+		}
+	}
+
 	const subscriptions = config.appendSubList ?? [];
 	if (subscriptions.length <= 1) {
 		return;

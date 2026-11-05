@@ -1,14 +1,16 @@
 import { AreaCode, UserConfig, SubConfig } from '@/types/user-config';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { FileText, Filter, ListPlus, Plus } from 'lucide-react';
+import { FileText, Filter, ListPlus, Network, Plus } from 'lucide-react';
 import { PromoLinkButton } from '@/components/PromoLinkButton';
 import { getRandomEmoji } from '@/utils/emojiUtils';
 import { useCallback, useMemo } from 'react';
 import { SubConfigCard } from './SubConfigCard';
 import { Separator } from '@/components/ui/separator';
 import { PanelTopBar } from './PanelTopBar';
+import { AREA_CODES, AREA_EMOJI } from '@/config/proxy-area.config';
 import { PROMO_URL } from '@/config/constants';
 import { setSubscriptionList } from '@/modules/user/subscription-list';
 
@@ -67,6 +69,13 @@ export function PanelBasicConfig({
         handleAppendSubListUpdate(index, 'includeArea', newAreas);
     }, [handleAppendSubListUpdate, subscriptions]);
 
+    const handleMultiPortAreaChange = useCallback((area: AreaCode, checked: boolean) => {
+        const current = config.multiPortMode ?? [];
+        const next = checked ? [...current, area] : current.filter((a) => a !== area);
+        // 全不选时置空，避免空数组被误当作“启用多端口但没有地区”。
+        handleChange('multiPortMode', next.length ? next : undefined);
+    }, [config.multiPortMode, handleChange]);
+
     return (
         <div className="space-y-8">
             {/* Main Configuration Section */}
@@ -115,6 +124,38 @@ export function PanelBasicConfig({
                                 使用正则表达式排除不需要的节点
                             </p>
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                            <Network className="h-4 w-4 text-muted-foreground" />
+                            多端口地区
+                        </Label>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {AREA_CODES.map((area: AreaCode) => {
+                                const isChecked = config.multiPortMode?.includes(area) || false;
+                                return (
+                                    <div key={`multiport-${area}`} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={`multiport-${area}`}
+                                            checked={isChecked}
+                                            onCheckedChange={(checked) => handleMultiPortAreaChange(area, checked as boolean)}
+                                            disabled={readOnly}
+                                        />
+                                        <Label
+                                            htmlFor={`multiport-${area}`}
+                                            className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
+                                        >
+                                            <span>{AREA_EMOJI[area]}</span>
+                                            <span>{area}</span>
+                                        </Label>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            勾选的地区会生成多端口监听，把该地区的节点按端口拆分直连；<b>全不选</b>则不启用多端口模式
+                        </p>
                     </div>
                 </div>
             </div>

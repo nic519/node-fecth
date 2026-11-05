@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { adminService } from '@/services/admin-api';
 import { UserAdminConfig } from '@/modules/user/admin.schema';
+import { UserConfigSchema } from '@/modules/user/user.schema';
 import { UserConfig } from '@/types/user-config';
 
 interface UseImportUserModalProps {
@@ -9,6 +10,14 @@ interface UseImportUserModalProps {
     onSuccess: () => void;
     showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
+
+export interface ImportResult {
+    imported: string[];
+    skipped: string[];
+    errors: string[];
+}
+
+const UID_PATTERN = /^[A-Za-z0-9_-]{4,}$/;
 
 export const useImportUserModal = ({
     superToken,
@@ -20,11 +29,11 @@ export const useImportUserModal = ({
     const [jsonContent, setJsonContent] = useState('');
     const [isImporting, setIsImporting] = useState(false);
     const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
-    const [importErrors, setImportErrors] = useState<string[]>([]);
+    const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
     const open = () => {
         setJsonContent('');
-        setImportErrors([]);
+        setImportResult(null);
         setImportProgress({ current: 0, total: 0 });
         setIsOpen(true);
     };
@@ -43,68 +52,85 @@ export const useImportUserModal = ({
             }
 
             const parsedData = JSON.parse(jsonContent) as unknown;
-            try {
-                if (!Array.isArray(parsedData)) {
-                    throw new Error('JSON必须是数组格式');
-                }
-            } catch {
-                showToast('无效的JSON格式', 'error');
+            if (!Array.isArray(parsedData)) {
+                showToast('无效的JSON格式：必须是数组', 'error');
                 return;
             }
-            const parsedArray = parsedData as unknown[];
 
             setIsImporting(true);
-            setImportErrors([]);
+            setImportResult(null);
 
-            // 过滤掉已存在的用户
+            // 逐项预校验：形状 → UID 格式 → 重复跳过 → 配置 Schema
             const existingUids = new Set(existingUsers.map(u => u.uid));
-            const usersToImport = parsedArray.filter((user): user is { uid: string; config: UserConfig } => {
-                if (!user || typeof user !== 'object') return false;
-                const record = user as Record<string, unknown>;
-                if (typeof record.uid !== 'string') return false;
-                if (!record.config || typeof record.config !== 'object') return false;
-                return !existingUids.has(record.uid);
+            const usersToImport: { uid: string; config: UserConfig }[] = [];
+            const skipped: string[] = [];
+            const errors: string[] = [];
+
+            parsedData.forEach((item, index) => {
+                const label = (uid?: unknown) => (typeof uid === 'string' && uid ? uid : `第 ${index + 1} 项`);
+                if (!item || typeof item !== 'object') {
+                    errors.push(`${label()}：不是有效的对象`);
+                    return;
+                }
+                const record = item as Record<string, unknown>;
+                if (typeof record.uid !== 'string' || !record.uid.trim()) {
+                    errors.push(`${label(record.uid)}：缺少有效的 uid`);
+                    return;
+                }
+                const uid = record.uid.trim();
+                if (!UID_PATTERN.test(uid)) {
+                    errors.push(`${uid}：用户 ID 至少 4 位，只能包含字母、数字、下划线和短横线`);
+                    return;
+                }
+                if (existingUids.has(uid)) {
+                    skipped.push(uid);
+                    return;
+                }
+                if (!record.config || typeof record.config !== 'object') {
+                    errors.push(`${uid}：缺少 config 对象`);
+                    return;
+                }
+                const validation = UserConfigSchema.safeParse(record.config);
+                if (!validation.success) {
+                    const issue = validation.error.issues[0];
+                    errors.push(`${uid}：${issue?.message ?? '配置不符合要求'}`);
+                    return;
+                }
+                usersToImport.push({ uid, config: validation.data });
             });
 
-            const skippedCount = parsedArray.length - usersToImport.length;
             setImportProgress({ current: 0, total: usersToImport.length });
 
-            const errors: string[] = [];
-            let successCount = 0;
-
+            const imported: string[] = [];
             for (let i = 0; i < usersToImport.length; i++) {
                 const user = usersToImport[i];
                 try {
-                    // 确保 config 符合 UserConfig 类型
-                    // 这里假设导入的数据结构是正确的，或者是之前导出的数据
-                    // 实际应用中可能需要更严格的验证
-                    await adminService.addUser(superToken, {
+                    const response = await adminService.addUser(superToken, {
                         uid: user.uid,
-                        config: user.config as UserConfig
+                        config: user.config,
                     });
-                    successCount++;
+                    if (response.code === 0) {
+                        imported.push(user.uid);
+                    } else {
+                        errors.push(`${user.uid}：${response.msg || '导入失败'}`);
+                    }
                 } catch (error) {
-                    const errorMsg = error instanceof Error ? error.message : '未知错误';
-                    errors.push(`用户 ${user.uid} 导入失败: ${errorMsg}`);
+                    errors.push(`${user.uid}：${error instanceof Error ? error.message : '未知错误'}`);
                 }
                 setImportProgress(prev => ({ ...prev, current: i + 1 }));
             }
 
-            setImportErrors(errors);
+            const result: ImportResult = { imported, skipped, errors };
+            setImportResult(result);
 
-            if (successCount > 0) {
-                showToast(`导入完成: 成功 ${successCount} 个, 跳过 ${skippedCount} 个, 失败 ${errors.length} 个`, errors.length > 0 ? 'info' : 'success');
+            if (imported.length > 0) {
+                showToast(`导入完成: 新增 ${imported.length}，跳过 ${skipped.length}，失败 ${errors.length}`, errors.length > 0 ? 'info' : 'success');
                 onSuccess();
-                if (errors.length === 0) {
-                    close();
-                }
-            } else if (skippedCount > 0 && errors.length === 0) {
-                showToast(`导入完成: 所有用户 (${skippedCount} 个) 已存在，无需导入`, 'info');
-                close();
-            } else {
-                showToast(`导入失败: ${errors.length} 个错误`, 'error');
+            } else if (skipped.length > 0 && errors.length === 0) {
+                showToast(`所有用户 (${skipped.length} 个) 已存在，无需导入`, 'info');
+            } else if (errors.length > 0) {
+                showToast(`导入失败: ${errors.length} 个问题`, 'error');
             }
-
         } catch (error) {
             console.error('导入过程出错:', error);
             showToast('导入过程发生未知错误', 'error');
@@ -119,7 +145,7 @@ export const useImportUserModal = ({
         setJsonContent,
         isImporting,
         importProgress,
-        importErrors,
+        importResult,
         open,
         close,
         handleImport,

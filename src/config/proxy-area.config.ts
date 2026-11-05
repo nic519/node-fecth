@@ -2,6 +2,15 @@ import { ProxyAreaInfo } from '@/types/clash.types';
 
 export const AREA_CODES = ['TW', 'SG', 'JP', 'VN', 'HK', 'US'] as const;
 
+export const AREA_EMOJI: Record<(typeof AREA_CODES)[number], string> = {
+	TW: '🏝️',
+	SG: '🇸🇬',
+	JP: '🇯🇵',
+	VN: '🇻🇳',
+	HK: '🇭🇰',
+	US: '🇺🇸',
+};
+
 export const ProxyAreaObjects: ProxyAreaInfo[] = [
 	{
 		code: 'TW',

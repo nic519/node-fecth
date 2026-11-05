@@ -17,6 +17,9 @@ interface TemplateModalsProps {
 	confirmDeleteTemplate: () => void;
 	isErrorModalOpen: boolean;
 	closeErrorModal: () => void;
+	isDiscardModalOpen?: boolean;
+	closeDiscardModal?: () => void;
+	confirmDiscard?: () => void;
 	loading: boolean;
 }
 
@@ -26,6 +29,9 @@ export function TemplateModals({
 	confirmDeleteTemplate,
 	isErrorModalOpen,
 	closeErrorModal,
+	isDiscardModalOpen = false,
+	closeDiscardModal,
+	confirmDiscard,
 	loading,
 }: TemplateModalsProps) {
 	return (
@@ -63,6 +69,26 @@ export function TemplateModals({
 					<DialogFooter>
 						<Button onClick={closeErrorModal}>
 							确定
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* 未保存修改确认模态框 */}
+			<Dialog open={isDiscardModalOpen} onOpenChange={(open) => !open && closeDiscardModal?.()}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>放弃未保存的修改？</DialogTitle>
+						<DialogDescription>
+							当前模板有未保存的更改，继续操作将丢弃这些内容。
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="secondary" onClick={closeDiscardModal}>
+							继续编辑
+						</Button>
+						<Button variant="destructive" onClick={confirmDiscard}>
+							放弃修改
 						</Button>
 					</DialogFooter>
 				</DialogContent>

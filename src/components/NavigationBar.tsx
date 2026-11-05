@@ -8,6 +8,7 @@ import {
   Graph,
   House,
   Layout,
+  LinkSimple,
   Scroll,
   UsersThree,
 } from '@phosphor-icons/react';
@@ -16,7 +17,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export interface NavigationBarProps {
   superToken: string;
-  currentPage?: 'dashboard' | 'analytics' | 'users' | 'templates' | 'logs';
+  currentPage?: 'dashboard' | 'analytics' | 'sources' | 'users' | 'templates' | 'logs';
   title?: string;
 }
 
@@ -29,6 +30,7 @@ export const AcmeLogo = ({ className }: { className?: string }) => (
 const NAV_ITEMS = [
   { id: 'dashboard', label: '运营总览', icon: Layout, href: '/admin/dashboard' },
   { id: 'analytics', label: '订阅分析', icon: Activity, href: '/admin/analytics' },
+  { id: 'sources', label: '订阅源', icon: LinkSimple, href: '/admin/sources' },
   { id: 'users', label: '用户', icon: UsersThree, href: '/admin/users' },
   { id: 'templates', label: '模板', icon: FileText, href: '/admin/templates' },
   { id: 'logs', label: '日志', icon: Scroll, href: '/admin/logs' },

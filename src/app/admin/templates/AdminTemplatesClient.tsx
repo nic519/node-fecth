@@ -34,6 +34,7 @@ export function AdminTemplatesClient({
     validationErrors,
     isDeleteModalOpen,
     isErrorModalOpen,
+    isDiscardModalOpen,
     handleSelectTemplate,
     handleStartEdit,
     handleCreateTemplate,
@@ -49,6 +50,8 @@ export function AdminTemplatesClient({
     handleCopyTemplateUrl,
     closeDeleteModal,
     closeErrorModal,
+    closeDiscardModal,
+    confirmDiscard,
     setValidationErrors,
   } = useTemplateManagement({ superToken, initialTemplates });
 
@@ -160,6 +163,9 @@ export function AdminTemplatesClient({
         confirmDeleteTemplate={confirmDeleteTemplate}
         isErrorModalOpen={isErrorModalOpen}
         closeErrorModal={closeErrorModal}
+        isDiscardModalOpen={isDiscardModalOpen}
+        closeDiscardModal={closeDiscardModal}
+        confirmDiscard={confirmDiscard}
         loading={loading}
       />
     </div>

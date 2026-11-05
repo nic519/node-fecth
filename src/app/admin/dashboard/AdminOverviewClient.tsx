@@ -40,6 +40,7 @@ import type { LogEvent } from '@/types/log';
 import type { SubscriptionAnalyticsResult, SubscriptionIpHeartbeat } from '@/types/subscription-analytics';
 import { copyToClipboard } from '@/utils/configUtils';
 import { formatDateTime, formatTraffic, parseTrafficInfo, type ParsedTrafficInfo } from '@/utils/trafficUtils';
+import { isExpiringTraffic, isTightTraffic } from '@/app/admin/users/utils/userUtils';
 import { LogDetailsDialog } from './components/LogDetailsDialog';
 
 const RANGE_OPTIONS = [
@@ -273,6 +274,16 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
     return traffic?.expire && !traffic.isExpired && traffic.expire * 1000 < Date.now() + 30 * 86400_000;
   }).length;
 
+  // 待处理队列：流量紧张优先，其次 7 天内到期；已过期源交给日历的过期收纳，不占队列。
+  const attentionSources = useMemo(() => sources
+    .map((source) => ({ source, traffic: trafficOf(source) }))
+    .filter((entry): entry is { source: SourceAggregate; traffic: ParsedTrafficInfo } => Boolean(entry.traffic && !entry.traffic.isExpired))
+    .filter((entry) => isTightTraffic(entry.traffic) || isExpiringTraffic(entry.traffic))
+    .sort((a, b) => {
+      const rank = (entry: { traffic: ParsedTrafficInfo }) => (isTightTraffic(entry.traffic) ? 0 : 1);
+      return rank(a) - rank(b) || a.traffic.remaining - b.traffic.remaining;
+    }), [sources]);
+
   const refresh = async () => { await Promise.all([loadDirectory(), loadAnalytics(), loadLogs()]); };
   const copy = async (text: string) => {
     const success = await copyToClipboard(text);
@@ -294,11 +305,41 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
 
         <section className="mt-7 grid divide-y divide-border/60 border-y border-border/70 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-5 lg:divide-x">
           <Metric icon={UsersThree} label="用户" value={users.length} note="全部账户" href={`/admin/users?${tokenQuery}`} />
-          <Metric icon={LinkSimple} label="独立订阅源" value={sources.length} note={`${sources.reduce((sum, source) => sum + source.references.length, 0)} 次引用`} />
+          <Metric icon={LinkSimple} label="独立订阅源" value={sources.length} note={`${sources.reduce((sum, source) => sum + source.references.length, 0)} 次引用`} href={`/admin/sources?${tokenQuery}`} />
           <Metric icon={Heartbeat} label="当前活跃 IP" value={activeIps} note={`${analytics?.totals.uniqueIps ?? 0} 个唯一 IP`} href={`/admin/analytics?${tokenQuery}`} />
           <Metric icon={CalendarBlank} label="30 天内到期" value={expiringCount} note="按去重订阅源" />
           <Metric icon={FileText} label="配置模板" value={templateCount} note="YAML 与可视化" href={`/admin/templates?${tokenQuery}`} />
         </section>
+
+        {attentionSources.length > 0 && (
+          <section className="mt-5 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] px-5 py-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-500">
+              <WarningCircle weight="fill" className="h-[18px] w-[18px]" />
+              待处理 {attentionSources.length} 项
+              <span className="text-xs font-normal text-muted-foreground">流量紧张优先，已过期源在下方日历收纳</span>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {attentionSources.map(({ source, traffic }) => (
+                <button
+                  type="button"
+                  key={source.url}
+                  onClick={() => setSelectedSource(source)}
+                  className="flex min-w-0 items-center gap-3 rounded-xl bg-card/80 px-3.5 py-2.5 text-left transition-colors hover:bg-card"
+                >
+                  <span className={cn('h-2 w-2 shrink-0 rounded-full', isTightTraffic(traffic) ? 'bg-red-500' : 'bg-amber-500')} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{sourceName(source)}</span>
+                    <span className="block truncate text-[11px] text-muted-foreground">
+                      {isTightTraffic(traffic) ? `剩余 ${formatTraffic(traffic.remaining)}` : `${new Date(traffic.expire! * 1000).toLocaleDateString('zh-CN')} 到期`}
+                      {' · '}{source.references.length} 个用户
+                    </span>
+                  </span>
+                  <CaretRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="mt-7 grid items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="surface overflow-hidden xl:sticky xl:top-24">

@@ -2,16 +2,22 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowsClockwise as RefreshCw, Database, DownloadSimple as Download, MagnifyingGlass as Search, SpinnerGap as Loader2, UploadSimple as Upload, UserPlus, UsersThree as Users } from '@phosphor-icons/react';
 
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
+import type { UserScope, UserSort } from '../utils/userUtils';
 
 export interface UserFiltersProps {
     searchTerm: string;
+    scope: UserScope;
+    sort: UserSort;
     loading: boolean;
     totalUsers?: number;
     filteredCount?: number;
     onSearchTermChange: (term: string) => void;
+    onScopeChange: (scope: UserScope) => void;
+    onSortChange: (sort: UserSort) => void;
     onRefresh: () => void;
     onAddUser?: () => void;
     onExport?: () => void;
@@ -23,10 +29,14 @@ export interface UserFiltersProps {
  */
 export function UserFilters({
     searchTerm,
+    scope,
+    sort,
     loading,
     totalUsers = 0,
     filteredCount = 0,
     onSearchTermChange,
+    onScopeChange,
+    onSortChange,
     onRefresh,
     onAddUser,
     onExport,
@@ -72,11 +82,41 @@ export function UserFilters({
                     <Input
                         id="user-search"
                         type="search"
-                        placeholder="输入用户 ID"
+                        placeholder="用户 ID / 配置名 / 订阅标识"
                         value={searchTerm}
                         onChange={(e) => onSearchTermChange(e.target.value)}
                         className="bg-background pl-9"
                     />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">范围</label>
+                    <Select value={scope} onValueChange={(value) => onScopeChange(value as UserScope)}>
+                        <SelectTrigger className="w-full bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">全部用户</SelectItem>
+                            <SelectItem value="attention">有待处理</SelectItem>
+                            <SelectItem value="expiring">7 天内到期</SelectItem>
+                            <SelectItem value="no-expiry">到期未提供</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">排序</label>
+                    <Select value={sort} onValueChange={(value) => onSortChange(value as UserSort)}>
+                        <SelectTrigger className="w-full bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="attention">异常优先</SelectItem>
+                            <SelectItem value="recent">最近更新</SelectItem>
+                            <SelectItem value="remaining">剩余流量</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 

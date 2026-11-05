@@ -49,7 +49,7 @@ export function AdminUsersClient({
     showToast,
   });
 
-  const { filteredUsers, searchTerm, setSearchTerm } = useUserFilters({
+  const { filteredUsers, searchTerm, setSearchTerm, scope, setScope, sort, setSort } = useUserFilters({
     users,
   });
 
@@ -62,10 +62,14 @@ export function AdminUsersClient({
           sidebar={
             <UserFilters
               searchTerm={searchTerm}
+              scope={scope}
+              sort={sort}
               loading={loading}
               totalUsers={users.length}
               filteredCount={filteredUsers.length}
               onSearchTermChange={setSearchTerm}
+              onScopeChange={setScope}
+              onSortChange={setSort}
               onRefresh={fetchUsers}
               onAddUser={addUserModal.open}
               onExport={handleExport}
@@ -126,7 +130,7 @@ export function AdminUsersClient({
         onJsonContentChange={importModal.setJsonContent}
         isImporting={importModal.isImporting}
         importProgress={importModal.importProgress}
-        importErrors={importModal.importErrors}
+        importResult={importModal.importResult}
       />
     </div>
   );

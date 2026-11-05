@@ -1,13 +1,14 @@
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useToastContext } from '@/providers/toast-provider';
 import type { ConfigTemplate } from '@/types/user-config';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TemplateItem } from '../components/TemplateList';
 import { templateService } from '@/services/template-api';
 import { minimalVisualTemplateModel } from '../visual-template/fixtures';
 import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from '../visual-template/metadata';
 import { composeVisualTemplateContent } from '../visual-template/compose';
 import { normalizeVisualTemplateModel } from '../visual-template/normalizer';
+import { validateTemplateSemantics } from '../visual-template/validate';
 
 const DEFAULT_VISUAL_TEMPLATE_BASE_CONTENT = '# 可选：在这里保留原始 YAML 片段，最终输出时会与可视化 JSON 合并\n';
 
@@ -25,11 +26,13 @@ export interface UseTemplateManagementReturn {
 	saving: boolean;
 	error: string | null;
 	isEditing: boolean;
+	isDirty: boolean;
 	validationErrors: string[];
 
 	// 模态框状态
 	isDeleteModalOpen: boolean;
 	isErrorModalOpen: boolean;
+	isDiscardModalOpen: boolean;
 	templateToDelete: string | null;
 
 	// 操作函数
@@ -52,6 +55,8 @@ export interface UseTemplateManagementReturn {
 	closeDeleteModal: () => void;
 	closeErrorModal: () => void;
 	openDeleteModal: () => void;
+	closeDiscardModal: () => void;
+	confirmDiscard: () => void;
 	setValidationErrors: (errors: string[]) => void;
 }
 
@@ -81,15 +86,54 @@ export const useTemplateManagement = ({
 	// 模态框状态
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+	const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 	const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+
+	// 脏检查：每个模板保存时的快照；编辑中与当前内容不一致即为未保存。
+	const pristineRef = useRef(new Map<string, string>());
+	const pendingDiscardRef = useRef<(() => void) | null>(null);
+	const snapshotOf = (template: Pick<TemplateItem, 'name' | 'description' | 'configContent' | 'format' | 'visualModel'>) =>
+		JSON.stringify({
+			name: template.name,
+			description: template.description,
+			configContent: template.configContent,
+			format: template.format,
+			visualModel: template.visualModel ?? null,
+		});
 
 	const openDeleteModal = () => setIsDeleteModalOpen(true);
 	const closeDeleteModal = () => setIsDeleteModalOpen(false);
 	const closeErrorModal = () => setIsErrorModalOpen(false);
+	const closeDiscardModal = () => {
+		pendingDiscardRef.current = null;
+		setIsDiscardModalOpen(false);
+	};
+	const confirmDiscard = () => {
+		const action = pendingDiscardRef.current;
+		pendingDiscardRef.current = null;
+		setIsDiscardModalOpen(false);
+		action?.();
+	};
 
 	// 计算属性
 	const selectedTemplate = templates.find((t) => t.isSelected) || null;
 	const currentConfigContent = selectedTemplate?.configContent || '';
+	const isDirty = Boolean(
+		isEditing &&
+		selectedTemplate &&
+		pristineRef.current.get(String(selectedTemplate.id)) !== undefined &&
+		pristineRef.current.get(String(selectedTemplate.id)) !== snapshotOf(selectedTemplate),
+	);
+
+	// 有未保存修改时先确认，再执行切换/取消动作。
+	const guardDirty = (action: () => void) => {
+		if (isDirty) {
+			pendingDiscardRef.current = action;
+			setIsDiscardModalOpen(true);
+		} else {
+			action();
+		}
+	};
 
 	useEffect(() => {
 		if (!superToken) {
@@ -137,6 +181,7 @@ export const useTemplateManagement = ({
 					templateItems[0].isSelected = true;
 				}
 				console.log('Setting templates:', templateItems);
+				pristineRef.current = new Map(templateItems.map((item) => [String(item.id), snapshotOf(item)]));
 				setTemplates(templateItems);
 			} else {
 				throw new Error(response.msg || '获取模板失败');
@@ -151,14 +196,22 @@ export const useTemplateManagement = ({
 	};
 
 	const handleSelectTemplate = (templateId: string) => {
-		setTemplates((prev) =>
-			prev.map((template) => ({
-				...template,
-				isSelected: String(template.id) === templateId,
-			})),
-		);
-		setIsEditing(false);
-		setValidationErrors([]);
+		const applySelect = () => {
+			setTemplates((prev) =>
+				prev.map((template) => ({
+					...template,
+					isSelected: String(template.id) === templateId,
+				})),
+			);
+			setIsEditing(false);
+			setValidationErrors([]);
+		};
+		// 切换模板时有未保存修改需先确认。
+		if (String(selectedTemplate?.id) !== templateId) {
+			guardDirty(applySelect);
+		} else {
+			applySelect();
+		}
 	};
 
 	const handleStartEdit = () => {
@@ -182,6 +235,7 @@ export const useTemplateManagement = ({
 					isSelected: true,
 				};
 
+				pristineRef.current.set(String(newTemplate.id), snapshotOf(newTemplate));
 				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat({ ...newTemplate, isSelected: true }));
 				setIsEditing(true);
 			} else {
@@ -214,6 +268,7 @@ export const useTemplateManagement = ({
 					isSelected: true,
 				};
 
+				pristineRef.current.set(String(newTemplate.id), snapshotOf(newTemplate));
 				setTemplates((prev) => prev.map((t) => ({ ...t, isSelected: false })).concat({ ...newTemplate, isSelected: true }));
 				setIsEditing(true);
 			} else {
@@ -281,6 +336,19 @@ export const useTemplateManagement = ({
 	const handleSave = async () => {
 		if (!selectedTemplate) return;
 
+		// 保存前的语义校验：策略重名、坏正则、非法 URL 等不能入库。
+		const semanticErrors = validateTemplateSemantics({
+			name: selectedTemplate.name,
+			format: selectedTemplate.format,
+			content: selectedTemplate.configContent,
+			visualModel: selectedTemplate.visualModel,
+		});
+		if (semanticErrors.length > 0) {
+			setValidationErrors(semanticErrors);
+			showToast(`保存前请修正 ${semanticErrors.length} 个问题`, 'error');
+			return;
+		}
+
 		try {
 			setSaving(true);
 
@@ -304,6 +372,7 @@ export const useTemplateManagement = ({
 					configContent: updatedData.content || selectedTemplate.configContent,
 				};
 
+				pristineRef.current.set(String(updatedTemplate.id), snapshotOf(updatedTemplate));
 				setTemplates((prev) => prev.map((template) => (template.id === selectedTemplate.id ? updatedTemplate : template)));
 				setIsEditing(false);
 				showToast('模板保存成功！', 'success');
@@ -318,8 +387,11 @@ export const useTemplateManagement = ({
 	};
 
 	const handleReset = () => {
-		setIsEditing(false);
-		loadTemplates();
+		// 取消编辑时有未保存修改需先确认。
+		guardDirty(() => {
+			setIsEditing(false);
+			loadTemplates();
+		});
 	};
 
 	const handleDownloadTemplate = () => {
@@ -375,11 +447,13 @@ export const useTemplateManagement = ({
 		saving,
 		error,
 		isEditing,
+		isDirty,
 		validationErrors,
 
 		// 模态框状态
 		isDeleteModalOpen,
 		isErrorModalOpen,
+		isDiscardModalOpen,
 		templateToDelete,
 
 		// 操作函数
@@ -402,6 +476,8 @@ export const useTemplateManagement = ({
 		closeDeleteModal,
 		closeErrorModal,
 		openDeleteModal,
+		closeDiscardModal,
+		confirmDiscard,
 		setValidationErrors,
 	};
 };
