@@ -31,11 +31,23 @@ export interface SubscriptionUserActivity {
   ips: SubscriptionIpHeartbeat[];
 }
 
+export interface SubscriptionTrendPoint {
+  start: string;
+  requests: number;
+  uniqueIps: number;
+}
+
+export interface SubscriptionTrend {
+  granularity: 'hour' | 'day';
+  points: SubscriptionTrendPoint[];
+}
+
 export interface SubscriptionAnalyticsResult {
   generatedAt: string;
   windowStart: string;
   rangeDays: 1 | 7 | 30;
   truncated: boolean;
+  trend: SubscriptionTrend;
   totals: {
     users: number;
     uniqueIps: number;

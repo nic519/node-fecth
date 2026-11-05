@@ -8,6 +8,7 @@ import {
   ArrowsClockwise,
   CalendarBlank,
   CaretRight,
+  ChartLine,
   CheckCircle,
   Copy,
   FileText,
@@ -42,6 +43,7 @@ import { copyToClipboard } from '@/utils/configUtils';
 import { formatDateTime, formatTraffic, parseTrafficInfo, type ParsedTrafficInfo } from '@/utils/trafficUtils';
 import { isExpiringTraffic, isTightTraffic } from '@/app/admin/users/utils/userUtils';
 import { LogDetailsDialog } from './components/LogDetailsDialog';
+import { TrafficTrendChart } from './components/TrafficTrendChart';
 
 const RANGE_OPTIONS = [
   { value: 1 as const, label: '24 小时' },
@@ -341,6 +343,19 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
           </section>
         )}
 
+        <section className="surface mt-6 overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-4 sm:px-6">
+            <div>
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold"><ChartLine weight="fill" className="h-[18px] w-[18px] text-primary" />访问趋势</h2>
+              <p className="mt-1 text-xs text-muted-foreground">按{analytics?.trend.granularity === 'hour' ? '小时' : '天'}聚合订阅拉取次数与唯一 IP · 来自真实访问日志</p>
+            </div>
+            <span className="text-xs text-muted-foreground">{RANGE_OPTIONS.find((option) => option.value === rangeDays)?.label}</span>
+          </div>
+          <div className="px-3 py-4 sm:px-5">
+            <TrafficTrendChart points={analytics?.trend.points ?? []} granularity={analytics?.trend.granularity ?? 'day'} />
+          </div>
+        </section>
+
         <div className="mt-7 grid items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="surface overflow-hidden xl:sticky xl:top-24">
             <div className="border-b border-border/60 p-4"><div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold">用户与订阅</h2><span className="text-xs text-muted-foreground">{filteredUsers.length} / {users.length}</span></div><div className="relative"><MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索用户 ID" className="h-11 bg-secondary/50 pl-9 shadow-none" /></div></div>
@@ -370,7 +385,7 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
           </div>
         </div>
 
-        <div className="mt-5 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span>访问量表示订阅被客户端拉取的次数；唯一 IP 不等于真实人数。流量与到期时间来自订阅响应快照，没有历史快照时不绘制虚构趋势。</span></div>
+        <div className="mt-5 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /><span>访问量表示订阅被客户端拉取的次数；唯一 IP 不等于真实人数。访问趋势按真实访问日志聚合；流量与到期时间来自订阅响应快照。</span></div>
       </main>
 
       <Sheet open={Boolean(selectedSource)} onOpenChange={(open) => { if (!open) setSelectedSource(null); }}>

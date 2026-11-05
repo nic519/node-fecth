@@ -46,7 +46,7 @@ export function UserFilters({
         <AdminSidePanel
             title="用户管理"
             icon={Users}
-            className="h-fit space-y-6"
+            className="h-fit"
             action={
                 <Button
                     variant="ghost"
@@ -64,6 +64,7 @@ export function UserFilters({
                 </Button>
             }
         >
+            <div className="space-y-6">
             <div className="grid grid-cols-2 divide-x divide-border/60 rounded-xl bg-secondary/45 py-3 text-center">
                 <div>
                     <div className="text-xs text-muted-foreground">总用户</div>
@@ -149,6 +150,7 @@ export function UserFilters({
                     </div>
                 </div>
             )}
+            </div>
         </AdminSidePanel>
     );
 }

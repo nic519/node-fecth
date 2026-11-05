@@ -6,6 +6,7 @@ import type {
   SubscriptionAnalyticsResult,
   SubscriptionIpHeartbeat,
   SubscriptionIpStatus,
+  SubscriptionTrend,
   SubscriptionUserActivity,
 } from '@/types/subscription-analytics';
 
@@ -110,6 +111,41 @@ function rankedCounts(values: string[]) {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
+/**
+ * 按固定窗口桶聚合访问趋势：24 小时按小时、7/30 天按天。
+ * 只统计访问日志里的真实记录，没有任何外推。
+ */
+function buildTrend(rows: AccessLogRow[], windowStartMs: number, nowMs: number, rangeDays: 1 | 7 | 30): SubscriptionTrend {
+  const granularity = rangeDays === 1 ? 'hour' : 'day';
+  const bucketMs = granularity === 'hour' ? 3_600_000 : 86_400_000;
+  const bucketCount = rangeDays === 1 ? 24 : rangeDays;
+  const buckets = Array.from({ length: bucketCount }, (_, index) => ({
+    start: new Date(windowStartMs + index * bucketMs).toISOString(),
+    requests: 0,
+    ips: new Set<string>(),
+  }));
+
+  for (const row of rows) {
+    const timestamp = Date.parse(row.createdAt);
+    if (!Number.isFinite(timestamp) || timestamp < windowStartMs || timestamp > nowMs) continue;
+    const index = Math.min(bucketCount - 1, Math.floor((timestamp - windowStartMs) / bucketMs));
+    buckets[index].requests += 1;
+
+    const headers = row.meta && typeof row.meta === 'object' && !Array.isArray(row.meta)
+      ? (row.meta as Record<string, unknown>).headers
+      : undefined;
+    if (headers && typeof headers === 'object' && !Array.isArray(headers)) {
+      const ip = getRequestIp(headers as HeaderBag);
+      if (ip) buckets[index].ips.add(ip);
+    }
+  }
+
+  return {
+    granularity,
+    points: buckets.map((bucket) => ({ start: bucket.start, requests: bucket.requests, uniqueIps: bucket.ips.size })),
+  };
+}
+
 function locationName(heartbeat: SubscriptionIpHeartbeat) {
   return heartbeat.location.city
     || heartbeat.location.region
@@ -194,6 +230,7 @@ export function aggregateSubscriptionAccessLogs(
     windowStart: windowStart.toISOString(),
     rangeDays: options.rangeDays,
     truncated: Boolean(options.truncated),
+    trend: buildTrend(rows, windowStart.getTime(), nowMs, options.rangeDays),
     totals: {
       users: users.length,
       uniqueIps: allIps.size,
