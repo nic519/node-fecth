@@ -1,5 +1,6 @@
 import { AuthenticatedUserConfig } from '@/types/api-schemas';
-import { authenticateUserConfig, isSuperAdminRequest } from '@/server/auth';
+import { authenticateUserConfig } from '@/server/auth';
+import { adminSessionCookie, isCrossOriginAdminWrite, isValidAdminSession } from '@/server/admin-session';
 import { ResponseUtils } from '@/utils/responseUtils';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -15,7 +16,7 @@ type ApiHandler = (
 
 interface AuthOptions {
   /**
-   * Only allow Super Admin (checks superToken against env)
+   * Require a signed admin session.
    */
   adminOnly?: boolean;
   /**
@@ -31,12 +32,19 @@ interface AuthOptions {
 export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
   return async (request: NextRequest, context: { params: Promise<Record<string, string>> }) => {
     const searchParams = request.nextUrl.searchParams;
+    const respond = (response: Response) => {
+      if (options.adminOnly) response.headers.set('Cache-Control', 'private, no-store');
+      return response;
+    };
 
     try {
       // 1. Admin Check
       if (options.adminOnly) {
-        if (!isSuperAdminRequest(request)) {
-          return ResponseUtils.error(401, 'Unauthorized');
+        if (isCrossOriginAdminWrite(request)) {
+          return respond(ResponseUtils.error(403, '不允许跨站操作。'));
+        }
+        if (!isValidAdminSession(request.cookies.get(adminSessionCookie)?.value)) {
+          return respond(ResponseUtils.error(401, '请先登录管理后台。'));
         }
       }
 
@@ -62,9 +70,9 @@ export function withAuth(handler: ApiHandler, options: AuthOptions = {}) {
         (request as AuthenticatedRequest).uid = uid;
       }
 
-      return await handler(request as AuthenticatedRequest, context);
+      return respond(await handler(request as AuthenticatedRequest, context));
     } catch (error: unknown) {
-      return ResponseUtils.handleApiError(error);
+      return respond(ResponseUtils.handleApiError(error));
     }
   };
 }

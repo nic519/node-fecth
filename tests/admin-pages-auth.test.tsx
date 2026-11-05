@@ -1,50 +1,35 @@
-import { afterEach, beforeEach, expect, test } from 'bun:test';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { expect, mock, test } from 'bun:test';
 
 import AdminDashboardPage from '@/app/admin/dashboard/page';
-import AdminTemplatesPage from '@/app/admin/templates/page';
 import AdminUsersPage from '@/app/admin/users/page';
+import AdminTemplatesPage from '@/app/admin/templates/page';
+import AdminAnalyticsPage from '@/app/admin/analytics/page';
+import AdminSourcesPage from '@/app/admin/sources/page';
+import AdminLogsPage from '@/app/admin/logs/page';
+import { adminReturnPath } from '@/server/admin-page';
 
-const originalSuperAdminToken = process.env.SUPER_ADMIN_TOKEN;
+mock.module('next/headers', () => ({
+  cookies: async () => new Map(),
+}));
 
-beforeEach(() => {
-  process.env.SUPER_ADMIN_TOKEN = 'real-admin-token';
-});
-
-afterEach(() => {
-  if (originalSuperAdminToken === undefined) {
-    Reflect.deleteProperty(process.env, 'SUPER_ADMIN_TOKEN');
-  } else {
-    process.env.SUPER_ADMIN_TOKEN = originalSuperAdminToken;
+test.each([
+  [AdminDashboardPage, '/admin/dashboard'],
+  [AdminUsersPage, '/admin/users'],
+  [AdminTemplatesPage, '/admin/templates'],
+  [AdminAnalyticsPage, '/admin/analytics'],
+  [AdminSourcesPage, '/admin/sources'],
+  [AdminLogsPage, '/admin/logs'],
+] as const)('%p redirects to login before loading protected data', async (page, path) => {
+  try {
+    await page();
+    throw new Error('Expected redirect');
+  } catch (error) {
+    expect(error).toHaveProperty('digest', `NEXT_REDIRECT;replace;/admin/login?next=${encodeURIComponent(path)};307;`);
   }
 });
 
-test('admin dashboard rejects an invalid superToken', async () => {
-  const page = await AdminDashboardPage({
-    searchParams: Promise.resolve({ superToken: 'anything-goes' }),
-  });
-
-  const markup = renderToStaticMarkup(page);
-  expect(markup).toContain('管理员令牌无效');
-  expect(markup).toContain('返回首页');
-});
-
-test('admin users page renders the shared invalid token state', async () => {
-  const page = await AdminUsersPage({
-    searchParams: Promise.resolve({ superToken: 'anything-goes' }),
-  });
-
-  const markup = renderToStaticMarkup(page);
-  expect(markup).toContain('管理员令牌无效');
-  expect(markup).toContain('返回首页');
-});
-
-test('admin templates page renders the shared invalid token state', async () => {
-  const page = await AdminTemplatesPage({
-    searchParams: Promise.resolve({ superToken: 'anything-goes' }),
-  });
-
-  const markup = renderToStaticMarkup(page);
-  expect(markup).toContain('管理员令牌无效');
-  expect(markup).toContain('返回首页');
+test('login only returns to a known admin page', () => {
+  expect(adminReturnPath('/admin/templates')).toBe('/admin/templates');
+  expect(adminReturnPath('//outside.test/admin/templates')).toBe('/admin/dashboard');
+  expect(adminReturnPath('/admin/login')).toBe('/admin/dashboard');
 });

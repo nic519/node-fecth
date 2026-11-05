@@ -24,7 +24,7 @@ function HistoryTime({ value }: { value: number | null }) {
   return <time dateTime={new Date(value).toISOString()}>{historyTime.format(value)}</time>;
 }
 
-export function SourceHistory({ superToken, url }: { superToken: string; url: string }) {
+export function SourceHistory({ url }: { url: string }) {
   const panelId = useId();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<DynamicHistoryPage | null>(null);
@@ -35,7 +35,7 @@ export function SourceHistory({ superToken, url }: { superToken: string; url: st
     setLoading(true);
     setError(false);
     try {
-      const response = await adminService.getSourceHistory(superToken, url, cursor);
+      const response = await adminService.getSourceHistory(url, cursor);
       if (response.code !== 0) throw new Error(response.msg);
       setPage((previous) => ({
         records: cursor ? [...(previous?.records ?? []), ...response.data.records] : response.data.records,

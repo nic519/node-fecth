@@ -7,6 +7,3 @@ export const DEFAULT_RULE_URL = "https://node.1024.hair/api/subscription/templat
 
 /// 推广订阅注册链接
 export const PROMO_URL = 'https://xn--9kqz23b19z.com/#/register?code=PI0eDXNf';
-
-/// url
-export const SUPER_TOKEN_QUERY_PARAM = 'superToken';

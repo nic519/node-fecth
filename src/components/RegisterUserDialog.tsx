@@ -23,14 +23,14 @@ import { DEFAULT_SUB_FLAG, PROMO_URL } from '@/config/constants';
 interface RegisterUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  superToken?: string;
+  isAdmin?: boolean;
   onSuccess?: () => void;
 }
 
 export function RegisterUserDialog({
   isOpen,
   onOpenChange,
-  superToken,
+  isAdmin = false,
   onSuccess
 }: RegisterUserDialogProps) {
   const { showToast } = useToastContext();
@@ -145,8 +145,8 @@ export function RegisterUserDialog({
       };
 
       let response: { code: number; msg?: string; data?: unknown };
-      if (superToken) {
-        response = await adminService.addUser(superToken, {
+      if (isAdmin) {
+        response = await adminService.addUser({
           uid: uid.trim(),
           config: userConfig
         });
@@ -167,7 +167,7 @@ export function RegisterUserDialog({
       if (response.code === 0) {
         showToast(`用户 ${uid} 创建成功`, 'success');
 
-        if (superToken) {
+        if (isAdmin) {
           // Admin flow: just close and refresh
           onOpenChange(false);
           onSuccess?.();

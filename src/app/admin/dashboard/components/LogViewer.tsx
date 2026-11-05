@@ -34,11 +34,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { LogDetailsDialog } from './LogDetailsDialog';
 
-interface LogViewerProps {
-  superToken: string;
-}
-
-export function LogViewer({ superToken }: LogViewerProps) {
+export function LogViewer() {
   const { showToast } = useToastContext();
   const [logs, setLogs] = useState<LogEvent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,7 +59,6 @@ export function LogViewer({ superToken }: LogViewerProps) {
     setLoading(true);
     try {
       const response = await logApi.getLogs({
-        superToken,
         page: effectivePage,
         pageSize,
         level: effectiveLevel === 'all' ? undefined : effectiveLevel,
@@ -81,7 +76,7 @@ export function LogViewer({ superToken }: LogViewerProps) {
     } finally {
       setLoading(false);
     }
-  }, [superToken, page, pageSize, level, type, userId, order]);
+  }, [page, pageSize, level, type, userId, order]);
 
   useEffect(() => {
     fetchLogs();

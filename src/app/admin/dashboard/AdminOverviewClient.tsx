@@ -204,7 +204,7 @@ function ExpiryCalendar({ sources, onSelect }: { sources: SourceAggregate[]; onS
   );
 }
 
-export function AdminOverviewClient({ superToken, initialUsers }: { superToken: string; initialUsers: UserAdminConfig[] }) {
+export function AdminOverviewClient({ initialUsers }: { initialUsers: UserAdminConfig[] }) {
   usePageTitle('运营总览');
   const [users, setUsers] = useState(initialUsers);
   const [templateCount, setTemplateCount] = useState(0);
@@ -221,34 +221,33 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const tokenQuery = `superToken=${encodeURIComponent(superToken)}`;
 
   const loadDirectory = useCallback(async () => {
     try {
-      const [userResponse, templateResponse] = await Promise.all([adminService.getUsers(superToken), templateService.getTemplates(superToken)]);
+      const [userResponse, templateResponse] = await Promise.all([adminService.getUsers(), templateService.getTemplates()]);
       if (userResponse.code === 0) setUsers(userResponse.data.users);
       if (templateResponse.code === 0) setTemplateCount(templateResponse.data.templates.length);
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : '用户或模板加载失败'); }
-  }, [superToken]);
+  }, []);
 
   const loadAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await subscriptionAnalyticsApi.get({ superToken, days: rangeDays });
+      const response = await subscriptionAnalyticsApi.get({ days: rangeDays });
       if (response.code !== 0) throw new Error(response.msg || '订阅分析加载失败');
       setAnalytics(response.data);
       setError('');
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : '订阅分析加载失败'); }
     finally { setLoading(false); }
-  }, [rangeDays, superToken]);
+  }, [rangeDays]);
 
   const loadLogs = useCallback(async () => {
     try {
-      const response = await logApi.getLogs({ superToken, page: 1, pageSize: 8, userId: logUser || undefined });
+      const response = await logApi.getLogs({ page: 1, pageSize: 8, userId: logUser || undefined });
       if (response.code === 0) setLogs(response.data.data);
     } catch { setError('日志加载失败，请刷新重试'); }
     finally { setLogsLoaded(true); }
-  }, [logUser, superToken]);
+  }, [logUser]);
 
   useEffect(() => { void loadDirectory(); }, [loadDirectory]);
   useEffect(() => { void loadAnalytics(); }, [loadAnalytics]);
@@ -304,7 +303,7 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
 
   return (
     <div className="min-h-100dvh bg-background">
-      <NavigationBar superToken={superToken} currentPage="dashboard" />
+      <NavigationBar currentPage="dashboard" />
       <main className="content-container py-7 sm:py-9">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div><h1 className="text-[28px] font-semibold tracking-[-0.035em] sm:text-[32px]">运营总览</h1><p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">用户、共享订阅、流量、IP 心跳与日志在同一视图中联动。点击任一记录即可继续查看上下文。</p></div>
@@ -314,11 +313,11 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
         {error && <div role="alert" className="mt-5 flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"><WarningCircle weight="fill" className="h-5 w-5" />{error}</div>}
 
         <section className="mt-7 grid divide-y divide-border/60 border-y border-border/70 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-5 lg:divide-x">
-          <Metric icon={UsersThree} label="用户" value={users.length} note="全部账户" href={`/admin/users?${tokenQuery}`} />
-          <Metric icon={LinkSimple} label="独立订阅源" value={sources.length} note={`${sources.reduce((sum, source) => sum + source.references.length, 0)} 次引用`} href={`/admin/sources?${tokenQuery}`} />
-          <Metric icon={Heartbeat} label="当前活跃 IP" value={activeIps} note={`${analytics?.totals.uniqueIps ?? 0} 个唯一 IP`} href={`/admin/analytics?${tokenQuery}`} />
+          <Metric icon={UsersThree} label="用户" value={users.length} note="全部账户" href="/admin/users" />
+          <Metric icon={LinkSimple} label="独立订阅源" value={sources.length} note={`${sources.reduce((sum, source) => sum + source.references.length, 0)} 次引用`} href="/admin/sources" />
+          <Metric icon={Heartbeat} label="当前活跃 IP" value={activeIps} note={`${analytics?.totals.uniqueIps ?? 0} 个唯一 IP`} href="/admin/analytics" />
           <Metric icon={CalendarBlank} label="30 天内到期" value={expiringCount} note="按去重订阅源" />
-          <Metric icon={FileText} label="配置模板" value={templateCount} note="YAML 与可视化" href={`/admin/templates?${tokenQuery}`} />
+          <Metric icon={FileText} label="配置模板" value={templateCount} note="YAML 与可视化" href="/admin/templates" />
         </section>
 
         <div className="mt-6 grid items-stretch gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -423,7 +422,7 @@ export function AdminOverviewClient({ superToken, initialUsers }: { superToken: 
 
             <ExpiryCalendar sources={sources} onSelect={setSelectedSource} />
 
-            <section className="surface overflow-hidden"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4"><div><h2 className="flex items-center gap-2 text-[15px] font-semibold"><Scroll weight="fill" className="h-[18px] w-[18px] text-primary" />{logUser ? `${logUser} 的日志` : '最近日志'}</h2><p className="mt-1 text-xs text-muted-foreground">点击记录查看完整元数据</p></div><div className="flex items-center gap-2">{logUser && <Button variant="ghost" size="sm" onClick={() => setLogUser('')}>清除用户筛选</Button>}<Button asChild variant="ghost" size="sm"><Link href={`/admin/logs?${tokenQuery}`}>全部日志<CaretRight className="h-4 w-4" /></Link></Button></div></div><div>{!logsLoaded ? Array.from({ length: 4 }, (_, index) => <div key={index} className="grid min-h-[62px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/50 px-5 py-3 last:border-b-0" aria-hidden><Skeleton className="h-2 w-2 rounded-full" /><span className="min-w-0 space-y-1.5"><Skeleton className="block h-3.5 w-56" /><Skeleton className="block h-3 w-28" /></span><Skeleton className="h-3 w-12" /></div>) : <>{logs.map((log) => <button type="button" key={log.id} onClick={() => setSelectedLog(log)} className="grid min-h-[62px] w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/50 px-5 py-3 text-left last:border-b-0 hover:bg-secondary/40"><span className={cn('h-2 w-2 rounded-full', log.level === 'error' ? 'bg-red-500' : log.level === 'warn' ? 'bg-amber-500' : 'bg-primary')} /><span className="min-w-0"><span className="block truncate text-sm">{log.message}</span><span className="mt-0.5 block truncate text-xs text-muted-foreground">{log.type}{log.userId ? ` · ${log.userId}` : ''}</span></span><span className="text-xs tabular-nums text-muted-foreground">{exactTime(log.createdAt)}</span></button>)}{!logs.length && <div className="p-8 text-center text-sm text-muted-foreground">当前筛选下暂无日志</div>}</>}</div></section>
+            <section className="surface overflow-hidden"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4"><div><h2 className="flex items-center gap-2 text-[15px] font-semibold"><Scroll weight="fill" className="h-[18px] w-[18px] text-primary" />{logUser ? `${logUser} 的日志` : '最近日志'}</h2><p className="mt-1 text-xs text-muted-foreground">点击记录查看完整元数据</p></div><div className="flex items-center gap-2">{logUser && <Button variant="ghost" size="sm" onClick={() => setLogUser('')}>清除用户筛选</Button>}<Button asChild variant="ghost" size="sm"><Link href="/admin/logs">全部日志<CaretRight className="h-4 w-4" /></Link></Button></div></div><div>{!logsLoaded ? Array.from({ length: 4 }, (_, index) => <div key={index} className="grid min-h-[62px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/50 px-5 py-3 last:border-b-0" aria-hidden><Skeleton className="h-2 w-2 rounded-full" /><span className="min-w-0 space-y-1.5"><Skeleton className="block h-3.5 w-56" /><Skeleton className="block h-3 w-28" /></span><Skeleton className="h-3 w-12" /></div>) : <>{logs.map((log) => <button type="button" key={log.id} onClick={() => setSelectedLog(log)} className="grid min-h-[62px] w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/50 px-5 py-3 text-left last:border-b-0 hover:bg-secondary/40"><span className={cn('h-2 w-2 rounded-full', log.level === 'error' ? 'bg-red-500' : log.level === 'warn' ? 'bg-amber-500' : 'bg-primary')} /><span className="min-w-0"><span className="block truncate text-sm">{log.message}</span><span className="mt-0.5 block truncate text-xs text-muted-foreground">{log.type}{log.userId ? ` · ${log.userId}` : ''}</span></span><span className="text-xs tabular-nums text-muted-foreground">{exactTime(log.createdAt)}</span></button>)}{!logs.length && <div className="p-8 text-center text-sm text-muted-foreground">当前筛选下暂无日志</div>}</>}</div></section>
           </div>
         </div>
 

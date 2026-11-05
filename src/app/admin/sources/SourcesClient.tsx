@@ -172,7 +172,7 @@ function SortableTh({
   );
 }
 
-export function SourcesClient({ superToken }: { superToken: string }) {
+export function SourcesClient() {
   usePageTitle('订阅源');
   const [users, setUsers] = useState<Awaited<ReturnType<typeof adminService.getUsers>>['data']['users']>([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +187,7 @@ export function SourcesClient({ superToken }: { superToken: string }) {
   const load = async () => {
     setLoading(true);
     try {
-      const response = await adminService.getUsers(superToken);
+      const response = await adminService.getUsers();
       if (response.code !== 0) throw new Error(response.msg || '用户列表加载失败');
       setUsers(response.data.users);
       setError('');
@@ -198,7 +198,7 @@ export function SourcesClient({ superToken }: { superToken: string }) {
     }
   };
 
-  useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void load(); }, []);
 
   // 相同远程地址跨用户合并为一个独立源，别名与引用关系完整保留。
   const sources = useMemo(() => {
@@ -280,7 +280,7 @@ export function SourcesClient({ superToken }: { superToken: string }) {
 
   return (
     <div className="min-h-100dvh bg-background">
-      <NavigationBar superToken={superToken} currentPage="sources" />
+      <NavigationBar currentPage="sources" />
       <main className="content-container py-7 sm:py-9">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
@@ -426,7 +426,7 @@ export function SourcesClient({ superToken }: { superToken: string }) {
                     );
                   })()}
                 </section>
-                <SourceHistory key={selectedSource.url} url={selectedSource.url} superToken={superToken} />
+                <SourceHistory key={selectedSource.url} url={selectedSource.url} />
                 <section>
                   <h3 className="mb-3 text-sm font-semibold">全部引用用户（{selectedSource.references.length}）</h3>
                   <div className="space-y-2">

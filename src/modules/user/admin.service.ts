@@ -20,23 +20,10 @@ export class AdminService {
 
 	constructor(
 		private db: DbInstance,
-		private superAdminToken: string | undefined,
 		deps: AdminServiceDeps = {},
 	) {
 		this.userService = deps.userService ?? new UserService(db);
 		this.logService = deps.logService ?? new LogService(db);
-	}
-
-	/**
-	 * 验证超级管理员权限
-	 */
-	async validateSuperAdmin(token: string): Promise<boolean> {
-		const superAdminToken = this.superAdminToken;
-		if (!superAdminToken) {
-			console.warn('SUPER_ADMIN_TOKEN 未配置');
-			return false;
-		}
-		return token === superAdminToken;
 	}
 
 	/**

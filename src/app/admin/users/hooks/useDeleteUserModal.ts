@@ -4,7 +4,6 @@ import { adminService } from '@/services/admin-api';
 import { useState } from 'react';
 
 export interface UseDeleteUserModalProps {
-	superToken: string;
 	showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 	onSuccess?: () => void;
 }
@@ -24,7 +23,7 @@ export interface UseDeleteUserModalReturn {
 /**
  * 删除用户模态框管理 Hook
  */
-export const useDeleteUserModal = ({ superToken, showToast, onSuccess }: UseDeleteUserModalProps): UseDeleteUserModalReturn => {
+export const useDeleteUserModal = ({ showToast, onSuccess }: UseDeleteUserModalProps): UseDeleteUserModalReturn => {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
@@ -42,7 +41,7 @@ export const useDeleteUserModal = ({ superToken, showToast, onSuccess }: UseDele
 		if (!userToDelete) return;
 
 		try {
-			const response = await adminService.deleteUser(superToken, userToDelete);
+			const response = await adminService.deleteUser(userToDelete);
 
 			if (response.code === 0) {
 				showToast(`用户 ${userToDelete} 删除成功`, 'success');

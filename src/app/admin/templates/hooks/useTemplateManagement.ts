@@ -13,7 +13,6 @@ import { validateTemplateSemantics } from '../visual-template/validate';
 const DEFAULT_VISUAL_TEMPLATE_BASE_CONTENT = '# 可选：在这里保留原始 YAML 片段，最终输出时会与可视化 JSON 合并\n';
 
 export interface UseTemplateManagementProps {
-	superToken: string;
 	initialTemplates?: TemplateItem[];
 }
 
@@ -64,10 +63,8 @@ export interface UseTemplateManagementReturn {
  * 模板管理Hook - 处理模板数据的CRUD操作
  */
 export const useTemplateManagement = ({
-	superToken,
 	initialTemplates = [],
 }: UseTemplateManagementProps): UseTemplateManagementReturn => {
-	console.log('useTemplateManagement hook called with superToken:', superToken);
 
 	// 设置页面标题
 	usePageTitle('配置模板');
@@ -136,24 +133,20 @@ export const useTemplateManagement = ({
 	};
 
 	useEffect(() => {
-		if (!superToken) {
-			setError('缺少管理员令牌');
-			return;
-		}
 		if (initialTemplates.length > 0) {
 			setLoading(false);
 			return;
 		}
 		loadTemplates();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [superToken, initialTemplates.length]);
+	}, [initialTemplates.length]);
 
 	const loadTemplates = async () => {
 		console.log('loadTemplates called');
 		try {
 			setLoading(true);
 			console.log('Fetching templates from API');
-			const response = await templateService.getTemplates(superToken);
+			const response = await templateService.getTemplates();
 			console.log('API response:', response);
 
 			if (response.code === 0) {
@@ -221,7 +214,7 @@ export const useTemplateManagement = ({
 	const handleCreateTemplate = async () => {
 		try {
 			setLoading(true);
-			const response = await templateService.createTemplate(superToken, {
+			const response = await templateService.createTemplate({
 				name: '新配置模板',
 				description: '新创建的配置模板',
 				content: `# 新配置模板
@@ -251,7 +244,7 @@ export const useTemplateManagement = ({
 	const handleCreateVisualTemplate = async () => {
 		try {
 			setLoading(true);
-			const response = await templateService.createTemplate(superToken, {
+			const response = await templateService.createTemplate({
 				name: '新可视化模板',
 				description: 'visual-v1',
 				format: 'visual-v1',
@@ -296,7 +289,7 @@ export const useTemplateManagement = ({
 
 		try {
 			setLoading(true);
-			const response = await templateService.deleteTemplate(superToken, templateToDelete);
+			const response = await templateService.deleteTemplate(templateToDelete);
 
 			if (response.code === 0) {
 				setTemplates((prev) => {
@@ -352,7 +345,7 @@ export const useTemplateManagement = ({
 		try {
 			setSaving(true);
 
-			const response = await templateService.updateTemplate(superToken, String(selectedTemplate.id), {
+			const response = await templateService.updateTemplate(String(selectedTemplate.id), {
 				name: selectedTemplate.name,
 				description: selectedTemplate.description || '配置模板',
 				content: selectedTemplate.configContent,

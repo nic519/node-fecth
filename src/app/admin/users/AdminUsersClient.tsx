@@ -23,10 +23,8 @@ import { Loader2 } from 'lucide-react';
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
 
 export function AdminUsersClient({
-  superToken,
   initialUsers,
 }: {
-  superToken: string;
   initialUsers: UserAdminConfig[];
 }) {
   usePageTitle('用户管理');
@@ -44,7 +42,6 @@ export function AdminUsersClient({
     addUserModal,
     importModal
   } = useUserManagement({
-    superToken,
     initialUsers,
     showToast,
   });
@@ -55,7 +52,7 @@ export function AdminUsersClient({
 
   return (
     <div className="min-h-100dvh bg-background">
-      <NavigationBar superToken={superToken} currentPage="users" />
+      <NavigationBar currentPage="users" />
 
       <main className="content-container py-7 sm:py-9">
         <AdminTwoColumnLayout
@@ -118,9 +115,9 @@ export function AdminUsersClient({
       </Dialog>
 
       <RegisterUserDialog
+        isAdmin
         isOpen={addUserModal.isOpen}
         onOpenChange={(open) => !open && addUserModal.close()}
-        superToken={superToken}
         onSuccess={fetchUsers}
       />
 

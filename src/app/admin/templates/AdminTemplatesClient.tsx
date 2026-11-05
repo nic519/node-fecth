@@ -16,10 +16,8 @@ import type React from 'react';
 import { useState } from 'react';
 
 export function AdminTemplatesClient({
-  superToken,
   initialTemplates,
 }: {
-  superToken: string;
   initialTemplates: TemplateItem[];
 }) {
   const [yamlRevealTarget, setYamlRevealTarget] = useState<{ line: number | null; key: number }>({ line: null, key: 0 });
@@ -53,7 +51,7 @@ export function AdminTemplatesClient({
     closeDiscardModal,
     confirmDiscard,
     setValidationErrors,
-  } = useTemplateManagement({ superToken, initialTemplates });
+  } = useTemplateManagement({ initialTemplates });
 
   const handleRevealProxyGroup = (groupName: string) => {
     const line = findProxyGroupLineNumber(currentConfigContent, groupName);
@@ -62,7 +60,7 @@ export function AdminTemplatesClient({
 
   return (
     <div className="min-h-100dvh bg-background">
-      <NavigationBar superToken={superToken} currentPage="templates" />
+      <NavigationBar currentPage="templates" />
 
       <main className={cn("content-container py-7 sm:py-9", isEditing && "max-w-none")}>
         {error && (

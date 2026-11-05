@@ -8,6 +8,9 @@ import { LogType, SUBSCRIPTION_REQUEST_LOG_MESSAGE } from '@/types/log';
 export const GET = withAuth(async (request) => {
   const { logService } = createServerServices();
   const uid = request.uid;
+  const headers = new Headers(request.headers);
+  headers.delete('cookie');
+  const requestHeaders = Object.fromEntries(headers);
 
   try {
     const authConfig = request.auth;
@@ -24,7 +27,7 @@ export const GET = withAuth(async (request) => {
       meta: {
         url: request.url,
         method: request.method,
-        headers: Object.fromEntries(request.headers.entries()),
+        headers: requestHeaders,
       },
     });
 
@@ -45,7 +48,7 @@ export const GET = withAuth(async (request) => {
       meta: {
         url: request.url,
         method: request.method,
-        headers: Object.fromEntries(request.headers.entries()),
+        headers: requestHeaders,
         error: error instanceof Error ? error.message : String(error),
       },
     });

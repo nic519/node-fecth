@@ -4,22 +4,12 @@ import { templates } from '@/db/schema';
 import { ensureTemplateVisualColumns } from '@/db/template-migrations';
 import { desc } from 'drizzle-orm';
 import type { TemplateItem } from './components/TemplateList';
-import { getValidSuperAdminToken } from '@/server/auth';
-import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
+import { requireAdminSession } from '@/server/admin-page';
 import { extractVisualModelFromContent, normalizeVisualTemplateContent, stripVisualModelMetadata } from './visual-template/metadata';
 import { normalizeVisualTemplateModel } from './visual-template/normalizer';
 
-export default async function AdminTemplatesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ superToken?: string | string[] }>;
-}) {
-  const params = await searchParams;
-  const superToken = getValidSuperAdminToken(params.superToken);
-
-  if (!superToken) {
-    return <AdminAccessDenied />;
-  }
+export default async function AdminTemplatesPage() {
+  await requireAdminSession('/admin/templates');
 
   const db = getServerDb();
   await ensureTemplateVisualColumns(db);
@@ -40,5 +30,5 @@ export default async function AdminTemplatesPage({
     };
   });
 
-  return <AdminTemplatesClient superToken={superToken} initialTemplates={initialTemplates} />;
+  return <AdminTemplatesClient initialTemplates={initialTemplates} />;
 }

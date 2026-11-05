@@ -7,7 +7,6 @@ import { DEFAULT_SUB_FLAG } from '@/config/constants';
 import { useState } from 'react';
 
 export interface UseAddUserModalProps {
-	superToken: string;
 	showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 	onSuccess?: () => void;
 }
@@ -34,7 +33,7 @@ export interface UseAddUserModalReturn {
 /**
  * 添加用户模态框管理 Hook
  */
-export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUserModalProps): UseAddUserModalReturn => {
+export const useAddUserModal = ({ showToast, onSuccess }: UseAddUserModalProps): UseAddUserModalReturn => {
 	const [showAddUserModal, setShowAddUserModal] = useState(false);
 	const [newUserUid, setNewUserUid] = useState('');
 	const [newUserToken, setNewUserToken] = useState('');
@@ -92,7 +91,7 @@ export const useAddUserModal = ({ superToken, showToast, onSuccess }: UseAddUser
 				}],
 			};
 
-			const response = await adminService.addUser(superToken, { uid, config: userConfig });
+			const response = await adminService.addUser({ uid, config: userConfig });
 
 			if (response.code === 0) {
 				showToast(`用户 ${uid} 创建成功`, 'success');

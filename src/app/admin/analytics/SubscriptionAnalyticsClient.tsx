@@ -471,7 +471,7 @@ function SelectedUserPanel({
   );
 }
 
-export function SubscriptionAnalyticsClient({ superToken }: { superToken: string }) {
+export function SubscriptionAnalyticsClient() {
   usePageTitle('订阅使用分析');
   const [rangeDays, setRangeDays] = useState<1 | 7 | 30>(1);
   const [data, setData] = useState<SubscriptionAnalyticsResult | null>(null);
@@ -485,7 +485,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
     setLoading(true);
     setError('');
     try {
-      const response = await subscriptionAnalyticsApi.get({ superToken, days: rangeDays });
+      const response = await subscriptionAnalyticsApi.get({ days: rangeDays });
       if (response.code !== 0) throw new Error(response.msg || '加载失败');
       setData(response.data);
       setSelectedUserId((current) => {
@@ -499,7 +499,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
     } finally {
       setLoading(false);
     }
-  }, [rangeDays, superToken]);
+  }, [rangeDays]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -518,7 +518,7 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
 
   return (
     <div className="min-h-screen bg-slate-50/70 dark:bg-zinc-950">
-      <NavigationBar superToken={superToken} currentPage="analytics" />
+      <NavigationBar currentPage="analytics" />
 
       <main className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">

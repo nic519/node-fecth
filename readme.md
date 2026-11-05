@@ -38,17 +38,19 @@
 - 用户配置：保存用户订阅、规则与覆写信息，订阅地址固定，规则可在线更新
 - 动态订阅抓取：拉取订阅内容并持久化，支持自动重试与内容格式转换
 - 规则合并与生成：多订阅聚合、策略化合并（多端口/多订阅策略），输出 Clash YAML
-- 管理后台：基于 superToken 进行管理员操作（用户管理、模板管理、日志记录）
+- 管理后台：密码登录后可管理用户、模板和日志
  
 
 ### 鉴权机制
 
-- 管理端：通过 superToken 访问（Query 参数或环境变量）
+- 管理端：在登录页输入服务端配置的 `SUPER_ADMIN_TOKEN`，登录状态通过 HttpOnly Cookie 保持 12 小时
 - 用户端：通过 token 访问用户配置与订阅
 
 ---
 
 ## 运行教程
+
+推荐使用 Bun 安装依赖和运行项目脚本。
 
 ### 1) 安装依赖
 
@@ -61,7 +63,7 @@ bun install
 创建 `.env.local`，至少包含以下环境变量：
 
 ```bash
-SUPER_ADMIN_TOKEN="your-super-token"
+SUPER_ADMIN_TOKEN="your-admin-password"
 TURSO_DATABASE_URL="libsql://your-database.turso.io"
 TURSO_AUTH_TOKEN="your-turso-token"
 ```
@@ -69,7 +71,7 @@ TURSO_AUTH_TOKEN="your-turso-token"
 ### 3) 本地开发
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 ### 4) 部署
@@ -77,19 +79,19 @@ npm run dev
 Vercel:
 
 ```bash
-npm run build
+bun run build
 ```
 
 Cloudflare:
 
 ```bash
-npm run preview
-npm run deploy
+bun run preview
+bun run deploy
 ```
 
 ---
 
 ## 常用访问入口
 
-- 管理后台：`/admin/dashboard?superToken=YOUR_TOKEN`
+- 管理后台：`/admin`
 - 用户配置页：`/config?uid=USER_ID&token=USER_TOKEN`

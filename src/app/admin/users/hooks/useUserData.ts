@@ -5,7 +5,6 @@ import { adminService } from '@/services/admin-api';
 import { useCallback, useEffect, useState } from 'react';
 
 export interface UseUserDataProps {
-	superToken: string;
 	initialUsers?: UserAdminConfig[];
 }
 
@@ -19,7 +18,7 @@ export interface UseUserDataReturn {
 /**
  * 用户数据管理 Hook - 负责用户列表的获取和状态管理
  */
-export const useUserData = ({ superToken, initialUsers = [] }: UseUserDataProps): UseUserDataReturn => {
+export const useUserData = ({ initialUsers = [] }: UseUserDataProps): UseUserDataReturn => {
 	const [users, setUsers] = useState<UserAdminConfig[]>(initialUsers);
 	const [loading, setLoading] = useState(initialUsers.length === 0);
 	const [error, setError] = useState<string | null>(null);
@@ -32,7 +31,7 @@ export const useUserData = ({ superToken, initialUsers = [] }: UseUserDataProps)
 			setLoading(true);
 			setError(null);
 
-			const response = await adminService.getUsers(superToken);
+			const response = await adminService.getUsers();
 
 			// 检查业务响应码
 			if (response.code !== 0) {
@@ -50,21 +49,16 @@ export const useUserData = ({ superToken, initialUsers = [] }: UseUserDataProps)
 		} finally {
 			setLoading(false);
 		}
-	}, [superToken]);
+	}, []);
 
 	// 初始化时获取用户列表
 	useEffect(() => {
-		if (!superToken) {
-			setError('缺少管理员令牌');
-			setLoading(false);
-			return;
-		}
 		if (initialUsers.length > 0) {
 			setLoading(false);
 			return;
 		}
 		fetchUsers();
-	}, [superToken, fetchUsers, initialUsers.length]);
+	}, [fetchUsers, initialUsers.length]);
 
 	return {
 		users,

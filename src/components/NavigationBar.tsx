@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   Pulse as Activity,
   ArrowSquareOut,
@@ -10,13 +11,15 @@ import {
   Layout,
   LinkSimple,
   Scroll,
+  SignOut,
   UsersThree,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { ModeToggle } from '@/components/ui/mode-toggle';
+import { Button } from '@/components/ui/button';
+import { useToastContext } from '@/providers/toast-provider';
 
 export interface NavigationBarProps {
-  superToken: string;
   currentPage?: 'dashboard' | 'analytics' | 'sources' | 'users' | 'templates' | 'logs';
   title?: string;
 }
@@ -36,7 +39,22 @@ const NAV_ITEMS = [
   { id: 'logs', label: '日志', icon: Scroll, href: '/admin/logs' },
 ] as const;
 
-export function NavigationBar({ superToken, currentPage, title = '运营后台' }: NavigationBarProps) {
+export function NavigationBar({ currentPage, title = '运营后台' }: NavigationBarProps) {
+  const [signingOut, setSigningOut] = useState(false);
+  const { showToast } = useToastContext();
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      const response = await fetch('/api/admin/session', { method: 'DELETE' });
+      if (!response.ok) throw new Error('退出登录失败');
+      window.location.replace('/admin/login');
+    } catch {
+      showToast('退出登录失败，请稍后重试。', 'error');
+      setSigningOut(false);
+    }
+  }
+
   return (
     <header className="glass-header sticky top-0 z-40 border-b border-border/60">
       <div className="content-container flex min-h-[72px] flex-wrap items-center gap-x-4 gap-y-0 py-2 lg:flex-nowrap lg:py-0">
@@ -55,7 +73,7 @@ export function NavigationBar({ superToken, currentPage, title = '运营后台' 
             return (
               <Link
                 key={item.id}
-                href={`${item.href}?superToken=${encodeURIComponent(superToken)}`}
+                href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex min-h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-sm font-medium transition-colors',
@@ -79,6 +97,9 @@ export function NavigationBar({ superToken, currentPage, title = '运营后台' 
             <ArrowSquareOut className="hidden h-3.5 w-3.5 xl:block" />
           </Link>
           <ModeToggle className="border-transparent bg-transparent shadow-none hover:bg-secondary/70" />
+          <Button type="button" variant="ghost" size="icon" onClick={signOut} disabled={signingOut} aria-label="退出登录" title="退出登录">
+            <SignOut />
+          </Button>
         </div>
       </div>
     </header>

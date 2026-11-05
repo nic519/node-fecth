@@ -10,7 +10,6 @@ export interface LogListResult {
 
 export const logApi = {
     getLogs: (params: {
-        superToken: string;
         page?: number;
         pageSize?: number;
         level?: string;

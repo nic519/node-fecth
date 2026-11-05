@@ -7,7 +7,6 @@ import { useImportUserModal } from './useImportUserModal';
 import { useUserData } from './useUserData';
 
 export interface UseUserManagementProps {
-	superToken: string;
 	initialUsers?: UserAdminConfig[];
 	showToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
@@ -61,27 +60,24 @@ export interface UseUserManagementReturn {
 /**
  * 用户管理主 Hook - 协调各个子 Hook，提供统一的接口
  */
-export const useUserManagement = ({ superToken, initialUsers, showToast }: UseUserManagementProps): UseUserManagementReturn => {
+export const useUserManagement = ({ initialUsers, showToast }: UseUserManagementProps): UseUserManagementReturn => {
 	// 用户数据管理
-	const userData = useUserData({ superToken, initialUsers });
+	const userData = useUserData({ initialUsers });
 
 	// 删除用户模态框管理
 	const { deleteModal } = useDeleteUserModal({
-		superToken,
 		showToast,
 		onSuccess: userData.fetchUsers,
 	});
 
 	// 添加用户模态框管理
 	const { addUserModal } = useAddUserModal({
-		superToken,
 		showToast,
 		onSuccess: userData.fetchUsers,
 	});
 
 	// 导入用户模态框管理
 	const importModal = useImportUserModal({
-		superToken,
 		existingUsers: userData.users,
 		showToast,
 		onSuccess: userData.fetchUsers,

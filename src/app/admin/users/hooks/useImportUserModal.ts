@@ -5,7 +5,6 @@ import { UserConfigSchema } from '@/modules/user/user.schema';
 import { UserConfig } from '@/types/user-config';
 
 interface UseImportUserModalProps {
-    superToken: string;
     existingUsers: UserAdminConfig[];
     onSuccess: () => void;
     showToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -20,7 +19,6 @@ export interface ImportResult {
 const UID_PATTERN = /^[A-Za-z0-9_-]{4,}$/;
 
 export const useImportUserModal = ({
-    superToken,
     existingUsers,
     onSuccess,
     showToast,
@@ -105,7 +103,7 @@ export const useImportUserModal = ({
             for (let i = 0; i < usersToImport.length; i++) {
                 const user = usersToImport[i];
                 try {
-                    const response = await adminService.addUser(superToken, {
+                    const response = await adminService.addUser({
                         uid: user.uid,
                         config: user.config,
                     });

@@ -17,33 +17,33 @@ export interface TemplateResponse {
 export const templateService = {
     /**
      * 获取模板列表
-     * GET /api/admin/templates?superToken=xxx
+     * GET /api/admin/templates
      */
-    getTemplates: (superToken: string) => {
-        return apiClient.get<TemplateListResponse>('/admin/templates', { superToken });
+    getTemplates: () => {
+        return apiClient.get<TemplateListResponse>('/admin/templates');
     },
 
     /**
      * 创建模板
-     * POST /api/admin/templates?superToken=xxx
+     * POST /api/admin/templates
      */
-    createTemplate: (superToken: string, data: CreateConfigTemplateRequest) => {
-        return apiClient.post<TemplateResponse>('/admin/templates', data, { superToken });
+    createTemplate: (data: CreateConfigTemplateRequest) => {
+        return apiClient.post<TemplateResponse>('/admin/templates', data);
     },
 
     /**
      * 更新模板
-     * PUT /api/admin/templates/:id?superToken=xxx
+     * PUT /api/admin/templates/:id
      */
-    updateTemplate: (superToken: string, id: string, data: Partial<CreateConfigTemplateRequest>) => {
-        return apiClient.put<Partial<TemplateResponse>>(`/admin/templates/${id}`, data, { superToken });
+    updateTemplate: (id: string, data: Partial<CreateConfigTemplateRequest>) => {
+        return apiClient.put<Partial<TemplateResponse>>(`/admin/templates/${id}`, data);
     },
 
     /**
      * 删除模板
-     * DELETE /api/admin/templates/:id?superToken=xxx
+     * DELETE /api/admin/templates/:id
      */
-    deleteTemplate: (superToken: string, id: string) => {
-        return apiClient.delete<null>(`/admin/templates/${id}`, { superToken });
+    deleteTemplate: (id: string) => {
+        return apiClient.delete<null>(`/admin/templates/${id}`);
     },
 };

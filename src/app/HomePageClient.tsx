@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { RegisterUserDialog } from '@/components/RegisterUserDialog';
 import { HomeNavbar } from '@/components/HomeNavbar';
 
-export function HomePageClient({ superToken, initialFilterOptions = [] }: { superToken?: string; initialFilterOptions?: string[] }) {
+export function HomePageClient({ initialFilterOptions = [] }: { initialFilterOptions?: string[] }) {
   const { filterOptions, loadingFilters, filterError } = useStaticRuleFilterOptionsWithInitialData(initialFilterOptions);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const openRegister = () => setIsRegisterOpen(true);
@@ -96,7 +96,7 @@ export function HomePageClient({ superToken, initialFilterOptions = [] }: { supe
 
       <footer className="border-t border-border/60 py-8"><div className="content-container flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-2.5"><AcmeLogo className="h-7 w-7 rounded-[8px]" /><span className="font-medium text-foreground">NodeFetch</span><span>· 订阅配置与规则管理</span></div><div>© {new Date().getFullYear()} NodeFetch</div></div></footer>
 
-      <RegisterUserDialog isOpen={isRegisterOpen} onOpenChange={setIsRegisterOpen} superToken={superToken} />
+      <RegisterUserDialog isOpen={isRegisterOpen} onOpenChange={setIsRegisterOpen} />
     </div>
   );
 }

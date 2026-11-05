@@ -6,29 +6,29 @@ import type { DynamicHistoryCursor, DynamicHistoryPage } from '@/types/schema/dy
 export const adminService = {
 	/**
 	 * 获取用户列表
-	 * GET /api/admin/users?superToken=xxx
+	 * GET /api/admin/users
 	 */
-	getUsers: (superToken: string) => {
-		return apiClient.get<{ users: UserAdminConfig[] }>('/admin/users', { superToken });
+	getUsers: () => {
+		return apiClient.get<{ users: UserAdminConfig[] }>('/admin/users');
 	},
 
-	getSourceHistory: (superToken: string, url: string, cursor?: DynamicHistoryCursor) => {
-		return apiClient.post<DynamicHistoryPage>('/admin/sources/history', { url, cursor }, { superToken });
+	getSourceHistory: (url: string, cursor?: DynamicHistoryCursor) => {
+		return apiClient.post<DynamicHistoryPage>('/admin/sources/history', { url, cursor });
 	},
 
 	/**
 	 * 添加用户
 	 * POST /api/admin/users
 	 */
-	addUser: (superToken: string, data: { uid: string; config: UserConfig }) => {
-		return apiClient.post<null>('/admin/users', data, { superToken });
+	addUser: (data: { uid: string; config: UserConfig }) => {
+		return apiClient.post<null>('/admin/users', data);
 	},
 
 	/**
 	 * 删除用户
-	 * DELETE /api/admin/users/:uid?superToken=xxx
+	 * DELETE /api/admin/users/:uid
 	 */
-	deleteUser: (superToken: string, uid: string) => {
-		return apiClient.delete<null>(`/admin/users/${uid}`, { superToken });
+	deleteUser: (uid: string) => {
+		return apiClient.delete<null>(`/admin/users/${uid}`);
 	},
 };
