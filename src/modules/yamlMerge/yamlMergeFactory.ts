@@ -2,7 +2,7 @@ import type { YamlObject } from '@/modules/yamlMerge/utils/yamlTypes';
 import { UserConfig } from '@/types/api-schemas';
 import { fetchRawContent } from '@/utils/http/client';
 import yaml from 'js-yaml';
-import { StrategyMultiSub } from './strategyMultiSub';
+import { StrategyMultiSub, type SubscriptionOutcome } from './strategyMultiSub';
 import { DEFAULT_RULE_URL } from '@/config/constants';
 
 export class YamlMergeFactory {
@@ -10,7 +10,7 @@ export class YamlMergeFactory {
 
 	constructor(
 		private userConfig: UserConfig,
-		private runtimeOptions: { uid?: string; env?: Env } = {},
+		private runtimeOptions: { uid?: string; env?: Env; outcome?: SubscriptionOutcome } = {},
 	) { }
 
 	private async measure<T>(name: string, fn: () => Promise<T>): Promise<T> {
@@ -39,6 +39,7 @@ export class YamlMergeFactory {
 			this.userConfig,
 			this.runtimeOptions.uid,
 			this.runtimeOptions.env,
+            this.runtimeOptions.outcome,
 		);
 		const { yamlContent, subInfo } = await yamlStrategy.generate();
 		return { yamlContent, subInfo };

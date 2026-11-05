@@ -1,6 +1,5 @@
 import { createServerServices } from '@/server/services';
-import { logs } from '@/db/schema';
-import { sql, and, eq } from 'drizzle-orm';
+import { releaseRegistration, reserveRegistration } from '@/services/registration-limit';
 import { RegisterRequestSchema, ResponseCodes } from '@/types/api-schemas';
 import { ResponseUtils } from '@/utils/responseUtils';
 
@@ -23,30 +22,18 @@ export const POST = async (request: Request) => {
 
     const { uid, config } = validationResult.data;
     const ip = getClientIp(request);
-    const { adminService, db, logService } = createServerServices();
-
-    // 按 IP 限制公开注册频率：同一 IP 24 小时内只能注册一次。
-    const recentRegistrations = await db.select({
-      id: logs.id
-    }).from(logs)
-      .where(and(
-        eq(logs.type, 'public_register'),
-        sql`json_extract(${logs.meta}, '$.ip') = ${ip}`,
-        sql`datetime(${logs.createdAt}) > datetime('now', '-1 day')`
-      ))
-      .limit(1);
-
-    if (recentRegistrations.length > 0) {
+    const { adminService, db } = createServerServices();
+    const reservationId = await reserveRegistration(db, ip);
+    if (!reservationId) {
       return ResponseUtils.error(429, '每24小时内只能创建一个账户');
     }
 
-    await adminService.createUser(uid, config, 'public');
-    await logService.log({
-      level: 'info',
-      type: 'public_register',
-      message: `Public user registration for ${uid}`,
-      meta: { ip, uid }
-    });
+    try {
+      await adminService.createUser(uid, config, 'public');
+    } catch (error) {
+      await releaseRegistration(db, ip, reservationId);
+      throw error;
+    }
 
     return ResponseUtils.success(null, 'success');
 

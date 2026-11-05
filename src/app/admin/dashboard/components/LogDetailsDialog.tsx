@@ -151,11 +151,18 @@ export function LogDetailsDialog({ log, open, onOpenChange, onCopy }: LogDetails
                 />
               </div>
 
+              {log.requestId && <DetailRow onCopy={onCopy} label="请求 ID" value={log.requestId} copyText={log.requestId} copyMessage="请求 ID 已复制" />}
+              {Object.entries({ result: '结果', actorId: '操作人', targetId: '目标 ID', changedFields: '变更字段', sourceCount: '订阅源数', successCount: '成功源数', failedCount: '失败源数', staleCount: '旧缓存源数', nodeCount: '节点数', contentLength: '内容长度', durationMs: '耗时（毫秒）', clientName: '客户端', ip: 'IP', stage: '失败阶段', error: '错误', failures: '失败摘要', requestCount: '请求次数' }).map(([key, label]) => {
+                const value = log.meta?.[key];
+                if (value === undefined || value === null) return null;
+                return <DetailRow key={key} onCopy={onCopy} label={label} value={typeof value === 'object' ? JSON.stringify(value) : String(value)} />;
+              })}
+
               {log.meta && (
-                <details open className="rounded-md border border-border/40 bg-muted/20 px-3 py-2 group">
+                <details className="rounded-md border border-border/40 bg-muted/20 px-3 py-2 group">
                   <summary className="cursor-pointer select-none text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                     <Database className="h-3.5 w-3.5" />
-                    元数据
+                    原始元数据 JSON
                   </summary>
                   <div className="pt-2">
                     <pre className="rounded-md bg-slate-950 text-slate-50 p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words">

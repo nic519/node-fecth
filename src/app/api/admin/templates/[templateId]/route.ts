@@ -1,3 +1,4 @@
+import { LogService } from '@/services/log-service';
 import { getServerDb } from '@/server/db';
 import { templates } from '@/db/schema';
 import { ensureTemplateVisualColumns } from '@/db/template-migrations';
@@ -14,18 +15,21 @@ import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/
 export const PUT = withAuth(async (request, { params }) => {
   const { templateId } = await params;
 
+  let logger: LogService | undefined;
   try {
+    const db = getServerDb();
+    logger = new LogService(db);
     const body = await request.json();
     const validationResult = ConfigTemplateSaveRequestSchema.safeParse(body);
 
     if (!validationResult.success) {
+      logger.record({ level: 'audit', type: 'template_update', message: '模板更新校验失败', meta: { actorId: 'admin', result: 'rejected' } });
       return ResponseUtils.error(ResponseCodes.INVALID_PARAMS, validationResult.error.issues[0].message);
     }
 
     const { name, description, format = 'yaml' } = validationResult.data;
     const templatePayload = buildTemplatePayload(format, validationResult.data.content, validationResult.data.visualModel);
 
-    const db = getServerDb();
     await ensureTemplateVisualColumns(db);
     const now = new Date().toISOString();
 
@@ -42,6 +46,8 @@ export const PUT = withAuth(async (request, { params }) => {
       .where(eq(templates.id, templateId))
       .execute();
 
+    logger.record({ level: 'audit', type: 'template_update', message: '管理员更新模板', meta: { actorId: 'admin', targetId: templateId, result: 'success' } });
+
     return ResponseUtils.success({
       template: {
         id: templateId,
@@ -55,6 +61,7 @@ export const PUT = withAuth(async (request, { params }) => {
     });
   } catch (error) {
     console.error('更新模板失败:', error);
+    logger?.record({ level: 'audit', type: 'template_update', message: '模板更新失败', meta: { actorId: 'admin', result: 'failed' } });
     return ResponseUtils.handleApiError(error);
   }
 }, { adminOnly: true });
@@ -81,12 +88,17 @@ function getRequestVisualModel(visualModel: unknown, content: string): VisualTem
 export const DELETE = withAuth(async (_, { params }) => {
   const { templateId } = await params;
 
+  let logger: LogService | undefined;
   try {
     const db = getServerDb();
+    logger = new LogService(db);
     await db.delete(templates).where(eq(templates.id, templateId)).execute();
+
+    logger.record({ level: 'audit', type: 'template_delete', message: '管理员删除模板', meta: { actorId: 'admin', targetId: templateId, result: 'success' } });
 
     return ResponseUtils.success(null);
   } catch (error: unknown) {
+    logger?.record({ level: 'audit', type: 'template_delete', message: '模板删除失败', meta: { actorId: 'admin', result: 'failed' } });
     return ResponseUtils.handleApiError(error);
   }
 }, { adminOnly: true });

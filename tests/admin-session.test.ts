@@ -89,7 +89,7 @@ test('expired admin cookies are rejected', async () => {
 });
 
 test('logout expires the session cookie', async () => {
-  const response = logout(new Request('https://nodefetch.test/api/admin/session', { method: 'DELETE' }));
+  const response = await logout(new Request('https://nodefetch.test/api/admin/session', { method: 'DELETE' }));
   expect(response.headers.get('set-cookie')).toContain('nodefetch_admin=;');
   expect(response.headers.get('set-cookie')).toContain('Max-Age=0');
 });

@@ -1,10 +1,11 @@
+import { redactLogText } from '@/services/log-policy';
 
 /**
  * Safely format error messages and metadata for logging to avoid log size limits.
  */
 
 export function safeError(error: unknown): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = redactLogText(error instanceof Error ? error.message : String(error), 1024);
     // Truncate message if it's too long (e.g. 1KB)
     if (message.length > 1024) {
         return message.slice(0, 1024) + '... (truncated)';
@@ -13,6 +14,7 @@ export function safeError(error: unknown): string {
 }
 
 export function safeString(str: string, maxLength = 1024): string {
+    str = redactLogText(str, maxLength);
     if (str.length > maxLength) {
         return str.slice(0, maxLength) + '... (truncated)';
     }
@@ -35,9 +37,9 @@ export function safeMeta(meta: Record<string, unknown>): Record<string, unknown>
                 try {
                     const str = JSON.stringify(value);
                     if (str.length > 2048) {
-                        safe[key] = str.slice(0, 2048) + '... (truncated object)';
+                        safe[key] = redactLogText(str, 2048) + '... (truncated object)';
                     } else {
-                        safe[key] = value;
+                        safe[key] = JSON.parse(redactLogText(str, 2048));
                     }
                 } catch {
                     safe[key] = '[Circular or Unserializable Object]';

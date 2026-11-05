@@ -14,9 +14,10 @@ export type LogLevel = 'info' | 'warn' | 'error' | 'audit';
 export enum LogType {
   // 用户相关
   USER_LOGIN = 'user_login',
-  USER_CREATE = 'user_create',
+  USER_LOGOUT = 'user_logout',
+  USER_CREATE = 'create_user',
   USER_UPDATE = 'user_update',
-  USER_DELETE = 'user_delete',
+  USER_DELETE = 'delete_user',
   
   // 模板相关
   TEMPLATE_CREATE = 'template_create',
@@ -25,11 +26,9 @@ export enum LogType {
   
   // 订阅相关
   SUBSCRIPTION_ACCESS = 'subscription_access',
-  SUBSCRIPTION_UPDATE = 'subscription_update',
   
   // 系统相关
   SYSTEM_ERROR = 'system_error',
-  DB_CLEANUP = 'db_cleanup',
 }
 
 export const SUBSCRIPTION_REQUEST_LOG_MESSAGE = '用户访问订阅配置';

@@ -9,7 +9,16 @@ import { DynamicService } from '@/modules/dynamic/dynamic.service';
 import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
 import yaml from 'js-yaml';
 import { normalizeInlineProxies } from '@/modules/user/inline-proxies';
+import { safeError } from '@/utils/logHelper';
 import { PreMergeInfo } from './clash-merge.types';
+
+export interface SubscriptionOutcome {
+  sourceCount: number;
+  successCount: number;
+  failedCount: number;
+  staleCount: number;
+  failures: string[];
+}
 
 export class StrategyMultiSub {
 	constructor(
@@ -17,6 +26,7 @@ export class StrategyMultiSub {
 		private userConfig: UserConfig,
 		private uid?: string,
 		private runtimeEnv?: Env,
+        private outcome?: SubscriptionOutcome,
 	) { }
 
 	private async getProxyList(): Promise<{ allProxyList: ClashProxy[]; preMergeInfo: PreMergeInfo }> {
@@ -28,7 +38,8 @@ export class StrategyMultiSub {
 		};
 
 		const appendSubList = buildSubscriptionListFromConfig(this.userConfig);
-		const userId = this.uid || this.userConfig.accessToken; // Use uid if available, fallback to accessToken
+		const userId = this.uid;
+        if (this.outcome) this.outcome.sourceCount = appendSubList.length;
 
 		if (appendSubList && appendSubList.length > 0) {
 			// 使用并发控制，最大并发数 5
@@ -36,7 +47,7 @@ export class StrategyMultiSub {
 			// 10 seconds timeout for each subscription is handled within fetch logic if needed, 
 			// but getWithCache does not expose timeout. Assuming default ky timeout or sufficient.
 
-			const tasks = appendSubList.map(sub => limit(async () => {
+			const tasks = appendSubList.map((sub, index) => limit(async () => {
 				try {
 					const result = sub.type === 'inline'
                         ? { content: normalizeInlineProxies(sub.proxiesYaml ?? ''), traffic: null }
@@ -45,6 +56,7 @@ export class StrategyMultiSub {
 						5 * 60 * 1000,
 						sub.proxyProvider,
 						this.runtimeEnv,
+                        () => { if (this.outcome) this.outcome.staleCount++; },
 					);
 					const clashContent = result.content;
 					const subInfo = result.traffic || '';
@@ -59,9 +71,14 @@ export class StrategyMultiSub {
 						includeArea: sub.includeArea,
 					});
 
-					return { proxyList: appendProxyList, subInfo, flag: sub.flag };
+					if (this.outcome) this.outcome.successCount++;
+                    return { proxyList: appendProxyList, subInfo, flag: sub.flag };
 				} catch (error) {
-					logger.error({ url: sub.subscribe, error, userId: userId }, 'Failed to fetch subscription in strategy');
+					if (this.outcome) {
+                        this.outcome.failedCount++;
+                        this.outcome.failures.push(`来源 ${index + 1}: ${safeError(error)}`);
+                    }
+                    logger.error({ error: safeError(error), userId }, 'Failed to fetch subscription in strategy');
 					// 失败时不中断整体流程，返回空列表
 					return { proxyList: [], subInfo: '', flag: sub.flag };
 				}

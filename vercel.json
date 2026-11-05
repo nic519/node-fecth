@@ -5,5 +5,11 @@
       "*": false,
       "dev/260418_turso": true
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/internal/log-maintenance",
+      "schedule": "17 3 * * *"
+    }
+  ]
 }

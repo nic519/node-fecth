@@ -1,8 +1,6 @@
-import { and, desc, eq, gte } from 'drizzle-orm';
-
-import { logs } from '@/db/schema';
 import type { DbInstance } from '@/server/db';
-import { LogType, SUBSCRIPTION_REQUEST_LOG_MESSAGE } from '@/types/log';
+import { cleanupSubscriptionAnalytics } from '@/services/subscription-analytics-storage';
+export { ensureSubscriptionAnalytics, recordSubscriptionAccess, cleanupSubscriptionAnalytics } from '@/services/subscription-analytics-storage';
 import type {
   SubscriptionAnalyticsResult,
   SubscriptionIpHeartbeat,
@@ -62,6 +60,7 @@ function getRequestIp(headers: HeaderBag) {
     textHeader(headers, 'x-vercel-forwarded-for'),
     textHeader(headers, 'x-forwarded-for'),
     textHeader(headers, 'forwarded'),
+    textHeader(headers, 'cf-connecting-ip'),
   ];
 
   for (const candidate of candidates) {
@@ -248,16 +247,17 @@ export async function getSubscriptionAnalytics(
 ) {
   const now = options.now ?? new Date();
   const windowStart = new Date(now.getTime() - options.rangeDays * 24 * 60 * 60 * 1000);
-  const rows = await db
-    .select({ userId: logs.userId, meta: logs.meta, createdAt: logs.createdAt })
-    .from(logs)
-    .where(and(
-      eq(logs.type, LogType.SUBSCRIPTION_ACCESS),
-      eq(logs.message, SUBSCRIPTION_REQUEST_LOG_MESSAGE),
-      gte(logs.createdAt, windowStart.toISOString()),
-    ))
-    .orderBy(desc(logs.createdAt))
-    .limit(MAX_ACCESS_LOGS + 1);
+  await cleanupSubscriptionAnalytics(db);
+  const result = await db.$client.execute({
+    sql: `SELECT user_id, headers, created_at FROM subscription_access
+      WHERE created_at >= ? ORDER BY created_at DESC LIMIT ?`,
+    args: [windowStart.toISOString(), MAX_ACCESS_LOGS + 1],
+  });
+  const rows: AccessLogRow[] = result.rows.map((row) => ({
+    userId: row.user_id === null ? null : String(row.user_id),
+    meta: { headers: JSON.parse(String(row.headers)) },
+    createdAt: String(row.created_at),
+  }));
 
   return aggregateSubscriptionAccessLogs(rows.slice(0, MAX_ACCESS_LOGS), {
     now,

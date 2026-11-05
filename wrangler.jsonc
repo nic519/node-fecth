@@ -1,6 +1,7 @@
 {
   "name": "node-fetch",
-  "main": ".open-next/worker.js",
+  "main": "worker.js",
+  "triggers": { "crons": ["17 * * * *"] },
   "assets": {
     "directory": ".open-next/assets"
   },

@@ -12,11 +12,11 @@ export const AdminLogsQuerySchema = z.object({
 	/**
 	 * 每页条数
 	 */
-	pageSize: z.coerce.number().int().positive().optional(),
+	pageSize: z.coerce.number().int().positive().max(100).optional(),
 	/**
 	 * 日志级别过滤
 	 */
-	level: z.enum(['info', 'warn', 'error', 'audit']).optional(),
+	level: z.enum(['info', 'warn', 'error', 'audit', 'problem']).optional(),
 	/**
 	 * 日志类型过滤，如 user_create, user_delete 等
 	 */
@@ -28,11 +28,11 @@ export const AdminLogsQuerySchema = z.object({
 	/**
 	 * 开始时间过滤 (ISO 8601)
 	 */
-	startTime: z.string().optional(),
+	startTime: z.string().datetime({ offset: true }).optional(),
 	/**
 	 * 结束时间过滤 (ISO 8601)
 	 */
-	endTime: z.string().optional(),
+	endTime: z.string().datetime({ offset: true }).optional(),
 	/**
 	 * 按时间排序方向，默认 desc（最新在前）
 	 */

@@ -3,8 +3,6 @@ import { ClashProxyFilter } from '@/modules/yamlMerge/filters/clashProxyFilter';
 import { ClashRuleFilter } from '@/modules/yamlMerge/filters/clashRuleFilter';
 import { ClashRuleOverride } from '@/modules/yamlMerge/filters/clashRuleOverride';
 import { YamlMergeFactory } from '@/modules/yamlMerge/yamlMergeFactory';
-import { createLogService } from '@/services/log-service';
-import { LogType } from '@/types/log';
 import { UserConfig } from '@/types/api-schemas';
 import { SubscribeParamsValidator } from '@/types/request/url-params.types';
 import { RouteHandler } from '@/types/routes.types';
@@ -38,8 +36,6 @@ export class ClashHandler implements RouteHandler {
 		const url = new URL(request.url);
 		const userConfig: UserConfig = params!.userConfig;
 		const uid = params?.uid || url.searchParams.get('uid');
-		const logger = createLogService();
-		const startTime = Date.now();
 
 		try {
 			const queryParams = SubscribeParamsValidator.parseParams(url);
@@ -47,9 +43,10 @@ export class ClashHandler implements RouteHandler {
 			const yamlMerge = new YamlMergeFactory(userConfig, {
 				uid,
 				env: resolveRuntimeEnv(),
+                outcome: params?.outcome,
 			});
 			// 获取合并后的 YAML 对象和性能计时数据
-			const { yamlContent: yamlObj, subInfo, timings } = await yamlMerge.generate();
+			const { yamlContent: yamlObj, subInfo } = await yamlMerge.generate();
 
 			// 处理用户干预（过滤、覆盖等），直接操作对象
 			this._processUserIntervention(yamlObj, userConfig, request);
@@ -60,24 +57,10 @@ export class ClashHandler implements RouteHandler {
 			// 添加头部注释信息
 			finalYamlString = await this._addRemark(finalYamlString, userConfig, uid, request);
 
-			const totalDuration = Date.now() - startTime;
-
-			// 记录详细的性能日志
-			void logger.log({
-				level: 'info',
-				type: LogType.SUBSCRIPTION_ACCESS,
-				message: '订阅生成成功',
-				userId: uid,
-				meta: {
-					url: request.url,
-					timings: {
-						...timings,
-						total: totalDuration
-					},
-					subInfo,
-					contentLength: finalYamlString.length
-				}
-			});
+            if (params?.meta) {
+                params.meta.nodeCount = Array.isArray(yamlObj.proxies) ? yamlObj.proxies.length : 0;
+                params.meta.contentLength = new TextEncoder().encode(finalYamlString).length;
+            }
 
 			return new Response(finalYamlString, {
 				status: 200,
@@ -86,19 +69,7 @@ export class ClashHandler implements RouteHandler {
 		} catch (error: unknown) {
 			console.error('ClashHandler handle error:', safeError(error));
 
-			void logger.log({
-				level: 'error',
-				type: LogType.SUBSCRIPTION_ACCESS,
-				message: '订阅生成失败',
-				userId: uid,
-				meta: {
-					url: request.url,
-					error: safeError(error),
-					timings: {
-						total: Date.now() - startTime
-					}
-				}
-			});
+            if (params?.meta) params.meta.error = safeError(error);
 
 			return new Response(error instanceof Error ? error.message : '处理订阅时发生错误', { status: 500 });
 		}
@@ -145,59 +116,6 @@ export class ClashHandler implements RouteHandler {
 				const configUrl = `${urlObj.origin}/config?uid=${uid}&token=${config.accessToken}`;
 				remark += `# 订阅管理地址\n# ${configUrl}\n\n`;
 			} catch {
-			}
-		}
-
-		if (uid) {
-			try {
-				const logger = createLogService();
-				// 查询最近的错误或警告日志 (最近 10 分钟)
-				const startTime = new Date(Date.now() - 10 * 60 * 1000);
-				const logs = await logger.queryLogs({
-					userId: uid,
-					limit: 10,
-					startTime,
-					level: 'warn' // 获取 warn 及以上级别，但目前 LogService 似乎只支持精确匹配，这里先只查 warn，或者我们修改 LogService 支持数组
-				});
-
-				// 由于 LogService.queryLogs 目前只支持单个 level，我们分别查询 error 和 warn
-				// 或者我们修改 queryLogs 方法。为了最小化改动，这里简单查询一下最近的 error 和 warn
-				
-				const errorLogs = await logger.queryLogs({
-					userId: uid,
-					limit: 5,
-					startTime,
-					level: 'error'
-				});
-				
-				const warnLogs = await logger.queryLogs({
-					userId: uid,
-					limit: 5,
-					startTime,
-					level: 'warn'
-				});
-
-				const allLogs = [...errorLogs.data, ...warnLogs.data].sort((a, b) => 
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-				);
-
-				if (allLogs.length > 0) {
-					remark += `# 最近的异常日志 (Last 10 min):\n`;
-					for (const log of allLogs) {
-						const time = new Date(log.createdAt).toLocaleTimeString();
-						let msg = log.message;
-						if (log.meta && typeof log.meta === 'object') {
-							const meta = log.meta as Record<string, unknown>;
-							if (meta.url) msg += ` URL: ${meta.url}`;
-							if (meta.error) msg += ` Error: ${meta.error}`;
-						}
-						remark += `# [${time}] [${log.level.toUpperCase()}] ${msg}\n`;
-					}
-					remark += `\n`;
-				}
-
-			} catch (e) {
-				console.error('Failed to add log remarks:', e);
 			}
 		}
 

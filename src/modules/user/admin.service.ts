@@ -234,12 +234,12 @@ export class AdminService {
 	private async logAdminOperation(operation: AdminOperation): Promise<void> {
 		const level: LogLevel = operation.result === 'error' ? 'error' : 'audit';
 
-		await this.logService.log({
+		this.logService.record({
 			level,
 			type: operation.operation,
 			message: operation.details || operation.operation,
-			userId: operation.adminId,
-			meta: operation
+			userId: operation.targetUserId,
+			meta: { actorId: operation.adminId, result: operation.result, targetId: operation.targetUserId }
 		});
 	}
 
@@ -257,12 +257,13 @@ export class AdminService {
 		return logs.data.map((log: Log) => {
 			const meta = (log.meta as Record<string, unknown>) || {};
 			return {
+				...meta,
 				timestamp: log.createdAt,
 				operation: log.type,
-				adminId: log.userId || '',
-				result: log.level === 'error' ? 'error' : 'success',
+				adminId: typeof meta.actorId === 'string' ? meta.actorId : typeof meta.adminId === 'string' ? meta.adminId : '',
+				targetUserId: typeof meta.targetId === 'string' ? meta.targetId : log.userId || undefined,
+				result: log.level === 'error' || ['error', 'failed', 'rejected'].includes(String(meta.result)) ? 'error' : 'success',
 				details: log.message,
-				...meta
 			} as AdminOperation;
 		});
 	}

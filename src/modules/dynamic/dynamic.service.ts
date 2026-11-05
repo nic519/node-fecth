@@ -185,6 +185,7 @@ export class DynamicService {
 		ttlMs: number = 5 * 60 * 1000,
 		proxyProvider?: SubscriptionProxyProvider,
 		runtimeEnv?: Env,
+		onStale?: () => void,
 	): Promise<DynamicContent> {
 		const cached = await this.getByUrl(url);
 
@@ -207,6 +208,7 @@ export class DynamicService {
 			// If fetch fails but we have stale cache, return it as fallback
 			if (cached) {
 				logger.warn({ url, error }, 'Fetch failed: returning stale cache as fallback');
+				onStale?.();
 				return cached;
 			}
 			throw error;

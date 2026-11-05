@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { LogEvent, LogLevel, LogType } from '@/types/log';
 import { formatDateTime } from '@/utils/trafficUtils';
 import { logApi } from '@/services/log-api';
@@ -43,64 +43,60 @@ export function LogViewer() {
   // Filters
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
-  const [level, setLevel] = useState<LogLevel | 'all'>('all');
+  const [level, setLevel] = useState<LogLevel | 'all' | 'problem'>('problem');
   const [type, setType] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedLog, setSelectedLog] = useState<LogEvent | null>(null);
 
-  const fetchLogs = useCallback(async (overrides?: Partial<{ page: number; level: LogLevel | 'all'; type: string; userId: string; order: 'asc' | 'desc' }>) => {
-    const effectivePage = overrides?.page ?? page;
-    const effectiveLevel = overrides?.level ?? level;
-    const effectiveType = overrides?.type ?? type;
-    const effectiveUserId = overrides?.userId ?? userId;
-    const effectiveOrder = overrides?.order ?? order;
+  const [timeRange, setTimeRange] = useState('7');
+  const [error, setError] = useState<string | null>(null);
+  const requestSequence = useRef(0);
 
+  const fetchLogs = useCallback(async () => {
+    const sequence = ++requestSequence.current;
     setLoading(true);
+    setError(null);
     try {
       const response = await logApi.getLogs({
-        page: effectivePage,
-        pageSize,
-        level: effectiveLevel === 'all' ? undefined : effectiveLevel,
-        type: effectiveType || undefined,
-        userId: effectiveUserId || undefined,
-        order: effectiveOrder,
+        page, pageSize,
+        level: level === 'all' ? undefined : level,
+        type: type || undefined,
+        userId: userId.trim() || undefined,
+        startTime: timeRange === 'all' ? undefined : new Date(Date.now() - Number(timeRange) * 86400000).toISOString(),
+        order,
       });
-
-      if (response.code === 0) {
-        setLogs(response.data.data);
-        setTotal(response.data.total);
-      }
-    } catch (error) {
-      console.error('Failed to fetch logs:', error);
+      if (sequence !== requestSequence.current) return;
+      if (response.code !== 0) throw new Error('日志加载失败，请重试');
+      setLogs(response.data.data);
+      setTotal(response.data.total);
+    } catch {
+      if (sequence !== requestSequence.current) return;
+      setLogs([]);
+      setTotal(0);
+      setError('日志加载失败，请重试');
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
-  }, [page, pageSize, level, type, userId, order]);
+  }, [page, pageSize, level, type, userId, order, timeRange]);
 
   useEffect(() => {
-    fetchLogs();
+    void fetchLogs();
+    return () => { requestSequence.current += 1; };
   }, [fetchLogs]);
 
-  const handleSearch = () => {
-    setPage(1);
-    fetchLogs({ page: 1 });
-  };
-
-  // 时间排序在服务端完成（覆盖全部记录，不只是当前页），切换后回到第一页。
   const toggleOrder = () => {
-    const next = order === 'desc' ? 'asc' : 'desc';
-    setOrder(next);
+    setOrder(order === 'desc' ? 'asc' : 'desc');
     setPage(1);
-    fetchLogs({ page: 1, order: next });
   };
 
   const handleReset = () => {
     setPage(1);
-    setLevel('all');
+    setLevel('problem');
     setType('');
     setUserId('');
-    fetchLogs({ page: 1, level: 'all', type: '', userId: '' });
+    setTimeRange('7');
+    setOrder('desc');
   };
 
   const handleCopy = async (text: string, successMessage: string) => {
@@ -113,7 +109,7 @@ export function LogViewer() {
   };
 
   const totalPages = Math.ceil(total / pageSize);
-  const hasFilters = level !== 'all' || !!type || !!userId;
+  const hasFilters = level !== 'problem' || !!type || !!userId || timeRange !== '7' || order !== 'desc';
 
   return (
     <>
@@ -153,6 +149,7 @@ export function LogViewer() {
             }
           >
             <div className="space-y-6">
+              <p className="text-xs leading-relaxed text-muted-foreground">每个用户：成功日志保留 3 天 / 100 条，异常 14 天 / 100 条，审计 30 天 / 100 条。全局系统日志保留 7 天 / 1000 条；天数或条数先到即清理。</p>
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm text-muted-foreground flex items-center gap-2">
                   <ListFilter className="h-3.5 w-3.5 text-primary" />
@@ -167,11 +164,12 @@ export function LogViewer() {
                     <Activity className="h-3.5 w-3.5 text-cyan-500" />
                     日志级别
                   </label>
-                  <Select value={level} onValueChange={(v) => setLevel(v as LogLevel | 'all')}>
+                  <Select value={level} onValueChange={(v) => { setLevel(v as LogLevel | 'all' | 'problem'); setPage(1); }}>
                     <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="日志级别" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="problem">异常（警告 / 错误）</SelectItem>
                       <SelectItem value="all">全部级别</SelectItem>
                       <SelectItem value="info" className="text-blue-500">Info</SelectItem>
                       <SelectItem value="warn" className="text-amber-500">Warn</SelectItem>
@@ -186,8 +184,9 @@ export function LogViewer() {
                     <Tag className="h-3.5 w-3.5 text-fuchsia-500" />
                     事件类型
                   </label>
-                  <Select value={type} onValueChange={(v) => {
+                  <Select value={type || 'all'} onValueChange={(v) => {
                     setType(v === 'all' ? '' : v);
+                    setPage(1);
                   }}>
                     <SelectTrigger className="w-full bg-muted/30 border-border/60 focus:ring-primary/20 focus:border-primary/50 transition-all">
                       <SelectValue placeholder="全部类型" />
@@ -204,6 +203,23 @@ export function LogViewer() {
                 </div>
 
                 <div className="space-y-2">
+                  <label htmlFor="log-legacy-type" className="text-sm text-muted-foreground">自定义 / 历史事件类型</label>
+                  <Input id="log-legacy-type" value={type} placeholder="输入精确类型" onChange={(e) => { setType(e.target.value); setPage(1); }} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">时间范围</label>
+                  <Select value={timeRange} onValueChange={(value) => { setTimeRange(value); setPage(1); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">最近 24 小时</SelectItem>
+                      <SelectItem value="7">最近 7 天</SelectItem>
+                      <SelectItem value="14">最近 14 天</SelectItem>
+                      <SelectItem value="30">最近 30 天</SelectItem>
+                      <SelectItem value="all">全部保留记录</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <User className="h-3.5 w-3.5 text-amber-500" />
                     用户ID
@@ -211,8 +227,7 @@ export function LogViewer() {
                   <Input
                     placeholder="输入用户ID..."
                     value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    onChange={(e) => { setUserId(e.target.value); setPage(1); }}
                     className="bg-muted/30 border-border/60 focus-visible:ring-primary/20 focus-visible:border-primary/50 transition-all"
                   />
                 </div>
@@ -223,6 +238,7 @@ export function LogViewer() {
         content={
           <Card className="surface flex min-h-[600px] flex-col">
             <CardContent className="pt-4 flex-1 flex flex-col">
+              {error && <div role="alert" className="mb-3 text-sm text-destructive">{error}</div>}
               <TooltipProvider>
                 <div className="flex-1 overflow-auto">
                   <Table>
@@ -293,7 +309,7 @@ export function LogViewer() {
                         </TableRow>
                       ) : (
                         logs.map((log) => {
-                          const metaUrl = typeof log.meta?.url === 'string' ? log.meta.url : undefined;
+                          const result = typeof log.meta?.result === 'string' ? log.meta.result : undefined;
                           return (
                             <TableRow
                               key={log.id}
@@ -319,11 +335,11 @@ export function LogViewer() {
                                     <div className="truncate text-sm text-foreground/80 group-hover:text-foreground transition-colors" title={log.message}>
                                       {log.message}
                                     </div>
-                                    {metaUrl && (
+                                    {result && (
                                       <div className="flex flex-col gap-1 mt-1">
-                                        {/* Extract and display URL from meta if available */}
+                                        {/* Display the request outcome */}
                                         <div className="text-xs text-blue-500/80 font-mono truncate opacity-80 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                          {metaUrl}
+                                          {result}
                                         </div>
                                       </div>
                                     )}
