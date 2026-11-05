@@ -1,6 +1,22 @@
 import { z } from 'zod';
 import { SubscriptionProxyProviderSchema } from '@/modules/user/user.schema';
 
+export const DynamicHistoryCursorSchema = z.object({
+	id: z.number().int().positive(),
+	fetchedAtMs: z.number().int().nullable(),
+});
+
+export type DynamicHistoryCursor = z.infer<typeof DynamicHistoryCursorSchema>;
+
+export type DynamicHistoryPage = {
+	records: (DynamicHistoryCursor & {
+		remainingBytes: number | null;
+		totalBytes: number | null;
+		expiresAtMs: number | null;
+	})[];
+	nextCursor: DynamicHistoryCursor | null;
+};
+
 /**
  * 动态摘要 Schema
  * 用于描述动态获取的订阅信息摘要

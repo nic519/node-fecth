@@ -1,19 +1,23 @@
 import { getServerDb } from '@/server/db';
-import { dynamic } from '@/db/schema';
+import { ensureDynamicHistoryTable } from '@/db/dynamic-migrations';
+import { dynamic, dynamicHistory } from '@/db/schema';
 import { formatDate } from '@/utils/dateUtils';
 import { hashUrl } from '@/utils/hashUtils';
 import { httpClient } from '@/utils/http/client';
 import { safeError, safeString } from '@/utils/logHelper';
 import { logger } from '@/utils/request/network.config';
-import { inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
 import type { SubscriptionProxyProvider } from '@/types/api-schemas';
 import { CommonUtils } from '@/utils/commonUtils';
 import type { DynamicSummary } from '@/types/api-schemas';
 import { resolveSubscriptionFetchUrl } from '@/modules/user/subscription-proxy';
+import type { DynamicHistoryCursor, DynamicHistoryPage } from '@/types/schema/dynamic';
+import { parseTrafficSnapshot } from '@/utils/trafficUtils';
 
 type DynamicRow = typeof dynamic.$inferSelect;
+const HISTORY_PAGE_SIZE = 50;
 
 export interface DynamicContent {
 	id: string;
@@ -45,6 +49,7 @@ export class DynamicService {
 			});
 
 			let content = await response.text();
+			const fetchedAt = new Date();
 
 			// 自动转换 SSR 订阅格式为 Clash YAML 格式
 			if (SSRToClashConverter.isValidProtocol(content)) {
@@ -59,33 +64,32 @@ export class DynamicService {
 
 			const traffic = response.headers.get('Subscription-Userinfo') || null;
 			const id = await hashUrl(cleanUrl);
-			const now = new Date();
-			const formattedDate = formatDate(now);
-
-			await this.db.insert(dynamic).values({
+			const updatedAt = formatDate(fetchedAt);
+			const snapshot = { traffic, updatedAt };
+			const latest = {
 				id,
 				url: cleanUrl,
 				content,
-				traffic,
-				updatedAt: formattedDate,
-			}).onConflictDoUpdate({
-				target: dynamic.id,
-				set: {
-					content,
-					traffic,
-					updatedAt: formattedDate,
-				},
-			});
+				...snapshot,
+			};
+
+			await ensureDynamicHistoryTable(this.db);
+			await this.db.batch([
+				this.db.insert(dynamic).values(latest).onConflictDoUpdate({
+					target: dynamic.id,
+					set: { content, ...snapshot },
+				}),
+				this.db.insert(dynamicHistory).values({
+					dynamicId: id,
+					fetchedAtMs: fetchedAt.getTime(),
+					...snapshot,
+					...parseTrafficSnapshot(traffic),
+				}),
+			]);
 
 			logger.info({ id, url: cleanUrl }, 'Dynamic content saved to database');
 
-			return {
-				id,
-				url: cleanUrl,
-				content,
-				traffic,
-				updatedAt: formattedDate,
-			};
+			return latest;
 		} catch (error: unknown) {
 			// ky 抛出的错误包含了详细信息
 			const safeMsg = safeError(error);
@@ -94,6 +98,47 @@ export class DynamicService {
 			logger.error({ url: cleanUrl, error: safeMsg, stack: safeStack }, 'Failed to fetch and save dynamic content');
 			throw error;
 		}
+	}
+
+	static async getHistory(url: string, cursor?: DynamicHistoryCursor): Promise<DynamicHistoryPage> {
+		const cleanUrl = CommonUtils.normalizeUrl(url);
+		const ids = await Promise.all([...new Set([url, cleanUrl])].map(hashUrl));
+		await ensureDynamicHistoryTable(this.db);
+
+		const { dynamicId, fetchedAtMs, id } = dynamicHistory;
+		const older = cursor && (cursor.fetchedAtMs === null
+			? and(isNull(fetchedAtMs), lt(id, cursor.id))
+			: or(
+				lt(fetchedAtMs, cursor.fetchedAtMs),
+				and(eq(fetchedAtMs, cursor.fetchedAtMs), lt(id, cursor.id)),
+				isNull(fetchedAtMs),
+			));
+		const rows = await this.db.select().from(dynamicHistory)
+			.where(and(inArray(dynamicId, ids), older))
+			.orderBy(desc(fetchedAtMs), desc(id))
+			.limit(HISTORY_PAGE_SIZE + 1);
+
+		const records = rows.slice(0, HISTORY_PAGE_SIZE).map((row) => {
+			const legacy = row.traffic && (
+				row.uploadBytes === null || row.downloadBytes === null || row.totalBytes === null || row.expiresAtMs === null
+			) ? parseTrafficSnapshot(row.traffic) : null;
+			const upload = row.uploadBytes ?? legacy?.uploadBytes ?? null;
+			const download = row.downloadBytes ?? legacy?.downloadBytes ?? null;
+			const totalBytes = row.totalBytes ?? legacy?.totalBytes ?? null;
+			return {
+				id: row.id,
+				fetchedAtMs: row.fetchedAtMs,
+				remainingBytes: upload === null || download === null || totalBytes === null
+					? null : Math.max(0, totalBytes - upload - download),
+				totalBytes,
+				expiresAtMs: row.expiresAtMs ?? legacy?.expiresAtMs ?? null,
+			};
+		});
+		const last = records.at(-1);
+		return {
+			records,
+			nextCursor: rows.length > HISTORY_PAGE_SIZE && last ? { id: last.id, fetchedAtMs: last.fetchedAtMs } : null,
+		};
 	}
 
 	/**

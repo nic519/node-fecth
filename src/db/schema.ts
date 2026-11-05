@@ -1,7 +1,7 @@
 import { DynamicUserConfigSchema } from '@/modules/user/user.schema';
 import type { VisualTemplateModel } from '@/app/admin/templates/visual-template/types';
 import { sql } from 'drizzle-orm';
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import z from 'zod';
 
 /**
@@ -95,6 +95,20 @@ export const dynamic = sqliteTable('dynamic', {
 		.notNull()
 		.default(sql`(datetime('now'))`),
 });
+
+export const dynamicHistory = sqliteTable('dynamic_history', {
+	id: integer('id').primaryKey(),
+	dynamicId: text('dynamic_id').notNull(),
+	traffic: text('traffic'),
+	updatedAt: text('updated_at').notNull(),
+	fetchedAtMs: integer('fetched_at_ms'),
+	uploadBytes: integer('upload_bytes'),
+	downloadBytes: integer('download_bytes'),
+	totalBytes: integer('total_bytes'),
+	expiresAtMs: integer('expires_at_ms'),
+}, (table) => [
+	index('dynamic_history_source_fetched_idx').on(table.dynamicId, table.fetchedAtMs, table.id),
+]);
 
 /**
  * 日志表

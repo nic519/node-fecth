@@ -1,6 +1,7 @@
 import { apiClient } from './api-client';
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import type { UserConfig } from '@/types/user-config';
+import type { DynamicHistoryCursor, DynamicHistoryPage } from '@/types/schema/dynamic';
 
 export const adminService = {
 	/**
@@ -9,6 +10,10 @@ export const adminService = {
 	 */
 	getUsers: (superToken: string) => {
 		return apiClient.get<{ users: UserAdminConfig[] }>('/admin/users', { superToken });
+	},
+
+	getSourceHistory: (superToken: string, url: string, cursor?: DynamicHistoryCursor) => {
+		return apiClient.post<DynamicHistoryPage>('/admin/sources/history', { url, cursor }, { superToken });
 	},
 
 	/**

@@ -31,6 +31,7 @@ import { adminService } from '@/services/admin-api';
 import { copyToClipboard } from '@/utils/configUtils';
 import { formatTraffic, parseTrafficInfo, type ParsedTrafficInfo } from '@/utils/trafficUtils';
 import { isExpiringTraffic, isTightTraffic } from '@/app/admin/users/utils/userUtils';
+import { SourceHistory } from './SourceHistory';
 
 type SourceReference = { uid: string; name: string; stat: SubscriptionStat };
 type SourceAggregate = { url: string; names: string[]; references: SourceReference[] };
@@ -425,6 +426,7 @@ export function SourcesClient({ superToken }: { superToken: string }) {
                     );
                   })()}
                 </section>
+                <SourceHistory key={selectedSource.url} url={selectedSource.url} superToken={superToken} />
                 <section>
                   <h3 className="mb-3 text-sm font-semibold">全部引用用户（{selectedSource.references.length}）</h3>
                   <div className="space-y-2">

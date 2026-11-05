@@ -12,7 +12,7 @@ export interface ParsedTrafficInfo {
 export const formatTraffic = (bytes: number): string => {
 	if (bytes === 0) return '0 B';
 	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
@@ -30,6 +30,26 @@ export const getTrafficBarColor = (usagePercent: number): string => {
 	if (usagePercent > 70) return 'bg-yellow-500';
 	return 'bg-green-500';
 };
+
+export function parseTrafficSnapshot(traffic: string | null) {
+	const fields = new Map(traffic?.split(';').map((pair) => {
+		const [key, value, extra] = pair.split('=');
+		return [key.trim().toLowerCase(), extra === undefined ? value?.trim() : undefined] as const;
+	}));
+	const readInteger = (key: string): number | null => {
+		const raw = fields.get(key);
+		if (!raw || !/^\d+$/.test(raw)) return null;
+		const value = Number(raw);
+		return Number.isSafeInteger(value) ? value : null;
+	};
+	const expiry = readInteger('expire');
+	return {
+		uploadBytes: readInteger('upload'),
+		downloadBytes: readInteger('download'),
+		totalBytes: readInteger('total'),
+		expiresAtMs: expiry && expiry <= 8_640_000_000_000 ? expiry * 1000 : null,
+	};
+}
 
 export const parseTrafficInfo = (traffic: string | null | undefined): ParsedTrafficInfo | null => {
 	if (!traffic) return null;
