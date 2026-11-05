@@ -30,6 +30,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Filter, Clock, AlertTriangle, Tag, MessageSquare, User, Copy, Code, ListFilter, Activity, ArrowUp, ArrowDown } from "lucide-react";
 import { AdminSidePanel } from '@/components/admin/AdminSidePanel';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { LogDetailsDialog } from './LogDetailsDialog';
 
 interface LogViewerProps {
@@ -271,14 +273,18 @@ export function LogViewer({ superToken }: LogViewerProps) {
                     </TableHeader>
                     <TableBody>
                       {loading && logs.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="h-64 text-center">
-                            <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
-                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                              <span className="text-sm font-medium animate-pulse">正在加载日志数据...</span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        Array.from({ length: 8 }, (_, row) => (
+                          <TableRow key={row} className="border-border/40" aria-hidden>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-28" /></TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-12 rounded-md" /></TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-20" /></TableCell>
+                            <TableCell className="max-w-[360px] py-2">
+                              <Skeleton className={cn('h-4', row % 2 ? 'w-64' : 'w-48')} />
+                              {row % 3 === 0 && <Skeleton className="mt-1.5 h-3 w-40" />}
+                            </TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-3.5 w-14" /></TableCell>
+                          </TableRow>
+                        ))
                       ) : logs.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="h-64 text-center text-muted-foreground">

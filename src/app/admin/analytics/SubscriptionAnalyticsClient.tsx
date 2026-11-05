@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { cn } from '@/lib/utils';
 import { subscriptionAnalyticsApi } from '@/services/subscription-analytics-api';
@@ -94,6 +95,90 @@ function Metric({ label, value, hint }: { label: string; value: number; hint: st
   );
 }
 
+/** 侧栏订阅行骨架：状态点 + 名称/时间行 + IP/请求数行，对齐 UserRow。 */
+function UserRowSkeleton() {
+  return (
+    <div className="border-b border-border/50 px-4 py-3.5 last:border-b-0" aria-hidden>
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-2.5 w-2.5 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-14" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-4 w-4 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+/** 详情面板骨架：头部统计 + 分布条形 + IP 心跳行（含 24 格心跳条），对齐 SelectedUserPanel。 */
+function PanelSkeleton() {
+  return (
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card" aria-hidden>
+      <div className="border-b border-border/60 px-5 py-5 sm:px-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2.5">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <div className="flex gap-5">
+            <Skeleton className="h-10 w-14" />
+            <Skeleton className="h-10 w-14" />
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-7 border-b border-border/60 bg-muted/20 px-5 py-5 sm:grid-cols-2 sm:px-6">
+        {[0, 1].map((column) => (
+          <div key={column}>
+            <Skeleton className="h-3 w-24" />
+            <div className="mt-3 space-y-2.5">
+              {[0, 1, 2].map((row) => (
+                <div key={row} className="grid grid-cols-[minmax(90px,1fr)_2fr_28px] items-center gap-3">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-1.5 w-full rounded-full" />
+                  <Skeleton className="h-3 w-5 justify-self-end" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      {[0, 1, 2].map((row) => (
+        <div key={row} className="grid gap-4 border-b border-border/50 px-5 py-4 last:border-b-0 lg:grid-cols-[minmax(200px,0.9fr)_minmax(260px,1.5fr)_130px_110px] lg:items-center">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="h-2.5 w-2.5 rounded-full" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-10 rounded-full" />
+            </div>
+            <Skeleton className="ml-5 h-3 w-36" />
+            <Skeleton className="ml-5 h-3 w-24" />
+          </div>
+          <div className="grid grid-cols-[repeat(24,minmax(3px,1fr))] gap-0.5">
+            {Array.from({ length: 24 }, (_, index) => (
+              <Skeleton key={index} className="h-6 rounded-[2px]" style={{ opacity: 0.35 + ((index * 7 + row * 3) % 5) * 0.1 }} />
+            ))}
+          </div>
+          <div className="space-y-2 lg:mx-auto">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <div className="space-y-2 lg:ml-auto">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function UserRow({
   user,
   selected,
@@ -102,8 +187,7 @@ function UserRow({
   user: SubscriptionUserActivity;
   selected: boolean;
   onSelect: () => void;
-}) {
-  return (
+}) {  return (
     <button
       type="button"
       onClick={onSelect}
@@ -512,8 +596,8 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
             </div>
             <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
               {loading && !data ? (
-                <div className="flex h-48 items-center justify-center text-muted-foreground">
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                <div aria-label="正在加载订阅列表">
+                  {Array.from({ length: 6 }, (_, index) => <UserRowSkeleton key={index} />)}
                 </div>
               ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
@@ -530,7 +614,9 @@ export function SubscriptionAnalyticsClient({ superToken }: { superToken: string
             </div>
           </aside>
 
-          {selectedUser ? (
+          {loading && !data ? (
+            <PanelSkeleton />
+          ) : selectedUser ? (
             <SelectedUserPanel
               user={selectedUser}
               windowStart={data?.windowStart ?? new Date().toISOString()}

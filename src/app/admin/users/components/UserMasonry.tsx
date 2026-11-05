@@ -1,8 +1,8 @@
 'use client';
 
-import Loading from '@/components/Loading';
 import type { UserAdminConfig } from '@/modules/user/admin.schema';
 import { UserCard } from './UserCard';
+import { UserMasonrySkeleton } from './UserMasonrySkeleton';
 
 export interface UserMasonryProps {
 	users: UserAdminConfig[];
@@ -16,11 +16,7 @@ export interface UserMasonryProps {
  */
 export function UserMasonry({ users, loading, error, onUserAction }: UserMasonryProps) {
 	if (loading) {
-		return (
-			<div className="surface flex items-center justify-center py-20">
-				<Loading message="正在加载用户数据..." size="md" />
-			</div>
-		);
+		return <UserMasonrySkeleton />;
 	}
 
 	if (users.length === 0 && !error) {

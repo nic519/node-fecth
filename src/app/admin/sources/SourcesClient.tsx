@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { cn } from '@/lib/utils';
 import type { SubscriptionStat } from '@/modules/user/admin.schema';
@@ -105,6 +106,38 @@ const attentionRank = (traffic: ParsedTrafficInfo | null) => {
   if (isExpiringTraffic(traffic)) return 1;
   return 3;
 };
+
+/** 表格骨架行：七列形状逐一对应真实行（名称/地址/用户、用量条、剩余、到期、更新、状态）。 */
+function SourceTableSkeletonRows() {
+  return (
+    <>
+      {Array.from({ length: 6 }, (_, row) => (
+        <tr key={row} className="border-b border-border/50 last:border-b-0" aria-hidden>
+          <td className="max-w-72 px-5 py-3.5">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-36" />
+              {row % 3 === 0 && <Skeleton className="h-5 w-16 rounded-full" />}
+            </div>
+            <Skeleton className="mt-1.5 h-3 w-52" />
+            <Skeleton className="mt-1.5 h-3 w-28" />
+          </td>
+          <td className="min-w-44 px-3 py-3.5">
+            <div className="flex items-baseline justify-between gap-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3 w-8" />
+            </div>
+            <Skeleton className="mt-2 h-1 w-full rounded-full" />
+          </td>
+          <td className="px-3 py-3.5"><Skeleton className="h-4 w-14" /></td>
+          <td className="px-3 py-3.5"><Skeleton className="h-3 w-20" /></td>
+          <td className="px-3 py-3.5"><Skeleton className="h-3 w-16" /></td>
+          <td className="px-3 py-3.5"><Skeleton className="h-3 w-12" /></td>
+          <td className="px-3 py-3.5"><Skeleton className="h-4 w-4 rounded-full" /></td>
+        </tr>
+      ))}
+    </>
+  );
+}
 
 function SortableTh({
   label,
@@ -337,9 +370,10 @@ export function SourcesClient({ superToken }: { superToken: string }) {
                     </tr>
                   );
                 })}
-                {!result.length && (
+                {loading && <SourceTableSkeletonRows />}
+                {!loading && !result.length && (
                   <tr><td colSpan={7} className="px-5 py-14 text-center text-sm text-muted-foreground">
-                    {loading ? '正在加载…' : '没有匹配的订阅源，调整搜索或状态筛选'}
+                    没有匹配的订阅源，调整搜索或状态筛选
                   </td></tr>
                 )}
               </tbody>
