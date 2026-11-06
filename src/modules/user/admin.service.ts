@@ -5,6 +5,7 @@ import { TrafficInfo, type UserConfig } from './user.schema';
 import { UserService } from './user.service';
 import { buildSubscriptionListFromConfig } from './subscription-list';
 import { DynamicService } from '@/modules/dynamic/dynamic.service';
+import { predictExhaustion, type ExhaustionPrediction } from '@/utils/usageCurve';
 import type { DbInstance } from '@/server/db';
 import { LogService } from '@/services/log-service';
 import { LogLevel } from '@/types/log';
@@ -62,6 +63,19 @@ export class AdminService {
 				dynamicData.forEach((d: InferSelectModel<typeof dynamic>) => dynamicMap.set(d.url, d));
 			}
 
+			// 批量读取历史曲线并预测每个订阅源的流量耗尽时间与消耗速率
+			const predictionMap = new Map<string, ExhaustionPrediction | null>();
+			if (allUrls.size > 0) {
+				try {
+					const seriesMap = await DynamicService.getUsageSeriesBatch(Array.from(allUrls));
+					seriesMap.forEach((series, url) => {
+						predictionMap.set(url, predictExhaustion(series.points));
+					});
+				} catch (error) {
+					console.error('批量预测流量耗尽时间失败:', error);
+				}
+			}
+
 			const summaries: UserAdminConfig[] = [];
 
 			for (const user of userList) {
@@ -79,12 +93,16 @@ export class AdminService {
 				subscriptions.forEach((sub, index) => {
                     if (sub.type === 'inline') return;
 					const d = dynamicMap.get(sub.subscribe);
+					const prediction = predictionMap.get(sub.subscribe) ?? null;
 					subscriptionStats.push({
 						url: sub.subscribe,
 						type: 'append',
 						name: sub.flag || `订阅源 ${index + 1}`,
 						traffic: d?.traffic || undefined,
-						lastUpdated: d?.updatedAt || undefined
+						lastUpdated: d?.updatedAt || undefined,
+						predictedExhaustionAtMs: prediction?.atMs ?? null,
+						consumptionRateBytesPerDay: prediction?.rateBytesPerDay ?? null,
+						predictionConfidence: prediction?.confidence ?? null,
 					});
 				});
 

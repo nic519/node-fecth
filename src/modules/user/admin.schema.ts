@@ -16,6 +16,12 @@ export interface SubscriptionStat {
 	traffic?: string;
 	// 动态缓存表记录的最后更新时间。
 	lastUpdated?: string;
+	// 按最近消耗速度预测的流量耗尽时间（毫秒时间戳）；数据不足时为 null。
+	predictedExhaustionAtMs?: number | null;
+	// 当前周期的估计消耗速率（字节/天）；数据不足或未在消耗时为 null。
+	consumptionRateBytesPerDay?: number | null;
+	// 预测置信度：数据点越多、时间跨度越长越可信；无预测时为 null。
+	predictionConfidence?: 'low' | 'medium' | 'high' | null;
 }
 
 /**

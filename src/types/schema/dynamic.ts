@@ -18,6 +18,26 @@ export type DynamicHistoryPage = {
 };
 
 /**
+ * 用量曲线数据点：一次成功拉取留下的剩余流量快照
+ */
+export interface UsageSeriesPoint {
+	/** 拉取时间（毫秒时间戳） */
+	t: number;
+	/** 剩余流量（字节） */
+	remainingBytes: number;
+	/** 总额度（字节） */
+	totalBytes: number;
+}
+
+/**
+ * 用量曲线序列：按时间升序，附带最近已知的到期时间
+ */
+export interface UsageSeries {
+	points: UsageSeriesPoint[];
+	expiresAtMs: number | null;
+}
+
+/**
  * 动态摘要 Schema
  * 用于描述动态获取的订阅信息摘要
  */

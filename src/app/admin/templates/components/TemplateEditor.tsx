@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, FileDown, Link, Clipboard, Pencil, Trash2, Layout } from 'lucide-react';
+import { Loader2, FileDown, Link, Clipboard, Layout } from 'lucide-react';
 import type { ConfigTemplate } from '@/types/user-config';
 import { TemplateVisualTools } from './TemplateVisualTools';
 import { isVisualTemplateContent } from '../visual-template/metadata';
@@ -22,8 +22,6 @@ interface TemplateEditorProps {
 	currentConfigContent: string;
 	yamlRevealLine?: number | null;
 	yamlRevealKey?: number;
-	onStartEdit: () => void;
-	onDeleteTemplate: () => void;
 	onUpdateTemplate: (field: keyof ConfigTemplate, value: any) => void;
 	onUpdateConfigContent: (content: string) => void;
 	onRevealProxyGroup?: (groupName: string) => void;
@@ -44,8 +42,6 @@ export function TemplateEditor({
 	currentConfigContent,
 	yamlRevealLine = null,
 	yamlRevealKey = 0,
-	onStartEdit,
-	onDeleteTemplate,
 	onUpdateTemplate,
 	onUpdateConfigContent,
 	onRevealProxyGroup,
@@ -109,31 +105,8 @@ export function TemplateEditor({
 					)}
 				</div>
 
-				{/* 右侧 - 操作按钮 */}
+				{/* 右侧 - 操作按钮（编辑/删除已移至左侧模板列表条目底部） */}
 				<div className="flex flex-wrap items-center gap-1">
-					{!isEditing && (
-						<>
-							<Button
-								onClick={onStartEdit}
-								size="sm"
-								className="mr-1"
-							>
-								<Pencil className="w-3.5 h-3.5 mr-1.5" />
-								编辑
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={onDeleteTemplate}
-								title="删除模板"
-								className="h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 mr-1 transition-colors"
-							>
-								<Trash2 className="w-4 h-4" />
-							</Button>
-							<div className="w-px h-4 bg-border/60 mx-1" />
-						</>
-					)}
-
 					<Button
 						variant="ghost"
 						size="icon"

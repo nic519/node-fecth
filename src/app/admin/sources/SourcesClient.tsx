@@ -11,6 +11,7 @@ import {
   CaretUpDown,
   CheckCircle,
   Copy,
+  Funnel,
   LinkSimple,
   MagnifyingGlass,
   UserCircle,
@@ -38,6 +39,96 @@ type SourceAggregate = { url: string; names: string[]; references: SourceReferen
 type SourceScope = 'all' | 'tight' | 'expiring' | 'expired' | 'missing';
 type SourceSortKey = 'attention' | 'usage' | 'remaining' | 'expiry' | 'updated' | 'refs';
 type SortDir = 'asc' | 'desc';
+
+const SCOPE_LABELS: Record<SourceScope, string> = {
+  all: '全部状态',
+  tight: '流量紧张',
+  expiring: '7 天内到期',
+  expired: '已过期',
+  missing: '流量未提供',
+};
+
+/**
+ * 表格顶部的悬停筛选条：收起时一行显示当前筛选摘要并吸附在顶部导航下方，
+ * 悬停 / 聚焦 / 点击展开为完整的搜索与范围控件。
+ */
+function SourceFilterBar({
+  search,
+  scope,
+  resultCount,
+  totalCount,
+  onSearchChange,
+  onScopeChange,
+}: {
+  search: string;
+  scope: SourceScope;
+  resultCount: number;
+  totalCount: number;
+  onSearchChange: (value: string) => void;
+  onScopeChange: (value: SourceScope) => void;
+}) {
+  // 点击展开兜底触屏等没有悬停的环境
+  const [pinnedOpen, setPinnedOpen] = useState(false);
+
+  return (
+    <div
+      className={cn(
+        'group sticky top-[104px] z-30 mt-4 rounded-xl border border-border/60 bg-card/80 backdrop-blur transition-shadow lg:top-[76px]',
+        'hover:shadow-md hover:shadow-black/5 focus-within:shadow-md focus-within:shadow-black/5',
+      )}
+    >
+      {/* 收起态摘要行：始终可见，点击可固定展开 */}
+      <button
+        type="button"
+        onClick={() => setPinnedOpen((open) => !open)}
+        aria-expanded={pinnedOpen}
+        className="flex min-h-11 w-full items-center gap-3 px-3.5 text-left text-xs text-muted-foreground"
+      >
+        <Funnel className="h-4 w-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate">
+          {search ? `搜索「${search}」` : '搜索'}
+          {' · '}{SCOPE_LABELS[scope]}
+        </span>
+        <span className="shrink-0 tabular-nums">{resultCount} / {totalCount}</span>
+        <CaretDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', pinnedOpen && 'rotate-180')} />
+      </button>
+
+      {/* 展开态控件：悬停 / 聚焦 / 点击固定 均可展开 */}
+      <div
+        className={cn(
+          'grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-out',
+          'group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]',
+          pinnedOpen && 'grid-rows-[1fr]',
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-2 border-t border-border/50 p-3 sm:flex-row sm:items-center">
+            <div className="relative min-w-0 flex-1">
+              <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                aria-label="搜索订阅源"
+                value={search}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder="订阅源地址、别名或使用用户"
+                className="h-9 bg-background pl-9"
+              />
+            </div>
+            <Select value={scope} onValueChange={(value) => onScopeChange(value as SourceScope)}>
+              <SelectTrigger aria-label="范围" className="h-9 w-36 shrink-0 bg-background"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(SCOPE_LABELS) as SourceScope[]).map((value) => (
+                  <SelectItem key={value} value={value}>{SCOPE_LABELS[value]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // 每列首次点击时的默认方向：异常等级/剩余/到期升序，用量/更新/引用数降序。
 const DEFAULT_DIR: Record<SourceSortKey, SortDir> = {
@@ -279,39 +370,36 @@ export function SourcesClient() {
 
   return (
     <div className="flex-1 bg-background">
-      <main className="content-container py-7 sm:py-9">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-[28px] font-semibold tracking-[-0.035em] sm:text-[32px]">订阅源</h1>
-            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">
-              {sources.length} 个独立源来自 {sources.reduce((sum, source) => sum + source.references.length, 0)} 次用户引用；相同远程地址已合并，未提供流量不视为 0。
+      <main className="content-container py-5 sm:py-6">
+        {/* 紧凑页头：小标题 + 同行统计摘要 + 右侧操作，一行内完成 */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <h1 className="text-base font-semibold tracking-[-0.01em]">订阅源</h1>
+            <p className="hidden truncate text-xs text-muted-foreground sm:block">
+              {sources.length} 个独立源 · {sources.reduce((sum, source) => sum + source.references.length, 0)} 次用户引用 · 相同远程地址已合并
             </p>
           </div>
-          <Button variant="outline" onClick={load} disabled={loading} className="h-11 bg-card">
+          <Button variant="outline" onClick={load} disabled={loading} className="h-9 bg-card">
             <ArrowsClockwise className={cn('h-4 w-4', loading && 'animate-spin')} />
             刷新
           </Button>
         </div>
 
-        {error && <div role="alert" className="mt-5 flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"><WarningCircle weight="fill" className="h-5 w-5" />{error}</div>}
+        {error && <div role="alert" className="mt-4 flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"><WarningCircle weight="fill" className="h-5 w-5" />{error}</div>}
 
-        <section className="surface mt-7 overflow-hidden">
-          <div className="flex flex-wrap items-center gap-3 border-b border-border/60 px-5 py-4">
-            <div className="relative min-w-56 flex-1">
-              <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="订阅源地址、别名或使用用户" className="h-10 bg-secondary/50 pl-9 shadow-none" />
-            </div>
-            <Select value={scope} onValueChange={(value) => setScope(value as SourceScope)}>
-              <SelectTrigger className="h-10 w-36 bg-secondary/50 shadow-none"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="tight">流量紧张</SelectItem>
-                <SelectItem value="expiring">7 天内到期</SelectItem>
-                <SelectItem value="expired">已过期</SelectItem>
-                <SelectItem value="missing">流量未提供</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-xs text-muted-foreground">{result.length} / {sources.length} 个独立源 · 点击表头排序</span>
+        <SourceFilterBar
+          search={search}
+          scope={scope}
+          resultCount={result.length}
+          totalCount={sources.length}
+          onSearchChange={setSearch}
+          onScopeChange={setScope}
+        />
+
+        <section className="surface mt-4 overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
+            <span className="text-xs text-muted-foreground">点击表头排序</span>
+            <span className="text-xs tabular-nums text-muted-foreground">{result.length} / {sources.length} 个独立源</span>
           </div>
 
           <div className="overflow-x-auto">

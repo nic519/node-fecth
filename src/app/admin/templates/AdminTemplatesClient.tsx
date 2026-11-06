@@ -33,7 +33,7 @@ export function AdminTemplatesClient({
     isErrorModalOpen,
     isDiscardModalOpen,
     handleSelectTemplate,
-    handleStartEdit,
+    handleEditTemplate,
     handleCreateTemplate,
     handleCreateVisualTemplate,
     handleDeleteTemplate,
@@ -80,8 +80,6 @@ export function AdminTemplatesClient({
                 currentConfigContent={currentConfigContent}
                 yamlRevealLine={yamlRevealTarget.line}
                 yamlRevealKey={yamlRevealTarget.key}
-                onStartEdit={handleStartEdit}
-                onDeleteTemplate={() => selectedTemplate && handleDeleteTemplate(String(selectedTemplate.id))}
                 onUpdateTemplate={handleUpdateTemplate}
                 onUpdateConfigContent={handleUpdateConfigContent}
                 onRevealProxyGroup={handleRevealProxyGroup}
@@ -103,12 +101,13 @@ export function AdminTemplatesClient({
                   icon={FileText}
                   className="h-fit"
                   action={
-                    <div className="grid w-full grid-cols-2 gap-2">
-                      <Button onClick={handleCreateTemplate} size="sm" className="px-3">
-                        <Plus className="h-4 w-4" />
+                    // 紧凑单行按钮组：标题在左、按钮在右，窄面板下也不换行
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <Button onClick={handleCreateTemplate} size="sm" className="h-7 gap-1 px-2 text-xs">
+                        <Plus className="h-3.5 w-3.5" />
                         YAML
                       </Button>
-                      <Button onClick={handleCreateVisualTemplate} size="sm" variant="secondary" className="px-3">
+                      <Button onClick={handleCreateVisualTemplate} size="sm" variant="secondary" className="h-7 px-2 text-xs">
                         可视化
                       </Button>
                     </div>
@@ -118,6 +117,8 @@ export function AdminTemplatesClient({
                     <TemplateList
                       templates={templates}
                       onSelectTemplate={handleSelectTemplate}
+                      onEditTemplate={handleEditTemplate}
+                      onDeleteTemplate={handleDeleteTemplate}
                     />
                   </div>
                 </AdminSidePanel>
@@ -131,8 +132,6 @@ export function AdminTemplatesClient({
                     currentConfigContent={currentConfigContent}
                     yamlRevealLine={yamlRevealTarget.line}
                     yamlRevealKey={yamlRevealTarget.key}
-                    onStartEdit={handleStartEdit}
-                    onDeleteTemplate={() => selectedTemplate && handleDeleteTemplate(String(selectedTemplate.id))}
                     onUpdateTemplate={handleUpdateTemplate}
                     onUpdateConfigContent={handleUpdateConfigContent}
                     onRevealProxyGroup={handleRevealProxyGroup}

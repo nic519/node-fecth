@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
@@ -20,6 +19,7 @@ import {
   Wifi,
 } from 'lucide-react';
 
+import { HeartbeatStrip, HeartbeatWindowToggle } from '@/components/HeartbeatStrip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ import type {
   SubscriptionIpHeartbeat,
   SubscriptionUserActivity,
 } from '@/types/subscription-analytics';
+import type { HeartbeatWindowDays } from '@/utils/heartbeatBins';
 
 const RANGE_OPTIONS = [
   { value: 1 as const, label: '24 小时' },
@@ -161,7 +162,7 @@ function PanelSkeleton() {
           </div>
           <div className="grid grid-cols-[repeat(24,minmax(3px,1fr))] gap-0.5">
             {Array.from({ length: 24 }, (_, index) => (
-              <Skeleton key={index} className="h-6 rounded-[2px]" style={{ opacity: 0.35 + ((index * 7 + row * 3) % 5) * 0.1 }} />
+              <Skeleton key={index} className="h-5 rounded-[2px]" style={{ opacity: 0.35 + ((index * 7 + row * 3) % 5) * 0.1 }} />
             ))}
           </div>
           <div className="space-y-2 lg:mx-auto">
@@ -239,70 +240,14 @@ function Distribution({ title, items }: { title: string; items: Array<{ name: st
   );
 }
 
-function HeartbeatStrip({
-  timestamps,
-  windowStart,
-  windowEnd,
-  rangeDays,
-}: {
-  timestamps: string[];
-  windowStart: string;
-  windowEnd: string;
-  rangeDays: 1 | 7 | 30;
-}) {
-  const bins = 24;
-  const startMs = Date.parse(windowStart);
-  const endMs = Date.parse(windowEnd);
-  const duration = Math.max(1, endMs - startMs);
-  const counts = Array.from({ length: bins }, () => 0);
-
-  for (const timestamp of timestamps) {
-    const ratio = (Date.parse(timestamp) - startMs) / duration;
-    const index = Math.min(bins - 1, Math.max(0, Math.floor(ratio * bins)));
-    counts[index] += 1;
-  }
-
-  const max = Math.max(...counts, 1);
-  const bucketHours = rangeDays === 1 ? 1 : rangeDays === 7 ? 7 : 30;
-
-  return (
-    <div>
-      <div className="grid grid-cols-[repeat(24,minmax(3px,1fr))] gap-0.5" aria-label="心跳时间分布">
-        {counts.map((count, index) => {
-          const opacity = count === 0 ? 0 : 0.25 + (count / max) * 0.75;
-          const bucketStart = new Date(startMs + (duration / bins) * index);
-          return (
-            <span
-              key={index}
-              className={cn(
-                'h-6 rounded-[2px]',
-                count === 0 ? 'bg-muted' : 'bg-primary',
-              )}
-              style={count === 0 ? undefined : { opacity }}
-              title={`${exactTime(bucketStart.toISOString())} 起 ${bucketHours} 小时：${count} 次心跳`}
-            />
-          );
-        })}
-      </div>
-      <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
-        <span>{rangeDays === 1 ? '24 小时前' : `${rangeDays} 天前`}</span>
-        <span>色块越深，心跳越密</span>
-        <span>现在</span>
-      </div>
-    </div>
-  );
-}
-
 function IpHeartbeatRow({
   heartbeat,
-  windowStart,
   generatedAt,
-  rangeDays,
+  heartbeatDays,
 }: {
   heartbeat: SubscriptionIpHeartbeat;
-  windowStart: string;
   generatedAt: string;
-  rangeDays: 1 | 7 | 30;
+  heartbeatDays: HeartbeatWindowDays;
 }) {
   const status = STATUS_META[heartbeat.status];
   return (
@@ -316,22 +261,24 @@ function IpHeartbeatRow({
           <span className="truncate font-mono text-sm font-semibold" title={heartbeat.ip}>{heartbeat.ip}</span>
           <Badge className={cn('border-0 px-2 py-0.5 text-[10px] font-medium shadow-none', status.badge)}>{status.label}</Badge>
         </div>
-        <div className="mt-1.5 flex items-center gap-1.5 pl-5 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" />
-          <span className="truncate" title={locationLabel(heartbeat)}>{locationLabel(heartbeat)}</span>
-        </div>
-        <div className="mt-1 flex items-center gap-1.5 pl-5 text-xs text-muted-foreground">
-          <Laptop className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <span className="truncate" title={heartbeat.userAgent}>{heartbeat.clientName}</span>
+        {/* 地区与客户端合并为一行，压缩行高 */}
+        <div className="mt-1.5 flex items-center gap-3 pl-5 text-xs text-muted-foreground">
+          <span className="flex min-w-0 items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate" title={locationLabel(heartbeat)}>{locationLabel(heartbeat)}</span>
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5">
+            <Laptop className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate" title={heartbeat.userAgent}>{heartbeat.clientName}</span>
+          </span>
         </div>
       </div>
 
       <div className="min-w-0">
         <HeartbeatStrip
-          timestamps={heartbeat.recentHeartbeats}
-          windowStart={windowStart}
+          heartbeat={heartbeat}
           windowEnd={generatedAt}
-          rangeDays={rangeDays}
+          windowDays={heartbeatDays}
         />
       </div>
 
@@ -373,14 +320,14 @@ function IpSortHeader({ label, direction, onClick, className }: {
 
 function SelectedUserPanel({
   user,
-  windowStart,
   generatedAt,
-  rangeDays,
+  heartbeatDays,
+  onHeartbeatDaysChange,
 }: {
   user: SubscriptionUserActivity;
-  windowStart: string;
   generatedAt: string;
-  rangeDays: 1 | 7 | 30;
+  heartbeatDays: HeartbeatWindowDays;
+  onHeartbeatDaysChange: (value: HeartbeatWindowDays) => void;
 }) {
   // IP 行排序：最后心跳 / 请求频率 / 请求间隔，点击表头切换。
   type IpSortKey = 'lastSeen' | 'requests' | 'interval';
@@ -421,7 +368,8 @@ function SelectedUserPanel({
               最近访问 {relativeTime(user.lastSeen)}，所选时段共 {user.requestCount.toLocaleString()} 次订阅请求
             </p>
           </div>
-          <div className="flex gap-5 text-sm">
+          <div className="flex items-center gap-5 text-sm">
+            <HeartbeatWindowToggle value={heartbeatDays} onChange={onHeartbeatDaysChange} />
             <div>
               <div className="text-xs text-muted-foreground">唯一 IP</div>
               <div className="mt-1 text-lg font-semibold tabular-nums">{user.uniqueIps}</div>
@@ -460,9 +408,8 @@ function SelectedUserPanel({
           <IpHeartbeatRow
             key={heartbeat.ip}
             heartbeat={heartbeat}
-            windowStart={windowStart}
             generatedAt={generatedAt}
-            rangeDays={rangeDays}
+            heartbeatDays={heartbeatDays}
           />
         ))}
       </div>
@@ -473,6 +420,8 @@ function SelectedUserPanel({
 export function SubscriptionAnalyticsClient() {
   usePageTitle('订阅使用分析');
   const [rangeDays, setRangeDays] = useState<1 | 7 | 30>(1);
+  // 心跳格子条窗口：24 小时（默认）或 14 天，只影响格子条取数，不改变页面统计口径
+  const [heartbeatDays, setHeartbeatDays] = useState<HeartbeatWindowDays>(1);
   const [data, setData] = useState<SubscriptionAnalyticsResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -484,7 +433,7 @@ export function SubscriptionAnalyticsClient() {
     setLoading(true);
     setError('');
     try {
-      const response = await subscriptionAnalyticsApi.get({ days: rangeDays });
+      const response = await subscriptionAnalyticsApi.get({ days: rangeDays, heartbeatDays });
       if (response.code !== 0) throw new Error(response.msg || '加载失败');
       setData(response.data);
       setSelectedUserId((current) => {
@@ -498,7 +447,7 @@ export function SubscriptionAnalyticsClient() {
     } finally {
       setLoading(false);
     }
-  }, [rangeDays]);
+  }, [rangeDays, heartbeatDays]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -517,19 +466,13 @@ export function SubscriptionAnalyticsClient() {
 
   return (
     <div className="flex-1 bg-slate-50/70 dark:bg-zinc-950">
-      <main className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              <Activity className="h-4 w-4" />
-              Subscription pulse
-            </div>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">订阅使用分析</h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              从访问日志查看每个订阅背后的 IP 心跳、地区和客户端，快速找出仍在使用的设备。
-            </p>
+      <main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
+        {/* 紧凑页头：小标题 + 同行描述 + 右侧操作，一行内完成 */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <h1 className="text-base font-semibold tracking-[-0.01em]">订阅使用分析</h1>
+            <p className="hidden truncate text-xs text-muted-foreground sm:block">每个订阅背后的 IP 心跳、地区和客户端</p>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex rounded-lg border border-border bg-card p-1">
               {RANGE_OPTIONS.map((option) => (
@@ -554,13 +497,13 @@ export function SubscriptionAnalyticsClient() {
         </div>
 
         {error && (
-          <div className="mt-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+          <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
             <CircleAlert className="h-4 w-4" />
             {error}
           </div>
         )}
 
-        <section className="mt-7 border-y border-border/70">
+        <section className="mt-4 border-y border-border/70">
           <div className="grid divide-y divide-border/70 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
             <Metric label="有访问的订阅" value={data?.totals.users ?? 0} hint="个用户" />
             <Metric label="唯一请求 IP" value={data?.totals.uniqueIps ?? 0} hint="不等于人数" />
@@ -630,9 +573,9 @@ export function SubscriptionAnalyticsClient() {
           ) : selectedUser ? (
             <SelectedUserPanel
               user={selectedUser}
-              windowStart={data?.windowStart ?? new Date().toISOString()}
               generatedAt={data?.generatedAt ?? new Date().toISOString()}
-              rangeDays={data?.rangeDays ?? rangeDays}
+              heartbeatDays={heartbeatDays}
+              onHeartbeatDaysChange={setHeartbeatDays}
             />
           ) : (
             <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/50 text-center">

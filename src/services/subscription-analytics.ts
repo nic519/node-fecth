@@ -8,10 +8,14 @@ import type {
   SubscriptionTrend,
   SubscriptionUserActivity,
 } from '@/types/subscription-analytics';
+import type { HeartbeatWindowDays } from '@/utils/heartbeatBins';
 
 const MAX_ACCESS_LOGS = 50_000;
 const ONLINE_WINDOW_MS = 60 * 60 * 1000;
 const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** 默认心跳采样上限；拉长心跳窗口（14 天）时放宽，避免高频 IP 的左侧格子被截断成空白 */
+const DEFAULT_HEARTBEAT_LIMIT = 200;
+const EXTENDED_HEARTBEAT_LIMIT = 400;
 
 type AccessLogRow = {
   userId: string | null;
@@ -155,12 +159,19 @@ function locationName(heartbeat: SubscriptionIpHeartbeat) {
 
 export function aggregateSubscriptionAccessLogs(
   rows: AccessLogRow[],
-  options: { now: Date; rangeDays: 1 | 7 | 30; truncated?: boolean },
+  options: { now: Date; rangeDays: 1 | 7 | 30; heartbeatWindowDays?: HeartbeatWindowDays; truncated?: boolean },
 ): SubscriptionAnalyticsResult {
   const nowMs = options.now.getTime();
   const windowStart = new Date(nowMs - options.rangeDays * 24 * 60 * 60 * 1000);
+  // 心跳条历史可独立于统计窗口拉长（如 14 天）：只影响 recentHeartbeats，不改变其他统计口径
+  const heartbeatStartMs = options.heartbeatWindowDays
+    ? nowMs - options.heartbeatWindowDays * 24 * 60 * 60 * 1000
+    : windowStart.getTime();
+  const heartbeatLimit = options.heartbeatWindowDays ? EXTENDED_HEARTBEAT_LIMIT : DEFAULT_HEARTBEAT_LIMIT;
   const grouped = new Map<string, Map<string, {
     timestamps: number[];
+    /** 心跳条历史（可能早于统计窗口），仅用于 recentHeartbeats */
+    history: number[];
     location: SubscriptionIpHeartbeat['location'];
     userAgent: string;
   }>>();
@@ -172,12 +183,16 @@ export function aggregateSubscriptionAccessLogs(
 
     const ip = getRequestIp(headers as HeaderBag);
     const timestamp = Date.parse(row.createdAt);
-    if (!ip || !Number.isFinite(timestamp) || timestamp < windowStart.getTime()) continue;
+    if (!ip || !Number.isFinite(timestamp)) continue;
+    const inWindow = timestamp >= windowStart.getTime();
+    // 既不在统计窗口也不在心跳窗口内的记录直接跳过
+    if (!inWindow && timestamp < heartbeatStartMs) continue;
 
     const userIps = grouped.get(row.userId) ?? new Map();
     const userAgent = textHeader(headers as HeaderBag, 'user-agent') ?? '';
     const existing = userIps.get(ip) ?? {
       timestamps: [],
+      history: [],
       userAgent,
       location: {
         city: decodedHeader(headers as HeaderBag, 'x-vercel-ip-city'),
@@ -186,14 +201,19 @@ export function aggregateSubscriptionAccessLogs(
         continent: decodedHeader(headers as HeaderBag, 'x-vercel-ip-continent'),
       },
     };
-    existing.timestamps.push(timestamp);
-    if (userAgent) existing.userAgent = userAgent;
     userIps.set(ip, existing);
     grouped.set(row.userId, userIps);
+    if (timestamp >= heartbeatStartMs) existing.history.push(timestamp);
+    // 统计窗口外的更早日志只补充心跳历史，不进入任何统计
+    if (!inWindow) continue;
+    existing.timestamps.push(timestamp);
+    if (userAgent) existing.userAgent = userAgent;
   }
 
   const users: SubscriptionUserActivity[] = [...grouped.entries()].map(([userId, ipMap]) => {
-    const ips = [...ipMap.entries()].map(([ip, value]): SubscriptionIpHeartbeat => {
+    const ips = [...ipMap.entries()]
+      .filter(([, value]) => value.timestamps.length > 0) // 只有更早日志的 IP 不进入统计
+      .map(([ip, value]): SubscriptionIpHeartbeat => {
       const timestamps = [...value.timestamps].sort((a, b) => b - a);
       const lastSeenMs = timestamps[0];
       return {
@@ -207,7 +227,7 @@ export function aggregateSubscriptionAccessLogs(
         location: value.location,
         userAgent: value.userAgent,
         clientName: getClientName(value.userAgent),
-        recentHeartbeats: timestamps.slice(0, 200).map((item) => new Date(item).toISOString()),
+        recentHeartbeats: [...value.history].sort((a, b) => b - a).slice(0, heartbeatLimit).map((item) => new Date(item).toISOString()),
       };
     }).sort((a, b) => Date.parse(b.lastSeen) - Date.parse(a.lastSeen));
 
@@ -222,7 +242,8 @@ export function aggregateSubscriptionAccessLogs(
       clients: rankedCounts(ips.map((item) => item.clientName)),
       ips,
     };
-  }).sort((a, b) => Date.parse(b.lastSeen) - Date.parse(a.lastSeen));
+  }).filter((user) => user.ips.length > 0) // 只有更早日志的用户不进入统计
+    .sort((a, b) => Date.parse(b.lastSeen) - Date.parse(a.lastSeen));
 
   const allIps = new Set(users.flatMap((user) => user.ips.map((item) => item.ip)));
   return {
@@ -243,15 +264,20 @@ export function aggregateSubscriptionAccessLogs(
 
 export async function getSubscriptionAnalytics(
   db: DbInstance,
-  options: { rangeDays: 1 | 7 | 30; now?: Date },
+  options: { rangeDays: 1 | 7 | 30; heartbeatWindowDays?: HeartbeatWindowDays; now?: Date },
 ) {
   const now = options.now ?? new Date();
-  const windowStart = new Date(now.getTime() - options.rangeDays * 24 * 60 * 60 * 1000);
+  const windowStartMs = now.getTime() - options.rangeDays * 24 * 60 * 60 * 1000;
+  // 心跳窗口可能比统计窗口更早（如统计 7 天 + 心跳 14 天），取更早者作为查询起点
+  const heartbeatStartMs = options.heartbeatWindowDays
+    ? now.getTime() - options.heartbeatWindowDays * 24 * 60 * 60 * 1000
+    : windowStartMs;
+  const fetchStart = new Date(Math.min(windowStartMs, heartbeatStartMs));
   await cleanupSubscriptionAnalytics(db);
   const result = await db.$client.execute({
     sql: `SELECT user_id, headers, created_at FROM subscription_access
       WHERE created_at >= ? ORDER BY created_at DESC LIMIT ?`,
-    args: [windowStart.toISOString(), MAX_ACCESS_LOGS + 1],
+    args: [fetchStart.toISOString(), MAX_ACCESS_LOGS + 1],
   });
   const rows: AccessLogRow[] = result.rows.map((row) => ({
     userId: row.user_id === null ? null : String(row.user_id),

@@ -4,6 +4,7 @@ import { CaretDown, ClockCounterClockwise } from '@phosphor-icons/react';
 import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { SourceUsageChart } from '@/components/UsageCurveChart';
 import { cn } from '@/lib/utils';
 import { adminService } from '@/services/admin-api';
 import type { DynamicHistoryCursor, DynamicHistoryPage } from '@/types/schema/dynamic';
@@ -67,6 +68,7 @@ export function SourceHistory({ url }: { url: string }) {
         </Button>
       </h3>
       <div id={panelId} hidden={!open} className="pb-2 pt-2">
+        {open && <SourceUsageChart url={url} className="mb-3 px-2" />}
         {page && page.records.length > 0 && (
           <table className="w-full border-collapse text-left text-xs tabular-nums">
             <caption className="sr-only">订阅源拉取历史，最新记录在前，时间为北京时间</caption>

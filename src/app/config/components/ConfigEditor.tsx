@@ -36,6 +36,7 @@ const TAB_COPY: Record<ConfigTab, { title: string; description: string }> = {
   rules: { title: '规则模板', description: '选择分流规则并按需覆写，变更会应用到同一订阅地址。' },
   dynamic: { title: '订阅加载', description: '检查各来源的同步状态，并选择适合的订阅拉取线路。' },
   token: { title: '访问令牌', description: '令牌用于保护配置与订阅地址，变更后请重新导入客户端。' },
+  analytics: { title: '用量分析', description: '订阅流量使用趋势与本账号的访问心跳。' },
   preview: { title: '预览结果', description: '在保存后检查实际生成的 YAML，确认规则与节点符合预期。' },
 };
 
@@ -55,16 +56,15 @@ export function ConfigEditor(props: ConfigEditorProps) {
           <div><div className="text-sm font-semibold">NodeFetch</div><div className="text-[11px] text-muted-foreground">{copy.title}</div></div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1320px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+        <main className="mx-auto w-full max-w-[1320px] px-4 py-5 sm:px-6 sm:py-6 lg:px-10">
           {loading ? <div className="flex min-h-[60dvh] items-center justify-center"><Loading message="加载配置中…" /></div> : error ? (
             <div className="flex min-h-[60dvh] items-center justify-center"><Card className="surface w-full max-w-md shadow-none"><CardContent className="p-7 text-center"><WarningCircle weight="fill" className="mx-auto h-8 w-8 text-destructive" /><h1 className="mt-4 text-xl font-semibold">配置加载失败</h1><p className="mt-2 text-sm leading-6 text-muted-foreground">{error}</p><Button onClick={() => window.location.reload()} variant="destructive" className="mt-6 w-full">重新加载</Button></CardContent></Card></div>
           ) : config ? (
             <>
-              <div className="mb-6"><h1 className="text-[28px] font-semibold tracking-[-0.035em]">{copy.title}</h1><p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">{copy.description}</p></div>
               {validationErrors.length > 0 && <div className="mb-5"><ValidationMessage validationErrors={validationErrors} /></div>}
               <section className="surface overflow-hidden">
                 <div className="p-5 sm:p-7 lg:p-8">
-                  {activeTab === 'preview' ? <PanelPreview uid={uid} token={token} /> : <ConfigForm config={config} onChange={onConfigChange} activeTab={activeTab} uid={uid} availableProxyProviders={availableProxyProviders} />}
+                  {activeTab === 'preview' ? <PanelPreview uid={uid} token={token} /> : <ConfigForm config={config} onChange={onConfigChange} activeTab={activeTab} uid={uid} token={token} availableProxyProviders={availableProxyProviders} />}
                 </div>
               </section>
             </>

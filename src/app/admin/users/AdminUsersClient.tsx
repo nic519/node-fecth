@@ -5,6 +5,7 @@ import { useToastContext } from '@/providers/toast-provider';
 import { useUserFilters } from './hooks/useUserFilters';
 import { useUserManagement } from './hooks/useUserManagement';
 import { AdminTwoColumnLayout } from '@/components/admin/AdminTwoColumnLayout';
+import { UserFilterBar } from './components/UserFilterBar';
 import { UserFilters } from './components/UserFilters';
 import { UserMasonry } from './components/UserMasonry';
 import { ImportUserModal } from './components/ImportUserModal';
@@ -55,17 +56,9 @@ export function AdminUsersClient({
         <AdminTwoColumnLayout
           sidebar={
             <UserFilters
-              searchTerm={searchTerm}
-              scope={scope}
-              sort={sort}
-              sortDir={sortDir}
               loading={loading}
               totalUsers={users.length}
               filteredCount={filteredUsers.length}
-              onSearchTermChange={setSearchTerm}
-              onScopeChange={setScope}
-              onSortChange={setSort}
-              onToggleSortDir={toggleSortDir}
               onRefresh={fetchUsers}
               onAddUser={addUserModal.open}
               onExport={handleExport}
@@ -79,6 +72,19 @@ export function AdminUsersClient({
                   <div className="text-destructive font-medium">{error}</div>
                 </div>
               )}
+
+              <UserFilterBar
+                searchTerm={searchTerm}
+                scope={scope}
+                sort={sort}
+                sortDir={sortDir}
+                filteredCount={filteredUsers.length}
+                totalUsers={users.length}
+                onSearchTermChange={setSearchTerm}
+                onScopeChange={setScope}
+                onSortChange={setSort}
+                onToggleSortDir={toggleSortDir}
+              />
 
               <UserMasonry users={filteredUsers} loading={loading} error={error} onUserAction={handleUserAction} />
 

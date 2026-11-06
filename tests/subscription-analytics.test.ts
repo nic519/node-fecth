@@ -92,3 +92,22 @@ test('subscription analytics groups heartbeats by user and IP', () => {
   expect(heartbeat.recentHeartbeats).toHaveLength(3);
 });
 
+test('heartbeatWindowDays extends recentHeartbeats beyond the stats window without changing stats', () => {
+  const row = (daysAgo: number) => ({
+    userId: 'sw-big',
+    createdAt: new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000).toISOString(),
+    meta: { headers: { 'x-real-ip': '203.0.113.10' } },
+  });
+  // 10 天前的记录在 1 天统计窗口之外，但在 14 天心跳窗口之内
+  const rows = [row(0.5), row(10)];
+
+  const extended = aggregateSubscriptionAccessLogs(rows, { now, rangeDays: 1, heartbeatWindowDays: 14 });
+  expect(extended.totals.requests).toBe(1);
+  expect(extended.users[0].ips[0].requestCount).toBe(1);
+  expect(extended.users[0].ips[0].recentHeartbeats).toHaveLength(2);
+
+  // 不传心跳窗口时保持原口径：只统计窗口内记录
+  const fallback = aggregateSubscriptionAccessLogs(rows, { now, rangeDays: 1 });
+  expect(fallback.users[0].ips[0].recentHeartbeats).toHaveLength(1);
+});
+

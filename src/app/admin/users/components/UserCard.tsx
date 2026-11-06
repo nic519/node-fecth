@@ -87,6 +87,15 @@ function SubscriptionStat({ stat }: SubscriptionStatProps) {
         </div>
       )}
 
+      {stat.consumptionRateBytesPerDay != null && stat.consumptionRateBytesPerDay > 0 && (
+        <div className="mt-1.5 flex items-baseline justify-between gap-3">
+          <span className="text-[10px] text-muted-foreground/70">日均消耗</span>
+          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+            {formatTraffic(stat.consumptionRateBytesPerDay)}/天
+          </span>
+        </div>
+      )}
+
       {(trafficInfo?.expire || stat.lastUpdated) && (
         <div className="mt-2 flex justify-between items-center text-[10px] text-muted-foreground/70">
           <span className="truncate">

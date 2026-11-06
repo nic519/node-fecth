@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn, secondaryActionButtonClass } from '@/lib/utils';
+import { SourceUsageChart } from '@/components/UsageCurveChart';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
 import {
   SUBSCRIPTION_PROXY_PROVIDER_LABELS,
@@ -38,6 +39,8 @@ interface SyncItemCardProps {
   info?: DynamicInfo;
   onSync?: () => void;
   showAction?: boolean;
+  /** 是否展示流量使用曲线（需要拉取历史数据，默认关闭） */
+  showUsageChart?: boolean;
   readOnly?: boolean;
   availableProxyProviders: SubscriptionProxyProvider[];
   onProxyProviderChange?: (proxyProvider?: SubscriptionProxyProvider) => void;
@@ -49,6 +52,7 @@ export function SyncItemCard({
   info,
   onSync,
   showAction,
+  showUsageChart = false,
   readOnly,
   availableProxyProviders,
   onProxyProviderChange,
@@ -205,6 +209,10 @@ export function SyncItemCard({
                   </div>
                 )}
               </div>
+            )}
+
+            {showUsageChart && info && (
+              <SourceUsageChart url={item.url} className="border-t border-border/50 pt-3" />
             )}
 
             <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-2">

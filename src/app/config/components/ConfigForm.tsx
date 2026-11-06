@@ -3,9 +3,10 @@ import { PanelDynamicSync } from './PanelDynamicSync';
 import { PanelBasicConfig } from './PanelBasicConfig';
 import { PanelRuleConfig } from './PanelRuleConfig';
 import { PanelTokenConfig } from './PanelTokenConfig';
+import { PanelUsageAnalytics } from './PanelUsageAnalytics';
 import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
-export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'preview';
+export type ConfigTab = 'basic' | 'rules' | 'dynamic' | 'token' | 'analytics' | 'preview';
 
 interface ConfigFormProps {
     config: UserConfig;
@@ -13,6 +14,7 @@ interface ConfigFormProps {
     readOnly?: boolean;
     activeTab: ConfigTab;
     uid?: string;
+    token?: string;
     availableProxyProviders: SubscriptionProxyProvider[];
 }
 
@@ -22,6 +24,7 @@ export function ConfigForm({
     readOnly = false,
     activeTab,
     uid,
+    token,
     availableProxyProviders,
 }: ConfigFormProps) {
     return (
@@ -50,6 +53,10 @@ export function ConfigForm({
 
             {activeTab === 'token' && (
                 <PanelTokenConfig config={config} onChange={onChange} readOnly={readOnly} />
+            )}
+
+            {activeTab === 'analytics' && (
+                <PanelUsageAnalytics config={config} uid={uid} token={token} />
             )}
         </div>
     );

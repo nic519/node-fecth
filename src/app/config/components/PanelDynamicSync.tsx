@@ -65,6 +65,7 @@ export function PanelDynamicSync({
                         status={statuses[item.url] || { status: 'idle' }}
                         info={dynamicInfos[item.url]}
                         readOnly={readOnly}
+                        showUsageChart
                         availableProxyProviders={availableProxyProviders}
                         onProxyProviderChange={(proxyProvider) => handleProxyProviderChange(item.subscriptionIndex ?? index, proxyProvider)}
                         onSync={() => syncUrl(item.url, item.proxyProvider)}

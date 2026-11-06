@@ -37,7 +37,7 @@ export interface UseTemplateManagementReturn {
 	// 操作函数
 	loadTemplates: () => void;
 	handleSelectTemplate: (templateId: string) => void;
-	handleStartEdit: () => void;
+	handleEditTemplate: (templateId: string) => void;
 	handleCreateTemplate: () => void;
 	handleCreateVisualTemplate: () => void;
 	handleDeleteTemplate: (templateId: string) => void;
@@ -207,8 +207,23 @@ export const useTemplateManagement = ({
 		}
 	};
 
-	const handleStartEdit = () => {
-		setIsEditing(true);
+	// 列表条目上的编辑：先选中目标模板再进入编辑态；切换目标且有未保存修改时先确认。
+	const handleEditTemplate = (templateId: string) => {
+		const applyEdit = () => {
+			setTemplates((prev) =>
+				prev.map((template) => ({
+					...template,
+					isSelected: String(template.id) === templateId,
+				})),
+			);
+			setValidationErrors([]);
+			setIsEditing(true);
+		};
+		if (String(selectedTemplate?.id) !== templateId) {
+			guardDirty(applyEdit);
+		} else {
+			applyEdit();
+		}
 	};
 
 	const handleCreateTemplate = async () => {
@@ -452,7 +467,7 @@ export const useTemplateManagement = ({
 		// 操作函数
 		loadTemplates,
 		handleSelectTemplate,
-		handleStartEdit,
+		handleEditTemplate,
 		handleCreateTemplate,
 		handleCreateVisualTemplate,
 		handleDeleteTemplate,

@@ -6,18 +6,53 @@ import { hashUrl } from '@/utils/hashUtils';
 import { httpClient } from '@/utils/http/client';
 import { safeError, safeString } from '@/utils/logHelper';
 import { logger } from '@/utils/request/network.config';
-import { and, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import { SSRToClashConverter } from '@/modules/yamlMerge/rawToClash/SSRToClashConverter';
 import type { SubscriptionProxyProvider } from '@/types/api-schemas';
 import { CommonUtils } from '@/utils/commonUtils';
 import type { DynamicSummary } from '@/types/api-schemas';
 import { resolveSubscriptionFetchUrl } from '@/modules/user/subscription-proxy';
-import type { DynamicHistoryCursor, DynamicHistoryPage } from '@/types/schema/dynamic';
+import type { DynamicHistoryCursor, DynamicHistoryPage, UsageSeries } from '@/types/schema/dynamic';
 import { parseTrafficSnapshot } from '@/utils/trafficUtils';
 
 type DynamicRow = typeof dynamic.$inferSelect;
+type DynamicHistoryRow = typeof dynamicHistory.$inferSelect;
 const HISTORY_PAGE_SIZE = 50;
+const USAGE_SERIES_QUERY_LIMIT = 5000;
+const MAX_USAGE_SERIES_POINTS = 240;
+
+/**
+ * 从一条历史记录解析出曲线点与到期时间（兼容仅有 traffic 文本的旧格式）。
+ */
+function parseUsageRow(row: DynamicHistoryRow): { point: UsageSeries['points'][number] | null; expiresAtMs: number | null } {
+	const legacy = row.traffic && (
+		row.uploadBytes === null || row.downloadBytes === null || row.totalBytes === null || row.expiresAtMs === null
+	) ? parseTrafficSnapshot(row.traffic) : null;
+	const upload = row.uploadBytes ?? legacy?.uploadBytes ?? null;
+	const download = row.downloadBytes ?? legacy?.downloadBytes ?? null;
+	const total = row.totalBytes ?? legacy?.totalBytes ?? null;
+	const expiresAtMs = row.expiresAtMs ?? legacy?.expiresAtMs ?? null;
+	if (row.fetchedAtMs === null || upload === null || download === null || total === null || total <= 0) {
+		return { point: null, expiresAtMs };
+	}
+	return {
+		point: { t: row.fetchedAtMs, remainingBytes: Math.max(0, total - upload - download), totalBytes: total },
+		expiresAtMs,
+	};
+}
+
+/**
+ * 渲染前降采样到至多 MAX_USAGE_SERIES_POINTS 个点，始终保留首尾。
+ */
+function downsampleUsagePoints(points: UsageSeries['points']): UsageSeries['points'] {
+	if (points.length <= MAX_USAGE_SERIES_POINTS) return points;
+	const stride = Math.ceil(points.length / MAX_USAGE_SERIES_POINTS);
+	const sampled = points.filter((_, index) => index % stride === 0);
+	const last = points[points.length - 1];
+	if (sampled[sampled.length - 1] !== last) sampled.push(last);
+	return sampled;
+}
 
 export interface DynamicContent {
 	id: string;
@@ -139,6 +174,80 @@ export class DynamicService {
 			records,
 			nextCursor: rows.length > HISTORY_PAGE_SIZE && last ? { id: last.id, fetchedAtMs: last.fetchedAtMs } : null,
 		};
+	}
+
+	/**
+	 * Get full usage series for charting: all history points ascending by time,
+	 * downsampled to at most MAX_USAGE_SERIES_POINTS for rendering.
+	 */
+	static async getUsageSeries(url: string): Promise<UsageSeries> {
+		const cleanUrl = CommonUtils.normalizeUrl(url);
+		const ids = await Promise.all([...new Set([url, cleanUrl])].map(hashUrl));
+		await ensureDynamicHistoryTable(this.db);
+
+		const { dynamicId, fetchedAtMs, id } = dynamicHistory;
+		const rows = await this.db.select().from(dynamicHistory)
+			.where(inArray(dynamicId, ids))
+			.orderBy(asc(fetchedAtMs), asc(id))
+			.limit(USAGE_SERIES_QUERY_LIMIT);
+
+		const points: UsageSeries['points'] = [];
+		let expiresAtMs: number | null = null;
+		for (const row of rows) {
+			const parsed = parseUsageRow(row);
+			if (parsed.expiresAtMs !== null) expiresAtMs = parsed.expiresAtMs;
+			if (parsed.point) points.push(parsed.point);
+		}
+
+		return { points: downsampleUsagePoints(points), expiresAtMs };
+	}
+
+	/**
+	 * Batch version of getUsageSeries: one query for many URLs,
+	 * returns a map keyed by the originally requested URL.
+	 * 用于运营后台等需要一次性评估大量订阅源的场景（如预测耗尽时间）。
+	 */
+	static async getUsageSeriesBatch(urls: string[]): Promise<Map<string, UsageSeries>> {
+		const result = new Map<string, UsageSeries>();
+		if (urls.length === 0) return result;
+
+		const idToUrl = new Map<string, string>();
+		await Promise.all(urls.map(async (url) => {
+			const cleanUrl = CommonUtils.normalizeUrl(url);
+			for (const candidate of new Set([url, cleanUrl])) {
+				const id = await hashUrl(candidate);
+				if (!idToUrl.has(id)) idToUrl.set(id, url);
+			}
+		}));
+		await ensureDynamicHistoryTable(this.db);
+
+		const { dynamicId, fetchedAtMs, id } = dynamicHistory;
+		const rows = await this.db.select().from(dynamicHistory)
+			.where(inArray(dynamicId, [...idToUrl.keys()]))
+			.orderBy(asc(fetchedAtMs), asc(id))
+			.limit(USAGE_SERIES_QUERY_LIMIT * urls.length);
+
+		const grouped = new Map<string, UsageSeries>();
+		for (const row of rows) {
+			const url = idToUrl.get(row.dynamicId);
+			if (!url) continue;
+			let entry = grouped.get(url);
+			if (!entry) {
+				entry = { points: [], expiresAtMs: null };
+				grouped.set(url, entry);
+			}
+			const parsed = parseUsageRow(row);
+			if (parsed.expiresAtMs !== null) entry.expiresAtMs = parsed.expiresAtMs;
+			if (parsed.point) entry.points.push(parsed.point);
+		}
+
+		for (const url of urls) {
+			const entry = grouped.get(url);
+			result.set(url, entry
+				? { points: downsampleUsagePoints(entry.points), expiresAtMs: entry.expiresAtMs }
+				: { points: [], expiresAtMs: null });
+		}
+		return result;
 	}
 
 	/**
