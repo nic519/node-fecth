@@ -12,6 +12,7 @@ interface HomeNavbarProps {
 const LINKS = [
   { href: '#product', label: '规则编排' },
   { href: '#sources', label: '多源容灾' },
+  { href: '#usage', label: '用量洞察' },
   { href: '#latency', label: '延迟优选' },
   { href: '#features', label: '产品能力' },
 ];
