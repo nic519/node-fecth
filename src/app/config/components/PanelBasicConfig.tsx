@@ -208,6 +208,9 @@ export function PanelBasicConfig({
                         })}
                     </div>
                     <p className="text-xs text-muted-foreground">
+                        适合配合指纹浏览器等工具使用，为不同浏览器环境配置独立的代理端口。
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                         勾选的地区会生成多端口监听，把该地区的节点按端口拆分直连；<b>全不选</b>则不启用多端口模式
                     </p>
                 </div>

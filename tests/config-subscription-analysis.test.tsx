@@ -17,7 +17,7 @@ test('subscription analysis includes sync controls and heartbeat without duplica
   expect(markup).not.toContain('订阅用量分析');
 });
 
-test('expiry calendar uses the shared subscription sync snapshot', () => {
+test('expiry timeline uses the shared subscription sync snapshot', () => {
   const url = config.appendSubList[0].subscribe;
   const markup = renderToStaticMarkup(
     <PanelUsageAnalytics config={config} infos={{
@@ -28,5 +28,5 @@ test('expiry calendar uses the shared subscription sync snapshot', () => {
       },
     }} />,
   );
-  expect(markup).toContain('到期日历');
+  expect(markup).toContain('到期时间轴');
 });

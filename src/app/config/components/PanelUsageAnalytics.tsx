@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Activity, Calendar, Globe, MapPin, Monitor } from 'lucide-react';
 
 import { HeartbeatStrip, HeartbeatWindowToggle } from '@/components/HeartbeatStrip';
-import { ExpiryYearCalendar, type ExpiryCalendarEvent } from '@/components/ExpiryYearCalendar';
+import { ExpiryTimeline, type ExpiryTimelineEvent } from '@/components/ExpiryTimeline';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { buildSubscriptionListFromConfig } from '@/modules/user/subscription-list';
@@ -84,7 +84,7 @@ interface PanelUsageAnalyticsProps {
 }
 
 /**
- * 订阅到期日历与本账号的访问心跳。
+ * 订阅到期时间轴与本账号的访问心跳。
  */
 export function PanelUsageAnalytics({ config, infos, uid, token }: PanelUsageAnalyticsProps) {
     const subscriptions = useMemo(
@@ -148,8 +148,8 @@ export function PanelUsageAnalytics({ config, infos, uid, token }: PanelUsageAna
         return infos[url] ?? infos[normalized] ?? null;
     };
 
-    // 到期日历事件：取每个订阅源的流量快照到期时间；无快照或无到期时间的源不进入年历
-    const expiryEvents = useMemo<ExpiryCalendarEvent[]>(() => subscriptions.flatMap((item) => {
+    // 到期时间轴事件：取每个订阅源的流量快照到期时间；无快照或无到期时间的源不进入时间轴
+    const expiryEvents = useMemo<ExpiryTimelineEvent[]>(() => subscriptions.flatMap((item) => {
         const info = findInfo(item.subscribe);
         const trafficInfo = info?.traffic ? parseTrafficInfo(info.traffic) : null;
         if (!trafficInfo?.expire) return [];
@@ -170,10 +170,10 @@ export function PanelUsageAnalytics({ config, infos, uid, token }: PanelUsageAna
                 <section className="space-y-4">
                     <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <h3 className="text-sm font-medium">到期日历</h3>
-                        <span className="text-xs text-muted-foreground">本月起往后一年 · 点击日期过滤列表</span>
+                        <h3 className="text-sm font-medium">到期时间轴</h3>
+                        <span className="text-xs text-muted-foreground">临近到期优先 · 已过期置后</span>
                     </div>
-                    <ExpiryYearCalendar events={expiryEvents} />
+                    <ExpiryTimeline events={expiryEvents} />
                 </section>
             )}
 
