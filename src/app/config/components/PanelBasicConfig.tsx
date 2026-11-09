@@ -125,38 +125,6 @@ export function PanelBasicConfig({
                             </p>
                         </div>
                     </div>
-
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                            <Network className="h-4 w-4 text-muted-foreground" />
-                            多端口地区
-                        </Label>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                            {AREA_CODES.map((area: AreaCode) => {
-                                const isChecked = config.multiPortMode?.includes(area) || false;
-                                return (
-                                    <div key={`multiport-${area}`} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`multiport-${area}`}
-                                            checked={isChecked}
-                                            onCheckedChange={(checked) => handleMultiPortAreaChange(area, checked as boolean)}
-                                            disabled={readOnly}
-                                        />
-                                        <Label
-                                            htmlFor={`multiport-${area}`}
-                                            className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
-                                        >
-                                            <span>{AREA_EMOJI[area]}</span>
-                                            <span>{area}</span>
-                                        </Label>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            勾选的地区会生成多端口监听，把该地区的节点按端口拆分直连；<b>全不选</b>则不启用多端口模式
-                        </p>
-                    </div>
                 </div>
             </div>
 
@@ -207,6 +175,43 @@ export function PanelBasicConfig({
                     ))}
                 </div>
             </div>
+
+            <details className="border-t border-border/60 pt-4">
+                <summary className="cursor-pointer rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    高级设置
+                </summary>
+                <div className="space-y-2 pt-4">
+                    <Label className="flex items-center gap-2">
+                        <Network className="h-4 w-4 text-muted-foreground" />
+                        多端口地区
+                    </Label>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                        {AREA_CODES.map((area: AreaCode) => {
+                            const isChecked = config.multiPortMode?.includes(area) || false;
+                            return (
+                                <div key={`multiport-${area}`} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={`multiport-${area}`}
+                                        checked={isChecked}
+                                        onCheckedChange={(checked) => handleMultiPortAreaChange(area, checked as boolean)}
+                                        disabled={readOnly}
+                                    />
+                                    <Label
+                                        htmlFor={`multiport-${area}`}
+                                        className="text-sm font-normal cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>{AREA_EMOJI[area]}</span>
+                                        <span>{area}</span>
+                                    </Label>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        勾选的地区会生成多端口监听，把该地区的节点按端口拆分直连；<b>全不选</b>则不启用多端口模式
+                    </p>
+                </div>
+            </details>
         </div>
     );
 }
