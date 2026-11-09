@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ExpiryBadge } from '@/components/ExpiryBadge';
 import { cn } from '@/lib/utils';
 
 export interface ExpiryTimelineEvent {
@@ -11,19 +12,8 @@ export interface ExpiryTimelineEvent {
   expired?: boolean;
 }
 
-const DAY_MS = 86_400_000;
-
 function isExpired(event: ExpiryTimelineEvent, now: number) {
   return event.expired || event.dateMs <= now;
-}
-
-function expiryLabel(event: ExpiryTimelineEvent, now: number) {
-  const remaining = event.dateMs - now;
-  if (isExpired(event, now)) {
-    return remaining > -DAY_MS ? '已到期' : `已过期 ${Math.floor(-remaining / DAY_MS)} 天`;
-  }
-  if (remaining < DAY_MS) return '不足 1 天';
-  return `剩余 ${Math.ceil(remaining / DAY_MS)} 天`;
 }
 
 export function ExpiryTimeline({ events }: { events: ExpiryTimelineEvent[] }) {
@@ -59,19 +49,13 @@ export function ExpiryTimeline({ events }: { events: ExpiryTimelineEvent[] }) {
               <ul className="divide-y divide-border/50">
                 {group.map((event) => {
                   const expired = isExpired(event, now);
-                  const days = (event.dateMs - now) / DAY_MS;
                   return (
                     <li key={event.id} className="flex min-w-0 items-center gap-3 py-2.5">
                       <div className="min-w-0 flex-1">
                         <p className={cn('truncate text-sm font-medium', expired && 'text-muted-foreground')} title={event.title}>{event.title}</p>
                         {event.subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{event.subtitle}</p>}
                       </div>
-                      <span className={cn(
-                        'shrink-0 rounded-md px-2 py-1 text-xs tabular-nums',
-                        expired ? 'bg-muted text-muted-foreground' : days <= 7
-                          ? 'bg-destructive/10 text-destructive' : days <= 30
-                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-secondary text-secondary-foreground',
-                      )}>{expiryLabel(event, now)}</span>
+                      <ExpiryBadge dateMs={event.dateMs} now={now} expired={expired} />
                     </li>
                   );
                 })}

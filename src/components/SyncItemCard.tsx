@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn, secondaryActionButtonClass } from '@/lib/utils';
+import { ExpiryBadge } from '@/components/ExpiryBadge';
 import { SourceUsageChart } from '@/components/UsageCurveChart';
 import { formatDateTime, formatTraffic, getTrafficBarColor, parseTrafficInfo } from '@/utils/trafficUtils';
 import {
@@ -30,7 +31,7 @@ import {
   SUBSCRIPTION_PROXY_PROVIDER_SHORT_LABELS,
   type SubscriptionProxyProvider,
 } from '@/config/subscription-proxy.config';
-import { Activity, Calendar, CheckCircle2, CircleHelp, Clock, Loader2, RefreshCw, Waypoints } from 'lucide-react';
+import { Activity, ChevronDown, CheckCircle2, CircleHelp, Clock, Loader2, RefreshCw, Waypoints } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface SyncItemCardProps {
@@ -97,6 +98,7 @@ export function SyncItemCard({
         ? '可继续手动预更新'
         : '尚未同步信息';
 
+  const [now] = useState(() => Date.now());
   const [displayedPercent, setDisplayedPercent] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -201,11 +203,8 @@ export function SyncItemCard({
                   />
                 </div>
                 {trafficInfo.expire && (
-                  <div className="flex items-center gap-1.5 pt-0.5 text-xs text-muted-foreground" title="到期时间">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                      到期时间 {new Date(trafficInfo.expire * 1000).toLocaleString('zh-CN')}
-                    </span>
+                  <div className="pt-1">
+                    <ExpiryBadge dateMs={trafficInfo.expire * 1000} now={now} expired={trafficInfo.isExpired} showDate />
                   </div>
                 )}
               </div>
@@ -215,52 +214,59 @@ export function SyncItemCard({
               <SourceUsageChart url={item.url} className="border-t border-border/50 pt-3" />
             )}
 
-            <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-2">
-              <div className="shrink-0">
-                <Select
-                  value={item.proxyProvider ?? '__direct__'}
-                  onValueChange={(value) => onProxyProviderChange?.(
-                    value === '__direct__' ? undefined : value as SubscriptionProxyProvider,
-                  )}
-                  disabled={readOnly}
-                >
-                  <SelectTrigger
-                    aria-label={`sync-proxy-provider-${item.flag ?? item.url}`}
-                    className="h-7 w-[84px] rounded-full border-border/40 bg-transparent px-2.5 text-xs shadow-none"
+            <details className="group border-t border-border/50 pt-2">
+              <summary className="flex w-fit cursor-pointer list-none items-center gap-1.5 rounded text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                <Waypoints className="h-3.5 w-3.5" />
+                应急访问
+                {item.proxyProvider && <span>（{proxyProviderShortLabel}）</span>}
+                <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <div className="shrink-0">
+                  <Select
+                    value={item.proxyProvider ?? '__direct__'}
+                    onValueChange={(value) => onProxyProviderChange?.(
+                      value === '__direct__' ? undefined : value as SubscriptionProxyProvider,
+                    )}
+                    disabled={readOnly}
                   >
-                    <SelectValue>{proxyProviderShortLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__direct__">直连</SelectItem>
-                    {availableProxyProviders.map((provider) => (
-                      <SelectItem key={provider} value={provider}>
-                        {SUBSCRIPTION_PROXY_PROVIDER_LABELS[provider]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-                <Waypoints className="h-3.5 w-3.5 shrink-0" />
-                <span>应急访问</span>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label="subscription-proxy-help"
-                      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground"
+                    <SelectTrigger
+                      aria-label={`sync-proxy-provider-${item.flag ?? item.url}`}
+                      className="h-7 w-[84px] rounded-full border-border/40 bg-transparent px-2.5 text-xs shadow-none"
                     >
-                      <CircleHelp className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" sideOffset={8} className="max-w-64 text-xs leading-5">
-                    <p>
-                      某些订阅源在本机网络下本来就无法直连，这时可以改由其他服务器代为拉取，并且只建议在本地拉取不了订阅时启用。
-                    </p>
-                  </PopoverContent>
-                </Popover>
+                      <SelectValue>{proxyProviderShortLabel}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__direct__">直连</SelectItem>
+                      {availableProxyProviders.map((provider) => (
+                        <SelectItem key={provider} value={provider}>
+                          {SUBSCRIPTION_PROXY_PROVIDER_LABELS[provider]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                  <span>拉取线路</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="subscription-proxy-help"
+                        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground"
+                      >
+                        <CircleHelp className="h-3.5 w-3.5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" sideOffset={8} className="max-w-64 text-xs leading-5">
+                      <p>
+                        某些订阅源在本机网络下本来就无法直连，这时可以改由其他服务器代为拉取，并且只建议在本地拉取不了订阅时启用。
+                      </p>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-            </div>
+            </details>
           </div>
 
           {shouldShowAction ? (

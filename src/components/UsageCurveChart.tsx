@@ -17,9 +17,9 @@ const PAD_BOTTOM = 22;
 const CHART_HEIGHT_COMPACT = 104;
 const CHART_HEIGHT_FULL = 132;
 
-function formatAxisDate(ms: number, withTime: boolean) {
+function formatAxisDate(ms: number, withTime: boolean, withYear = false) {
 	const date = new Date(ms);
-	const day = `${date.getMonth() + 1}/${date.getDate()}`;
+	const day = `${withYear ? `${date.getFullYear()}/` : ''}${date.getMonth() + 1}/${date.getDate()}`;
 	if (!withTime) return day;
 	return `${day} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
@@ -79,16 +79,16 @@ export function UsageCurveChart({ points, expiresAtMs, compact = false, classNam
 	const expired = expiresAtMs !== null && expiresAtMs <= nowMs;
 
 	const statusText = expired && expiresAtMs !== null
-		? `已于 ${formatDate(expiresAtMs)} 到期`
+		? '已到期'
 		: showPrediction
-			? `按当前速度预计 ${formatDate(predictedAtMs)} 用完${expiresAtMs !== null ? `（到期 ${formatDate(expiresAtMs)}）` : ''}`
+			? `按当前速度预计 ${formatDate(predictedAtMs)} 用完`
 			: expiresAtMs !== null
-				? `到期 ${formatDate(expiresAtMs)}`
+				? ''
 				: '消耗平缓，暂无法预测耗尽时间';
 
 	// 能从当前周期估出消耗速率时，在状态区追加日均消耗，帮助判断是否需要续订
 	const dailyRate = estimateConsumptionRate(points, nowMs);
-	const statusWithRate = dailyRate !== null ? `${statusText} · 日均消耗 ${formatTraffic(dailyRate)}` : statusText;
+	const statusWithRate = [statusText, dailyRate !== null ? `日均消耗 ${formatTraffic(dailyRate)}` : ''].filter(Boolean).join(' · ');
 
 	return (
 		<div className={cn('min-w-0', className)}>
@@ -148,6 +148,7 @@ function ChartBody({ points, startMs, endMs, nowMs, predictedAtMs, width, height
 		: null;
 
 	const showNow = nowMs > startMs && nowMs < endMs;
+	const withYear = new Date(startMs).getFullYear() !== new Date(endMs).getFullYear();
 
 	return (
 		<svg width={width} height={height} role="img" aria-label="流量使用曲线图" className="block">
@@ -168,12 +169,12 @@ function ChartBody({ points, startMs, endMs, nowMs, predictedAtMs, width, height
 			{/* 起止日期标签：窗口太窄时只保留一个居中标签，避免互相遮挡 */}
 			{xOf(endMs) - xOf(startMs) >= 70 ? (
 				<>
-					<text x={xOf(startMs)} y={height - 6} textAnchor="start" className="fill-muted-foreground stroke-background" fontSize="10" paintOrder="stroke" strokeWidth="3">{formatAxisDate(startMs, withTime)}</text>
-					<text x={xOf(endMs)} y={height - 6} textAnchor="end" className="fill-muted-foreground stroke-background" fontSize="10" paintOrder="stroke" strokeWidth="3">{formatAxisDate(endMs, withTime)}</text>
+					<text x={xOf(startMs)} y={height - 6} textAnchor="start" className="fill-muted-foreground stroke-background" fontSize="10" paintOrder="stroke" strokeWidth="3">{formatAxisDate(startMs, withTime, withYear)}</text>
+					<text x={xOf(endMs)} y={height - 6} textAnchor="end" className="fill-muted-foreground stroke-background" fontSize="10" paintOrder="stroke" strokeWidth="3">{formatAxisDate(endMs, withTime, withYear)}</text>
 				</>
 			) : (
 				<text x={(xOf(startMs) + xOf(endMs)) / 2} y={height - 6} textAnchor="middle" className="fill-muted-foreground stroke-background" fontSize="10" paintOrder="stroke" strokeWidth="3">
-					{`${formatAxisDate(startMs, withTime)} – ${formatAxisDate(endMs, withTime)}`}
+					{`${formatAxisDate(startMs, withTime, withYear)} – ${formatAxisDate(endMs, withTime, withYear)}`}
 				</text>
 			)}
 
@@ -211,7 +212,7 @@ function ChartBody({ points, startMs, endMs, nowMs, predictedAtMs, width, height
 			)}
 			{points.map((point, index) => (
 				<circle key={`${point.t}-${index}`} cx={xOf(point.t)} cy={yOf(percents[index])} r="2.5" className="fill-primary">
-					<title>{`${formatAxisDate(point.t, true)} · 剩余 ${formatTraffic(point.remainingBytes)} / ${formatTraffic(point.totalBytes)}（${percents[index].toFixed(1)}%）`}</title>
+					<title>{`${formatAxisDate(point.t, true, true)} · 剩余 ${formatTraffic(point.remainingBytes)} / ${formatTraffic(point.totalBytes)}（${percents[index].toFixed(1)}%）`}</title>
 				</circle>
 			))}
 		</svg>
