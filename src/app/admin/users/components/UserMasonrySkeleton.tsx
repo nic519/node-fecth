@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * 用户卡片骨架：结构对齐 UserCard ——
- * 头像+名称/异常行 → 合计流量块 → 若干订阅行(圆点+胶囊+地址+用量条) → 底部日期与操作。
+ * 头像+名称/异常行 → 若干订阅行(圆点+胶囊+地址+用量条) → 底部日期与操作。
  */
 function UserCardSkeleton({ subscriptions }: { subscriptions: number }) {
   return (
@@ -23,15 +23,6 @@ function UserCardSkeleton({ subscriptions }: { subscriptions: number }) {
 
       <div className="mb-5 space-y-3">
         <Skeleton className="h-4 w-24" />
-        <div className="rounded-lg bg-secondary/45 px-3.5 py-2.5">
-          <div className="flex items-baseline justify-between gap-3">
-            <Skeleton className="h-3 w-14" />
-            <Skeleton className="h-4 w-28" />
-          </div>
-          <Skeleton className="mt-2 h-1 w-full rounded-full" />
-          <Skeleton className="mt-2 h-2.5 w-32" />
-        </div>
-
         <ul className="divide-y divide-border/40">
           {Array.from({ length: subscriptions }, (_, index) => (
             <li key={index} className="py-2 first:pt-0 last:pb-0">
