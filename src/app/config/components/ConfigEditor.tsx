@@ -34,9 +34,8 @@ interface ConfigEditorProps {
 const TAB_COPY: Record<ConfigTab, { title: string; description: string }> = {
   basic: { title: '基础配置', description: '管理订阅源、配置名称和节点过滤。建议保留至少两个可用来源。' },
   rules: { title: '规则模板', description: '选择分流规则并按需覆写，变更会应用到同一订阅地址。' },
-  dynamic: { title: '订阅加载', description: '检查各来源的同步状态，并选择适合的订阅拉取线路。' },
+  dynamic: { title: '订阅分析', description: '查看订阅同步状态、流量趋势、到期时间与访问心跳，并选择拉取线路。' },
   token: { title: '访问令牌', description: '令牌用于保护配置与订阅地址，变更后请重新导入客户端。' },
-  analytics: { title: '用量分析', description: '订阅流量使用趋势与本账号的访问心跳。' },
   preview: { title: '预览结果', description: '在保存后检查实际生成的 YAML，确认规则与节点符合预期。' },
 };
 

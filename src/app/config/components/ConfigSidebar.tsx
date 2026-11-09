@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ArrowsClockwise,
   ChartLine,
   CheckCircle,
   Clock,
@@ -39,10 +38,9 @@ interface ConfigSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: 'analytics', label: '用量分析', note: '流量趋势与访问心跳', icon: ChartLine },
   { id: 'basic', label: '基础配置', note: '订阅源与节点过滤', icon: SlidersHorizontal },
   { id: 'rules', label: '规则模板', note: '分流规则与覆写', icon: ShieldCheck },
-  { id: 'dynamic', label: '订阅加载', note: '同步状态与线路', icon: ArrowsClockwise },
+  { id: 'dynamic', label: '订阅分析', note: '同步状态、用量与访问心跳', icon: ChartLine },
   { id: 'token', label: '访问令牌', note: '配置访问安全', icon: Key },
   { id: 'preview', label: '预览结果', note: '检查最终 YAML', icon: Eye },
 ] as const;

@@ -21,10 +21,10 @@ import type { UserConfig } from '@/types/user-config';
 import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
 
 function parseStoredTab(tab: string | null): ConfigTab {
-  if (tab === 'basic' || tab === 'rules' || tab === 'dynamic' || tab === 'token' || tab === 'analytics' || tab === 'preview') {
+  if (tab === 'basic' || tab === 'rules' || tab === 'dynamic' || tab === 'token' || tab === 'preview') {
     return tab;
   }
-  return 'analytics';
+  return 'dynamic';
 }
 
 function subscribeToStorageChanges(callback: () => void) {
@@ -59,7 +59,7 @@ function UserConfigInner({
   const activeTab = useSyncExternalStore<ConfigTab>(
     subscribeToStorageChanges,
     () => parseStoredTab(window.localStorage.getItem(storageKey)),
-    () => 'analytics'
+    () => 'dynamic'
   );
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

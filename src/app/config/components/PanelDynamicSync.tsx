@@ -1,6 +1,7 @@
 import { Link as LinkIcon } from 'lucide-react';
 import { UserConfig } from '@/types/user-config';
 import { useDynamicSync } from '@/app/config/hooks/useDynamicSync';
+import { PanelUsageAnalytics } from './PanelUsageAnalytics';
 import { PanelTopBar } from './PanelTopBar';
 import { SyncItemCard } from '@/components/SyncItemCard';
 import { setSubscriptionList } from '@/modules/user/subscription-list';
@@ -10,6 +11,8 @@ interface DynamicSyncPanelProps {
     config: UserConfig;
     onChange: (newConfig: UserConfig) => void;
     readOnly?: boolean;
+    uid?: string;
+    token?: string;
     availableProxyProviders: SubscriptionProxyProvider[];
 }
 
@@ -17,6 +20,8 @@ export function PanelDynamicSync({
     config,
     onChange,
     readOnly = false,
+    uid,
+    token,
     availableProxyProviders,
 }: DynamicSyncPanelProps) {
     const { items, statuses, dynamicInfos, syncUrl } = useDynamicSync(config);
@@ -72,6 +77,8 @@ export function PanelDynamicSync({
                     />
                 ))}
             </div>
+
+            <PanelUsageAnalytics config={config} infos={dynamicInfos} uid={uid} token={token} />
         </div>
     );
 }
