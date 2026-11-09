@@ -6,6 +6,7 @@ import { PanelTopBar } from './PanelTopBar';
 import { SyncItemCard } from '@/components/SyncItemCard';
 import { setSubscriptionList } from '@/modules/user/subscription-list';
 import type { SubscriptionProxyProvider } from '@/config/subscription-proxy.config';
+import { InlineNodesCard } from './InlineNodesCard';
 
 interface DynamicSyncPanelProps {
     config: UserConfig;
@@ -25,6 +26,7 @@ export function PanelDynamicSync({
     availableProxyProviders,
 }: DynamicSyncPanelProps) {
     const { items, statuses, dynamicInfos, syncUrl } = useDynamicSync(config);
+    const inlineSources = (config.appendSubList ?? []).filter(item => item.type === 'inline');
 
     const handleProxyProviderChange = (index: number, proxyProvider?: SubscriptionProxyProvider) => {
         const subscriptions = config.appendSubList ?? [];
@@ -47,18 +49,20 @@ export function PanelDynamicSync({
             <PanelTopBar
                 description={
                     <div className="space-y-1">
-                        <div>共 {items.length} 个链接订阅源，可单独预更新。</div>
-                        <div>粘贴节点在保存配置后生效，无需远程同步。</div>
+                        {items.length > 0 && <div>共 {items.length} 个链接订阅源，可单独预更新。</div>}
+                        {inlineSources.length > 0 && <div>当前{items.length > 0 ? '同时' : '直接'}使用 {inlineSources.length} 组节点列表，保存配置后生效，无需远程同步。</div>}
+                        {items.length === 0 && inlineSources.length === 0 && <div>添加订阅链接或直接粘贴节点列表后，可在这里查看来源与访问心跳。</div>}
                     </div>
                 }
             />
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {items.length === 0 && (
+            {(items.length > 0 || inlineSources.length === 0) && <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {items.length === 0 && inlineSources.length === 0 && (
                     <div className="col-span-full text-center py-12 text-muted-foreground border border-dashed rounded-lg bg-muted/50">
                         <div className="flex flex-col items-center gap-2">
                             <LinkIcon className="w-8 h-8 opacity-50" />
-                            <p>暂无订阅源</p>
+                            <p>尚未添加节点来源</p>
+                            <p className="text-xs">请到基础配置添加订阅链接或粘贴节点列表</p>
                         </div>
                     </div>
                 )}
@@ -76,7 +80,13 @@ export function PanelDynamicSync({
                         onSync={() => syncUrl(item.url, item.proxyProvider)}
                     />
                 ))}
-            </div>
+            </div>}
+
+            {inlineSources.length > 0 && (
+                <div className="space-y-4">
+                    {inlineSources.map((item, index) => <InlineNodesCard key={index} item={item} />)}
+                </div>
+            )}
 
             <PanelUsageAnalytics config={config} infos={dynamicInfos} uid={uid} token={token} />
         </div>
